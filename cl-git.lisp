@@ -10,9 +10,9 @@
 
 (cffi:use-foreign-library libgit2)
 
-(cffi:defctype git-code :int)
 
-(cffi:defctype git-repository :pointer)
+;;; Git Common
+(cffi:defctype git-code :int)
 
 (cffi:defctype size :unsigned-int)
 
@@ -20,6 +20,16 @@
     (tv-secs :long)
     (tv-usecs :long))
 
+(cffi:defcstruct git-strings
+  (strings :pointer)
+  (count size))
+
+
+;;; Git Repositories
+(cffi:defctype git-repository :pointer)
+
+
+;;; Git References
 (cffi:defbitfield git-reference-flags
     (:invalid 0)
     (:oid 1)
@@ -27,20 +37,34 @@
     (:packed 4)
     (:has-peel 8))
 
-(cffi:defcstruct git-strings
-  (strings :pointer)
-  (count size))
-
 (cffi:defcfun ("git_reference_listall" %git-reference-listall)
     :int
   (strings :pointer)
   (repository :pointer)
   (flags git-reference-flags))
 
+
+;;; Git Revision Walking
+(cffi:defcfun ("git_revwalk_new" %git-revwalk-new)
+    :int
+  (revwalk :pointer)
+  (repository :pointer))
+
+(cffi:defcfun ("git_revwalk_free" %git-revwalk-free)
+    :void
+  (revwalk :pointer))
+
+(cffi:defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
+    :void
+  (revwalk :pointer)
+  (sort-mode :unsigned-int))
+
+;;; Git Utilities
 (cffi:defcfun ("git_strarray_free" %git-strarray-free)
     :void
   (strings :pointer))
 
+;;; Git Errors
 (defun git-error-code-text (code)
   "Translate a function return code to a readable message"
   (case code
