@@ -53,6 +53,23 @@
   (flags git-reference-flags))
 
 
+;;; Git Commit
+
+(cffi:defcfun ("_commit_lookup" %git-commit-lookup)
+    :int
+  (commit :pointer)
+  (repo :pointer)
+  (oid :pointer))
+
+(cffi:defcfun ("git_commit_message" git-commit-message)
+    :string
+  (commit :pointer))
+
+(cffi:defcfun ("git_commit_close" %git-commit-close)
+    :void
+  (commit :pointer))
+
+
 ;;; Git Revision Walking
 (cffi:defcfun ("git_revwalk_new" %git-revwalk-new)
     :int
@@ -67,6 +84,20 @@
     :void
   (revwalk :pointer)
   (sort-mode :unsigned-int))
+
+(cffi:defcfun ("git_revwalk_reset" %git-revwalk-reset)
+    :void
+  (revwalk :pointer))
+
+(cffi:defcfun ("git_revwalk_next" %git-revwalk-next)
+    :int
+  (oid :pointer)
+  (revwalk :pointer))
+
+(cffi:defcfun ("git_revwalk_push" %git-revwalk-push)
+    :int
+    (revwalk :pointer)
+    (oid :pointer))
 
 ;;; Git Utilities
 (cffi:defcfun ("git_strarray_free" %git-strarray-free)
@@ -167,6 +198,9 @@
 			git-repository repo
 			:void))
 
+(defun git-commit-lookup (oid repo)
+  (let ((commit (cffi:foreign-alloc :pointer)))
+    (%git-commit-lookup commit oid repo)))
 
 (defun git-oid-fromstr (str)
   "convert a git hash to an oid"
