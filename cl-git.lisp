@@ -24,10 +24,19 @@
   (strings :pointer)
   (count size))
 
+(cffi:defcstruct git-oid
+  (id :unsigned-char :count 20))
+
 
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
 
+
+;;; Git OID
+(cffi:defcfun ("git_oid_fromstr" %git-oid-fromstr)
+    :int
+  (oid :pointer)
+  (str :string))
 
 ;;; Git References
 (cffi:defbitfield git-reference-flags
@@ -115,6 +124,12 @@
     :initform nil
     :documentation "The value of the error code.")))
 
+(defun handle-git-return-code (return-code)
+     (unless (= return-code 0)
+	  (error 'git-error
+		 :mossage (git-error-code-text return-code)
+		 :code return-code)))
+
 
 (defun git-repository-init (path &optional bare)
   "return a new git repository"
@@ -151,6 +166,13 @@
   (cffi:foreign-funcall "git_repository_free"
 			git-repository repo
 			:void))
+
+
+(defun git-oid-fromstr (str)
+  "convert a git hash to an oid"
+  (cffi:with-foreign-object (oid 'git-oid)
+    (handle-git-return-code (%git-oid-fromstr oid str))
+    oid))
 
 (defun git-reference-listall (repo &optional flags)
   "list all the refs, filter by flag"
