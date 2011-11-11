@@ -17,8 +17,8 @@
 (cffi:defctype size :unsigned-int)
 
 (cffi:defcstruct timeval
-    (tv-secs :long)
-    (tv-usecs :long))
+    (secs :long)
+    (usecs :long))
 
 (cffi:defcstruct git-strings
   (strings :pointer)
@@ -26,6 +26,11 @@
 
 (cffi:defcstruct git-oid
   (id :unsigned-char :count 20))
+
+(cffi:defcstruct git-signature
+  (name :string)
+  (email :string)
+  (time timeval))
 
 
 ;;; Git Repositories
@@ -53,16 +58,37 @@
   (flags git-reference-flags))
 
 
-;;; Git Commit
+;;; Git Object
 
-(cffi:defcfun ("_commit_lookup" %git-commit-lookup)
+(cffi:defcenum git-object-type
+  (:any -2)		; Object can be any of the following
+  (:bad -1)		; Object is invalid.
+  (:commit 1)		; A commit object.
+  (:tree 2)		; A tree (directory listing) object.
+  (:blob 3)		; A file revision object.
+  (:tag 4)		; An annotated tag object.
+  (:ofs_delta 6)	; A delta, base is given by an offset.
+  (:ref_delta 7)	; A delta, base is given by object id.
+)
+
+(cffi:defcfun ("git_object_lookup" %git-object-lookup)
     :int
-  (commit :pointer)
+  (object :pointer)
   (repo :pointer)
-  (oid :pointer))
+  (oid :pointer)
+  (type git-object-type))
 
-(cffi:defcfun ("git_commit_message" git-commit-message)
+;;; Git Commit
+(cffi:defcfun ("git_commit_message" %git-commit-message)
     :string
+  (commit :pointer))
+
+(cffi:defcfun ("git_commit_author" %git-commit-author)
+    git-signature
+  (commit :pointer))
+
+(cffi:defcfun ("git_commit_committer" %git-commit-committer)
+    git-signature
   (commit :pointer))
 
 (cffi:defcfun ("git_commit_close" %git-commit-close)
@@ -71,6 +97,12 @@
 
 
 ;;; Git Revision Walking
+(cffi:defbitfield git-revwalk-flags
+    (:none 0)
+    (:topological 1)
+    (:time 2)
+    (:reverse 4))
+
 (cffi:defcfun ("git_revwalk_new" %git-revwalk-new)
     :int
   (revwalk :pointer)
@@ -93,6 +125,11 @@
     :int
   (oid :pointer)
   (revwalk :pointer))
+
+(cffi:defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
+    :void
+  (oid :pointer)
+  (sort-mode git-revwalk-flags))
 
 (cffi:defcfun ("git_revwalk_push" %git-revwalk-push)
     :int
@@ -200,7 +237,30 @@
 
 (defun git-commit-lookup (oid repo)
   (let ((commit (cffi:foreign-alloc :pointer)))
-    (%git-commit-lookup commit oid repo)))
+    (handle-git-return-code (%git-object-lookup commit oid repo
+			(cffi:foreign-enum-value 'git-object-type :commit)))
+    (cffi:mem-ref commit :pointer)))
+
+(defun git-commit-message (commit)
+   (%git-commit-message commit))
+
+(defun git-commit-author (commit)
+  (cffi:with-foreign-slots ((name email time)
+			    (%git-commit-author commit)
+			    git-signature)
+    (cffi:with-foreign-slots ((secs usecs) time timeval)
+      (list name email (local-time:unix-to-timestamp secs)))))
+
+(defun git-commit-committer (commit)
+  (cffi:with-foreign-slots ((name email time)
+			    (%git-commit-committer commit)
+			    git-signature)
+    (cffi:with-foreign-slots ((secs usecs) time timeval)
+      (list name email (local-time:unix-to-timestamp secs)))))
+
+(defun git-commit-close (commit)
+  (%git-commit-close commit)
+)
 
 (defun git-oid-fromstr (str)
   "convert a git hash to an oid"
@@ -212,17 +272,23 @@
   "list all the refs, filter by flag"
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
-      (let ((return-code (%git-reference-listall string-array repo
-						 git-flags)))
-	(if (= return-code 0)
-	    (progn
-	      (cffi:with-foreign-slots ((strings count) string-array git-strings)
-		(let ((refs
-		       (loop for i below count collect
-			 (cffi:foreign-string-to-lisp
-			  (cffi:mem-aref strings :pointer i)))))
-		  (%git-strarray-free string-array)
-		  refs)))
-	    (error 'git-error
-		   :mossage (git-error-code-text return-code)
-		   :code return-code))))))
+      (handle-git-return-code (%git-reference-listall string-array repo
+						      git-flags))
+      (cffi:with-foreign-slots ((strings count) string-array git-strings)
+	(let ((refs
+	       (loop for i below count collect
+		 (cffi:foreign-string-to-lisp
+		  (cffi:mem-aref strings :pointer i)))))
+	  (%git-strarray-free string-array)
+	  refs)))))
+
+
+(defun git-revwalk (repo oid)
+  (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
+    (handle-git-return-code (%git-revwalk-new revwalker-pointer repo))
+    (let ((revwalker (cffi:mem-ref revwalker-pointer :pointer)))
+      (cffi:foreign-free revwalker-pointer)
+      (%git-revwalk-sorting revwalker :time)
+      (handle-git-return-code (%git-revwalk-push revwalker oid))
+      revwalker
+)))

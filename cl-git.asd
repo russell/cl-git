@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:cl-git
   :serial t
-  :depends-on (#:cffi)
+  :depends-on (#:cffi #:local-time)
   :components ((:file "package")
                (:file "cl-git")))
 
