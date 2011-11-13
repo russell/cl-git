@@ -2,6 +2,8 @@
 
 (in-package #:cl-git)
 
+(defparameter *git-repository* (cffi:null-pointer))
+
 (cffi:define-foreign-library libgit2
   (:linux "libgit2.so")
   (:windows "libgit2.dll")
@@ -43,6 +45,7 @@
   (oid :pointer)
   (str :string))
 
+
 ;;; Git References
 (cffi:defbitfield git-reference-flags
     (:invalid 0)
@@ -57,9 +60,18 @@
   (repository :pointer)
   (flags git-reference-flags))
 
+(cffi:defcfun ("git_reference_oid" %git-reference-oid)
+    :pointer
+  (reference :pointer))
+
+(cffi:defcfun ("git_reference_lookup" %git-reference-lookup)
+    :int
+  (reference :pointer)
+  (repository :pointer)
+  (name :string))
+
 
 ;;; Git Object
-
 (cffi:defcenum git-object-type
   (:any -2)		; Object can be any of the following
   (:bad -1)		; Object is invalid.
@@ -77,6 +89,7 @@
   (repo :pointer)
   (oid :pointer)
   (type git-object-type))
+
 
 ;;; Git Commit
 (cffi:defcfun ("git_commit_message" %git-commit-message)
@@ -112,11 +125,6 @@
     :void
   (revwalk :pointer))
 
-(cffi:defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
-    :void
-  (revwalk :pointer)
-  (sort-mode :unsigned-int))
-
 (cffi:defcfun ("git_revwalk_reset" %git-revwalk-reset)
     :void
   (revwalk :pointer))
@@ -136,10 +144,12 @@
     (revwalk :pointer)
     (oid :pointer))
 
+
 ;;; Git Utilities
 (cffi:defcfun ("git_strarray_free" %git-strarray-free)
     :void
   (strings :pointer))
+
 
 ;;; Git Errors
 (defun git-error-code-text (code)
@@ -205,11 +215,12 @@
 	(repo (cffi:foreign-alloc :pointer)))
     (let ((return-code (cffi:foreign-funcall "git_repository_init"
 					     git-repository repo
-					     :string path
+					     :string (namestring path)
 					     :unsigned-int is-bare
 					     git-code)))
       (if (= return-code 0)
-	  (cffi:mem-ref repo :pointer)
+	  (setf *git-repository* (cffi:mem-ref repo :pointer))
+	  ; TODO should free repo pointer here
 	  (error 'git-error
 		 :mossage (git-error-code-text return-code)
 		 :code return-code)))))
@@ -220,24 +231,36 @@
   (let ((repo (cffi:foreign-alloc :pointer)))
     (let ((return-code (cffi:foreign-funcall "git_repository_open"
 			  git-repository repo
-			  :string path
+			  :string (namestring path)
 			  git-code)))
       (if (= return-code 0)
-	  (cffi:mem-ref repo :pointer)
+	  (setf *git-repository* (cffi:mem-ref repo :pointer))
+	  ; TODO should free repo pointer here
 	  (error 'git-error
 		 :mossage (git-error-code-text return-code)
 		 :code return-code)))))
 
 
-(defun git-repository-free (repo)
+(defun git-repository-free ()
   "deallocate repository"
   (cffi:foreign-funcall "git_repository_free"
-			git-repository repo
-			:void))
+			git-repository *git-repository*
+			:void)
+  (setf *git-repository* (cffi:null-pointer)))
 
-(defun git-commit-lookup (oid repo)
+(defun ensure-git-repository-exist (path &optional bare)
+  (handler-case
+      (progn
+	(git-repository-open path)
+	(git-repository-free))
+    (git-error (err)
+      (princ err)
+      (git-repository-init path bare)
+      (git-repository-free))))
+
+(defun git-commit-lookup (oid)
   (let ((commit (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code (%git-object-lookup commit oid repo
+    (handle-git-return-code (%git-object-lookup commit oid *git-repository*
 			(cffi:foreign-enum-value 'git-object-type :commit)))
     (cffi:mem-ref commit :pointer)))
 
@@ -259,20 +282,30 @@
       (list name email (local-time:unix-to-timestamp secs)))))
 
 (defun git-commit-close (commit)
-  (%git-commit-close commit)
-)
+  (%git-commit-close commit))
 
 (defun git-oid-fromstr (str)
   "convert a git hash to an oid"
-  (cffi:with-foreign-object (oid 'git-oid)
+ (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
     oid))
 
-(defun git-reference-listall (repo &optional flags)
+(defun git-reference-lookup (name)
+  (let ((reference (cffi:foreign-alloc :pointer)))
+    (handle-git-return-code (%git-reference-lookup reference *git-repository* name))
+    (cffi:mem-ref reference :pointer)))
+
+(defun git-reference-oid (reference)
+  "create a new oid for the reference, this will need to be freed explicitly"
+ (let ((oid (cffi:null-pointer)))
+    (setf oid (%git-reference-oid reference))
+    oid))
+
+(defun git-reference-listall (&optional flags)
   "list all the refs, filter by flag"
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
-      (handle-git-return-code (%git-reference-listall string-array repo
+      (handle-git-return-code (%git-reference-listall string-array *git-repository*
 						      git-flags))
       (cffi:with-foreign-slots ((strings count) string-array git-strings)
 	(let ((refs
@@ -282,13 +315,41 @@
 	  (%git-strarray-free string-array)
 	  refs)))))
 
-
-(defun git-revwalk (repo oid)
+(defun git-revwalk (oid)
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code (%git-revwalk-new revwalker-pointer repo))
+    (handle-git-return-code (%git-revwalk-new revwalker-pointer *git-repository*))
     (let ((revwalker (cffi:mem-ref revwalker-pointer :pointer)))
       (cffi:foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
       (handle-git-return-code (%git-revwalk-push revwalker oid))
       revwalker
 )))
+
+(defmacro with-git-repository ((path) &body body)
+  (let ((temp (gensym)))
+  `(let ((,temp *git-repository*))
+     (unwind-protect
+	  (progn
+	    (git-repository-open ,path)
+	    ,@body)
+       (progn
+	 (git-repository-free)
+	 (setq *git-repository* ,temp))))))
+
+(defmacro with-git-revisions ((commit &key sha head) &body body)
+  `(let ((oid (gensym)))
+     (cond
+       (,head
+	(setq oid (git-reference-oid (git-reference-lookup ,head))))
+       (,sha
+	(setq oid (git-oid-fromstr ,sha))
+	))
+     (let ((revwalker (git-revwalk oid)))
+       (labels ((revision-walker)
+		(progn
+		  (let ((,commit (git-commit-lookup oid)))
+		    ,@body)
+		  (if (= (%git-revwalk-next oid revwalker) 0)
+		      (revision-walker)))
+		(revision-walker)))
+       )))
