@@ -90,6 +90,9 @@
   (oid :pointer)
   (type git-object-type))
 
+(cffi:defcfun ("git_object_close" %git-object-close)
+    :void
+  (object :pointer))
 
 ;;; Git Commit
 (cffi:defcfun ("git_commit_message" %git-commit-message)
@@ -102,10 +105,6 @@
 
 (cffi:defcfun ("git_commit_committer" %git-commit-committer)
     git-signature
-  (commit :pointer))
-
-(cffi:defcfun ("git_commit_close" %git-commit-close)
-    :void
   (commit :pointer))
 
 
@@ -260,7 +259,7 @@
 
 (defun git-commit-lookup (oid)
   (let ((commit (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code (%git-object-lookup commit oid *git-repository*
+    (handle-git-return-code (%git-object-lookup commit *git-repository* oid
 			(cffi:foreign-enum-value 'git-object-type :commit)))
     (cffi:mem-ref commit :pointer)))
 
@@ -282,7 +281,7 @@
       (list name email (local-time:unix-to-timestamp secs)))))
 
 (defun git-commit-close (commit)
-  (%git-commit-close commit))
+  (%git-object-close commit))
 
 (defun git-oid-fromstr (str)
   "convert a git hash to an oid"
@@ -296,7 +295,8 @@
     (cffi:mem-ref reference :pointer)))
 
 (defun git-reference-oid (reference)
-  "create a new oid for the reference, this will need to be freed explicitly"
+  "return the oid from within the reference, this will be deallocated
+with the reference"
  (let ((oid (cffi:null-pointer)))
     (setf oid (%git-reference-oid reference))
     oid))
@@ -338,18 +338,22 @@
 
 (defmacro with-git-revisions ((commit &key sha head) &body body)
   `(let ((oid (gensym)))
-     (cond
-       (,head
-	(setq oid (git-reference-oid (git-reference-lookup ,head))))
-       (,sha
-	(setq oid (git-oid-fromstr ,sha))
-	))
-     (let ((revwalker (git-revwalk oid)))
-       (labels ((revision-walker)
-		(progn
-		  (let ((,commit (git-commit-lookup oid)))
-		    ,@body)
-		  (if (= (%git-revwalk-next oid revwalker) 0)
-		      (revision-walker)))
-		(revision-walker)))
-       )))
+     (progn
+       (cond
+	 (,head
+	  (setq oid (git-reference-oid (git-reference-lookup ,head))))
+	 (,sha
+	  (setq oid (git-oid-fromstr ,sha))
+	  ))
+       (let ((revwalker (git-revwalk oid)))
+	 (labels ((revision-walker ()
+		    (progn
+		      (let ((,commit (git-commit-lookup oid)))
+			(unwind-protect
+			     (progn ,@body)
+			  (progn (git-commit-close ,commit))
+			))
+		      (if (= (%git-revwalk-next oid revwalker) 0)
+			  (revision-walker)))))
+	   (revision-walker))))
+       ))
