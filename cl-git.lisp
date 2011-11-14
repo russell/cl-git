@@ -326,6 +326,8 @@ with the reference"
 )))
 
 (defmacro with-git-repository ((path) &body body)
+  "Evaluates the body with *git-repository* bound to a newly opened
+repositony at path."
   (let ((temp (gensym)))
   `(let ((,temp *git-repository*))
      (unwind-protect
@@ -337,6 +339,8 @@ with the reference"
 	 (setq *git-repository* ,temp))))))
 
 (defmacro with-git-revisions ((commit &key sha head) &body body)
+  "Iterate aver all the revisions, the symbol specified by commit will
+be bound to each commit during each iteration."
   `(let ((oid (gensym)))
      (progn
        (cond
