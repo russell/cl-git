@@ -3,6 +3,7 @@
 (defpackage #:cl-git
   (:use #:cl)
   (:export
+   #:*git-repository*
    #:with-git-revisions
    #:git-commit-author
    #:git-commit-message

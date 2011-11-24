@@ -2,7 +2,8 @@
 
 (in-package #:cl-git)
 
-(defparameter *git-repository* (cffi:null-pointer))
+(defparameter *git-repository* (cffi:null-pointer)
+  "A global that stores a pointer to the current git repository.")
 
 (cffi:define-foreign-library libgit2
   (:linux "libgit2.so")
@@ -264,6 +265,7 @@
     (cffi:mem-ref commit :pointer)))
 
 (defun git-commit-message (commit)
+  "return a string containing the commit message"
    (%git-commit-message commit))
 
 (defun git-commit-author (commit)
@@ -326,7 +328,7 @@ with the reference"
 )))
 
 (defmacro with-git-repository ((path) &body body)
-  "Evaluates the body with *git-repository* bound to a newly opened
+  "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
   (let ((temp (gensym)))
   `(let ((,temp *git-repository*))
