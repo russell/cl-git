@@ -4,6 +4,9 @@
   (:use #:cl)
   (:export
    #:*git-repository*
+   #:git-repository-init
+   #:git-repository-open
+   #:git-repository-free
    #:with-git-revisions
    #:git-commit-author
    #:git-commit-message
