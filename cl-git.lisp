@@ -5,6 +5,9 @@
 (defparameter *git-repository* (cffi:null-pointer)
   "A global that stores a pointer to the current git repository.")
 
+(defparameter *git-repository-index* (cffi:null-pointer)
+  "A global that stores a pointer to the current git repository index.")
+
 (cffi:define-foreign-library libgit2
   (:linux "libgit2.so")
   (:windows "libgit2.dll")
@@ -38,6 +41,7 @@
 
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
+(cffi:defctype git-repository-index :pointer)
 
 
 ;;; Git OID
@@ -143,6 +147,18 @@
     :int
     (revwalk :pointer)
     (oid :pointer))
+
+
+;;; Git Index
+(cffi:defcfun ("git_index_add" %git-index-add)
+    :int
+    (index :pointer)
+    (path :pointer)
+    (stage :int))
+
+(cffi:defcfun ("git_index_clear" %git-index-clear)
+    :void
+  (index :pointer))
 
 
 ;;; Git Utilities
@@ -257,6 +273,23 @@
       (princ err)
       (git-repository-init path bare)
       (git-repository-free))))
+
+
+(defun git-repository-index (repr)
+  "load a repository index"
+  (let ((index (cffi:foreign-alloc :pointer)))
+    (let ((return-code (cffi:foreign-funcall
+			"git_repository_index"
+			:pointer index
+			git-repository repo
+			git-code)))
+      (if (= return-code 0)
+	  (setf *git-repository-index* (cffi:mem-ref repo :pointer))
+	  ; TODO should free repo index pointer here
+	  (error 'git-error
+		 :mossage (git-error-code-text return-code)
+		 :code return-code)))))
+
 
 (defun git-commit-lookup (oid)
   (let ((commit (cffi:foreign-alloc :pointer)))
