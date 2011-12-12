@@ -12,6 +12,9 @@
    #:git-commit-message
    #:git-commit-committer
    #:git-reference-listall
+   #:with-git-repository-index
+   #:git-index-add
+   #:git-index-write
    #:with-git-repository
    #:ensure-git-repository-exist
 ))

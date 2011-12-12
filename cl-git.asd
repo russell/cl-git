@@ -10,6 +10,6 @@
   :components ((:file "package")
                (:file "cl-git")))
 
-(asdf:defsystem #:cl-git.tests
+(asdf:defsystem #:cl-git-tests
   :depends-on (#:cl-git #:FiveAM #:cl-fad)
   :components ((:file "tests")))

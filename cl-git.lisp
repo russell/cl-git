@@ -100,6 +100,19 @@
   (object :pointer))
 
 ;;; Git Commit
+(cffi:defcfun ("git_commit_create" %git-commit-create)
+    :int
+  (oid :pointer)
+  (repo :pointer)
+  (update-ref :pointer)
+  (author :pointer)
+  (committer :pointer)
+  (message-encoding :pointer)
+  (message :pointer)
+  (tree :pointer)
+  (parent-count :int)
+  (parents :pointer))
+
 (cffi:defcfun ("git_commit_message" %git-commit-message)
     :string
   (commit :pointer))
@@ -112,6 +125,12 @@
     git-signature
   (commit :pointer))
 
+
+;;; Git Tree
+(cffi:defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
+    :int
+  (oid :pointer)
+  (index :pointer))
 
 ;;; Git Revision Walking
 (cffi:defbitfield git-revwalk-flags
@@ -154,10 +173,18 @@
     :int
     (index :pointer)
     (path :pointer)
-    (stage :int))
+    (stage :int)) ; an int from 0 to 4
 
 (cffi:defcfun ("git_index_clear" %git-index-clear)
     :void
+  (index :pointer))
+
+(cffi:defcfun ("git_index_free" %git-index-free)
+    :void
+  (index :pointer))
+
+(cffi:defcfun ("git_index_write" %git-index-write)
+    :int
   (index :pointer))
 
 
@@ -224,9 +251,8 @@
 		 :mossage (git-error-code-text return-code)
 		 :code return-code)))
 
-
 (defun git-repository-init (path &optional bare)
-  "return a new git repository"
+  "init a git repository"
   (let ((is-bare (if bare 1 0))
 	(repo (cffi:foreign-alloc :pointer)))
     (let ((return-code (cffi:foreign-funcall "git_repository_init"
@@ -235,8 +261,9 @@
 					     :unsigned-int is-bare
 					     git-code)))
       (if (= return-code 0)
-	  (setf *git-repository* (cffi:mem-ref repo :pointer))
-	  ; TODO should free repo pointer here
+	  (cffi:foreign-funcall "git_repository_free"
+				git-repository (cffi:mem-ref repo :pointer)
+				:void)
 	  (error 'git-error
 		 :mossage (git-error-code-text return-code)
 		 :code return-code)))))
@@ -264,6 +291,7 @@
 			:void)
   (setf *git-repository* (cffi:null-pointer)))
 
+
 (defun ensure-git-repository-exist (path &optional bare)
   (handler-case
       (progn
@@ -275,20 +303,29 @@
       (git-repository-free))))
 
 
-(defun git-repository-index (repr)
-  "load a repository index"
-  (let ((index (cffi:foreign-alloc :pointer)))
-    (let ((return-code (cffi:foreign-funcall
-			"git_repository_index"
-			:pointer index
-			git-repository repo
-			git-code)))
-      (if (= return-code 0)
-	  (setf *git-repository-index* (cffi:mem-ref repo :pointer))
-	  ; TODO should free repo index pointer here
-	  (error 'git-error
-		 :mossage (git-error-code-text return-code)
-		 :code return-code)))))
+(defmacro with-git-repository-index (&body body)
+  "load a repository index uses the current *GIT-REPOSITORY* as the
+current repository."
+  (let ((temp (gensym)))
+    `(let ((,temp *git-repository-index*))
+       (unwind-protect
+	    (progn
+	      (let ((index (cffi:foreign-alloc :pointer)))
+		(let ((return-code (cffi:foreign-funcall
+				    "git_repository_index"
+				    :pointer index
+				    git-repository *git-repository*
+				    git-code)))
+
+		  (if (= return-code 0)
+		      (setf *git-repository-index* (cffi:mem-ref index :pointer))
+		      (error 'git-error
+			     :mossage (git-error-code-text return-code)
+			     :code return-code))))
+	      ,@body)
+	 (progn
+	   (%git-index-free *git-repository-index*)
+	   (setq *git-repository-index* ,temp))))))
 
 
 (defun git-commit-lookup (oid)
@@ -351,14 +388,35 @@ with the reference"
 	  refs)))))
 
 (defun git-revwalk (oid)
+  "Walk all the revisions from a specified oid"
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code (%git-revwalk-new revwalker-pointer *git-repository*))
+    (handle-git-return-code
+     (%git-revwalk-new revwalker-pointer *git-repository*))
     (let ((revwalker (cffi:mem-ref revwalker-pointer :pointer)))
       (cffi:foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
       (handle-git-return-code (%git-revwalk-push revwalker oid))
       revwalker
 )))
+
+
+(defun git-index-add (path)
+  "add a file at PATH to the repository, the PATH should be relative
+to the repository"
+  (let ((path (namestring path)))
+    (cffi:with-foreign-string (path-str path)
+      (handle-git-return-code
+       (%git-index-add *git-repository-index* path-str 0)))))
+
+(defun git-index-clear ()
+  (handle-git-return-code
+   (%git-index-clear *git-repository-index*)))
+
+(defun git-index-write ()
+  "write the current index to disk"
+  (handle-git-return-code
+   (%git-index-write *git-repository-index*)))
+
 
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
@@ -372,6 +430,7 @@ repositony at path."
        (progn
 	 (git-repository-free)
 	 (setq *git-repository* ,temp))))))
+
 
 (defmacro with-git-revisions ((commit &key sha head) &body body)
   "Iterate aver all the revisions, the symbol specified by commit will

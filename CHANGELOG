@@ -1,0 +1,8 @@
+-*-mode: rst;-*-
+
+0.1 - UNREALEASED
+-----------------
+
+ * basic support for the libgit2 features like creating a new
+   repository and listing it's commit history [Russell]
+
