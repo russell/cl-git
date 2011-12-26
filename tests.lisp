@@ -30,7 +30,7 @@
 	(progn
 	  (cl-fad:delete-directory-and-files path))))))
 
-(Test create-commits
+(test create-commits
   "create a repository and add some files to it."
   (let ((path (gen-temp-path)))
     (finishes
@@ -41,9 +41,11 @@
 	       (cl-git:with-git-repository-index
 		 (let ((test-file (concatenate 'string path "/test")))
 		   (with-open-file (stream test-file :direction :output)
-		     (format stream "Some text."))
+		     (format stream "Some text.\n"))
 		   (cl-git:git-index-add "test")
 		   (cl-git:git-index-write)
-		   ))))))))
-      (progn
-	(cl-fad:delete-directory-and-files path))))))
+		   )
+		 (cl-git:git-oid-from-index)
+		 )))))))
+;      (progn
+;	(cl-fad:delete-directory-and-files path))))))

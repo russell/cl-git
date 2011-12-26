@@ -15,7 +15,7 @@
    #:with-git-repository-index
    #:git-index-add
    #:git-index-write
+   #:git-oid-from-index
    #:with-git-repository
    #:ensure-git-repository-exist
 ))
-

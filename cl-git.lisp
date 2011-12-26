@@ -417,6 +417,13 @@ to the repository"
   (handle-git-return-code
    (%git-index-write *git-repository-index*)))
 
+(defun git-oid-from-index ()
+  "write the curret index to the disk and return an oid to it"
+ (cffi:with-foreign-object (oid 'git-oid)
+    (handle-git-return-code
+     (%git-tree-create-fromindex oid *git-repository-index*))
+    oid
+  ))
 
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
