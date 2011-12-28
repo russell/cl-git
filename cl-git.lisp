@@ -50,6 +50,8 @@
   (oid :pointer)
   (str :string))
 
+;;; Git Error
+(cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
 
 ;;; Git References
 (cffi:defbitfield git-reference-flags
@@ -240,7 +242,7 @@
     :initform nil
     :documentation "Text message indicating what went wrong.")
    (code
-    :initarg :value
+    :initarg :code
     :accessor git-error-code
     :initform nil
     :documentation "The value of the error code.")))
@@ -248,7 +250,7 @@
 (defun handle-git-return-code (return-code)
      (unless (= return-code 0)
 	  (error 'git-error
-		 :mossage (git-error-code-text return-code)
+		 :message (cffi:foreign-string-to-lisp (git-lasterror))
 		 :code return-code)))
 
 (defun git-repository-init (path &optional bare)
