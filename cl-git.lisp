@@ -134,6 +134,7 @@
   (oid :pointer)
   (index :pointer))
 
+
 ;;; Git Revision Walking
 (cffi:defbitfield git-revwalk-flags
     (:none 0)
@@ -195,6 +196,41 @@
     :void
   (strings :pointer))
 
+
+(defun my-getenv (name &optional default)
+    #+CMU
+    (let ((x (assoc name ext:*environment-list*
+                    :test #'string=)))
+      (if x (cdr x) default))
+    #-CMU
+    (or
+     #+Allegro (sys:getenv name)
+     #+CLISP (ext:getenv name)
+     #+ECL (si:getenv name)
+     #+SBCL (sb-unix::posix-getenv name)
+     #+LISPWORKS (lispworks:environment-variable name)
+     default))
+
+(defun default-email ()
+  (or (my-getenv "MAIL")
+      (concatenate 'string (my-getenv "USERNAME") "@" (machine-instance))))
+
+(defun git-signature-create (&key (name nil) (email nil) (time nil))
+  (let ((signature (cffi:foreign-alloc 'git-signature)))
+    (setf
+     (cffi:foreign-slot-value signature 'git-signature 'name)
+     (or name (my-getenv "USER"))
+
+     (cffi:foreign-slot-value signature 'git-signature 'email)
+     (or email (default-email)))
+
+    (if time
+	(setf (cffi:foreign-slot-value signature 'git-signature 'time) time)
+	(cffi:with-foreign-slots ((time) signature git-signature)
+	  (setf (cffi:foreign-slot-value time 'timeval 'secs)
+		(local-time:timestamp-to-unix (local-time:now))
+		(cffi:foreign-slot-value time 'timeval 'usecs) 0)))
+  signature))
 
 ;;; Git Errors
 (defun git-error-code-text (code)
@@ -329,11 +365,67 @@ current repository."
 	   (%git-index-free *git-repository-index*)
 	   (setq *git-repository-index* ,temp))))))
 
+(defun git-commit-create (oid message &key
+					(update-ref "HEAD")
+					(author nil)
+					(committer nil)
+					(parents nil))
+  "create a new commit from the tree with the OID specified and
+  MESSAGE.  Optional UPDATE-REF is the name of the reference that will
+  be updated to point to this commit.  The default value \"HEAD\" will
+  updote the head of the current branch.  If it's value is NULL then
+  no reference will be updated.  AUTHOR is an optional instance of a
+  GIT-SIGNATURE that details the commit author.  COMMITTER is an
+  optional instance of a GIT-SIGNATURE the details the commit
+  committer.  PARENTS is an optional list of parent commits."
+  (let ((tree (cffi:foreign-alloc :pointer))
+	(newoid (cffi:foreign-alloc :pointer))
+	(%author (or (git-signature-create) author))
+	(%committer (or (git-signature-create) committer))
+	(%tree (git-tree-lookup oid)))
+    (unwind-protect
+	 (progn
+	   (cffi:with-foreign-object (%parents :pointer (length parents))
+	     (cffi:with-foreign-strings ((%message message)
+					 (%message-encoding "UTF-8")
+					 (%update-ref update-ref))
+	       (handle-git-return-code
+		(%git-commit-create
+		 newoid
+		 *git-repository*
+		 %update-ref
+		 %author
+		 %committer
+		 %message-encoding
+		 %message
+		 %tree
+		 (length parents)
+		 %parents)
+	      ))))
+	   (progn
+	     (%git-object-close tree)
+    )))
+  )
+
+(defun git-tree-lookup (oid)
+  "lookup a git tree object, the value returned will need to be freed
+manually."
+  (let ((commit (cffi:foreign-alloc :pointer)))
+    (handle-git-return-code
+     (%git-object-lookup
+      commit *git-repository* oid
+      (cffi:foreign-enum-value 'git-object-type :tree)))
+    (let ((%commit (cffi:mem-ref commit :pointer)))
+      (cffi:foreign-free commit)
+      %commit)
+    ))
 
 (defun git-commit-lookup (oid)
   (let ((commit (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code (%git-object-lookup commit *git-repository* oid
-			(cffi:foreign-enum-value 'git-object-type :commit)))
+    (handle-git-return-code
+     (%git-object-lookup
+      commit *git-repository* oid
+      (cffi:foreign-enum-value 'git-object-type :commit)))
     (cffi:mem-ref commit :pointer)))
 
 (defun git-commit-message (commit)
@@ -420,8 +512,9 @@ to the repository"
    (%git-index-write *git-repository-index*)))
 
 (defun git-oid-from-index ()
-  "write the curret index to the disk and return an oid to it"
- (cffi:with-foreign-object (oid 'git-oid)
+  "write the curret index to the disk and return an oid to it,
+returned oid will have to be freed manually."
+  (let ((oid (cffi:foreign-alloc 'git-oid)))
     (handle-git-return-code
      (%git-tree-create-fromindex oid *git-repository-index*))
     oid

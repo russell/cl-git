@@ -8,6 +8,8 @@
    #:git-repository-open
    #:git-repository-free
    #:with-git-revisions
+   #:git-signature-create
+   #:git-commit-create
    #:git-commit-author
    #:git-commit-message
    #:git-commit-committer
