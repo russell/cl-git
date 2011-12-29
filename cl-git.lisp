@@ -370,7 +370,8 @@ index."
 		 %tree
 		 (length parents)
 		 %parents)
-	      ))))
+	      )))
+	   newoid)
 	   (progn
 	     (%git-object-close tree)
     )))
@@ -402,6 +403,7 @@ manually."
    (%git-commit-message commit))
 
 (defun git-commit-author (commit)
+  "Given a commit return the commit author's signature."
   (cffi:with-foreign-slots ((name email time)
 			    (%git-commit-author commit)
 			    git-signature)
@@ -409,6 +411,7 @@ manually."
       (list name email (local-time:unix-to-timestamp secs)))))
 
 (defun git-commit-committer (commit)
+  "Given a commit return the commit committer's signature."
   (cffi:with-foreign-slots ((name email time)
 			    (%git-commit-committer commit)
 			    git-signature)
@@ -416,6 +419,7 @@ manually."
       (list name email (local-time:unix-to-timestamp secs)))))
 
 (defun git-commit-close (commit)
+  "Close the commit and free the memory allocated to the commit."
   (%git-object-close commit))
 
 (defun git-oid-fromstr (str)
@@ -426,8 +430,12 @@ manually."
 
 (defun git-reference-lookup (name)
   (let ((reference (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code (%git-reference-lookup reference *git-repository* name))
-    (cffi:mem-ref reference :pointer)))
+    (unwind-protect
+	 (progn
+	   (handle-git-return-code
+	    (%git-reference-lookup reference *git-repository* name))
+	   (cffi:mem-ref reference :pointer))
+      (cffi:foreign-free reference))))
 
 (defun git-reference-oid (reference)
   "Return the oid from within the reference, this will be deallocated
