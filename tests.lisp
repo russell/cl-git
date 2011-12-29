@@ -45,7 +45,6 @@
 		   (cl-git:git-index-add "test")
 		   (cl-git:git-index-write)
 		   )
-
 		 (cl-git:git-commit-create (cl-git:git-oid-from-index) "Test commit")
 		 )))
 	(progn

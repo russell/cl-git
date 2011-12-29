@@ -233,44 +233,6 @@
   signature))
 
 ;;; Git Errors
-(defun git-error-code-text (code)
-  "Translate a function return code to a readable message"
-  (case code
-    (0 "Success.")
-    (-1 "Error.")
-    (-2 "Input was not a properly formatted Git object id.")
-    (-3 "Input does not exist in the scope searched.")
-    (-4 "Not enough space available.")
-    (-5 "Consult the OS error information.")
-    (-6 "The specified object is of invalid type.")
-    (-7 "The specified repository is invalid.")
-    (-8 "The object type is invalid or doesn't match.")
-    (-9 "The object cannot be written because it's missing internal data.")
-    (-10 "The packfile for the ODB is corrupted.")
-    (-11 "Failed to acquire or release a file lock.")
-    (-12 "The Z library failed to inflate/deflate an object's data.")
-    (-13 "The queried object is currently busy.")
-    (-14 "The index file is not backed up by an existing repository.")
-    (-15 "The name of the reference is not valid.")
-    (-16 "The specified reference has its data corrupted.")
-    (-17 "The specified symbolic reference is too deeply nested.")
-    (-18 "The pack-refs file is either corrupted or its format is not currently supported.")
-    (-19 "The path is invalid.")
-    (-20 "The revision walker is empty; there are no more commits left to iterate.")
-    (-21 "The state of the reference is not valid.")
-    (-22 "This feature has not been implemented yet.")
-    (-23 "A reference with this name already exists.")
-    (-24 "The given integer literal is too large to be parsed.")
-    (-25 "The given literal is not a valid number.")
-    (-26 "Streaming error.")
-    (-27 "invalid arguments to function.")
-    (-28 "The specified object has its data corrupted.")
-    (-29 "The given short oid is ambiguous.")
-    (-30 "Skip and passthrough the given ODB backend.")
-    (-31 "The path pattern and string did not match.")
-    (-32 "The buffer is too short to satisfy the request.")
-    ))
-
 (define-condition git-error (error)
   ((message
     :initarg :message
@@ -289,41 +251,44 @@
 		 :message (cffi:foreign-string-to-lisp (git-lasterror))
 		 :code return-code)))
 
+
 (defun git-repository-init (path &optional bare)
-  "init a git repository"
+  "Init a new git repository.  A positive value for BARE init a bare
+repository."
   (let ((is-bare (if bare 1 0))
 	(repo (cffi:foreign-alloc :pointer)))
-    (let ((return-code (cffi:foreign-funcall "git_repository_init"
-					     git-repository repo
-					     :string (namestring path)
-					     :unsigned-int is-bare
-					     git-code)))
-      (if (= return-code 0)
-	  (cffi:foreign-funcall "git_repository_free"
-				git-repository (cffi:mem-ref repo :pointer)
-				:void)
-	  (error 'git-error
-		 :mossage (git-error-code-text return-code)
-		 :code return-code)))))
+    (unwind-protect
+	 (handle-git-return-code
+	  (cffi:foreign-funcall "git_repository_init"
+				git-repository repo
+				:string (namestring path)
+				:unsigned-int is-bare
+				git-code))
+      (progn
+	(cffi:foreign-funcall "git_repository_free"
+			      git-repository (cffi:mem-ref repo :pointer)
+			      :void)
+	(cffi:foreign-free repo)))))
 
 
 (defun git-repository-open (path)
-  "open an existing repository"
+  "Open an existing repository and set the global *GIT-REPOSITORY*
+variable to the open repository."
   (let ((repo (cffi:foreign-alloc :pointer)))
-    (let ((return-code (cffi:foreign-funcall "git_repository_open"
-			  git-repository repo
-			  :string (namestring path)
-			  git-code)))
-      (if (= return-code 0)
-	  (setf *git-repository* (cffi:mem-ref repo :pointer))
-	  ; TODO should free repo pointer here
-	  (error 'git-error
-		 :mossage (git-error-code-text return-code)
-		 :code return-code)))))
+    (unwind-protect
+	 (progn
+	   (cffi:foreign-funcall "git_repository_open"
+				 git-repository repo
+				 :string (namestring path)
+				 git-code)
+	   (setf *git-repository* (cffi:mem-ref repo :pointer)))
+      (progn
+	(cffi:foreign-free repo)))))
 
 
 (defun git-repository-free ()
-  "deallocate repository"
+  "Deallocate repository and re-initialise the *GIT-REPOSITORY*
+variable as a null painter."
   (cffi:foreign-funcall "git_repository_free"
 			git-repository *git-repository*
 			:void)
@@ -331,6 +296,9 @@
 
 
 (defun ensure-git-repository-exist (path &optional bare)
+  "Open a repository at location, if the repository doesn't exist
+create it.  BARE is an optional keyword, if specified then the newly
+created repository will be bare."
   (handler-case
       (progn
 	(git-repository-open path)
@@ -342,35 +310,32 @@
 
 
 (defmacro with-git-repository-index (&body body)
-  "load a repository index uses the current *GIT-REPOSITORY* as the
-current repository."
+  "Load a repository index uses the current *GIT-REPOSITORY* as the
+current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
+index."
   (let ((temp (gensym)))
     `(let ((,temp *git-repository-index*))
        (unwind-protect
 	    (progn
 	      (let ((index (cffi:foreign-alloc :pointer)))
-		(let ((return-code (cffi:foreign-funcall
-				    "git_repository_index"
-				    :pointer index
-				    git-repository *git-repository*
-				    git-code)))
-
-		  (if (= return-code 0)
-		      (setf *git-repository-index* (cffi:mem-ref index :pointer))
-		      (error 'git-error
-			     :mossage (git-error-code-text return-code)
-			     :code return-code))))
+		(handle-git-return-code (cffi:foreign-funcall
+					 "git_repository_index"
+					 :pointer index
+					 git-repository *git-repository*
+					 git-code))
+		(setf *git-repository-index* (cffi:mem-ref index :pointer)))
 	      ,@body)
 	 (progn
 	   (%git-index-free *git-repository-index*)
 	   (setq *git-repository-index* ,temp))))))
+
 
 (defun git-commit-create (oid message &key
 					(update-ref "HEAD")
 					(author nil)
 					(committer nil)
 					(parents nil))
-  "create a new commit from the tree with the OID specified and
+  "Create a new commit from the tree with the OID specified and
   MESSAGE.  Optional UPDATE-REF is the name of the reference that will
   be updated to point to this commit.  The default value \"HEAD\" will
   updote the head of the current branch.  If it's value is NULL then
@@ -380,8 +345,8 @@ current repository."
   committer.  PARENTS is an optional list of parent commits."
   (let ((tree (cffi:foreign-alloc :pointer))
 	(newoid (cffi:foreign-alloc :pointer))
-	(%author (or (git-signature-create) author))
-	(%committer (or (git-signature-create) committer))
+	(%author (or author (git-signature-create)))
+	(%committer (or committer (git-signature-create)))
 	(%tree (git-tree-lookup oid)))
     (unwind-protect
 	 (progn
