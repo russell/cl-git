@@ -216,6 +216,10 @@
       (concatenate 'string (my-getenv "USERNAME") "@" (machine-instance))))
 
 (defun git-signature-create (&key (name nil) (email nil) (time nil))
+  "Create a new git signature if the NAME isn't specified then use the
+USER environment variable.  If no EMAIL is specified then use the
+USERNAME at hostname.  If there is no TIME specified then use the
+current time."
   (let ((signature (cffi:foreign-alloc 'git-signature)))
     (setf
      (cffi:foreign-slot-value signature 'git-signature 'name)
@@ -373,7 +377,7 @@ index."
   )
 
 (defun git-tree-lookup (oid)
-  "lookup a git tree object, the value returned will need to be freed
+  "Lookup a git tree object, the value returned will need to be freed
 manually."
   (let ((commit (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
@@ -394,7 +398,7 @@ manually."
     (cffi:mem-ref commit :pointer)))
 
 (defun git-commit-message (commit)
-  "return a string containing the commit message"
+  "Return a string containing the commit message"
    (%git-commit-message commit))
 
 (defun git-commit-author (commit)
@@ -415,7 +419,7 @@ manually."
   (%git-object-close commit))
 
 (defun git-oid-fromstr (str)
-  "convert a git hash to an oid"
+  "Convert a git hash to an oid"
  (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
     oid))
@@ -426,14 +430,14 @@ manually."
     (cffi:mem-ref reference :pointer)))
 
 (defun git-reference-oid (reference)
-  "return the oid from within the reference, this will be deallocated
+  "Return the oid from within the reference, this will be deallocated
 with the reference"
  (let ((oid (cffi:null-pointer)))
     (setf oid (%git-reference-oid reference))
     oid))
 
 (defun git-reference-listall (&optional flags)
-  "list all the refs, filter by flag"
+  "List all the refs, filter by flag"
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
       (handle-git-return-code (%git-reference-listall string-array *git-repository*
@@ -447,7 +451,7 @@ with the reference"
 	  refs)))))
 
 (defun git-revwalk (oid)
-  "Walk all the revisions from a specified oid"
+  "Walk all the revisions from a specified OID"
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-revwalk-new revwalker-pointer *git-repository*))
@@ -460,7 +464,7 @@ with the reference"
 
 
 (defun git-index-add (path)
-  "add a file at PATH to the repository, the PATH should be relative
+  "Add a file at PATH to the repository, the PATH should be relative
 to the repository"
   (let ((path (namestring path)))
     (cffi:with-foreign-string (path-str path)
@@ -468,16 +472,17 @@ to the repository"
        (%git-index-add *git-repository-index* path-str 0)))))
 
 (defun git-index-clear ()
+  "Remove all staged data from the index."
   (handle-git-return-code
    (%git-index-clear *git-repository-index*)))
 
 (defun git-index-write ()
-  "write the current index to disk"
+  "Write the current index to disk"
   (handle-git-return-code
    (%git-index-write *git-repository-index*)))
 
 (defun git-oid-from-index ()
-  "write the curret index to the disk and return an oid to it,
+  "Write the curret index to the disk and return an oid to it,
 returned oid will have to be freed manually."
   (let ((oid (cffi:foreign-alloc 'git-oid)))
     (handle-git-return-code
@@ -520,5 +525,4 @@ be bound to each commit during each iteration."
 			))
 		      (if (= (%git-revwalk-next oid revwalker) 0)
 			  (revision-walker)))))
-	   (revision-walker))))
-       ))
+	   (revision-walker))))))
