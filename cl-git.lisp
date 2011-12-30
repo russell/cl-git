@@ -277,14 +277,22 @@ repository."
 
 (defun git-repository-open (path)
   "Open an existing repository and set the global *GIT-REPOSITORY*
-variable to the open repository."
-  (let ((repo (cffi:foreign-alloc :pointer)))
+variable to the open repository.  If the PATH contains a .git
+directory it will be opened instead of the specified path."
+  (let ((repo (cffi:foreign-alloc :pointer))
+	(path (or (cl-fad:directory-exists-p
+		   (merge-pathnames
+		    #p".git/"
+		    (cl-fad:pathname-as-directory path)))
+		  path)))
     (unwind-protect
 	 (progn
-	   (cffi:foreign-funcall "git_repository_open"
-				 git-repository repo
-				 :string (namestring path)
-				 git-code)
+	   (cffi:with-foreign-strings ((%path (namestring path)))
+	     (handle-git-return-code
+	      (cffi:foreign-funcall "git_repository_open"
+				    git-repository repo
+				    :string (namestring path)
+				    git-code)))
 	   (setf *git-repository* (cffi:mem-ref repo :pointer)))
       (progn
 	(cffi:foreign-free repo)))))
@@ -373,13 +381,13 @@ PARENTS is an optional list of parent commits."
 	      )))
 	   newoid)
 	   (progn
-	     (%git-object-close tree)
+	     (git-tree-close tree)
     )))
   )
 
 (defun git-tree-lookup (oid)
   "Lookup a git tree object, the value returned will need to be freed
-manually."
+manually with GIT-TREE-CLOSE."
   (let ((commit (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-object-lookup
@@ -390,7 +398,13 @@ manually."
       %commit)
     ))
 
+(defun git-tree-close (tree)
+  "Close the tree and free the memory allocated to the tree."
+  (%git-object-close tree))
+
 (defun git-commit-lookup (oid)
+  "Look up a commit by oid, return the resulting commit.  This commit
+will need to be freed manually with GIT-COMMIT-CLOSE."
   (let ((commit (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-object-lookup

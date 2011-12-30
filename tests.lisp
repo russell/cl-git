@@ -37,7 +37,7 @@
       (unwind-protect
 	   (progn
 	     (cl-git:git-repository-init path)
-	     (cl-git:with-git-repository ((concatenate 'string path "/.git"))
+	     (cl-git:with-git-repository (path)
 	       (cl-git:with-git-repository-index
 		 (let ((test-file (concatenate 'string path "/test")))
 		   (with-open-file (stream test-file :direction :output)
@@ -46,6 +46,7 @@
 		   (cl-git:git-index-write)
 		   )
 		 (cl-git:git-commit-create (cl-git:git-oid-from-index) "Test commit")
-		 )))
+		 ))
+	     )
 	(progn
 	  (cl-fad:delete-directory-and-files path))))))

@@ -2,9 +2,9 @@
 
 (asdf:defsystem #:cl-git
   :description "A CFFI wrapper of libgit2."
-  :version "0.0.1"
+  :version "0.1"
   :serial t
-  :depends-on (#:cffi #:local-time)
+  :depends-on (#:cffi #:local-time #:cl-fad)
   :author "Russell Sim <russell.sim@gmail.com>"
   :licence "Lisp-LGPL"
   :components ((:file "package")
