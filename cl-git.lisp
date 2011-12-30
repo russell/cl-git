@@ -216,7 +216,7 @@
       (concatenate 'string (my-getenv "USERNAME") "@" (machine-instance))))
 
 (defun git-signature-create (&key (name nil) (email nil) (time nil))
-  "Create a new git signature if the NAME isn't specified then use the
+  "Create a new GIT-SIGNATURE if the NAME isn't specified then use the
 USER environment variable.  If no EMAIL is specified then use the
 USERNAME at hostname.  If there is no TIME specified then use the
 current time."
@@ -340,13 +340,13 @@ index."
 					(committer nil)
 					(parents nil))
   "Create a new commit from the tree with the OID specified and
-  MESSAGE.  Optional UPDATE-REF is the name of the reference that will
-  be updated to point to this commit.  The default value \"HEAD\" will
-  updote the head of the current branch.  If it's value is NULL then
-  no reference will be updated.  AUTHOR is an optional instance of a
-  GIT-SIGNATURE that details the commit author.  COMMITTER is an
-  optional instance of a GIT-SIGNATURE the details the commit
-  committer.  PARENTS is an optional list of parent commits."
+MESSAGE.  Optional UPDATE-REF is the name of the reference that will
+be updated to point to this commit.  The default value \"HEAD\" will
+updote the head of the current branch.  If it's value is NULL then no
+reference will be updated.  AUTHOR is an optional instance of a
+GIT-SIGNATURE that details the commit author.  COMMITTER is an
+optional instance of a GIT-SIGNATURE the details the commit committer.
+PARENTS is an optional list of parent commits."
   (let ((tree (cffi:foreign-alloc :pointer))
 	(newoid (cffi:foreign-alloc :pointer))
 	(%author (or author (git-signature-create)))
@@ -480,12 +480,12 @@ to the repository"
        (%git-index-add *git-repository-index* path-str 0)))))
 
 (defun git-index-clear ()
-  "Remove all staged data from the index."
+  "Remove all staged data from the index at *GIT-REPOSITORY-INDEX*."
   (handle-git-return-code
    (%git-index-clear *git-repository-index*)))
 
 (defun git-index-write ()
-  "Write the current index to disk"
+  "Write the current index stored in *GIT-REPOSITORY-INDEX* to disk"
   (handle-git-return-code
    (%git-index-write *git-repository-index*)))
 

@@ -4,6 +4,7 @@
   (:use #:cl)
   (:export
    #:*git-repository*
+   #:*git-repository-index*
    #:git-repository-init
    #:git-repository-open
    #:git-repository-free

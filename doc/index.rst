@@ -12,7 +12,9 @@ Contents:
    :maxdepth: 2
 
    repositories
-
+   indexs
+   commit
+   signatures
 
 Indices and tables
 ==================
