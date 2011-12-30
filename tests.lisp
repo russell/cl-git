@@ -45,8 +45,11 @@
 		   (cl-git:git-index-add "test")
 		   (cl-git:git-index-write)
 		   )
-		 (cl-git:git-commit-create (cl-git:git-oid-from-index) "Test commit")
-		 ))
-	     )
+		 (cl-git:with-git-revisions (commit :sha (cl-git:git-commit-create
+							  (cl-git:git-oid-from-index)
+							  "Test commit"))
+		   (is (cl-git:git-commit-message commit) "Test commit")
+		   )
+		 )))
 	(progn
 	  (cl-fad:delete-directory-and-files path))))))

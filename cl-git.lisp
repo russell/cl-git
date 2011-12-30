@@ -17,6 +17,9 @@
 (cffi:use-foreign-library libgit2)
 
 
+(defparameter *git-oid-hex-size* (+ 40 1)
+  "The size of a git commit hash.")
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -49,6 +52,15 @@
     :int
   (oid :pointer)
   (str :string))
+
+(cffi::defctype size-t :unsigned-long)
+
+(cffi:defcfun ("git_oid_to_string" %git-oid-to-string)
+    (:pointer :char)
+  (out (:pointer :char))
+  (n size-t)
+  (oid :pointer))
+
 
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
@@ -256,18 +268,28 @@ current time."
 		 :code return-code)))
 
 
+(defun git-oid-to-string (oid)
+  "Convert an OID to a string."
+  (cffi:with-foreign-pointer-as-string (str *git-oid-hex-size*)
+    (%git-oid-to-string str *git-oid-hex-size* oid)
+    (cffi:foreign-string-to-lisp str)
+    ))
+
+
 (defun git-repository-init (path &optional bare)
   "Init a new git repository.  A positive value for BARE init a bare
-repository."
+repository.  Returns the path of the newly created git repository."
   (let ((is-bare (if bare 1 0))
 	(repo (cffi:foreign-alloc :pointer)))
     (unwind-protect
-	 (handle-git-return-code
-	  (cffi:foreign-funcall "git_repository_init"
-				git-repository repo
-				:string (namestring path)
-				:unsigned-int is-bare
-				git-code))
+	 (progn
+	   (handle-git-return-code
+	    (cffi:foreign-funcall "git_repository_init"
+				  git-repository repo
+				  :string (namestring path)
+				  :unsigned-int is-bare
+				  git-code))
+	   path)
       (progn
 	(cffi:foreign-funcall "git_repository_free"
 			      git-repository (cffi:mem-ref repo :pointer)
@@ -356,7 +378,7 @@ GIT-SIGNATURE that details the commit author.  COMMITTER is an
 optional instance of a GIT-SIGNATURE the details the commit committer.
 PARENTS is an optional list of parent commits."
   (let ((tree (cffi:foreign-alloc :pointer))
-	(newoid (cffi:foreign-alloc :pointer))
+	(newoid (cffi:foreign-alloc 'git-oid))
 	(%author (or author (git-signature-create)))
 	(%committer (or committer (git-signature-create)))
 	(%tree (git-tree-lookup oid)))
@@ -379,11 +401,12 @@ PARENTS is an optional list of parent commits."
 		 (length parents)
 		 %parents)
 	      )))
-	   newoid)
+	   (git-oid-to-string newoid))
 	   (progn
-	     (git-tree-close tree)
+	     (cffi:foreign-free newoid)
+	     (git-tree-close tree))
     )))
-  )
+
 
 (defun git-tree-lookup (oid)
   "Lookup a git tree object, the value returned will need to be freed
@@ -413,7 +436,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
     (cffi:mem-ref commit :pointer)))
 
 (defun git-commit-message (commit)
-  "Return a string containing the commit message"
+  "Return a string containing the commit message."
    (%git-commit-message commit))
 
 (defun git-commit-author (commit)
@@ -437,7 +460,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
   (%git-object-close commit))
 
 (defun git-oid-fromstr (str)
-  "Convert a git hash to an oid"
+  "Convert a git hash to an oid."
  (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
     oid))
@@ -453,13 +476,13 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 
 (defun git-reference-oid (reference)
   "Return the oid from within the reference, this will be deallocated
-with the reference"
+with the reference."
  (let ((oid (cffi:null-pointer)))
     (setf oid (%git-reference-oid reference))
     oid))
 
 (defun git-reference-listall (&optional flags)
-  "List all the refs, filter by flag"
+  "List all the refs, filter by flag."
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
       (handle-git-return-code (%git-reference-listall string-array *git-repository*
@@ -473,7 +496,7 @@ with the reference"
 	  refs)))))
 
 (defun git-revwalk (oid)
-  "Walk all the revisions from a specified OID"
+  "Walk all the revisions from a specified OID."
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-revwalk-new revwalker-pointer *git-repository*))
@@ -487,7 +510,7 @@ with the reference"
 
 (defun git-index-add (path)
   "Add a file at PATH to the repository, the PATH should be relative
-to the repository"
+to the repository."
   (let ((path (namestring path)))
     (cffi:with-foreign-string (path-str path)
       (handle-git-return-code
@@ -499,7 +522,7 @@ to the repository"
    (%git-index-clear *git-repository-index*)))
 
 (defun git-index-write ()
-  "Write the current index stored in *GIT-REPOSITORY-INDEX* to disk"
+  "Write the current index stored in *GIT-REPOSITORY-INDEX* to disk."
   (handle-git-return-code
    (%git-index-write *git-repository-index*)))
 
