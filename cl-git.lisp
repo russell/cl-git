@@ -404,7 +404,8 @@ PARENTS is an optional list of parent commits."
 	   (git-oid-to-string newoid))
 	   (progn
 	     (cffi:foreign-free newoid)
-	     (git-tree-close tree))
+	     (git-tree-close tree)
+	     (cffi:foreign-free tree))
     )))
 
 
