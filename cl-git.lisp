@@ -3,10 +3,10 @@
 (in-package #:cl-git)
 
 (defparameter *git-repository* (cffi:null-pointer)
-  "A global that stores a pointer to the current git repository.")
+  "A global that stores a pointer to the current Git repository.")
 
 (defparameter *git-repository-index* (cffi:null-pointer)
-  "A global that stores a pointer to the current git repository index.")
+  "A global that stores a pointer to the current Git repository index.")
 
 (cffi:define-foreign-library libgit2
   (:linux "libgit2.so")
@@ -18,7 +18,7 @@
 
 
 (defparameter *git-oid-hex-size* (+ 40 1)
-  "The size of a git commit hash.")
+  "The size of a Git commit hash.")
 
 ;;; Git Common
 (cffi:defctype git-code :int)
@@ -277,8 +277,8 @@ current time."
 
 
 (defun git-repository-init (path &optional bare)
-  "Init a new git repository.  A positive value for BARE init a bare
-repository.  Returns the path of the newly created git repository."
+  "Init a new Git repository.  A positive value for BARE init a bare
+repository.  Returns the path of the newly created Git repository."
   (let ((is-bare (if bare 1 0))
 	(repo (cffi:foreign-alloc :pointer)))
     (unwind-protect
@@ -336,11 +336,12 @@ created repository will be bare."
   (handler-case
       (progn
 	(git-repository-open path)
-	(git-repository-free))
+	(git-repository-free)
+	path)
     (git-error (err)
-      (princ err)
       (git-repository-init path bare)
-      (git-repository-free))))
+      (git-repository-free)
+      path)))
 
 
 (defmacro with-git-repository-index (&body body)
@@ -410,7 +411,7 @@ PARENTS is an optional list of parent commits."
 
 
 (defun git-tree-lookup (oid)
-  "Lookup a git tree object, the value returned will need to be freed
+  "Lookup a Git tree object, the value returned will need to be freed
 manually with GIT-TREE-CLOSE."
   (let ((commit (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
@@ -461,7 +462,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
   (%git-object-close commit))
 
 (defun git-oid-fromstr (str)
-  "Convert a git hash to an oid."
+  "Convert a Git hash to an oid."
  (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
     oid))

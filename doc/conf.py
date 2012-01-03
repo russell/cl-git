@@ -80,8 +80,10 @@ exclude_patterns = ['_build', 'bin', 'eggs', 'develop-eggs', 'parts']
 # output. They are ignored by default.
 #show_authors = False
 
+highlight_language = 'common-lisp'
+
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'tango'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
