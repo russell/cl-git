@@ -325,8 +325,7 @@ directory it will be opened instead of the specified path."
 variable as a null painter."
   (cffi:foreign-funcall "git_repository_free"
 			git-repository *git-repository*
-			:void)
-  (setf *git-repository* (cffi:null-pointer)))
+			:void))
 
 
 (defun ensure-git-repository-exist (path &optional bare)
@@ -348,8 +347,7 @@ created repository will be bare."
   "Load a repository index uses the current *GIT-REPOSITORY* as the
 current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
 index."
-  (let ((temp (gensym)))
-    `(let ((,temp *git-repository-index*))
+    `(let ((*git-repository-index* (cffi:null-pointer)))
        (unwind-protect
 	    (progn
 	      (let ((index (cffi:foreign-alloc :pointer)))
@@ -358,11 +356,11 @@ index."
 					 :pointer index
 					 git-repository *git-repository*
 					 git-code))
-		(setf *git-repository-index* (cffi:mem-ref index :pointer)))
+		(setf *git-repository-index* (cffi:mem-ref index :pointer))
+		(cffi:foreign-free index))
 	      ,@body)
 	 (progn
-	   (%git-index-free *git-repository-index*)
-	   (setq *git-repository-index* ,temp))))))
+	   (%git-index-free *git-repository-index*)))))
 
 
 (defun git-commit-create (oid message &key
@@ -413,14 +411,14 @@ PARENTS is an optional list of parent commits."
 (defun git-tree-lookup (oid)
   "Lookup a Git tree object, the value returned will need to be freed
 manually with GIT-TREE-CLOSE."
-  (let ((commit (cffi:foreign-alloc :pointer)))
+  (let ((tree (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-object-lookup
-      commit *git-repository* oid
+      tree *git-repository* oid
       (cffi:foreign-enum-value 'git-object-type :tree)))
-    (let ((%commit (cffi:mem-ref commit :pointer)))
-      (cffi:foreign-free commit)
-      %commit)
+    (let ((%tree (cffi:mem-ref tree :pointer)))
+      (cffi:foreign-free tree)
+      %tree)
     ))
 
 (defun git-tree-close (tree)
@@ -540,15 +538,13 @@ returned oid will have to be freed manually."
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
-  (let ((temp (gensym)))
-  `(let ((,temp *git-repository*))
+  `(let ((*git-repository* nil))
      (unwind-protect
 	  (progn
 	    (git-repository-open ,path)
 	    ,@body)
        (progn
-	 (git-repository-free)
-	 (setq *git-repository* ,temp))))))
+	 (git-repository-free)))))
 
 
 (defmacro with-git-revisions ((commit &key sha head) &body body)

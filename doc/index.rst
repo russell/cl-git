@@ -1,6 +1,11 @@
 cl-git
 ======
 
+.. contents::
+
+About
+-----
+
 cl-git is available under an `LLGPL`_ license.
 
 It is actively developed, but not an ambitious project whose aim is to
@@ -11,8 +16,12 @@ lisp.  This library uses the `CFFI` to create a lisp wrapper around the libgit2 
 .. _LLGPL: http://opensource.franz.com/preamble.html
 .. _libgit2: http://libgit2.github.com/
 
-.. contents::
+Download
+--------
 
+Since there is currently no released version, the source can be downloaded from `github`_.
+
+.. _github: https://github.com/russell/cl-git/
 
 Repositories
 ------------
@@ -23,8 +32,8 @@ Repositories
 
 .. cl:macro:: with-git-repository
 
-   :param path: the path to the git repository
-   :param body: the body of the macro
+   :param path: the path to the git repository.
+   :param body: the body of the macro.
 
    .. code-block:: common-lisp
 
@@ -35,7 +44,7 @@ Repositories
 
 .. cl:function:: ensure-git-repository-exist
 
-   :param path: the path to the git repository
+   :param path: the path to the git repository.
    :param bare: if truthful, then create a bare repository.
 
    .. code-block:: common-lisp
@@ -49,6 +58,12 @@ References
 
 .. cl:function:: git-reference-listall
 
+   .. code-block:: common-lisp
+
+      CL-GIT> (with-git-repository (#p"/home/russell/projects/cl-git/")
+			     (git-reference-listall))
+      ("refs/remotes/origin/master" "refs/remotes/origin/verrazano"
+      "refs/heads/master" "refs/heads/verrazano")
 
 Manipulating the Index
 ----------------------
@@ -59,9 +74,11 @@ Manipulating the Index
 
 .. cl:macro:: with-git-repository-index
 
-   :param body: the body of the macro
+   :param body: the body of the macro.
 
 .. cl:function:: git-index-add
+
+   :param path: the relative path of a file to be added to the repository.
 
 .. cl:function:: git-index-clear
 
