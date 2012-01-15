@@ -5,6 +5,12 @@ This is common lisp wrapper around the `libgit2`_ library. It's still
 early days and the abstraction is far from complete, but there is
 enough for this library to be useful.
 
+- `Documentation`_
+- `Bug Tracker'_
+
+.. _Documentation: http://cl-git.russellsim.org/
+.. _Bug Tracker: https://github.com/russell/cl-git/issues
+
 
 What It Can Do
 --------------

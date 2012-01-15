@@ -532,8 +532,7 @@ returned oid will have to be freed manually."
   (let ((oid (cffi:foreign-alloc 'git-oid)))
     (handle-git-return-code
      (%git-tree-create-fromindex oid *git-repository-index*))
-    oid
-  ))
+    oid))
 
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
@@ -553,19 +552,15 @@ be bound to each commit during each iteration."
   `(let ((oid (gensym)))
      (progn
        (cond
-	 (,head
-	  (setq oid (git-reference-oid (git-reference-lookup ,head))))
-	 (,sha
-	  (setq oid (git-oid-fromstr ,sha))
-	  ))
+	 (,head (setq oid (git-reference-oid (git-reference-lookup ,head))))
+	 (,sha (setq oid (git-oid-fromstr ,sha))))
        (let ((revwalker (git-revwalk oid)))
 	 (labels ((revision-walker ()
 		    (progn
 		      (let ((,commit (git-commit-lookup oid)))
 			(unwind-protect
 			     (progn ,@body)
-			  (progn (git-commit-close ,commit))
-			))
+			  (progn (git-commit-close ,commit))))
 		      (if (= (%git-revwalk-next oid revwalker) 0)
 			  (revision-walker)))))
 	   (revision-walker))))))
