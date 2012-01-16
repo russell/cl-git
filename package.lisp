@@ -9,6 +9,7 @@
    #:git-repository-open
    #:git-repository-free
    #:with-git-revisions
+   #:with-git-commits
    #:git-signature-create
    #:git-commit-create
    #:git-commit-author

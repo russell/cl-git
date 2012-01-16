@@ -546,6 +546,33 @@ repositony at path."
 	 (git-repository-free)))))
 
 
+(defun lookup-commit (&key sha head)
+  (let ((oid (gensym)))
+       (cond
+	 (head (setq oid (git-reference-oid (git-reference-lookup head))))
+	 (sha (setq oid (git-oid-fromstr sha))))
+    oid))
+
+
+(defmacro with-git-commits (bindings &body body)
+  "lookup commits specified in the bindings"
+  `(let ,(mapcar #'(lambda (s)
+		     `(,(car s) (cffi:null-pointer)))
+	  bindings)
+     (unwind-protect
+	  (progn
+	    ,@(mapcar #'(lambda (s)
+			  `(setf ,(car s)
+				 (git-commit-lookup
+				  (lookup-commit ,@(cdr s)))))
+		      bindings)
+	    ,@body)
+       (progn
+	 ,@(mapcar #'(lambda (s)
+		       `(git-commit-close ,(car s)))
+		   bindings)))))
+
+
 (defmacro with-git-revisions ((commit &key sha head) &body body)
   "Iterate aver all the revisions, the symbol specified by commit will
 be bound to each commit during each iteration."
