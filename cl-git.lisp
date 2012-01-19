@@ -538,6 +538,7 @@ repositony at path."
      (unwind-protect
 	  (progn
 	    (git-repository-open ,path)
+	    ,path
 	    ,@body)
        (progn
 	 (git-repository-free)))))
@@ -551,40 +552,48 @@ repositony at path."
     oid))
 
 
-(defmacro with-git-commits (bindings &body body)
-  "lookup commits specified in the bindings"
+(defmacro bind-git-commits (bindings &body body)
+  "Lookup commits specified in the bindings.  The bindings syntax is
+similar to the LET syntax except instead of needing to specify an
+initial form key arguments are used.  Atleast one key arguments SHA or
+HEAD must be specified.  SHA is a hash of the commit.  HEAD is a full
+ref path."
   `(let ,(mapcar #'(lambda (s)
 		     `(,(car s) (cffi:null-pointer)))
 	  bindings)
      (unwind-protect
 	  (progn
-	    ,@(mapcar #'(lambda (s)
-			  `(setf ,(car s)
-				 (git-commit-lookup
-				  (lookup-commit ,@(cdr s)))))
-		      bindings)
+	    ,@(mapcar
+	       #'(lambda (s)
+		   `(setf ,(car s)
+			  (git-commit-lookup
+			   (lookup-commit ,@(cdr s)))))
+	       bindings)
 	    ,@body)
        (progn
-	 ,@(mapcar #'(lambda (s)
-		       `(git-commit-close ,(car s)))
-		   bindings)))))
+	 ,@(mapcar
+	    #'(lambda (s)
+		`(progn
+		   (unless (cffi:null-pointer-p ,(car s))
+		     (git-commit-close ,(car s)))))
+		   ;(cffi:foreign-free ,(car s))))
+	    bindings)))))
 
 
-(defmacro with-git-revisions ((commit &key sha head) &body body)
+(defmacro with-git-revisions ((commit &rest rest &key sha head) &body body)
   "Iterate aver all the revisions, the symbol specified by commit will
-be bound to each commit during each iteration."
-  `(let ((oid (gensym)))
-     (progn
-       (cond
-	 (,head (setq oid (git-reference-oid (git-reference-lookup ,head))))
-	 (,sha (setq oid (git-oid-fromstr ,sha))))
+be bound to each commit during each iteration.  This uses a return
+special call to stop iteration."
+  `(let ((oid (lookup-commit ,@rest)))
        (let ((revwalker (git-revwalk oid)))
-	 (labels ((revision-walker ()
-		    (progn
-		      (let ((,commit (git-commit-lookup oid)))
-			(unwind-protect
-			     (progn ,@body)
-			  (progn (git-commit-close ,commit))))
-		      (if (= (%git-revwalk-next oid revwalker) 0)
-			  (revision-walker)))))
-	   (revision-walker))))))
+	 (block nil
+	   (labels ((revision-walker ()
+		      (progn
+			(if (= (%git-revwalk-next oid revwalker) 0)
+			    (progn
+			      (let ((,commit (git-commit-lookup oid)))
+				(unwind-protect
+				     (progn ,@body)
+				  (progn (git-commit-close ,commit))))
+			      (revision-walker))))))
+	     (revision-walker))))))
