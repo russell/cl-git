@@ -404,8 +404,7 @@ PARENTS is an optional list of parent commits."
 	   (progn
 	     (cffi:foreign-free newoid)
 	     (git-tree-close tree)
-	     (cffi:foreign-free tree))
-    )))
+	     (cffi:foreign-free tree)))))
 
 
 (defun git-tree-lookup (oid)
@@ -418,8 +417,7 @@ manually with GIT-TREE-CLOSE."
       (cffi:foreign-enum-value 'git-object-type :tree)))
     (let ((%tree (cffi:mem-ref tree :pointer)))
       (cffi:foreign-free tree)
-      %tree)
-    ))
+      %tree)))
 
 (defun git-tree-close (tree)
   "Close the tree and free the memory allocated to the tree."
@@ -504,8 +502,7 @@ with the reference."
       (cffi:foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
       (handle-git-return-code (%git-revwalk-push revwalker oid))
-      revwalker
-)))
+      revwalker)))
 
 
 (defun git-index-add (path)
