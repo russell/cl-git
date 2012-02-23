@@ -113,6 +113,10 @@
     :void
   (object :pointer))
 
+(cffi:defcfun ("git_object_free" %git-object-free)
+    :void
+  (object :pointer))
+
 ;;; Git Commit
 (cffi:defcfun ("git_commit_create" %git-commit-create)
     :int
@@ -421,7 +425,7 @@ manually with GIT-TREE-CLOSE."
 
 (defun git-tree-close (tree)
   "Close the tree and free the memory allocated to the tree."
-  (%git-object-close tree))
+  (%git-object-free tree))
 
 (defun git-commit-lookup (oid)
   "Look up a commit by oid, return the resulting commit.  This commit
@@ -455,7 +459,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 
 (defun git-commit-close (commit)
   "Close the commit and free the memory allocated to the commit."
-  (%git-object-close commit))
+  (%git-object-free commit))
 
 (defun git-oid-fromstr (str)
   "Convert a Git hash to an oid."
