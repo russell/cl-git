@@ -46,6 +46,8 @@
 (cffi:defctype git-repository :pointer)
 (cffi:defctype git-repository-index :pointer)
 
+;;; ODB
+(cffi:defctype git-odb :pointer)
 
 ;;; Git OID
 (cffi:defcfun ("git_oid_fromstr" %git-oid-fromstr)
@@ -102,16 +104,16 @@
   (:ref_delta 7)	; A delta, base is given by object id.
 )
 
+(cffi:defcfun ("git_object_type" %git-object-type)
+    git-object-type
+  (object :pointer))
+
 (cffi:defcfun ("git_object_lookup" %git-object-lookup)
     :int
   (object :pointer)
   (repo :pointer)
   (oid :pointer)
   (type git-object-type))
-
-(cffi:defcfun ("git_object_close" %git-object-close)
-    :void
-  (object :pointer))
 
 (cffi:defcfun ("git_object_free" %git-object-free)
     :void
@@ -143,6 +145,18 @@
     git-signature
   (commit :pointer))
 
+(cffi:defcfun ("git_tag_type" %git-tag-type)
+    git-object-type
+  (tag :pointer))
+
+(cffi:defcfun ("git_tag_target" %git-tag-target)
+    :int
+  (reference :pointer)
+  (tag :pointer))
+
+(cffi:defcfun ("git_tag_tagger" %git-tag-tagger)
+    git-signature
+  (tag :pointer))
 
 ;;; Git Tree
 (cffi:defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
@@ -206,7 +220,6 @@
     :int
   (index :pointer))
 
-
 ;;; Git Utilities
 (cffi:defcfun ("git_strarray_free" %git-strarray-free)
     :void
@@ -252,6 +265,17 @@ current time."
 		(cffi:foreign-slot-value time 'timeval 'usecs) 0)))
   signature))
 
+
+
+;;;
+
+(defmacro with-git-signature-return (form)
+  `(cffi:with-foreign-slots ((name email time)
+			     ,form
+			     git-signature)
+     (cffi:with-foreign-slots ((secs usecs) time timeval)
+       (list name email (local-time:unix-to-timestamp secs)))))
+
 ;;; Git Errors
 (define-condition git-error (error)
   ((message
@@ -263,7 +287,10 @@ current time."
     :initarg :code
     :accessor git-error-code
     :initform nil
-    :documentation "The value of the error code.")))
+    :documentation "The value of the error code."))
+  (:report (lambda (condition stream)
+	     (format stream "git error ~D: ~A"
+		     (git-error-code condition) (git-error-message condition)))))
 
 (defun handle-git-return-code (return-code)
      (unless (= return-code 0)
@@ -410,18 +437,29 @@ PARENTS is an optional list of parent commits."
 	     (git-tree-close tree)
 	     (cffi:foreign-free tree)))))
 
+(defun git-object-lookup (oid type)
+  "Returns a reference to the git odb (object) which is identified by the oid.
+The type argument specifies which type is expected.  If the found
+object is not of the right type, an error will be signaled.  The type
+is one of :any, :bad, :commit :tree :blob :tag :ofs_delta :refs_delta.
+:any and :bad are special cases.  :any means return the object found,
+do not do a typecheck and is a valid type, but should typically not
+occur.
+
+Note that the returned git object should be freed with git-object-free."
+  (let ((obj (cffi:foreign-alloc :pointer)))
+    (prog2
+	(handle-git-return-code
+	 (%git-object-lookup
+	  obj *git-repository* oid
+	  (cffi:foreign-enum-value 'git-object-type type)))
+	(cffi:mem-ref obj :pointer)
+      (cffi:foreign-free obj))))
 
 (defun git-tree-lookup (oid)
   "Lookup a Git tree object, the value returned will need to be freed
 manually with GIT-TREE-CLOSE."
-  (let ((tree (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code
-     (%git-object-lookup
-      tree *git-repository* oid
-      (cffi:foreign-enum-value 'git-object-type :tree)))
-    (let ((%tree (cffi:mem-ref tree :pointer)))
-      (cffi:foreign-free tree)
-      %tree)))
+  (git-object-lookup oid :tree))
 
 (defun git-tree-close (tree)
   "Close the tree and free the memory allocated to the tree."
@@ -430,12 +468,7 @@ manually with GIT-TREE-CLOSE."
 (defun git-commit-lookup (oid)
   "Look up a commit by oid, return the resulting commit.  This commit
 will need to be freed manually with GIT-COMMIT-CLOSE."
-  (let ((commit (cffi:foreign-alloc :pointer)))
-    (handle-git-return-code
-     (%git-object-lookup
-      commit *git-repository* oid
-      (cffi:foreign-enum-value 'git-object-type :commit)))
-    (cffi:mem-ref commit :pointer)))
+  (git-object-lookup oid :commit))
 
 (defun git-commit-message (commit)
   "Return a string containing the commit message."
@@ -443,23 +476,29 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 
 (defun git-commit-author (commit)
   "Given a commit return the commit author's signature."
-  (cffi:with-foreign-slots ((name email time)
-			    (%git-commit-author commit)
-			    git-signature)
-    (cffi:with-foreign-slots ((secs usecs) time timeval)
-      (list name email (local-time:unix-to-timestamp secs)))))
+  (with-git-signature-return (%git-commit-author commit)))
 
 (defun git-commit-committer (commit)
   "Given a commit return the commit committer's signature."
-  (cffi:with-foreign-slots ((name email time)
-			    (%git-commit-committer commit)
-			    git-signature)
-    (cffi:with-foreign-slots ((secs usecs) time timeval)
-      (list name email (local-time:unix-to-timestamp secs)))))
+  (with-git-signature-return (%git-commit-committer commit)))
 
 (defun git-commit-close (commit)
   "Close the commit and free the memory allocated to the commit."
   (%git-object-free commit))
+
+(defun git-tag-type (tag)
+  (%git-tag-type tag))
+
+(defun git-tag-target (tag)
+  (let ((obj (cffi:foreign-alloc :pointer)))
+    (prog2
+	(handle-git-return-code
+	 (%git-tag-target obj tag))
+	(cffi:mem-ref obj :pointer)
+      (cffi:foreign-free obj))))
+
+(defun git-tag-tagger (tag)
+  (with-git-signature-return (%git-tag-tagger tag)))
 
 (defun git-oid-fromstr (str)
   "Convert a Git hash to an oid."
