@@ -9,7 +9,7 @@
   "A global that stores a pointer to the current Git repository index.")
 
 (cffi:define-foreign-library libgit2
-  (:linux "libgit2.so")
+  (:linux "libgit2.so.0")
   (:windows "libgit2.dll")
   (:darwin "libgit2.0.dylib")
   (:default "libgit2"))
