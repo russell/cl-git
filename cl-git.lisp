@@ -119,6 +119,11 @@
     :void
   (object :pointer))
 
+;;; Reference
+(cffi:defcfun ("git_reference_type" %git-reference-type)
+    git-reference-flags
+  (reference :pointer))
+
 ;;; Git Commit
 (cffi:defcfun ("git_commit_create" %git-commit-create)
     :int
