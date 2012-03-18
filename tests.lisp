@@ -1,11 +1,16 @@
+#!/usr/bin/sbcl --script
+(load "~/.sbclrc")
+
 (asdf:oos 'asdf:load-op :FiveAM)
+(asdf:oos 'asdf:load-op :cl-git)
 
 (defpackage :cl-git-tests
-    (:use :common-lisp
-	  :cl-git
-	  :it.bese.FiveAM))
+  (:use
+   :common-lisp
+   :cl-git
+   :it.bese.FiveAM))
 
-(in-package :cl-git-tests)
+(in-package #:cl-git-tests)
 
 
 (defun gen-letter ()
@@ -53,3 +58,5 @@
 		 )))
 	(progn
 	  (cl-fad:delete-directory-and-files path))))))
+
+(run! (list 'create-commits 'repository-init))
