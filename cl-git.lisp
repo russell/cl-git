@@ -93,6 +93,11 @@
 
 
 ;;; Git Object
+(cffi:defcfun ("git_object_id" %git-object-id)
+    :pointer
+  (object :pointer))
+
+
 (cffi:defcenum git-object-type
   (:any -2)		; Object can be any of the following
   (:bad -1)		; Object is invalid.
@@ -442,6 +447,12 @@ PARENTS is an optional list of parent commits."
 	     (git-tree-close tree)
 	     (cffi:foreign-free tree)))))
 
+(defun git-object-id (object)
+  "Returns the oid identifying `object'"
+  (let ((oid (cffi:null-pointer)))
+    (setf oid (%git-object-id object))
+    oid))
+
 (defun git-object-lookup (oid type)
   "Returns a reference to the git odb (object) which is identified by the oid.
 The type argument specifies which type is expected.  If the found
@@ -543,7 +554,9 @@ with the reference."
 
 (defun git-revwalk (oid-or-oids)
   "Walk all the revisions from a specified OID, or OIDs.
-OID can be a single object id, or a list of object ids."
+OID can be a single object id, or a list of object ids.
+The OIDs can be anything that can be resolved by commit-oid-from-oid.
+In general this means, commits and tags."
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-revwalk-new revwalker-pointer *git-repository*))
@@ -551,7 +564,8 @@ OID can be a single object id, or a list of object ids."
       (cffi:foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
       (loop for oid in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids) do
-	   (handle-git-return-code (%git-revwalk-push revwalker oid)))
+	   (handle-git-return-code (%git-revwalk-push revwalker
+						      (commit-oid-from-oid oid))))
       revwalker)))
 
 
@@ -593,8 +607,31 @@ repositony at path."
        (progn
 	 (git-repository-free)))))
 
+(defun git-commit-from-oid (oid)
+  "Returns a git-commit object identified by the `oid'.
+This is an extended version of git-commit-lookup.
+If theo oid refers to a tag, this function will return the git-commit
+pointed to by the tag.  The call git-commit-lookup will fail."
+  (let ((git-object (git-object-lookup oid :any)))
+    (ecase (%git-object-type git-object)
+      (:tag (prog1 (git-tag-target git-object) (%git-object-free git-object)))
+      (:commit git-object))))
+
+(defun commit-oid-from-oid (oid)
+  "Returns the oid of a commit referenced by `oid'.
+If the `oid' refers to a commit the function is basically a
+no-op.  However if `oid' refers to a tag, it will return
+the oid of the target of the tag."
+  (let ((commit (git-commit-from-oid oid)))
+    (prog1
+	(git-object-id commit)
+      (%git-object-free commit))))
+
 
 (defun lookup-commit (&key sha head)
+  "Returns an oid for a single commit (or tag).  It takes a single keyword argument,
+either SHA or HEAD  If the keyword argument is SHA the value should be a SHA1 id as
+a string.  The value for the HEAD keyword should be a symbolic reference to a git commit."
   (let ((oid (gensym)))
        (cond
 	 (head (setq oid (git-reference-oid (git-reference-lookup head))))
@@ -602,8 +639,10 @@ repositony at path."
     oid))
 
 (defun lookup-commits (&key sha head)
-  "Similar to lookup-commit, except that the keyword arguments should be a list,
-and it returns a list of oids instead of a single oid."
+  "Similar to lookup-commit, except that the keyword arguments also except a list of references.
+It will returns list of oids instead of a single oid.  If the argument
+was a single reference, it will return a list containing a single
+oid."
   (cond
     (head (loop for reference in (if (atom head) (list head) head) collect (lookup-commit :head reference)))
     (sha (loop for reference in (if (atom sha) (list sha) sha) collect (lookup-commit :sha reference)))))
@@ -622,7 +661,7 @@ ref path."
 	    ,@(mapcar
 	       #'(lambda (s)
 		   `(setf ,(car s)
-			  (git-commit-lookup
+			  (git-commit-from-oid
 			   (lookup-commit ,@(cdr s)))))
 	       bindings)
 	    ,@body)
@@ -648,7 +687,7 @@ special call to stop iteration."
 			(progn
 			  (if (= (%git-revwalk-next oid revwalker) 0)
 			      (progn
-				(let ((,commit (git-commit-lookup oid)))
+				(let ((,commit (git-commit-from-oid oid)))
 				  (unwind-protect
 				       (progn ,@body)
 				    (progn (git-commit-close ,commit))))
