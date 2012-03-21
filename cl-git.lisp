@@ -368,10 +368,10 @@ index."
 
 
 (defun git-commit-create (oid message &key
-					(update-ref "HEAD")
-					(author nil)
-					(committer nil)
-					(parents nil))
+                                        (update-ref "HEAD")
+                                        (author nil)
+                                        (committer nil)
+                                        (parents nil))
   "Create a new commit from the tree with the OID specified and
 MESSAGE.  Optional UPDATE-REF is the name of the reference that will
 be updated to point to this commit.  The default value \"HEAD\" will
@@ -381,34 +381,40 @@ GIT-SIGNATURE that details the commit author.  COMMITTER is an
 optional instance of a GIT-SIGNATURE the details the commit committer.
 PARENTS is an optional list of parent commits."
   (let ((tree (cffi:foreign-alloc :pointer))
-	(newoid (cffi:foreign-alloc 'git-oid))
-	(%author (or author (git-signature-create)))
-	(%committer (or committer (git-signature-create)))
-	(%tree (git-tree-lookup oid)))
+        (newoid (cffi:foreign-alloc 'git-oid))
+        (%author (or author (git-signature-create)))
+        (%committer (or committer (git-signature-create)))
+        (%tree (git-tree-lookup oid))
+        (parents (if (listp parents) parents (list parents))))
     (unwind-protect
-	 (progn
-	   (cffi:with-foreign-object (%parents :pointer (length parents))
-	     (cffi:with-foreign-strings ((%message message)
-					 (%message-encoding "UTF-8")
-					 (%update-ref update-ref))
-	       (handle-git-return-code
-		(%git-commit-create
-		 newoid
-		 *git-repository*
-		 %update-ref
-		 %author
-		 %committer
-		 %message-encoding
-		 %message
-		 %tree
-		 (length parents)
-		 %parents)
-	      )))
-	   (git-oid-to-string newoid))
-	   (progn
-	     (cffi:foreign-free newoid)
-	     (git-tree-close tree)
-	     (cffi:foreign-free tree)))))
+         (progn
+           ; lookup all the git commits
+           (setq parents (mapcar #'(lambda (c) (git-commit-lookup (lookup-commit :sha c))) parents))
+           (cffi:with-foreign-object (%parents :pointer (length parents))
+             (cffi:with-foreign-strings ((%message message)
+                                         (%message-encoding "UTF-8")
+                                         (%update-ref update-ref))
+               (loop for parent in parents
+                     counting parent into i
+                     do (setf (cffi:mem-aref %parents :pointer (1- i)) parent))
+               (handle-git-return-code
+                (%git-commit-create
+                 newoid
+                 *git-repository*
+                 %update-ref
+                 %author
+                 %committer
+                 %message-encoding
+                 %message
+                 %tree
+                 (length parents)
+                 %parents))))
+           (git-oid-to-string newoid))
+      (progn
+        (mapcar #'(lambda (c) (git-commit-close c)) parents)
+        (cffi:foreign-free newoid)
+        (git-tree-close tree)
+        (cffi:foreign-free tree)))))
 
 
 (defun git-tree-lookup (oid)
