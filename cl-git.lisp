@@ -503,15 +503,17 @@ with the reference."
 	  (%git-strarray-free string-array)
 	  refs)))))
 
-(defun git-revwalk (oid)
-  "Walk all the revisions from a specified OID."
+(defun git-revwalk (oid-or-oids)
+  "Walk all the revisions from a specified OID, or OIDs.
+OID can be a single object id, or a list of object ids."
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-revwalk-new revwalker-pointer *git-repository*))
     (let ((revwalker (cffi:mem-ref revwalker-pointer :pointer)))
       (cffi:foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
-      (handle-git-return-code (%git-revwalk-push revwalker oid))
+      (loop for oid in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids) do
+	   (handle-git-return-code (%git-revwalk-push revwalker oid)))
       revwalker)))
 
 
@@ -561,6 +563,12 @@ repositony at path."
 	 (sha (setq oid (git-oid-fromstr sha))))
     oid))
 
+(defun lookup-commits (&key sha head)
+  "Similar to lookup-commit, except that the keyword arguments should be a list,
+and it returns a list of oids instead of a single oid."
+  (cond
+    (head (loop for reference in (if (atom head) (list head) head) collect (lookup-commit :head reference)))
+    (sha (loop for reference in (if (atom sha) (list sha) sha) collect (lookup-commit :sha reference)))))
 
 (defmacro bind-git-commits (bindings &body body)
   "Lookup commits specified in the bindings.  The bindings syntax is
@@ -594,16 +602,17 @@ ref path."
   "Iterate aver all the revisions, the symbol specified by commit will
 be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
-  `(let ((oid (lookup-commit ,@rest)))
-       (let ((revwalker (git-revwalk oid)))
-	 (block nil
-	   (labels ((revision-walker ()
-		      (progn
-			(if (= (%git-revwalk-next oid revwalker) 0)
-			    (progn
-			      (let ((,commit (git-commit-lookup oid)))
-				(unwind-protect
-				     (progn ,@body)
-				  (progn (git-commit-close ,commit))))
-			      (revision-walker))))))
-	     (revision-walker))))))
+  `(let ((oids (lookup-commits ,@rest)))
+       (let ((revwalker (git-revwalk oids)))
+	 (cffi:with-foreign-object (oid 'git-oid)
+	   (block nil
+	     (labels ((revision-walker ()
+			(progn
+			  (if (= (%git-revwalk-next oid revwalker) 0)
+			      (progn
+				(let ((,commit (git-commit-lookup oid)))
+				  (unwind-protect
+				       (progn ,@body)
+				    (progn (git-commit-close ,commit))))
+				(revision-walker))))))
+	       (revision-walker)))))))
