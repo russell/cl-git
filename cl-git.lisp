@@ -20,6 +20,30 @@
 (defparameter *git-oid-hex-size* (+ 40 1)
   "The size of a Git commit hash.")
 
+
+(defmacro defcfun (name-and-options return-type &body args)
+  "define a cfunction, with cffi if there is more then one function
+name then choose the best one if there is no best one then choose the
+last one."
+  (let* ((function-names (car `(,@name-and-options)))
+         (function-name (if (listp function-names)
+                            (or
+                             ;; Choose the most approprate symbol,
+                             ;; default is the most recent.
+                             #+SBCL
+                             (loop for func in function-names
+                                   when (sb-sys:find-foreign-symbol-address func)
+                                     return func)
+                             ;; default
+                             (car (last function-names)))
+                            function-names))
+         (function-symbol (car (last `(,@name-and-options)))))
+
+    `(cffi:defcfun (,function-name ,function-symbol)
+       ,return-type
+     ,@args)))
+
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -55,7 +79,9 @@
 
 (cffi::defctype size-t :unsigned-long)
 
-(cffi:defcfun ("git_oid_to_string" %git-oid-to-string)
+(defcfun (("git_oid_to_string" ; 0.16.0
+           "git_oid_tostr")    ; 0.16.0+
+          %git-oid-tostr)
     (:pointer :char)
   (out (:pointer :char))
   (n size-t)
@@ -109,11 +135,9 @@
   (oid :pointer)
   (type git-object-type))
 
-(cffi:defcfun ("git_object_close" %git-object-close)
-    :void
-  (object :pointer))
-
-(cffi:defcfun ("git_object_free" %git-object-free)
+(defcfun (("git_object_close" ; 0.15.0
+           "git_object_free") ; 0.16.0
+          %git-object-free)
     :void
   (object :pointer))
 
@@ -272,10 +296,10 @@ current time."
 		 :code return-code)))
 
 
-(defun git-oid-to-string (oid)
+(defun git-oid-tostr (oid)
   "Convert an OID to a string."
   (cffi:with-foreign-pointer-as-string (str *git-oid-hex-size*)
-    (%git-oid-to-string str *git-oid-hex-size* oid)
+    (%git-oid-tostr str *git-oid-hex-size* oid)
     (cffi:foreign-string-to-lisp str)
     ))
 
@@ -409,7 +433,7 @@ PARENTS is an optional list of parent commits."
                  %tree
                  (length parents)
                  %parents))))
-           (git-oid-to-string newoid))
+           (git-oid-tostr newoid))
       (progn
         (mapcar #'(lambda (c) (git-commit-close c)) parents)
         (cffi:foreign-free newoid)
