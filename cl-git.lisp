@@ -92,15 +92,15 @@
 
 ;;; Git Object
 (cffi:defcenum git-object-type
-  (:any -2)		; Object can be any of the following
-  (:bad -1)		; Object is invalid.
-  (:commit 1)		; A commit object.
-  (:tree 2)		; A tree (directory listing) object.
-  (:blob 3)		; A file revision object.
-  (:tag 4)		; An annotated tag object.
-  (:ofs_delta 6)	; A delta, base is given by an offset.
-  (:ref_delta 7)	; A delta, base is given by object id.
-)
+  (:any -2)       ; Object can be any of the following
+  (:bad -1)       ; Object is invalid.
+  (:commit 1)     ; A commit object.
+  (:tree 2)       ; A tree (directory listing) object.
+  (:blob 3)       ; A file revision object.
+  (:tag 4)        ; An annotated tag object.
+  (:ofs_delta 6)  ; A delta, base is given by an offset.
+  (:ref_delta 7)) ; A delta, base is given by object id.
+
 
 (cffi:defcfun ("git_object_lookup" %git-object-lookup)
     :int
