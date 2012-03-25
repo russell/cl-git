@@ -213,7 +213,7 @@
   (strings :pointer))
 
 
-(defun my-getenv (name &optional default)
+(defun getenv (name &optional default)
     #+CMU
     (let ((x (assoc name ext:*environment-list*
                     :test #'string=)))
@@ -228,8 +228,8 @@
      default))
 
 (defun default-email ()
-  (or (my-getenv "MAIL")
-      (concatenate 'string (my-getenv "USERNAME") "@" (machine-instance))))
+  (or (getenv "MAIL")
+      (concatenate 'string (getenv "USERNAME") "@" (machine-instance))))
 
 (defun git-signature-create (&key (name nil) (email nil) (time nil))
   "Create a new GIT-SIGNATURE if the NAME isn't specified then use the
@@ -239,7 +239,7 @@ current time."
   (let ((signature (cffi:foreign-alloc 'git-signature)))
     (setf
      (cffi:foreign-slot-value signature 'git-signature 'name)
-     (or name (my-getenv "USER"))
+     (or name (getenv "USER"))
 
      (cffi:foreign-slot-value signature 'git-signature 'email)
      (or email (default-email)))
