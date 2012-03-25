@@ -284,21 +284,21 @@ current time."
   "Init a new Git repository.  A positive value for BARE init a bare
 repository.  Returns the path of the newly created Git repository."
   (let ((is-bare (if bare 1 0))
-	(repo (cffi:foreign-alloc :pointer)))
+        (repo (cffi:foreign-alloc :pointer)))
     (unwind-protect
-	 (progn
-	   (handle-git-return-code
-	    (cffi:foreign-funcall "git_repository_init"
-				  git-repository repo
-				  :string (namestring path)
-				  :unsigned-int is-bare
-				  git-code))
-	   path)
+         (progn
+           (handle-git-return-code
+            (cffi:foreign-funcall "git_repository_init"
+                                  git-repository repo
+                                  :string (namestring path)
+                                  :unsigned-int is-bare
+                                  git-code))
+           path)
       (progn
-	(cffi:foreign-funcall "git_repository_free"
-			      git-repository (cffi:mem-ref repo :pointer)
-			      :void)
-	(cffi:foreign-free repo)))))
+        (cffi:foreign-funcall "git_repository_free"
+                              git-repository (cffi:mem-ref repo :pointer)
+                              :void)
+        (cffi:foreign-free repo)))))
 
 
 (defun git-repository-open (path)
@@ -604,16 +604,16 @@ ref path."
 be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
   `(let ((oids (lookup-commits ,@rest)))
-       (let ((revwalker (git-revwalk oids)))
-	 (cffi:with-foreign-object (oid 'git-oid)
-	   (block nil
-	     (labels ((revision-walker ()
-			(progn
-			  (if (= (%git-revwalk-next oid revwalker) 0)
-			      (progn
-				(let ((,commit (git-commit-lookup oid)))
-				  (unwind-protect
-				       (progn ,@body)
-				    (progn (git-commit-close ,commit))))
-				(revision-walker))))))
-	       (revision-walker)))))))
+     (let ((revwalker (git-revwalk oids)))
+       (cffi:with-foreign-object (oid 'git-oid)
+         (block nil
+           (labels ((revision-walker ()
+                      (progn
+                        (if (= (%git-revwalk-next oid revwalker) 0)
+                            (progn
+                              (let ((,commit (git-commit-lookup oid)))
+                                (unwind-protect
+                                     (progn ,@body)
+                                  (progn (git-commit-close ,commit))))
+                              (revision-walker))))))
+             (revision-walker)))))))
