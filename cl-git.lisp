@@ -557,6 +557,7 @@ repositony at path."
 
 
 (defun lookup-commit (&key sha head)
+  "lookup a commit by sha or head name, return an oid."
   (let ((oid (gensym)))
        (cond
 	 (head (setq oid (git-reference-oid (git-reference-lookup head))))
