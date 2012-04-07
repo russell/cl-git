@@ -1,0 +1,12 @@
+#!/usr/bin/sbcl --script
+(load "~/.sbclrc")
+
+(asdf:oos 'asdf:load-op :FiveAM)
+(asdf:oos 'asdf:load-op :cl-git)
+(asdf:oos 'asdf:load-op :cl-git-tests)
+
+(use-package 'cl-git-tests)
+
+(FiveAM:run! (list 'repository-init
+                   'create-commit
+                   'create-commits))
