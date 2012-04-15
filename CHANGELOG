@@ -1,8 +1,7 @@
 -*-mode: rst;-*-
 
-0.1 - UNREALEASED
------------------
+0.1 - 2012-01-20
+----------------
 
  * basic support for the libgit2 features like creating a new
    repository and listing it's commit history [Russell]
-
