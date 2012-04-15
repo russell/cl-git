@@ -403,7 +403,7 @@ updote the head of the current branch.  If it's value is NULL then no
 reference will be updated.  AUTHOR is an optional instance of a
 GIT-SIGNATURE that details the commit author.  COMMITTER is an
 optional instance of a GIT-SIGNATURE the details the commit committer.
-PARENTS is an optional list of parent commits."
+PARENTS is an optional list of parent commits sha1 hashes."
   (let ((tree (cffi:foreign-alloc :pointer))
         (newoid (cffi:foreign-alloc 'git-oid))
         (%author (or author (git-signature-create)))

@@ -1,4 +1,10 @@
 -*-mode: rst;-*-
+0.2 - UNRELEASED
+----------------
+
+ * support for multiple start revisions when doing revision walk
+   [Willem]
+ * FFI symbol selector for SBCL [Russell]
 
 0.1 - 2012-01-20
 ----------------
