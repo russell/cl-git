@@ -21,29 +21,6 @@
   "The size of a Git commit hash.")
 
 
-(defmacro defcfun (name-and-options return-type &body args)
-  "define a cfunction, with cffi if there is more then one function
-name then choose the best one if there is no best one then choose the
-last one."
-  (let* ((function-names (car `(,@name-and-options)))
-         (function-name (if (listp function-names)
-                            (or
-                             ;; Choose the most approprate symbol,
-                             ;; default is the most recent.
-                             #+SBCL
-                             (loop for func in function-names
-                                   when (sb-sys:find-foreign-symbol-address func)
-                                     return func)
-                             ;; default
-                             (car (last function-names)))
-                            function-names))
-         (function-symbol (car (last `(,@name-and-options)))))
-
-    `(cffi:defcfun (,function-name ,function-symbol)
-       ,return-type
-     ,@args)))
-
-
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -81,14 +58,12 @@ last one."
 
 (cffi::defctype size-t :unsigned-long)
 
-(defcfun (("git_oid_to_string" ; 0.16.0
-           "git_oid_tostr")    ; 0.16.0+
-          %git-oid-tostr)
+(cffi:defcfun ("git_oid_to_string"
+               %git-oid-tostr)
     (:pointer :char)
   (out (:pointer :char))
   (n size-t)
   (oid :pointer))
-
 
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
@@ -146,9 +121,8 @@ last one."
   (oid :pointer)
   (type git-object-type))
 
-(defcfun (("git_object_close" ; 0.15.0
-           "git_object_free") ; 0.16.0
-          %git-object-free)
+(cffi:defcfun ("git_object_free"
+               %git-object-free)
     :void
   (object :pointer))
 
