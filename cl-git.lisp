@@ -270,13 +270,14 @@ current time."
      (or email (default-email)))
 
     (if time
-	(setf (cffi:foreign-slot-value signature 'git-signature 'time) time)
-	(cffi:with-foreign-slots ((time) signature git-signature)
-	  (setf (cffi:foreign-slot-value time 'timeval 'secs)
-		(local-time:timestamp-to-unix (local-time:now))
-		(cffi:foreign-slot-value time 'timeval 'usecs) 0)))
+        (setf (cffi:foreign-slot-value signature 'git-signature 'time) time)
+        (cffi:with-foreign-slots ((time) signature git-signature)
+          (setf
+           (cffi:foreign-slot-value time 'timeval 'secs)
+           (local-time:timestamp-to-unix (local-time:now))
+           (cffi:foreign-slot-value time 'timeval 'usecs)
+           0)))
   signature))
-
 
 
 ;;;
@@ -637,23 +638,28 @@ the oid of the target of the tag."
 
 
 (defun lookup-commit (&key sha head)
-  "Returns an oid for a single commit (or tag).  It takes a single keyword argument,
-either SHA or HEAD  If the keyword argument is SHA the value should be a SHA1 id as
-a string.  The value for the HEAD keyword should be a symbolic reference to a git commit."
-  (let ((oid (gensym)))
-       (cond
-	 (head (setq oid (git-reference-oid (git-reference-lookup head))))
-	 (sha (setq oid (git-oid-fromstr sha))))
-    oid))
+  "Returns an oid for a single commit (or tag).  It takes a single
+ keyword argument, either SHA or HEAD If the keyword argument is SHA
+ the value should be a SHA1 id as a string.  The value for the HEAD
+ keyword should be a symbolic reference to a git commit."
+    (cond
+      (head (git-reference-oid (git-reference-lookup head)))
+       (sha (git-oid-fromstr sha))))
 
 (defun lookup-commits (&key sha head)
-  "Similar to lookup-commit, except that the keyword arguments also except a list of references.
-It will returns list of oids instead of a single oid.  If the argument
-was a single reference, it will return a list containing a single
-oid."
-  (cond
-    (head (loop for reference in (if (atom head) (list head) head) collect (lookup-commit :head reference)))
-    (sha (loop for reference in (if (atom sha) (list sha) sha) collect (lookup-commit :sha reference)))))
+   "Similar to lookup-commit, except that the keyword arguments also
+ except a list of references.  It will returns list of oids instead of
+ a single oid.  If the argument was a single reference, it will return
+ a list containing a single oid."
+   (flet ((lookup-loop (keyword lookup)
+          (loop for reference
+                in
+                (if (atom lookup) (list lookup) lookup)
+                collect
+                (lookup-commit keyword reference))))
+     (cond
+       (head (lookup-loop :head head))
+       (sha (lookup-loop :sha sha)))))
 
 (defmacro bind-git-commits (bindings &body body)
   "Lookup commits specified in the bindings.  The bindings syntax is
@@ -701,4 +707,3 @@ special call to stop iteration."
                                   (progn (git-commit-close ,commit))))
                               (revision-walker))))))
              (revision-walker)))))))
-
