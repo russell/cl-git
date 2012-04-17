@@ -22,6 +22,9 @@
                 (gen-string :length (gen-integer :min 5 :max 10)
                             :elements (gen-letter)))))
 
+(defun random-number (min max)
+  (funcall (gen-integer :min min :max max)))
+
 (defun random-string (length)
   (funcall
    (gen-string :length (gen-integer :min length :max length)
@@ -61,6 +64,18 @@ REPO-PATH."
       (let ((content (add-random-file-modification repo-path filename)))
         `((filename . ,filename)(content . ,content))))))
 
+(defun create-random-signature ()
+  "create a random commit signature and return both the commit and the
+signature to the commit"
+  (let ((name (random-string 25))
+        (email (random-string 25)))
+    (let ((signature (git-signature-create
+                      :name name
+                      :email email))
+          (sig-alist `((name . ,name)
+                       (email . ,email))))
+    (values signature sig-alist))))
+
 (defun commit-random-file (repo-path &key (parents nil))
   "create a new random file in the repository located at REPO-PATH
 then add and commit it to the repository. returns a list containing
@@ -70,14 +85,22 @@ commit-message filename content."
                            stream "Random commit: ~A.\n"
                            (random-string 100)))))
     (cl-git:with-git-repository-index
-      (let* ((file (add-new-random-file repo-path))
-             (commit-sha (cl-git:git-commit-create
+      (multiple-value-bind (author author-alist) (create-random-signature)
+        (multiple-value-bind (committer committer-alist) (create-random-signature)
+          (let* ((file (add-new-random-file repo-path))
+                 (commit-sha (cl-git:git-commit-create
                           (cl-git:git-oid-from-index)
                           commit-message
+                          :author author
+                          :committer committer
                           :parents parents)))
+
         (cons `(commit-sha . ,commit-sha)
               (cons `(commit-message . ,commit-message)
-                    file))))))
+                    (cons `(committer . ,committer-alist)
+                          (cons `(author . ,author-alist)
+                                file))))))))))
+
 
 (defun commit-random-file-modification (repo-path
                                         filename
@@ -114,7 +137,9 @@ commit-message filename content."
       (let ((new-commit (commit-random-file repo-path)))
         (cons new-commit nil))
       (let* ((commit (create-random-commits repo-path (1- number)))
-             (new-commit (commit-random-file repo-path :parents (assoc-default 'commit-sha (car commit)))))
+             (new-commit (commit-random-file
+                          repo-path
+                          :parents (assoc-default 'commit-sha (car commit)))))
         (cons new-commit commit))))
 
 
@@ -131,9 +156,22 @@ check that the commit messages match the expected messages."
                 (cl-git:with-git-repository (path)
                   (let* ((commit-list (create-random-commits path 10))
                          (tcommit (pop commit-list)))
-                    (cl-git:with-git-revisions (commit :sha (assoc-default 'commit-sha tcommit))
+                    (cl-git:with-git-revisions
+                        (commit :sha (assoc-default 'commit-sha tcommit))
                       (is (equal (cl-git:git-commit-message commit)
-                                      (assoc-default 'commit-message tcommit)))
+                                 (assoc-default 'commit-message tcommit)))
+                      (let ((tauthor (assoc-default 'author tcommit))
+                            (author (cl-git:git-commit-author commit)))
+                        (is (equal (car author)
+                                   (assoc-default 'name tauthor)))
+                        (is (equal (second author)
+                                   (assoc-default 'email tauthor))))
+                      (let ((tcommitter (assoc-default 'committer tcommit))
+                            (committer (cl-git:git-commit-committer commit)))
+                        (is (equal (car committer)
+                                   (assoc-default 'name tcommitter)))
+                        (is (equal (second committer)
+                                   (assoc-default 'email tcommitter))))
                       (setq tcommit (pop commit-list))))))
            (progn
              (cl-fad:delete-directory-and-files path))))))
