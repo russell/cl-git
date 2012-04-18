@@ -587,7 +587,9 @@ OID.  If FORCE is true then override if it already exists."
               (%git-reference-create-oid
                reference *git-repository*
                ref-name oid %force))
-          (%git-reference-free reference)))))
+          (progn
+              (%git-reference-free reference)
+              (cffi:foreign-free reference))))))
   name)
 
 
