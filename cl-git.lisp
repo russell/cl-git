@@ -576,7 +576,7 @@ with the reference."
 
 (defun git-reference-create (name &key sha head force)
   "Create new reference in the current repository with NAME linking to
-OID.  If FORCE is true then override if it already exists."
+SHA or HEAD.  If FORCE is true then override if it already exists."
   (let ((reference (cffi:null-pointer))
         (oid (lookup-commit :sha sha :head head)))
     (cffi:with-foreign-string (ref-name name)
