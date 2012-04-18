@@ -68,6 +68,7 @@
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
 
+
 ;;; Git References
 (cffi:defbitfield git-reference-flags
     (:invalid 0)
@@ -91,6 +92,18 @@
   (reference :pointer)
   (repository :pointer)
   (name :string))
+
+(cffi:defcfun ("git_reference_create_oid" %git-reference-create-oid)
+    :int
+  (reference :pointer)
+  (repository :pointer)
+  (name :string)
+  (oid :pointer)
+  (force :int))
+
+(cffi:defcfun ("git_reference_free" %git-reference-free)
+    :void
+  (reference :pointer))
 
 
 ;;; Git Object
@@ -560,6 +573,23 @@ with the reference."
 		  (cffi:mem-aref strings :pointer i)))))
 	  (%git-strarray-free string-array)
 	  refs)))))
+
+(defun git-reference-create (name &key sha head force)
+  "Create new reference in the current repository with NAME linking to
+OID.  If FORCE is true then override if it already exists."
+  (let ((reference (cffi:null-pointer))
+        (oid (lookup-commit :sha sha :head head)))
+    (cffi:with-foreign-string (ref-name name)
+      (cffi:with-foreign-object (%force :int)
+        (setf %force (if force 1 0))
+        (unwind-protect
+             (handle-git-return-code
+              (%git-reference-create-oid
+               reference *git-repository*
+               ref-name oid %force))
+          (%git-reference-free reference)))))
+  name)
+
 
 (defun git-revwalk (oid-or-oids)
   "Walk all the revisions from a specified OID, or OIDs.

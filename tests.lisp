@@ -33,6 +33,9 @@
 (defun assoc-default (key alist)
   (cdr (assoc key alist)))
 
+(defun sort-strings (strings)
+  (sort strings #'string-lessp))
+
 (test repository-init
       "create a repository and open it to make sure that works"
       (for-all ((path 'gen-temp-path))
@@ -175,3 +178,23 @@ check that the commit messages match the expected messages."
                       (setq tcommit (pop commit-list))))))
            (progn
              (cl-fad:delete-directory-and-files path))))))
+
+(test create-references
+  "create a repository and add a file to it and a commit, then create
+a reference from the commit."
+  (let ((path (gen-temp-path)))
+    (finishes
+      (unwind-protect
+           (progn
+             (cl-git:git-repository-init path)
+             (cl-git:with-git-repository (path)
+               (let ((sha (commit-random-file-modification
+                           path "test" "Test commit")))
+                 (let ((reference (cl-git:git-reference-create
+                                   "refs/heads/test" :sha sha)))
+                   (is
+                    (equal
+                     (sort-strings (list reference "refs/heads/master"))
+                     (sort-strings (cl-git:git-reference-listall))))))))
+        (progn
+          (cl-fad:delete-directory-and-files path))))))
