@@ -560,19 +560,21 @@ with the reference."
     (setf oid (%git-reference-oid reference))
     oid))
 
-(defun git-reference-listall (&optional flags)
-  "List all the refs, filter by flag."
+(defun git-reference-listall (&rest flags)
+  "List all the refs, filter by FLAGS.  The flag options
+are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
-      (handle-git-return-code (%git-reference-listall string-array *git-repository*
-						      git-flags))
+      (handle-git-return-code (%git-reference-listall
+                               string-array *git-repository*
+                               git-flags))
       (cffi:with-foreign-slots ((strings count) string-array git-strings)
-	(let ((refs
-	       (loop for i below count collect
-		 (cffi:foreign-string-to-lisp
-		  (cffi:mem-aref strings :pointer i)))))
-	  (%git-strarray-free string-array)
-	  refs)))))
+        (let ((refs
+               (loop for i below count collect
+                    (cffi:foreign-string-to-lisp
+                     (cffi:mem-aref strings :pointer i)))))
+          (%git-strarray-free string-array)
+          refs)))))
 
 (defun git-reference-create (name &key sha head force)
   "Create new reference in the current repository with NAME linking to
