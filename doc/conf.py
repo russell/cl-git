@@ -54,6 +54,11 @@ if os.environ.get("GOOGLE_ANALYTICS"):
 else:
     googleanalytics_enabled = False
 
+
+lisp_packages = {"cl-git":
+                 os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                              "../")}
+
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
