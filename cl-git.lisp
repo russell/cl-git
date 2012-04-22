@@ -21,29 +21,6 @@
   "The size of a Git commit hash.")
 
 
-(defmacro defcfun (name-and-options return-type &body args)
-  "define a cfunction, with cffi if there is more then one function
-name then choose the best one if there is no best one then choose the
-last one."
-  (let* ((function-names (car `(,@name-and-options)))
-         (function-name (if (listp function-names)
-                            (or
-                             ;; Choose the most approprate symbol,
-                             ;; default is the most recent.
-                             #+SBCL
-                             (loop for func in function-names
-                                   when (sb-sys:find-foreign-symbol-address func)
-                                     return func)
-                             ;; default
-                             (car (last function-names)))
-                            function-names))
-         (function-symbol (car (last `(,@name-and-options)))))
-
-    `(cffi:defcfun (,function-name ,function-symbol)
-       ,return-type
-     ,@args)))
-
-
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -81,17 +58,16 @@ last one."
 
 (cffi::defctype size-t :unsigned-long)
 
-(defcfun (("git_oid_to_string" ; 0.16.0
-           "git_oid_tostr")    ; 0.16.0+
-          %git-oid-tostr)
+(cffi:defcfun ("git_oid_to_string"
+               %git-oid-tostr)
     (:pointer :char)
   (out (:pointer :char))
   (n size-t)
   (oid :pointer))
 
-
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
+
 
 ;;; Git References
 (cffi:defbitfield git-reference-flags
@@ -116,6 +92,18 @@ last one."
   (reference :pointer)
   (repository :pointer)
   (name :string))
+
+(cffi:defcfun ("git_reference_create_oid" %git-reference-create-oid)
+    :int
+  (reference :pointer)
+  (repository :pointer)
+  (name :string)
+  (oid :pointer)
+  (force :int))
+
+(cffi:defcfun ("git_reference_free" %git-reference-free)
+    :void
+  (reference :pointer))
 
 
 ;;; Git Object
@@ -146,9 +134,8 @@ last one."
   (oid :pointer)
   (type git-object-type))
 
-(defcfun (("git_object_close" ; 0.15.0
-           "git_object_free") ; 0.16.0
-          %git-object-free)
+(cffi:defcfun ("git_object_free"
+               %git-object-free)
     :void
   (object :pointer))
 
@@ -305,13 +292,14 @@ current time."
      (or email (default-email)))
 
     (if time
-	(setf (cffi:foreign-slot-value signature 'git-signature 'time) time)
-	(cffi:with-foreign-slots ((time) signature git-signature)
-	  (setf (cffi:foreign-slot-value time 'timeval 'secs)
-		(local-time:timestamp-to-unix (local-time:now))
-		(cffi:foreign-slot-value time 'timeval 'usecs) 0)))
+        (setf (cffi:foreign-slot-value signature 'git-signature 'time) time)
+        (cffi:with-foreign-slots ((time) signature git-signature)
+          (setf
+           (cffi:foreign-slot-value time 'timeval 'secs)
+           (local-time:timestamp-to-unix (local-time:now))
+           (cffi:foreign-slot-value time 'timeval 'usecs)
+           0)))
   signature))
-
 
 
 ;;;
@@ -603,6 +591,25 @@ with the reference."
 	  (%git-strarray-free string-array)
 	  refs)))))
 
+(defun git-reference-create (name &key sha head force)
+  "Create new reference in the current repository with NAME linking to
+SHA or HEAD.  If FORCE is true then override if it already exists."
+  (let ((reference (cffi:null-pointer))
+        (oid (lookup-commit :sha sha :head head)))
+    (cffi:with-foreign-string (ref-name name)
+      (cffi:with-foreign-object (%force :int)
+        (setf %force (if force 1 0))
+        (unwind-protect
+             (handle-git-return-code
+              (%git-reference-create-oid
+               reference *git-repository*
+               ref-name oid %force))
+          (progn
+              (%git-reference-free reference)
+              (cffi:foreign-free reference))))))
+  name)
+
+
 (defun git-revwalk (oid-or-oids)
   "Walk all the revisions from a specified OID, or OIDs.
 OID can be a single object id, or a list of object ids.
@@ -685,23 +692,28 @@ The oids in the returned list become invalid when the `commit' is freed."
        collect (git-commit-parent-oid commit index)))
 
 (defun lookup-commit (&key sha head)
-  "Returns an oid for a single commit (or tag).  It takes a single keyword argument,
-either SHA or HEAD  If the keyword argument is SHA the value should be a SHA1 id as
-a string.  The value for the HEAD keyword should be a symbolic reference to a git commit."
-  (let ((oid (gensym)))
-       (cond
-	 (head (setq oid (git-reference-oid (git-reference-lookup head))))
-	 (sha (setq oid (git-oid-fromstr sha))))
-    oid))
+  "Returns an oid for a single commit (or tag).  It takes a single
+ keyword argument, either SHA or HEAD If the keyword argument is SHA
+ the value should be a SHA1 id as a string.  The value for the HEAD
+ keyword should be a symbolic reference to a git commit."
+    (cond
+      (head (git-reference-oid (git-reference-lookup head)))
+       (sha (git-oid-fromstr sha))))
 
 (defun lookup-commits (&key sha head)
-  "Similar to lookup-commit, except that the keyword arguments also except a list of references.
-It will returns list of oids instead of a single oid.  If the argument
-was a single reference, it will return a list containing a single
-oid."
-  (cond
-    (head (loop for reference in (if (atom head) (list head) head) collect (lookup-commit :head reference)))
-    (sha (loop for reference in (if (atom sha) (list sha) sha) collect (lookup-commit :sha reference)))))
+   "Similar to lookup-commit, except that the keyword arguments also
+ except a list of references.  It will returns list of oids instead of
+ a single oid.  If the argument was a single reference, it will return
+ a list containing a single oid."
+   (flet ((lookup-loop (keyword lookup)
+          (loop for reference
+                in
+                (if (atom lookup) (list lookup) lookup)
+                collect
+                (lookup-commit keyword reference))))
+     (cond
+       (head (lookup-loop :head head))
+       (sha (lookup-loop :sha sha)))))
 
 (defmacro bind-git-commits (bindings &body body)
   "Lookup commits specified in the bindings.  The bindings syntax is
@@ -749,4 +761,3 @@ special call to stop iteration."
                                   (progn (git-commit-close ,commit))))
                               (revision-walker))))))
              (revision-walker)))))))
-

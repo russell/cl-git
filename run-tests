@@ -9,4 +9,4 @@
 
 (FiveAM:run! (list 'repository-init
                    'create-commit
-                   'create-commits))
+                   'create-random-commits))

@@ -16,6 +16,7 @@
    #:git-commit-message
    #:git-commit-committer
    #:git-reference-listall
+   #:git-reference-create
    #:with-git-repository-index
    #:git-index-add
    #:git-index-write

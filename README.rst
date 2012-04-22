@@ -22,6 +22,12 @@ What It Can Do
 - reference management listing
 
 
+Requires
+--------
+
+libgit2: 0.16.0
+
+
 Examples
 --------
 
