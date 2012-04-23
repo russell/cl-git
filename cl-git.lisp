@@ -643,7 +643,6 @@ repositony at path."
      (unwind-protect
 	  (progn
 	    (git-repository-open ,path)
-	    ,path
 	    ,@body)
        (progn
 	 (git-repository-free)))))
