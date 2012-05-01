@@ -1,4 +1,4 @@
-;;;; cl-git.lisp
+*;;;; cl-git.lisp
 
 (in-package #:cl-git)
 
@@ -17,9 +17,11 @@
 (cffi:use-foreign-library libgit2)
 
 
+
 (defparameter *git-oid-hex-size* (+ 40 1)
   "The size of a Git commit hash.")
 
+(defparameter *git-oid-size* 20)
 
 ;;; Git Common
 (cffi:defctype git-code :int)
@@ -35,13 +37,50 @@
   (count size))
 
 (cffi:defcstruct git-oid
-  (id :unsigned-char :count 20))
+  (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
 
 (cffi:defcstruct git-signature
   (name :string)
   (email :string)
   (time timeval))
 
+
+;;; Foreign type translation
+
+(cffi:define-foreign-type oid-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser :oid))
+
+(defmethod cffi:translate-to-foreign ((value number) (type oid-type))
+  (declare (ignore type))
+  (let ((c-oid (cffi:foreign-alloc 'git-oid)))
+    (loop :for c-index :from 0 :below *git-oid-size*
+       :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+       :do
+       (setf (cffi:mem-aref (cffi:foreign-slot-pointer c-oid 'git-oid 'id)
+			    :unsigned-char c-index)
+	     (ldb (byte 8 byte-index) value)))
+    c-oid))
+
+(defmethod cffi:translate-to-foreign ((value string) (type oid-type))
+  (cffi:translate-to-foreign (parse-integer value :radix 16) type))
+
+(defmethod cffi:translate-from-foreign (value (type oid-type))
+  (declare (ignore type))
+  (let ((lisp-oid 0))
+    (loop
+       :for c-index :from 0 :below *git-oid-size*
+       :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+       :do
+       (setf (ldb (byte 8 byte-index) lisp-oid)
+	   (cffi:mem-aref (cffi:foreign-slot-pointer value 'git-oid 'id)
+			  :unsigned-char c-index)))
+    lisp-oid))
+
+(defmethod cffi:free-translated-object (pointer (type oid-type) param)
+  (declare (ignore type param))
+  (cffi:foreign-free pointer))
 
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
@@ -63,7 +102,7 @@
     (:pointer :char)
   (out (:pointer :char))
   (n size-t)
-  (oid :pointer))
+  (oid :oid))
 
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
@@ -84,7 +123,7 @@
   (flags git-reference-flags))
 
 (cffi:defcfun ("git_reference_oid" %git-reference-oid)
-    git-oid
+    :oid
   (reference :pointer))
 
 (cffi:defcfun ("git_reference_lookup" %git-reference-lookup)
@@ -98,7 +137,7 @@
   (reference :pointer)
   (repository :pointer)
   (name :string)
-  (oid :pointer)
+  (oid :oid)
   (force :int))
 
 (cffi:defcfun ("git_reference_free" %git-reference-free)
@@ -108,7 +147,7 @@
 
 ;;; Git Object
 (cffi:defcfun ("git_object_id" %git-object-id)
-    :pointer
+    :oid
   (object :pointer))
 
 
@@ -131,7 +170,7 @@
     :int
   (object :pointer)
   (repo :pointer)
-  (oid :pointer)
+  (oid :oid)
   (type git-object-type))
 
 (cffi:defcfun ("git_object_free"
@@ -217,13 +256,13 @@
 
 (cffi:defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
     :void
-  (oid :pointer)
+  (walk :pointer)
   (sort-mode git-revwalk-flags))
 
 (cffi:defcfun ("git_revwalk_push" %git-revwalk-push)
     :int
     (revwalk :pointer)
-    (oid :pointer))
+    (oid :oid))
 
 
 ;;; Git Index
@@ -329,8 +368,7 @@ current time."
   "Convert an OID to a string."
   (cffi:with-foreign-pointer-as-string (str *git-oid-hex-size*)
     (%git-oid-tostr str *git-oid-hex-size* oid)
-    (cffi:foreign-string-to-lisp str)
-    ))
+    (cffi:foreign-string-to-lisp str)))
 
 
 (defun git-repository-init (path &optional bare)
@@ -471,9 +509,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
 
 (defun git-object-id (object)
   "Returns the oid identifying `object'"
-  (let ((oid (cffi:null-pointer)))
-    (setf oid (%git-object-id object))
-    oid))
+  (%git-object-id object))
 
 (defun git-object-lookup (oid type)
   "Returns a reference to the git odb (object) which is identified by the oid.
@@ -542,9 +578,10 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
   "Convert a Git hash to an oid."
  (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
-    oid))
+    (cffi:convert-from-foreign oid :oid)))
 
 (defun git-reference-lookup (name)
+  (assert (not (cffi:null-pointer-p *git-repository*)))
   (let ((reference (cffi:foreign-alloc :pointer)))
     (unwind-protect
 	 (progn
@@ -556,9 +593,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 (defun git-reference-oid (reference)
   "Return the oid from within the reference, this will be deallocated
 with the reference."
- (cffi:with-foreign-object (oid :pointer)
-   (setf oid (%git-reference-oid reference))
-    oid))
+  (%git-reference-oid reference))
 
 (defun git-reference-listall (&optional flags)
   "List all the refs, filter by flag."
@@ -629,12 +664,11 @@ to the repository."
    (%git-index-write *git-repository-index*)))
 
 (defun git-oid-from-index ()
-  "Write the curret index to the disk and return an oid to it,
-returned oid will have to be freed manually."
-  (let ((oid (cffi:foreign-alloc 'git-oid)))
+  "Write the current index to the disk and return an oid to it."
+  (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code
      (%git-tree-create-fromindex oid *git-repository-index*))
-    oid))
+    (cffi:convert-from-foreign oid :oid)))
 
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
@@ -650,7 +684,7 @@ repositony at path."
 (defun git-commit-from-oid (oid)
   "Returns a git-commit object identified by the `oid'.
 This is an extended version of git-commit-lookup.
-If theo oid refers to a tag, this function will return the git-commit
+If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
   (let ((git-object (git-object-lookup oid :any)))
     (ecase (%git-object-type git-object)
@@ -674,8 +708,10 @@ the oid of the target of the tag."
  the value should be a SHA1 id as a string.  The value for the HEAD
  keyword should be a symbolic reference to a git commit."
     (cond
-      (head (git-reference-oid (git-reference-lookup head)))
-       (sha (git-oid-fromstr sha))))
+      (head (let ((object (git-reference-lookup head)))
+	      (prog1 (git-reference-oid object)
+		(%git-object-free object))))
+      (sha (git-oid-fromstr sha))))
 
 (defun lookup-commits (&key sha head)
    "Similar to lookup-commit, except that the keyword arguments also
