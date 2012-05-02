@@ -55,7 +55,8 @@
 (defmethod cffi:translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
   (let ((c-oid (cffi:foreign-alloc 'git-oid)))
-    (loop :for c-index :from 0 :below *git-oid-size*
+    (loop
+       :for c-index :from 0 :below *git-oid-size*
        :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
        :do
        (setf (cffi:mem-aref (cffi:foreign-slot-pointer c-oid 'git-oid 'id)
@@ -170,7 +171,7 @@
     :int
   (object :pointer)
   (repo :pointer)
-  (oid :pointer)
+  (oid %oid)
   (type git-object-type))
 
 (cffi:defcfun ("git_object_free"
@@ -251,7 +252,7 @@
 
 (cffi:defcfun ("git_revwalk_next" %git-revwalk-next)
     :int
-  (oid :pointer)
+  (oid %oid)
   (revwalk :pointer))
 
 (cffi:defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
@@ -763,7 +764,8 @@ be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
   `(let ((oids (lookup-commits ,@rest)))
      (let ((revwalker (git-revwalk oids)))
-       (cffi:with-foreign-object (oid 'git-oid)
+       (cffi:with-foreign-object (oid :pointer)
+         (setf oid (cffi:foreign-alloc 'git-oid))
          (block nil
            (labels ((revision-walker ()
                       (progn
