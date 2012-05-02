@@ -84,7 +84,7 @@
   (flags git-reference-flags))
 
 (cffi:defcfun ("git_reference_oid" %git-reference-oid)
-    :pointer
+    git-oid
   (reference :pointer))
 
 (cffi:defcfun ("git_reference_lookup" %git-reference-lookup)
@@ -556,8 +556,8 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 (defun git-reference-oid (reference)
   "Return the oid from within the reference, this will be deallocated
 with the reference."
- (let ((oid (cffi:null-pointer)))
-    (setf oid (%git-reference-oid reference))
+ (cffi:with-foreign-object (oid :pointer)
+   (setf oid (%git-reference-oid reference))
     oid))
 
 (defun git-reference-listall (&rest flags)
@@ -645,7 +645,6 @@ repositony at path."
      (unwind-protect
 	  (progn
 	    (git-repository-open ,path)
-	    ,path
 	    ,@body)
        (progn
 	 (git-repository-free)))))
