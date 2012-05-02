@@ -252,7 +252,7 @@
 
 (cffi:defcfun ("git_revwalk_next" %git-revwalk-next)
     :int
-  (oid %oid)
+  (oid :pointer)
   (revwalk :pointer))
 
 (cffi:defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
@@ -501,10 +501,11 @@ PARENTS is an optional list of parent commits sha1 hashes."
                  %tree
                  (length parents)
                  %parents))))
-           (git-oid-tostr newoid))
+           (git-oid-tostr (cffi:convert-from-foreign newoid '%oid)))
       (progn
         (mapcar #'(lambda (c) (git-commit-close c)) parents)
         (git-tree-close tree)
+        (cffi:foreign-free newoid)
         (cffi:foreign-free tree)))))
 
 (defun git-object-id (object)
@@ -764,14 +765,13 @@ be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
   `(let ((oids (lookup-commits ,@rest)))
      (let ((revwalker (git-revwalk oids)))
-       (cffi:with-foreign-object (oid :pointer)
-         (setf oid (cffi:foreign-alloc 'git-oid))
+       (cffi:with-foreign-object (oid 'git-oid)
          (block nil
            (labels ((revision-walker ()
                       (progn
                         (if (= (%git-revwalk-next oid revwalker) 0)
                             (progn
-                              (let ((,commit (git-commit-from-oid (cffi:convert-from-foreign oid %oid))))
+                              (let ((,commit (git-commit-from-oid (cffi:convert-from-foreign oid '%oid))))
                                 (unwind-protect
                                      (progn ,@body)
                                   (progn (git-commit-close ,commit))))
