@@ -1,5 +1,8 @@
 #!/usr/bin/sbcl --script
+; -*- mode: Lisp;-*-
+
 (load "~/.sbclrc")
+(sb-ext:enable-debugger)
 
 (asdf:oos 'asdf:load-op :FiveAM)
 (asdf:oos 'asdf:load-op :cl-git)

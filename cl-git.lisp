@@ -1,4 +1,4 @@
-*;;;; cl-git.lisp
+;;;; cl-git.lisp
 
 (in-package #:cl-git)
 
@@ -50,12 +50,13 @@
 (cffi:define-foreign-type oid-type ()
   nil
   (:actual-type :pointer)
-  (:simple-parser :oid))
+  (:simple-parser %oid))
 
 (defmethod cffi:translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
   (let ((c-oid (cffi:foreign-alloc 'git-oid)))
-    (loop :for c-index :from 0 :below *git-oid-size*
+    (loop
+       :for c-index :from 0 :below *git-oid-size*
        :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
        :do
        (setf (cffi:mem-aref (cffi:foreign-slot-pointer c-oid 'git-oid 'id)
@@ -102,7 +103,7 @@
     (:pointer :char)
   (out (:pointer :char))
   (n size-t)
-  (oid :oid))
+  (oid %oid))
 
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
@@ -123,7 +124,7 @@
   (flags git-reference-flags))
 
 (cffi:defcfun ("git_reference_oid" %git-reference-oid)
-    :oid
+    %oid
   (reference :pointer))
 
 (cffi:defcfun ("git_reference_lookup" %git-reference-lookup)
@@ -137,7 +138,7 @@
   (reference :pointer)
   (repository :pointer)
   (name :string)
-  (oid :oid)
+  (oid %oid)
   (force :int))
 
 (cffi:defcfun ("git_reference_free" %git-reference-free)
@@ -147,7 +148,7 @@
 
 ;;; Git Object
 (cffi:defcfun ("git_object_id" %git-object-id)
-    :oid
+    %oid
   (object :pointer))
 
 
@@ -170,7 +171,7 @@
     :int
   (object :pointer)
   (repo :pointer)
-  (oid :oid)
+  (oid %oid)
   (type git-object-type))
 
 (cffi:defcfun ("git_object_free"
@@ -262,7 +263,7 @@
 (cffi:defcfun ("git_revwalk_push" %git-revwalk-push)
     :int
     (revwalk :pointer)
-    (oid :oid))
+    (oid %oid))
 
 
 ;;; Git Index
@@ -500,11 +501,11 @@ PARENTS is an optional list of parent commits sha1 hashes."
                  %tree
                  (length parents)
                  %parents))))
-           (git-oid-tostr newoid))
+           (git-oid-tostr (cffi:convert-from-foreign newoid '%oid)))
       (progn
         (mapcar #'(lambda (c) (git-commit-close c)) parents)
-        (cffi:foreign-free newoid)
         (git-tree-close tree)
+        (cffi:foreign-free newoid)
         (cffi:foreign-free tree)))))
 
 (defun git-object-id (object)
@@ -578,7 +579,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
   "Convert a Git hash to an oid."
  (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
-    (cffi:convert-from-foreign oid :oid)))
+    (cffi:convert-from-foreign oid '%oid)))
 
 (defun git-reference-lookup (name)
   (assert (not (cffi:null-pointer-p *git-repository*)))
@@ -670,7 +671,7 @@ to the repository."
   (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code
      (%git-tree-create-fromindex oid *git-repository-index*))
-    (cffi:convert-from-foreign oid :oid)))
+    (cffi:convert-from-foreign oid '%oid)))
 
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
@@ -772,7 +773,7 @@ special call to stop iteration."
                       (progn
                         (if (= (%git-revwalk-next oid revwalker) 0)
                             (progn
-                              (let ((,commit (git-commit-from-oid oid)))
+                              (let ((,commit (git-commit-from-oid (cffi:convert-from-foreign oid '%oid))))
                                 (unwind-protect
                                      (progn ,@body)
                                   (progn (git-commit-close ,commit))))
