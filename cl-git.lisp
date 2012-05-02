@@ -771,7 +771,7 @@ special call to stop iteration."
                       (progn
                         (if (= (%git-revwalk-next oid revwalker) 0)
                             (progn
-                              (let ((,commit (git-commit-from-oid oid)))
+                              (let ((,commit (git-commit-from-oid (cffi:convert-from-foreign oid %oid))))
                                 (unwind-protect
                                      (progn ,@body)
                                   (progn (git-commit-close ,commit))))
