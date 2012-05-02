@@ -536,7 +536,7 @@ manually with GIT-TREE-CLOSE."
   (git-object-lookup oid :tree))
 
 (defun git-tree-close (tree)
-  "Close the tree and free the memory allocated to the tree."
+  "Close the TREE and free the memory allocated to the tree."
   (%git-object-free tree))
 
 (defun git-commit-lookup (oid)
@@ -762,6 +762,8 @@ ref path."
   "Iterate aver all the revisions, the symbol specified by commit will
 be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
+  (declare (ignore sha))
+  (declare (ignore head))
   `(let ((oids (lookup-commits ,@rest)))
      (let ((revwalker (git-revwalk oids)))
        (cffi:with-foreign-object (oid 'git-oid)
