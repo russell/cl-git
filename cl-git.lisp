@@ -50,7 +50,7 @@
 (cffi:define-foreign-type oid-type ()
   nil
   (:actual-type :pointer)
-  (:simple-parser :oid))
+  (:simple-parser %oid))
 
 (defmethod cffi:translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
@@ -102,7 +102,7 @@
     (:pointer :char)
   (out (:pointer :char))
   (n size-t)
-  (oid :oid))
+  (oid %oid))
 
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
@@ -123,7 +123,7 @@
   (flags git-reference-flags))
 
 (cffi:defcfun ("git_reference_oid" %git-reference-oid)
-    :oid
+    %oid
   (reference :pointer))
 
 (cffi:defcfun ("git_reference_lookup" %git-reference-lookup)
@@ -137,7 +137,7 @@
   (reference :pointer)
   (repository :pointer)
   (name :string)
-  (oid :oid)
+  (oid %oid)
   (force :int))
 
 (cffi:defcfun ("git_reference_free" %git-reference-free)
@@ -147,7 +147,7 @@
 
 ;;; Git Object
 (cffi:defcfun ("git_object_id" %git-object-id)
-    :oid
+    %oid
   (object :pointer))
 
 
@@ -170,7 +170,7 @@
     :int
   (object :pointer)
   (repo :pointer)
-  (oid :oid)
+  (oid %oid)
   (type git-object-type))
 
 (cffi:defcfun ("git_object_free"
@@ -262,7 +262,7 @@
 (cffi:defcfun ("git_revwalk_push" %git-revwalk-push)
     :int
     (revwalk :pointer)
-    (oid :oid))
+    (oid %oid))
 
 
 ;;; Git Index
@@ -578,7 +578,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
   "Convert a Git hash to an oid."
  (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
-    (cffi:convert-from-foreign oid :oid)))
+    (cffi:convert-from-foreign oid '%oid)))
 
 (defun git-reference-lookup (name)
   (assert (not (cffi:null-pointer-p *git-repository*)))
@@ -670,7 +670,7 @@ to the repository."
   (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code
      (%git-tree-create-fromindex oid *git-repository-index*))
-    (cffi:convert-from-foreign oid :oid)))
+    (cffi:convert-from-foreign oid '%oid)))
 
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
