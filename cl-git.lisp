@@ -1,4 +1,4 @@
-*;;;; cl-git.lisp
+;;;; cl-git.lisp
 
 (in-package #:cl-git)
 
@@ -170,7 +170,7 @@
     :int
   (object :pointer)
   (repo :pointer)
-  (oid %oid)
+  (oid :pointer)
   (type git-object-type))
 
 (cffi:defcfun ("git_object_free"
@@ -503,7 +503,6 @@ PARENTS is an optional list of parent commits sha1 hashes."
            (git-oid-tostr newoid))
       (progn
         (mapcar #'(lambda (c) (git-commit-close c)) parents)
-        (cffi:foreign-free newoid)
         (git-tree-close tree)
         (cffi:foreign-free tree)))))
 
