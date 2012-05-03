@@ -1,7 +1,9 @@
-#!/usr/bin/sbcl --script
+#!/usr/bin/env sbcl --script
 ; -*- mode: Lisp;-*-
 
-(load "~/.sbclrc")
+(load (merge-pathnames (user-homedir-pathname) (make-pathname :name ".sbclrc")))
+;(load "~/.sbclrc")
+
 (sb-ext:enable-debugger)
 (use-package 'asdf)
 

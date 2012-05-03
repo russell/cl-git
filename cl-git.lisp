@@ -23,6 +23,11 @@
 
 (defparameter *git-oid-size* 20)
 
+;;; Helper function for debugging
+
+(defun null-or-nullpointer (obj)
+  (or (not obj) (cffi:null-pointer-p obj)))
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -397,6 +402,8 @@ repository.  Returns the path of the newly created Git repository."
   "Open an existing repository and set the global *GIT-REPOSITORY*
 variable to the open repository.  If the PATH contains a .git
 directory it will be opened instead of the specified path."
+  (assert (null-or-nullpointer *git-repository-index*))
+  (assert (null-or-nullpointer *git-repository*))
   (let ((repo (cffi:foreign-alloc :pointer))
 	(path (or (cl-fad:directory-exists-p
 		   (merge-pathnames
@@ -419,9 +426,11 @@ directory it will be opened instead of the specified path."
 (defun git-repository-free ()
   "Deallocate repository and re-initialise the *GIT-REPOSITORY*
 variable as a null painter."
+  (assert (not (null-or-nullpointer *git-repository*)))
   (cffi:foreign-funcall "git_repository_free"
 			git-repository *git-repository*
-			:void))
+			:void)
+  (setf *git-repository* (cffi:null-pointer)))
 
 
 (defun ensure-git-repository-exist (path &optional bare)
@@ -446,6 +455,7 @@ index."
     `(let ((*git-repository-index* (cffi:null-pointer)))
        (unwind-protect
 	    (progn
+	      (assert (not (null-or-nullpointer *git-repository*)))
 	      (let ((index (cffi:foreign-alloc :pointer)))
 		(handle-git-return-code (cffi:foreign-funcall
 					 "git_repository_index"
@@ -472,6 +482,9 @@ reference will be updated.  AUTHOR is an optional instance of a
 GIT-SIGNATURE that details the commit author.  COMMITTER is an
 optional instance of a GIT-SIGNATURE the details the commit committer.
 PARENTS is an optional list of parent commits sha1 hashes."
+
+  (assert (not (null-or-nullpointer *git-repository*)))
+
   (let ((tree (cffi:foreign-alloc :pointer))
         (newoid (cffi:foreign-alloc 'git-oid))
         (%author (or author (git-signature-create)))
@@ -522,6 +535,9 @@ do not do a typecheck and is a valid type, but should typically not
 occur.
 
 Note that the returned git object should be freed with git-object-free."
+
+  (assert (not (null-or-nullpointer *git-repository*)))
+
   (let ((obj (cffi:foreign-alloc :pointer)))
     (prog2
 	(handle-git-return-code
@@ -582,7 +598,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
     (cffi:convert-from-foreign oid '%oid)))
 
 (defun git-reference-lookup (name)
-  (assert (not (cffi:null-pointer-p *git-repository*)))
+  (assert (not (null-or-nullpointer *git-repository*)))
   (let ((reference (cffi:foreign-alloc :pointer)))
     (unwind-protect
 	 (progn
@@ -599,6 +615,9 @@ with the reference."
 (defun git-reference-listall (&rest flags)
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
+
+  (assert (not (null-or-nullpointer *git-repository*)))
+
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
       (handle-git-return-code (%git-reference-listall
@@ -615,6 +634,9 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 (defun git-reference-create (name &key sha head force)
   "Create new reference in the current repository with NAME linking to
 SHA or HEAD.  If FORCE is true then override if it already exists."
+
+  (assert (not (null-or-nullpointer *git-repository*)))
+
   (let ((reference (cffi:null-pointer))
         (oid (lookup-commit :sha sha :head head)))
     (cffi:with-foreign-string (ref-name name)
@@ -636,6 +658,9 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 OID can be a single object id, or a list of object ids.
 The OIDs can be anything that can be resolved by commit-oid-from-oid.
 In general this means, commits and tags."
+
+  (assert (not (null-or-nullpointer *git-repository*)))
+
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
     (handle-git-return-code
      (%git-revwalk-new revwalker-pointer *git-repository*))
@@ -651,6 +676,7 @@ In general this means, commits and tags."
 (defun git-index-add (path)
   "Add a file at PATH to the repository, the PATH should be relative
 to the repository."
+  (assert (not (null-or-nullpointer *git-repository-index*)))
   (let ((path (namestring path)))
     (cffi:with-foreign-string (path-str path)
       (handle-git-return-code
@@ -658,16 +684,19 @@ to the repository."
 
 (defun git-index-clear ()
   "Remove all staged data from the index at *GIT-REPOSITORY-INDEX*."
+  (assert (not (null-or-nullpointer *git-repository-index*)))
   (handle-git-return-code
    (%git-index-clear *git-repository-index*)))
 
 (defun git-index-write ()
   "Write the current index stored in *GIT-REPOSITORY-INDEX* to disk."
+  (assert (not (null-or-nullpointer *git-repository-index*)))
   (handle-git-return-code
    (%git-index-write *git-repository-index*)))
 
 (defun git-oid-from-index ()
   "Write the current index to the disk and return an oid to it."
+  (assert (not (null-or-nullpointer *git-repository-index*)))
   (cffi:with-foreign-object (oid 'git-oid)
     (handle-git-return-code
      (%git-tree-create-fromindex oid *git-repository-index*))
