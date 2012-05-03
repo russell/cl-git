@@ -10,6 +10,22 @@
 
 (use-package 'cl-git-tests)
 
+;; (handler-bind ((simple-error
+;;                 #'(lambda (c)
+;;                     (format t "Skipping Symbol (probably a macro)~%")
+;;                     (invoke-restart 'skip-symbol))))
+;;   (do-symbols (sym 'cl-git)
+;;     (when (and (fboundp sym)
+;;                (functionp (symbol-function sym))
+;;                                         ;(not (macrop sym))
+;;                (equal (package-name (symbol-package sym))
+;;                       "CL-GIT"))
+;;       (format t "Trying to trace Symbol ~A~%" sym)
+;;       (restart-case
+;;           (eval `(trace ,(intern (symbol-name sym))))
+;;         (skip-symbol () nil)))))
+
+
 (FiveAM:run! (list 'repository-init
                    'create-commit
                    'create-random-commits))
