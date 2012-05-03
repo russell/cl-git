@@ -3,29 +3,42 @@
 
 (load "~/.sbclrc")
 (sb-ext:enable-debugger)
+(use-package 'asdf)
 
-(asdf:oos 'asdf:load-op :FiveAM)
-(asdf:oos 'asdf:load-op :cl-git)
+
+(asdf:oos 'asdf:load-op :quicklisp)
+(push (probe-file #p"./") asdf:*central-registry*)
+(ql:quickload 'cl-git)
 (asdf:oos 'asdf:load-op :cl-git-tests)
 
+
+(in-package #:cl-git)
+
+(use-package 'unix-options)
+(with-cli-options ()
+    (help trace)
+  (when help
+    (print-usage-summary
+     "Usage:~%~@{~A~%~}"
+     '(((#\t "trace") nil "trace the functions during a test run.")))
+    (cl-user::quit :unix-status 1))
+  (when trace
+    (handler-bind ((simple-error
+                     #'(lambda (c)
+                         (format t "Skipping Symbol (probably a macro)~%")
+                         (invoke-restart 'skip-symbol))))
+      (do-symbols (sym 'cl-git)
+        (when (and (fboundp sym)
+                   (functionp (symbol-function sym))
+                                        ;(not (macrop sym))
+                   (equal (package-name (symbol-package sym))
+                          "CL-GIT"))
+          (format t "Trying to trace Symbol ~A~%" sym)
+          (restart-case
+              (eval `(trace ,(intern (symbol-name sym))))
+            (skip-symbol () nil)))))))
+
 (use-package 'cl-git-tests)
-
-;; (handler-bind ((simple-error
-;;                 #'(lambda (c)
-;;                     (format t "Skipping Symbol (probably a macro)~%")
-;;                     (invoke-restart 'skip-symbol))))
-;;   (do-symbols (sym 'cl-git)
-;;     (when (and (fboundp sym)
-;;                (functionp (symbol-function sym))
-;;                                         ;(not (macrop sym))
-;;                (equal (package-name (symbol-package sym))
-;;                       "CL-GIT"))
-;;       (format t "Trying to trace Symbol ~A~%" sym)
-;;       (restart-case
-;;           (eval `(trace ,(intern (symbol-name sym))))
-;;         (skip-symbol () nil)))))
-
-
 (FiveAM:run! (list 'repository-init
                    'create-commit
                    'create-random-commits))
