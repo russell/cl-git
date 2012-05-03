@@ -72,6 +72,11 @@
 (defmethod cffi:translate-to-foreign ((value string) (type oid-type))
   (cffi:translate-to-foreign (parse-integer value :radix 16) type))
 
+(defmethod cffi:translate-to-foreign ((value t) (type oid-type))
+  (if (cffi:pointerp value)
+      (values value t)
+      (error "Cannot convert type: ~A to git-oid struct" (type-of value))))
+
 (defmethod cffi:translate-from-foreign (value (type oid-type))
   (declare (ignore type))
   (let ((lisp-oid 0))
@@ -84,9 +89,8 @@
 			  :unsigned-char c-index)))
     lisp-oid))
 
-(defmethod cffi:free-translated-object (pointer (type oid-type) param)
-  (declare (ignore type param))
-  (cffi:foreign-free pointer))
+(defmethod cffi:free-translated-object (pointer (type oid-type) do-not-free)
+  (unless do-not-free (cffi:foreign-free pointer)))
 
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
@@ -514,7 +518,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
                  %tree
                  (length parents)
                  %parents))))
-           (git-oid-tostr (cffi:convert-from-foreign newoid '%oid)))
+           (git-oid-tostr newoid))
       (progn
         (mapcar #'(lambda (c) (git-commit-close c)) parents)
         (git-tree-close tree)
@@ -802,7 +806,7 @@ special call to stop iteration."
                       (progn
                         (if (= (%git-revwalk-next oid revwalker) 0)
                             (progn
-                              (let ((,commit (git-commit-from-oid (cffi:convert-from-foreign oid '%oid))))
+                              (let ((,commit (git-commit-from-oid oid)))
                                 (unwind-protect
                                      (progn ,@body)
                                   (progn (git-commit-close ,commit))))
