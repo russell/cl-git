@@ -489,8 +489,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
-  (let ((tree (cffi:foreign-alloc :pointer))
-        (newoid (cffi:foreign-alloc 'git-oid))
+  (let ((newoid (cffi:foreign-alloc 'git-oid))
         (%author (or author (git-signature-create)))
         (%committer (or committer (git-signature-create)))
         (%tree (git-tree-lookup oid))
@@ -521,9 +520,8 @@ PARENTS is an optional list of parent commits sha1 hashes."
            (git-oid-tostr newoid))
       (progn
         (mapcar #'(lambda (c) (git-commit-close c)) parents)
-        (git-tree-close tree)
-        (cffi:foreign-free newoid)
-        (cffi:foreign-free tree)))))
+        (git-tree-close %tree)
+        (cffi:foreign-free newoid)))))
 
 (defun git-object-id (object)
   "Returns the oid identifying `object'"
@@ -641,19 +639,15 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
-  (let ((reference (cffi:null-pointer))
-        (oid (lookup-commit :sha sha :head head)))
-    (cffi:with-foreign-string (ref-name name)
-      (cffi:with-foreign-object (%force :int)
-        (setf %force (if force 1 0))
-        (unwind-protect
-             (handle-git-return-code
-              (%git-reference-create-oid
-               reference *git-repository*
-               ref-name oid %force))
-          (progn
-              (%git-reference-free reference)
-              (cffi:foreign-free reference))))))
+  (let ((oid (lookup-commit :sha sha :head head)))
+    (cffi:with-foreign-object (reference :pointer)
+      (unwind-protect
+	   (handle-git-return-code
+	    (%git-reference-create-oid
+	     reference *git-repository*
+	     name oid  (if force 1 0)))
+	(progn
+	  (%git-reference-free (mem-ref reference :pointer))))))
   name)
 
 
