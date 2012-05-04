@@ -224,7 +224,7 @@
   (commit :pointer))
 
 (cffi:defcfun ("git_commit_parent_oid" %git-commit-parent-oid)
-    :pointer
+    %oid
   (commit :pointer)
   (n :int))
 
@@ -589,8 +589,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 
 (defun git-commit-parent-oid (commit parent-index)
   "Returns the oid of the parent with index `parent-index' in the list of parents
-of the commit `commit'.
-The oid returned will become invalid when the `commit' is freed."
+of the commit `commit'."
   (%git-commit-parent-oid commit parent-index))
 
 (defun git-commit-close (commit)
@@ -749,9 +748,8 @@ the oid of the target of the tag."
 	(git-object-id commit)
       (%git-object-free commit))))
 
-(defun commit-parent-oids (commit)
-  "Returns a list of oids identifying the parent commits of `commit'.
-The oids in the returned list become invalid when the `commit' is freed."
+(defun git-commit-parent-oids (commit)
+  "Returns a list of oids identifying the parent commits of `commit'."
   (loop for index from 0 below (git-commit-parent-count commit)
        collect (git-commit-parent-oid commit index)))
 
