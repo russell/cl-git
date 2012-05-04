@@ -72,6 +72,11 @@
 (defmethod cffi:translate-to-foreign ((value string) (type oid-type))
   (cffi:translate-to-foreign (parse-integer value :radix 16) type))
 
+(defmethod cffi:translate-to-foreign ((value t) (type oid-type))
+  (if (cffi:pointerp value)
+      (values value t)
+      (error "Cannot convert type: ~A to git-oid struct" (type-of value))))
+
 (defmethod cffi:translate-from-foreign (value (type oid-type))
   (declare (ignore type))
   (let ((lisp-oid 0))
@@ -84,9 +89,8 @@
 			  :unsigned-char c-index)))
     lisp-oid))
 
-(defmethod cffi:free-translated-object (pointer (type oid-type) param)
-  (declare (ignore type param))
-  (cffi:foreign-free pointer))
+(defmethod cffi:free-translated-object (pointer (type oid-type) do-not-free)
+  (unless do-not-free (cffi:foreign-free pointer)))
 
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
@@ -485,8 +489,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
-  (let ((tree (cffi:foreign-alloc :pointer))
-        (newoid (cffi:foreign-alloc 'git-oid))
+  (let ((newoid (cffi:foreign-alloc 'git-oid))
         (%author (or author (git-signature-create)))
         (%committer (or committer (git-signature-create)))
         (%tree (git-tree-lookup oid))
@@ -514,12 +517,11 @@ PARENTS is an optional list of parent commits sha1 hashes."
                  %tree
                  (length parents)
                  %parents))))
-           (git-oid-tostr (cffi:convert-from-foreign newoid '%oid)))
+           (git-oid-tostr newoid))
       (progn
         (mapcar #'(lambda (c) (git-commit-close c)) parents)
-        (git-tree-close tree)
-        (cffi:foreign-free newoid)
-        (cffi:foreign-free tree)))))
+        (git-tree-close %tree)
+        (cffi:foreign-free newoid)))))
 
 (defun git-object-id (object)
   "Returns the oid identifying `object'"
@@ -637,19 +639,15 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
-  (let ((reference (cffi:null-pointer))
-        (oid (lookup-commit :sha sha :head head)))
-    (cffi:with-foreign-string (ref-name name)
-      (cffi:with-foreign-object (%force :int)
-        (setf %force (if force 1 0))
-        (unwind-protect
-             (handle-git-return-code
-              (%git-reference-create-oid
-               reference *git-repository*
-               ref-name oid %force))
-          (progn
-              (%git-reference-free reference)
-              (cffi:foreign-free reference))))))
+  (let ((oid (lookup-commit :sha sha :head head)))
+    (cffi:with-foreign-object (reference :pointer)
+      (unwind-protect
+	   (handle-git-return-code
+	    (%git-reference-create-oid
+	     reference *git-repository*
+	     name oid  (if force 1 0)))
+	(progn
+	  (%git-reference-free (mem-ref reference :pointer))))))
   name)
 
 
@@ -802,7 +800,7 @@ special call to stop iteration."
                       (progn
                         (if (= (%git-revwalk-next oid revwalker) 0)
                             (progn
-                              (let ((,commit (git-commit-from-oid (cffi:convert-from-foreign oid '%oid))))
+                              (let ((,commit (git-commit-from-oid oid)))
                                 (unwind-protect
                                      (progn ,@body)
                                   (progn (git-commit-close ,commit))))
