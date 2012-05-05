@@ -826,4 +826,7 @@ special call to stop iteration."
                                      (progn ,@body)
                                   (progn (git-commit-close ,commit))))
                               (revision-walker))))))
-             (revision-walker)))))))
+             (unwind-protect
+		  (revision-walker)
+	       (%git-revwalk-free revwalker))))))))
+
