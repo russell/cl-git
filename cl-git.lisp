@@ -393,22 +393,17 @@ current time."
 (defun git-repository-init (path &optional bare)
   "Init a new Git repository.  A positive value for BARE init a bare
 repository.  Returns the path of the newly created Git repository."
-  (let ((is-bare (if bare 1 0))
-        (repo (cffi:foreign-alloc :pointer)))
-    (unwind-protect
-         (progn
-           (handle-git-return-code
+  (cffi:with-foreign-object (repo :pointer)
+    (handle-git-return-code
             (cffi:foreign-funcall "git_repository_init"
                                   git-repository repo
                                   :string (namestring path)
-                                  :unsigned-int is-bare
+                                  :unsigned-int (if bare 1 0)
                                   git-code))
-           path)
-      (progn
-        (cffi:foreign-funcall "git_repository_free"
-                              git-repository (cffi:mem-ref repo :pointer)
-                              :void)
-        (cffi:foreign-free repo)))))
+           (cffi:foreign-funcall "git_repository_free"
+                                 git-repository (cffi:mem-ref repo :pointer)
+                                :void)
+           path))
 
 
 (defun git-repository-open (path)
