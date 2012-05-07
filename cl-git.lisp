@@ -664,7 +664,7 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 	     reference *git-repository*
 	     name oid  (if force 1 0)))
 	(progn
-	  (%git-reference-free (mem-ref reference :pointer))))))
+	  (%git-reference-free (cffi:mem-ref reference :pointer))))))
   name)
 
 
