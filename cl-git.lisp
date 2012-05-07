@@ -662,7 +662,7 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 	   (handle-git-return-code
 	    (%git-reference-create-oid
 	     reference *git-repository*
-	     name oid  (if force 1 0)))
+	     name oid (if force 1 0)))
 	(progn
 	  (%git-reference-free (cffi:mem-ref reference :pointer))))))
   name)
@@ -829,4 +829,3 @@ special call to stop iteration."
              (unwind-protect
 		  (revision-walker)
 	       (%git-revwalk-free revwalker))))))))
-
