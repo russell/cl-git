@@ -39,7 +39,4 @@
               (eval `(trace ,(intern (symbol-name sym))))
             (skip-symbol () nil)))))))
 
-(use-package 'cl-git-tests)
-(FiveAM:run! (list 'repository-init
-                   'create-commit
-                   'create-random-commits))
+(FiveAM:run! :cl-git)

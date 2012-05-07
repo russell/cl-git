@@ -1,15 +1,14 @@
 
 (defpackage :cl-git-tests
-  (:use
-   :common-lisp
-   :cl-git
-   :it.bese.FiveAM)
-  (:export
-   #:repository-init
-   #:create-commit
-   #:create-random-commits))
+  (:use :common-lisp
+        :cl-git
+        :it.bese.FiveAM))
+
 
 (in-package #:cl-git-tests)
+
+(def-suite :cl-git)
+(in-suite :cl-git)
 
 
 (defun gen-letter ()
