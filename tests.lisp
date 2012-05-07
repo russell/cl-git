@@ -116,23 +116,27 @@ commit-message filename content."
      commit-message
      :parents parents)))
 
-(test create-commit
-      "create a repository and add a file to it."
-      (let ((path (gen-temp-path)))
-        (finishes
-         (unwind-protect
-              (progn
-                (cl-git:git-repository-init path)
-                (cl-git:with-git-repository (path)
-                  (cl-git:with-git-revisions
-                      (commit :sha
-                              (commit-random-file-modification
-                               path "test" "Test commit"))
-                    (is (equal (cl-git:git-commit-message commit)
-                               "Test commit"))))))
+(defmacro tempory-repository ((path) &body body)
+  `(let ((,path (gen-temp-path)))
+     (finishes
+       (unwind-protect
+            (progn
+              (cl-git:git-repository-init ,path)
+              ,@body)
          (progn
-           (cl-fad:delete-directory-and-files path)))))
+           (cl-fad:delete-directory-and-files ,path))))))
 
+(test create-commit
+  "create a repository and add a file to it."
+  (tempory-repository
+      (path)
+    (cl-git:with-git-repository (path)
+      (cl-git:with-git-revisions
+          (commit :sha
+                  (commit-random-file-modification
+                   path "test" "Test commit"))
+        (is (equal (cl-git:git-commit-message commit)
+                   "Test commit"))))))
 
 (defun create-random-commits (repo-path number)
   "create a number of random commits to random files."
@@ -147,54 +151,44 @@ commit-message filename content."
 
 
 (test create-random-commits
-      "create a repository and add several random commits to it. then
+  "create a repository and add several random commits to it. then
 check that the commit messages match the expected messages."
-      (let ((path (gen-temp-path)))
-        (finishes
-         (unwind-protect
-              (progn
-                (cl-git:git-repository-init path)
-                (cl-git:with-git-repository (path)
-                  (create-random-commits path 10))
-                (cl-git:with-git-repository (path)
-                  (let* ((commit-list (create-random-commits path 10))
-                         (tcommit (pop commit-list)))
-                    (cl-git:with-git-revisions
-                        (commit :sha (assoc-default 'commit-sha tcommit))
-                      (is (equal (cl-git:git-commit-message commit)
-                                 (assoc-default 'commit-message tcommit)))
-                      (let ((tauthor (assoc-default 'author tcommit))
-                            (author (cl-git:git-commit-author commit)))
-                        (is (equal (car author)
-                                   (assoc-default 'name tauthor)))
-                        (is (equal (second author)
-                                   (assoc-default 'email tauthor))))
-                      (let ((tcommitter (assoc-default 'committer tcommit))
-                            (committer (cl-git:git-commit-committer commit)))
-                        (is (equal (car committer)
-                                   (assoc-default 'name tcommitter)))
-                        (is (equal (second committer)
-                                   (assoc-default 'email tcommitter))))
-                      (setq tcommit (pop commit-list))))))
-           (progn
-             (cl-fad:delete-directory-and-files path))))))
+  (tempory-repository
+      (path)
+    (cl-git:with-git-repository (path)
+      (create-random-commits path 10))
+    (cl-git:with-git-repository (path)
+      (let* ((commit-list (create-random-commits path 10))
+             (tcommit (pop commit-list)))
+        (cl-git:with-git-revisions
+            (commit :sha (assoc-default 'commit-sha tcommit))
+          (is (equal (cl-git:git-commit-message commit)
+                     (assoc-default 'commit-message tcommit)))
+          (let ((tauthor (assoc-default 'author tcommit))
+                (author (cl-git:git-commit-author commit)))
+            (is (equal (car author)
+                       (assoc-default 'name tauthor)))
+            (is (equal (second author)
+                       (assoc-default 'email tauthor))))
+          (let ((tcommitter (assoc-default 'committer tcommit))
+                (committer (cl-git:git-commit-committer commit)))
+            (is (equal (car committer)
+                       (assoc-default 'name tcommitter)))
+            (is (equal (second committer)
+                       (assoc-default 'email tcommitter))))
+          (setq tcommit (pop commit-list)))))))
 
 (test create-references
   "create a repository and add a file to it and a commit, then create
 a reference from the commit."
-  (let ((path (gen-temp-path)))
-    (finishes
-      (unwind-protect
-           (progn
-             (cl-git:git-repository-init path)
-             (cl-git:with-git-repository (path)
-               (let ((sha (commit-random-file-modification
-                           path "test" "Test commit")))
-                 (let ((reference (cl-git:git-reference-create
-                                   "refs/heads/test" :sha sha)))
-                   (is
-                    (equal
-                     (sort-strings (list reference "refs/heads/master"))
-                     (sort-strings (cl-git:git-reference-listall))))))))
-        (progn
-          (cl-fad:delete-directory-and-files path))))))
+  (tempory-repository
+      (path)
+    (cl-git:with-git-repository (path)
+      (let ((sha (commit-random-file-modification
+                  path "test" "Test commit")))
+        (let ((reference (cl-git:git-reference-create
+                          "refs/heads/test" :sha sha)))
+          (is
+           (equal
+            (sort-strings (list reference "refs/heads/master"))
+            (sort-strings (cl-git:git-reference-listall)))))))))
