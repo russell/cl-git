@@ -219,6 +219,15 @@
     git-signature
   (commit :pointer))
 
+(cffi:defcfun ("git_commit_parentcount" %git-commit-parentcount)
+    :int
+  (commit :pointer))
+
+(cffi:defcfun ("git_commit_parent_oid" %git-commit-parent-oid)
+    %oid
+  (commit :pointer)
+  (n :int))
+
 (cffi:defcfun ("git_tag_type" %git-tag-type)
     git-object-type
   (tag :pointer))
@@ -575,6 +584,14 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
   "Given a commit return the commit committer's signature."
   (with-git-signature-return (%git-commit-committer commit)))
 
+(defun git-commit-parent-count (commit)
+  (%git-commit-parentcount commit))
+
+(defun git-commit-parent-oid (commit parent-index)
+  "Returns the oid of the parent with index `parent-index' in the list of parents
+of the commit `commit'."
+  (%git-commit-parent-oid commit parent-index))
+
 (defun git-commit-close (commit)
   "Close the commit and free the memory allocated to the commit."
   (%git-object-free commit))
@@ -731,6 +748,10 @@ the oid of the target of the tag."
 	(git-object-id commit)
       (%git-object-free commit))))
 
+(defun git-commit-parent-oids (commit)
+  "Returns a list of oids identifying the parent commits of `commit'."
+  (loop for index from 0 below (git-commit-parent-count commit)
+       collect (git-commit-parent-oid commit index)))
 
 (defun lookup-commit (&key sha head)
   "Returns an oid for a single commit (or tag).  It takes a single
@@ -805,4 +826,7 @@ special call to stop iteration."
                                      (progn ,@body)
                                   (progn (git-commit-close ,commit))))
                               (revision-walker))))))
-             (revision-walker)))))))
+             (unwind-protect
+		  (revision-walker)
+	       (%git-revwalk-free revwalker))))))))
+
