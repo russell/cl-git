@@ -35,6 +35,18 @@
 (defun sort-strings (strings)
   (sort strings #'string-lessp))
 
+(defmacro tempory-repository ((path) &body body)
+  "Create a new repository and bind the randomly generated path of the
+new repository to PATH. "
+  `(let ((,path (gen-temp-path)))
+     (finishes
+       (unwind-protect
+            (progn
+              (cl-git:git-repository-init ,path)
+              ,@body)
+         (progn
+           (cl-fad:delete-directory-and-files ,path))))))
+
 (test repository-init
       "create a repository and open it to make sure that works"
       (for-all ((path 'gen-temp-path))
@@ -115,15 +127,6 @@ commit-message filename content."
      commit-message
      :parents parents)))
 
-(defmacro tempory-repository ((path) &body body)
-  `(let ((,path (gen-temp-path)))
-     (finishes
-       (unwind-protect
-            (progn
-              (cl-git:git-repository-init ,path)
-              ,@body)
-         (progn
-           (cl-fad:delete-directory-and-files ,path))))))
 
 (test create-commit
   "create a repository and add a file to it."
