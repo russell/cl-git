@@ -10,13 +10,31 @@
 (def-suite :cl-git)
 (in-suite :cl-git)
 
+(defparameter *test-repository-path* #P"/tmp/")
+
+(defun getpid ()
+  #+SBCL
+  (sb-posix:getpid))
+
+(defmacro format-string (control-string &rest format-arguments)
+    `(with-output-to-string (stream)
+      (format stream ,control-string ,@format-arguments)))
+
+(defun open-test-files-p ()
+  "check if there were any files left open from a test."
+  (loop :for line
+        :in (cdr (inferior-shell:run/lines (format-string "lsof -Fn -p ~S" (getpid))))
+        :when (eq 1 (search (namestring *test-repository-path*) line))
+          :collect (subseq line 1 (length line))))
 
 (defun gen-letter ()
   (gen-character :code (gen-integer :min (char-code #\a)
                                     :max (char-code #\z))))
 
 (defun gen-temp-path ()
-  (concatenate 'string "/tmp/cl-git.test-"
+  (concatenate 'string (namestring
+                        (merge-pathnames "cl-git.test-"
+                                         *test-repository-path*))
                (funcall
                 (gen-string :length (gen-integer :min 5 :max 10)
                             :elements (gen-letter)))))
@@ -43,7 +61,10 @@ new repository to PATH. "
        (unwind-protect
             (progn
               (cl-git:git-repository-init ,path)
-              ,@body)
+              ,@body
+              (let ((open-files (open-test-files-p)))
+                (when open-files
+                  (fail "The following files were left open ~S" open-files))))
          (progn
            (cl-fad:delete-directory-and-files ,path))))))
 

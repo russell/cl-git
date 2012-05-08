@@ -11,7 +11,7 @@
                (:file "cl-git")))
 
 (asdf:defsystem #:cl-git-tests
-  :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options)
+  :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell)
   :components ((:file "tests"))
   :in-order-to ((compile-op (load-op :cl-git))))
 
