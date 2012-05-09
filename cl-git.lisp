@@ -460,12 +460,11 @@ create it.  BARE is an optional keyword, if specified then the newly
 created repository will be bare."
   (handler-case
       (progn
-	(git-repository-open path)
-	(git-repository-free)
-	path)
-    (git-error (err)
+        (git-repository-open path)
+        (git-repository-free)
+        path)
+    (git-error ()
       (git-repository-init path bare)
-      (git-repository-free)
       path)))
 
 
