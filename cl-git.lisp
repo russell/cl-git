@@ -16,8 +16,6 @@
 
 (cffi:use-foreign-library libgit2)
 
-
-
 (defparameter *git-oid-hex-size* (+ 40 1)
   "The size of a Git commit hash.")
 
@@ -28,13 +26,30 @@
 (defun null-or-nullpointer (obj)
   (or (not obj) (cffi:null-pointer-p obj)))
 
+
+;;;  Define types
+(cffi:define-foreign-type oid-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %oid))
+
+(cffi:define-foreign-type time-type ()
+  nil
+  (:actual-type :int64)
+  (:simple-parser %time))
+
+(cffi:define-foreign-type git-signature-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %git-signature))
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
 (cffi:defctype size :unsigned-int)
 
 (cffi:defcstruct timeval
-    (secs :long)
+    (secs %time)
     (usecs :long))
 
 (cffi:defcstruct git-strings
@@ -49,14 +64,9 @@
   (email :string)
   (time timeval))
 
-
 ;;; Foreign type translation
 
-(cffi:define-foreign-type oid-type ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %oid))
-
+;; OID
 (defmethod cffi:translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
   (let ((c-oid (cffi:foreign-alloc 'git-oid)))
@@ -92,6 +102,40 @@
 (defmethod cffi:free-translated-object (pointer (type oid-type) do-not-free)
   (unless do-not-free (cffi:foreign-free pointer)))
 
+;; git time
+
+(defmethod cffi:translate-from-foreign (value (type time-type))
+  (local-time:unix-to-timestamp value))
+
+(defmethod cffi:translate-to-foreign ((value local-time:timestamp) (type time-type))
+  (local-time:timestamp-to-unix value))
+
+;; git signature
+
+(defmethod cffi:translate-to-foreign ((value list) (type git-signature-type))
+  (declare (ignore type))
+  (let ((signature (cffi:foreign-alloc 'git-signature)))
+    (cffi:with-foreign-slots ((name email time) signature git-signature)
+      (setf name (getf value :name (getenv "USER")))
+      (setf email (getf value :email (default-email)))
+      (cffi:with-foreign-slots ((secs usecs) time timeval)
+	(setf secs (getf value :time (local-time:now)))
+	(setf usecs 0)))
+    signature))
+
+(defmethod cffi:translate-to-foreign ((value t) (type git-signature-type))
+  (if (cffi:pointerp value)
+      (values value t)
+      (error "Cannot convert type: ~A to git-signature struct" (type-of value))))
+
+(defmethod cffi:translate-from-foreign (value (type git-signature-type))
+  (cffi:with-foreign-slots ((name email time) value git-signature)
+    (cffi:with-foreign-slots ((secs) time timeval)
+      (list :name name :email email :time secs))))
+
+(defmethod cffi:free-translated-object (pointer (type git-signature-type) do-not-free)
+  (unless do-not-free (cffi:foreign-free pointer)))
+
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
 (cffi:defctype git-repository-index :pointer)
@@ -107,6 +151,7 @@
 
 (cffi::defctype size-t :unsigned-long)
 
+;;; The return value should not be freed.
 (cffi:defcfun ("git_oid_to_string"
                %git-oid-tostr)
     (:pointer :char)
@@ -115,8 +160,7 @@
   (oid %oid))
 
 ;;; Git Error
-(cffi:defcfun ("git_lasterror" git-lasterror) :pointer)
-
+(cffi:defcfun ("git_lasterror" git-lasterror) :string)
 
 ;;; Git References
 (cffi:defbitfield git-reference-flags
@@ -199,8 +243,8 @@
   (oid :pointer)
   (repo :pointer)
   (update-ref :pointer)
-  (author :pointer)
-  (committer :pointer)
+  (author %git-signature)
+  (committer %git-signature)
   (message-encoding :pointer)
   (message :pointer)
   (tree :pointer)
@@ -212,11 +256,11 @@
   (commit :pointer))
 
 (cffi:defcfun ("git_commit_author" %git-commit-author)
-    git-signature
+    %git-signature
   (commit :pointer))
 
 (cffi:defcfun ("git_commit_committer" %git-commit-committer)
-    git-signature
+    %git-signature
   (commit :pointer))
 
 (cffi:defcfun ("git_commit_parentcount" %git-commit-parentcount)
@@ -238,7 +282,7 @@
   (tag :pointer))
 
 (cffi:defcfun ("git_tag_tagger" %git-tag-tagger)
-    git-signature
+    %git-signature
   (tag :pointer))
 
 ;;; Git Tree
@@ -327,38 +371,7 @@
   (or (getenv "MAIL")
       (concatenate 'string (getenv "USERNAME") "@" (machine-instance))))
 
-(defun git-signature-create (&key (name nil) (email nil) (time nil))
-  "Create a new GIT-SIGNATURE if the NAME isn't specified then use the
-USER environment variable.  If no EMAIL is specified then use the
-USERNAME at hostname.  If there is no TIME specified then use the
-current time."
-  (let ((signature (cffi:foreign-alloc 'git-signature)))
-    (setf
-     (cffi:foreign-slot-value signature 'git-signature 'name)
-     (or name (getenv "USER"))
-
-     (cffi:foreign-slot-value signature 'git-signature 'email)
-     (or email (default-email)))
-
-    (if time
-        (setf (cffi:foreign-slot-value signature 'git-signature 'time) time)
-        (cffi:with-foreign-slots ((time) signature git-signature)
-          (setf
-           (cffi:foreign-slot-value time 'timeval 'secs)
-           (local-time:timestamp-to-unix (local-time:now))
-           (cffi:foreign-slot-value time 'timeval 'usecs)
-           0)))
-  signature))
-
-
 ;;;
-
-(defmacro with-git-signature-return (form)
-  `(cffi:with-foreign-slots ((name email time)
-			     ,form
-			     git-signature)
-     (cffi:with-foreign-slots ((secs usecs) time timeval)
-       (list name email (local-time:unix-to-timestamp secs)))))
 
 ;;; Git Errors
 (define-condition git-error (error)
@@ -379,7 +392,7 @@ current time."
 (defun handle-git-return-code (return-code)
      (unless (= return-code 0)
 	  (error 'git-error
-		 :message (cffi:foreign-string-to-lisp (git-lasterror))
+		 :message (git-lasterror)
 		 :code return-code)))
 
 
@@ -494,8 +507,6 @@ PARENTS is an optional list of parent commits sha1 hashes."
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((newoid (cffi:foreign-alloc 'git-oid))
-        (%author (or author (git-signature-create)))
-        (%committer (or committer (git-signature-create)))
         (%tree (git-tree-lookup oid))
         (parents (if (listp parents) parents (list parents))))
     (unwind-protect
@@ -514,8 +525,8 @@ PARENTS is an optional list of parent commits sha1 hashes."
                  newoid
                  *git-repository*
                  %update-ref
-                 %author
-                 %committer
+                 author
+                 committer
                  %message-encoding
                  %message
                  %tree
@@ -573,11 +584,11 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 
 (defun git-commit-author (commit)
   "Given a commit return the commit author's signature."
-  (with-git-signature-return (%git-commit-author commit)))
+  (%git-commit-author commit))
 
 (defun git-commit-committer (commit)
   "Given a commit return the commit committer's signature."
-  (with-git-signature-return (%git-commit-committer commit)))
+  (%git-commit-committer commit))
 
 (defun git-commit-parent-count (commit)
   (%git-commit-parentcount commit))
@@ -603,7 +614,7 @@ of the commit `commit'."
       (cffi:foreign-free obj))))
 
 (defun git-tag-tagger (tag)
-  (with-git-signature-return (%git-tag-tagger tag)))
+  (%git-tag-tagger tag))
 
 (defun git-oid-fromstr (str)
   "Convert a Git hash to an oid."
