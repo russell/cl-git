@@ -105,10 +105,17 @@
 ;; git time
 
 (defmethod cffi:translate-from-foreign (value (type time-type))
+  "Translate a git time_t to a local-time"
   (local-time:unix-to-timestamp value))
 
 (defmethod cffi:translate-to-foreign ((value local-time:timestamp) (type time-type))
+  "Translate a local-time value to a git time_t"
   (local-time:timestamp-to-unix value))
+
+(defmethod cffi:translate-to-foreign ((value integer) (type time-type))
+  "Translate a universal-time to a git time_t"
+  (cffi:translate-to-foreign
+   (local-time:universal-to-timestamp (local-time:timestamp-to-unix value)) type))
 
 ;; git signature
 
@@ -119,8 +126,11 @@
       (setf name (getf value :name (getenv "USER")))
       (setf email (getf value :email (default-email)))
       (cffi:with-foreign-slots ((time offset) time timeval)
-	(setf time (getf value :time (local-time:now)))
-	(setf offset 0)))
+	(let ((time-to-set (getf value :time (local-time:now))))
+	  (setf time time-to-set)
+	  (setf offset (/ (local-time:timestamp-subtimezone
+			   time-to-set local-time:*default-timezone*)
+			  60)))))
     signature))
 
 (defmethod cffi:translate-to-foreign ((value t) (type git-signature-type))
