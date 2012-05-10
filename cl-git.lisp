@@ -49,8 +49,8 @@
 (cffi:defctype size :unsigned-int)
 
 (cffi:defcstruct timeval
-    (secs %time)
-    (usecs :long))
+    (time %time)
+    (offset :int))
 
 (cffi:defcstruct git-strings
   (strings :pointer)
@@ -118,9 +118,9 @@
     (cffi:with-foreign-slots ((name email time) signature git-signature)
       (setf name (getf value :name (getenv "USER")))
       (setf email (getf value :email (default-email)))
-      (cffi:with-foreign-slots ((secs usecs) time timeval)
-	(setf secs (getf value :time (local-time:now)))
-	(setf usecs 0)))
+      (cffi:with-foreign-slots ((time offset) time timeval)
+	(setf time (getf value :time (local-time:now)))
+	(setf offset 0)))
     signature))
 
 (defmethod cffi:translate-to-foreign ((value t) (type git-signature-type))
@@ -130,8 +130,8 @@
 
 (defmethod cffi:translate-from-foreign (value (type git-signature-type))
   (cffi:with-foreign-slots ((name email time) value git-signature)
-    (cffi:with-foreign-slots ((secs) time timeval)
-      (list :name name :email email :time secs))))
+    (cffi:with-foreign-slots ((time) time timeval)
+      (list :name name :email email :time time))))
 
 (defmethod cffi:free-translated-object (pointer (type git-signature-type) do-not-free)
   (unless do-not-free (cffi:foreign-free pointer)))
