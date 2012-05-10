@@ -104,12 +104,9 @@ REPO-PATH."
 signature to the commit"
   (let ((name (random-string 25))
         (email (random-string 25)))
-    (let ((signature (git-signature-create
-                      :name name
-                      :email email))
-          (sig-alist `((name . ,name)
-                       (email . ,email))))
-    (values signature sig-alist))))
+    (values `(:name ,name :email ,email)
+	    `((name . ,name)
+	      (email . ,email)))))
 
 (defun commit-random-file (repo-path &key (parents nil))
   "create a new random file in the repository located at REPO-PATH
@@ -189,15 +186,15 @@ check that the commit messages match the expected messages."
                      (assoc-default 'commit-message tcommit)))
           (let ((tauthor (assoc-default 'author tcommit))
                 (author (cl-git:git-commit-author commit)))
-            (is (equal (car author)
+            (is (equal (getf author :name)
                        (assoc-default 'name tauthor)))
-            (is (equal (second author)
+            (is (equal (getf author :email)
                        (assoc-default 'email tauthor))))
           (let ((tcommitter (assoc-default 'committer tcommit))
                 (committer (cl-git:git-commit-committer commit)))
-            (is (equal (car committer)
+            (is (equal (getf committer :name)
                        (assoc-default 'name tcommitter)))
-            (is (equal (second committer)
+            (is (equal (getf committer :email)
                        (assoc-default 'email tcommitter))))
           (setq tcommit (pop commit-list)))))))
 

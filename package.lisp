@@ -25,4 +25,7 @@
    #:git-index-write
    #:git-oid-from-index
    #:with-git-repository
-   #:ensure-git-repository-exist))
+   #:ensure-git-repository-exist
+   #:git-tag-tagger
+   #:git-tag-type
+   #:git-tag-target))
