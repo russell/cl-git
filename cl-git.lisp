@@ -172,6 +172,23 @@
 ;;; Git Error
 (cffi:defcfun ("git_lasterror" git-lasterror) :string)
 
+;;; Git Config
+
+(cffi:defcfun ("git_repository_config" %git-repository-config)
+    :int
+  (out :pointer)
+  (repository :pointer))
+
+(cffi:defcfun ("git_config_free" git-config-free)
+    :void
+  (config :pointer))
+
+(cffi:defcfun ("git_config_foreach" %git-config-foreach)
+    :int
+  (config :pointer)
+  (callback :pointer)
+  (payload :pointer))
+
 ;;; Git References
 (cffi:defbitfield git-reference-flags
     (:invalid 0)
@@ -484,6 +501,27 @@ created repository will be bare."
     (git-error ()
       (git-repository-init path bare)
       path)))
+
+(defun git-repository-config ()
+  "Return the config repository object"
+  (cffi:with-foreign-object (config :pointer)
+    (handle-git-return-code (%git-repository-config config *git-repository*))
+    (cffi:mem-ref config :pointer)))
+
+(defparameter *config-values* nil)
+
+(cffi:defcallback collect-config-values :int ((key :string) (value :string))
+  (push (cons key value) *config-values*)
+  0);;; replace with success
+
+(defun git-config-values (config)
+  (let ((*config-values* (list)))
+    (handle-git-return-code
+     (%git-config-foreach config
+			  (cffi:callback collect-config-values)
+			  (cffi:null-pointer)))
+    *config-values*))
+
 
 
 (defmacro with-git-repository-index (&body body)
