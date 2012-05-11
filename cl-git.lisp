@@ -43,10 +43,15 @@
   (:actual-type :pointer)
   (:simple-parser %git-signature))
 
+(cffi:define-foreign-type git-tree-entry-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %tree-entry))
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
-(cffi:defctype size :unsigned-int)
+(cffi:defctype size :unsigned-long)
 
 (cffi:defcstruct timeval
     (time %time)
@@ -63,6 +68,13 @@
   (name :string)
   (email :string)
   (time timeval))
+
+(cffi:defcstruct git-tree-entry
+  (attr :unsigned-int)
+  (filename :string)
+  (oid git-oid)
+  (filename-len size)
+  (removed :int))
 
 ;;; Foreign type translation
 
@@ -146,6 +158,12 @@
 (defmethod cffi:free-translated-object (pointer (type git-signature-type) do-not-free)
   (unless do-not-free (cffi:foreign-free pointer)))
 
+;;;
+(defmethod cffi:translate-from-foreign (value (type git-tree-entry-type))
+  (cffi:with-foreign-slots ((attr filename oid removed) value git-tree-entry)
+    (list :attr attr :filename filename
+	  :oid  (cffi:convert-from-foreign oid '%oid) :removed removed)))
+
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
 (cffi:defctype git-repository-index :pointer)
@@ -225,7 +243,6 @@
 (cffi:defcfun ("git_reference_free" %git-reference-free)
     :void
   (reference :pointer))
-
 
 ;;; Git Object
 (cffi:defcfun ("git_object_id" git-object-id)
@@ -307,6 +324,12 @@ of the commit `commit'."
   (commit :pointer)
   (n :int))
 
+(cffi:defcfun ("git_commit_tree" %git-commit-tree)
+    :int
+  (tree-out :pointer)
+  (commit :pointer))
+
+;;; Tag functions
 (cffi:defcfun ("git_tag_type" git-tag-type)
     git-object-type
   (tag :pointer))
@@ -326,6 +349,20 @@ of the commit `commit'."
   (oid :pointer)
   (index :pointer))
 
+(cffi:defcfun ("git_tree_id" git-tree-oid)
+    %oid
+  "Returns the oid of the tree."
+  (tree :pointer))
+
+(cffi:defcfun ("git_tree_entrycount" git-tree-entry-count)
+    :unsigned-int
+  (tree :pointer))
+
+(cffi:defcfun ("git_tree_entry_byindex" git-tree-entry-by-index)
+    %tree-entry
+  "Returns the tree entry at index"
+  (tree :pointer)
+  (index :unsigned-int))
 
 ;;; Git Revision Walking
 (cffi:defbitfield git-revwalk-flags
@@ -593,6 +630,13 @@ PARENTS is an optional list of parent commits sha1 hashes."
         (git-tree-close %tree)
         (cffi:foreign-free newoid)))))
 
+(defun git-commit-tree (commit)
+  "Returns the tree object of the commit."
+  (cffi:with-foreign-object (tree :pointer)
+    (handle-git-return-code
+     (%git-commit-tree tree commit))
+    (cffi:mem-aref tree :pointer)))
+
 (defun git-object-lookup (oid type)
   "Returns a reference to the git odb (object) which is identified by the oid.
 The type argument specifies which type is expected.  If the found
@@ -623,6 +667,12 @@ manually with GIT-TREE-CLOSE."
 (defun git-tree-close (tree)
   "Close the TREE and free the memory allocated to the tree."
   (%git-object-free tree))
+
+(defun git-tree-entries (tree)
+  "Return all direct children of `tree'."
+  (loop :repeat (git-tree-entry-count tree)
+     :for index :from 0
+     :collect (git-tree-entry-by-index tree index)))
 
 (defun git-commit-lookup (oid)
   "Look up a commit by oid, return the resulting commit.  This commit
