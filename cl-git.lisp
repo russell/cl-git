@@ -186,8 +186,9 @@
   (repository :pointer)
   (flags git-reference-flags))
 
-(cffi:defcfun ("git_reference_oid" %git-reference-oid)
+(cffi:defcfun ("git_reference_oid" git-reference-oid)
     %oid
+  "Return the oid from within the reference."
   (reference :pointer))
 
 (cffi:defcfun ("git_reference_lookup" %git-reference-lookup)
@@ -210,8 +211,9 @@
 
 
 ;;; Git Object
-(cffi:defcfun ("git_object_id" %git-object-id)
+(cffi:defcfun ("git_object_id" git-object-id)
     %oid
+  "Returns the oid identifying `object'"
   (object :pointer))
 
 
@@ -261,28 +263,34 @@
   (parent-count :int)
   (parents :pointer))
 
-(cffi:defcfun ("git_commit_message" %git-commit-message)
+(cffi:defcfun ("git_commit_message" git-commit-message)
     :string
+  "Return a string containing the commit message."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_author" %git-commit-author)
+(cffi:defcfun ("git_commit_author" git-commit-author)
     %git-signature
+  "Given a commit return the commit author's signature."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_committer" %git-commit-committer)
+(cffi:defcfun ("git_commit_committer" git-commit-committer)
     %git-signature
+  "Given a commit return the commit committer's signature."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_parentcount" %git-commit-parentcount)
+(cffi:defcfun ("git_commit_parentcount" git-commit-parentcount)
     :int
+  "Returns the number of parent commits of the argument."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_parent_oid" %git-commit-parent-oid)
+(cffi:defcfun ("git_commit_parent_oid" git-commit-parent-oid)
     %oid
+  "Returns the oid of the parent with index `parent-index' in the list of parents
+of the commit `commit'."
   (commit :pointer)
   (n :int))
 
-(cffi:defcfun ("git_tag_type" %git-tag-type)
+(cffi:defcfun ("git_tag_type" git-tag-type)
     git-object-type
   (tag :pointer))
 
@@ -291,7 +299,7 @@
   (reference :pointer)
   (tag :pointer))
 
-(cffi:defcfun ("git_tag_tagger" %git-tag-tagger)
+(cffi:defcfun ("git_tag_tagger" git-tag-tagger)
     %git-signature
   (tag :pointer))
 
@@ -547,10 +555,6 @@ PARENTS is an optional list of parent commits sha1 hashes."
         (git-tree-close %tree)
         (cffi:foreign-free newoid)))))
 
-(defun git-object-id (object)
-  "Returns the oid identifying `object'"
-  (%git-object-id object))
-
 (defun git-object-lookup (oid type)
   "Returns a reference to the git odb (object) which is identified by the oid.
 The type argument specifies which type is expected.  If the found
@@ -587,32 +591,9 @@ manually with GIT-TREE-CLOSE."
 will need to be freed manually with GIT-COMMIT-CLOSE."
   (git-object-lookup oid :commit))
 
-(defun git-commit-message (commit)
-  "Return a string containing the commit message."
-   (%git-commit-message commit))
-
-(defun git-commit-author (commit)
-  "Given a commit return the commit author's signature."
-  (%git-commit-author commit))
-
-(defun git-commit-committer (commit)
-  "Given a commit return the commit committer's signature."
-  (%git-commit-committer commit))
-
-(defun git-commit-parent-count (commit)
-  (%git-commit-parentcount commit))
-
-(defun git-commit-parent-oid (commit parent-index)
-  "Returns the oid of the parent with index `parent-index' in the list of parents
-of the commit `commit'."
-  (%git-commit-parent-oid commit parent-index))
-
 (defun git-commit-close (commit)
   "Close the commit and free the memory allocated to the commit."
   (%git-object-free commit))
-
-(defun git-tag-type (tag)
-  (%git-tag-type tag))
 
 (defun git-tag-target (tag)
   (let ((obj (cffi:foreign-alloc :pointer)))
@@ -621,9 +602,6 @@ of the commit `commit'."
 	 (%git-tag-target obj tag))
 	(cffi:mem-ref obj :pointer)
       (cffi:foreign-free obj))))
-
-(defun git-tag-tagger (tag)
-  (%git-tag-tagger tag))
 
 (defun git-oid-fromstr (str)
   "Convert a Git hash to an oid."
@@ -640,11 +618,6 @@ of the commit `commit'."
 	    (%git-reference-lookup reference *git-repository* name))
 	   (cffi:mem-ref reference :pointer))
       (cffi:foreign-free reference))))
-
-(defun git-reference-oid (reference)
-  "Return the oid from within the reference, this will be deallocated
-with the reference."
-  (%git-reference-oid reference))
 
 (defun git-reference-listall (&rest flags)
   "List all the refs, filter by FLAGS.  The flag options
