@@ -268,8 +268,9 @@
   (:ref_delta 7)) ; A delta, base is given by object id.
 
 
-(cffi:defcfun ("git_object_type" %git-object-type)
+(cffi:defcfun ("git_object_type" git-object-type)
     git-object-type
+  "Returns the type of the git object."
   (object :pointer))
 
 (cffi:defcfun ("git_object_lookup" %git-object-lookup)
@@ -279,10 +280,26 @@
   (oid %oid)
   (type git-object-type))
 
-(cffi:defcfun ("git_object_free"
-               %git-object-free)
+(cffi:defcfun ("git_object_free" git-object-free)
     :void
+  "Free the git object."
   (object :pointer))
+
+;;; Blobs
+(cffi:defcfun ("git_blob_lookup" %git-blob-lookup)
+    :int
+  (blob-out :pointer)
+  (repository :pointer)
+  (oid %oid))
+
+(cffi:defcfun ("git_blob_rawcontent" %git-blob-raw-content)
+    :pointer
+  (blob :pointer))
+
+(cffi:defcfun ("git_blob_rawsize" git-blob-raw-size)
+    size
+  "The number of content bytes in the blob."
+  (blob :pointer))
 
 ;;; Reference
 (cffi:defcfun ("git_reference_type" %git-reference-type)
@@ -347,6 +364,16 @@ of the commit `commit'."
 
 (cffi:defcfun ("git_tag_tagger" git-tag-tagger)
     %git-signature
+  (tag :pointer))
+
+(cffi:defcfun ("git_tag_name" git-tag-name)
+    :string
+  "Returns the name of the tag"
+  (tag :pointer))
+
+(cffi:defcfun ("git_tag_message" git-tag-message)
+    :string
+  "Returns the message of the tag"
   (tag :pointer))
 
 ;;; Git Tree
@@ -660,14 +687,32 @@ Note that the returned git object should be freed with git-object-free."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
-  (let ((obj (cffi:foreign-alloc :pointer)))
-    (prog2
-	(handle-git-return-code
-	 (%git-object-lookup
-	  obj *git-repository* oid
-	  (cffi:foreign-enum-value 'git-object-type type)))
-	(cffi:mem-ref obj :pointer)
-      (cffi:foreign-free obj))))
+  (cffi:with-foreign-object (obj :pointer)
+    (handle-git-return-code
+     (%git-object-lookup
+      obj *git-repository* oid type))
+    (cffi:mem-ref obj :pointer)))
+
+
+(defun git-blob-lookup (oid)
+  "Returns a blob identified by the oid."
+  (assert (not (null-or-nullpointer *git-repository*)))
+
+  (cffi:with-foreign-object (obj :pointer)
+    (handle-git-return-code
+     (%git-blob-lookup obj *git-repository* oid))
+    (cffi:mem-ref obj :pointer)))
+
+(defun git-blob-raw-content (blob)
+  (let ((result (make-array (git-blob-raw-size blob)
+			    :element-type '(unsigned-byte 8)
+			    :initial-element 0))
+	(content (%git-blob-raw-content blob)))
+    (loop :for index :from 0
+	 :repeat (length result)
+	 :do
+	 (setf (aref result index) (cffi:mem-aref content :unsigned-char index)))
+    result))
 
 (defun git-tree-lookup (oid)
   "Lookup a Git tree object, the value returned will need to be freed
@@ -676,7 +721,7 @@ manually with GIT-TREE-CLOSE."
 
 (defun git-tree-close (tree)
   "Close the TREE and free the memory allocated to the tree."
-  (%git-object-free tree))
+  (git-object-free tree))
 
 (defun git-tree-entries (tree)
   "Return all direct children of `tree'."
@@ -691,7 +736,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
 
 (defun git-commit-close (commit)
   "Close the commit and free the memory allocated to the commit."
-  (%git-object-free commit))
+  (git-object-free commit))
 
 (defun git-tag-target (tag)
   (let ((obj (cffi:foreign-alloc :pointer)))
@@ -827,8 +872,8 @@ This is an extended version of git-commit-lookup.
 If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
   (let ((git-object (git-object-lookup oid :any)))
-    (ecase (%git-object-type git-object)
-      (:tag (prog1 (git-tag-target git-object) (%git-object-free git-object)))
+    (ecase (git-object-type git-object)
+      (:tag (prog1 (git-tag-target git-object) (git-object-free git-object)))
       (:commit git-object))))
 
 (defun commit-oid-from-oid (oid)
@@ -839,7 +884,7 @@ the oid of the target of the tag."
   (let ((commit (git-commit-from-oid oid)))
     (prog1
 	(git-object-id commit)
-      (%git-object-free commit))))
+      (git-object-free commit))))
 
 (defun git-commit-parent-oids (commit)
   "Returns a list of oids identifying the parent commits of `commit'."
@@ -854,7 +899,7 @@ the oid of the target of the tag."
     (cond
       (head (let ((object (git-reference-lookup head)))
 	      (prog1 (git-reference-oid object)
-		(%git-object-free object))))
+		(git-object-free object))))
       (sha (git-oid-fromstr sha))))
 
 (defun lookup-commits (&key sha head)
