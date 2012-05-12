@@ -199,6 +199,7 @@
 
 (cffi:defcfun ("git_config_free" git-config-free)
     :void
+  "Free the git configuration object that is acquired with git-repository-config."
   (config :pointer))
 
 (cffi:defcfun ("git_config_foreach" %git-config-foreach)
@@ -540,7 +541,8 @@ created repository will be bare."
       path)))
 
 (defun git-repository-config ()
-  "Return the config repository object"
+  "Return the config object of the current open repository."
+  (assert (not (null-or-nullpointer *git-repository*)))
   (cffi:with-foreign-object (config :pointer)
     (handle-git-return-code (%git-repository-config config *git-repository*))
     (cffi:mem-ref config :pointer)))
@@ -552,6 +554,7 @@ created repository will be bare."
   0);;; replace with success
 
 (defun git-config-values (config)
+  "Returns the key value pairs in the config as an association list."
   (let ((*config-values* (list)))
     (handle-git-return-code
      (%git-config-foreach config

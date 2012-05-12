@@ -10,7 +10,6 @@
    #:git-repository-free
    #:with-git-revisions
    #:bind-git-commits
-   #:git-signature-create
    #:git-commit-create
    #:git-commit-author
    #:git-commit-message
@@ -28,4 +27,15 @@
    #:ensure-git-repository-exist
    #:git-tag-tagger
    #:git-tag-type
-   #:git-tag-target))
+   #:git-tag-target
+   #:git-config-free
+   #:git-repository-config
+   #:git-config-values
+   #:git-tree-oid
+   #:git-tree-entry-count
+   #:git-tree-entry-by-index
+   #:git-tree-lookup
+   #:git-tree-close
+   #:git-tree-entries))
+
+
