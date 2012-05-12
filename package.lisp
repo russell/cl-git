@@ -46,4 +46,5 @@
    #:git-object-free
    #:git-blob-raw-size
    #:git-blob-lookup
-   #:git-blob-raw-content))
+   #:git-blob-raw-content
+   #:git-status))

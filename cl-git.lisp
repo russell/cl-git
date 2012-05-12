@@ -208,6 +208,22 @@
   (callback :pointer)
   (payload :pointer))
 
+;;; Git Status
+(cffi:defbitfield git-status-flags
+  (:index-new        1)
+  (:index-modified   2)
+  (:index-deleted    4)
+  (:worktree-new     8)
+  (:worktree-modified 16)
+  (:worktree-deleted  32)
+  (:ignored           64))
+
+(cffi:defcfun ("git_status_foreach" %git-status-for-each)
+    :int
+  (repository :pointer)
+  (callback :pointer)
+  (payload :pointer))
+
 ;;; Git References
 (cffi:defbitfield git-reference-flags
     (:invalid 0)
@@ -596,7 +612,21 @@ created repository will be bare."
 			  (cffi:null-pointer)))
     *config-values*))
 
+(defparameter *status-values* nil)
 
+(cffi:defcallback collect-status-values :int ((path :string) (value git-status-flags) (payload :pointer))
+  (declare (ignore payload))
+  (push (cons path value) *status-values*)
+  0)
+
+(defun git-status ()
+  (assert (not (null-or-nullpointer *git-repository*)))
+  (let ((*status-values* (list)))
+    (handle-git-return-code
+     (%git-status-for-each *git-repository*
+			   (cffi:callback collect-status-values)
+			   (cffi:null-pointer)))
+    *status-values*))
 
 (defmacro with-git-repository-index (&body body)
   "Load a repository index uses the current *GIT-REPOSITORY* as the
