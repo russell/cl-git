@@ -19,6 +19,7 @@
    #:git-commit-parent-oids
    #:git-reference-listall
    #:git-reference-create
+   #:git-reference-resolve
    #:with-git-repository-index
    #:git-index-add
    #:git-index-write

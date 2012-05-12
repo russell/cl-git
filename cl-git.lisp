@@ -233,6 +233,11 @@
   (repository :pointer)
   (name :string))
 
+(cffi:defcfun ("git_reference_resolve" %git-reference-resolve)
+    :int
+  (resolved-ref :pointer)
+  (reference :pointer))
+
 (cffi:defcfun ("git_reference_create_oid" %git-reference-create-oid)
     :int
   (reference :pointer)
@@ -357,6 +362,8 @@ of the commit `commit'."
 
 (cffi:defcfun ("git_tree_entrycount" git-tree-entry-count)
     :unsigned-int
+  "Returns the number of tree entries in the tree object.
+This does count the number of direct children, not recursively."
   (tree :pointer))
 
 (cffi:defcfun ("git_tree_entry_byindex" git-tree-entry-by-index)
@@ -701,14 +708,21 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
     (cffi:convert-from-foreign oid '%oid)))
 
 (defun git-reference-lookup (name)
+  "Find a reference by its full name e.g.: ref/heads/master"
   (assert (not (null-or-nullpointer *git-repository*)))
-  (let ((reference (cffi:foreign-alloc :pointer)))
-    (unwind-protect
-	 (progn
-	   (handle-git-return-code
-	    (%git-reference-lookup reference *git-repository* name))
-	   (cffi:mem-ref reference :pointer))
-      (cffi:foreign-free reference))))
+  (cffi:with-foreign-object (reference :pointer)
+    (handle-git-return-code
+     (%git-reference-lookup reference *git-repository* name))
+    (cffi:mem-ref reference :pointer)))
+
+(defun git-reference-resolve (reference)
+  "If the reference is symbolic, follow the it until it finds a non
+symbolic reference.  The result should be freed independently from the
+argument."
+  (cffi:with-foreign-object (resolved-ref :pointer)
+    (handle-git-return-code
+     (%git-reference-resolve resolved-ref reference))
+    (cffi:mem-ref resolved-ref :pointer)))
 
 (defun git-reference-listall (&rest flags)
   "List all the refs, filter by FLAGS.  The flag options
