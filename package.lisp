@@ -19,6 +19,7 @@
    #:git-commit-parent-oids
    #:git-reference-listall
    #:git-reference-create
+   #:git-reference-lookup
    #:git-reference-oid
    #:git-reference-resolve
    #:with-git-repository-index
