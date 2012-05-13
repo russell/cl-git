@@ -437,10 +437,10 @@ directory it will be opened instead of the specified path."
   (assert (null-or-nullpointer *git-repository*))
   (let ((repo (cffi:foreign-alloc :pointer))
 	(path (or (cl-fad:directory-exists-p
-		   (merge-pathnames
-		    #p".git/"
-		    (cl-fad:pathname-as-directory path)))
-		  path)))
+               (merge-pathnames
+                #p".git/"
+                (cl-fad:pathname-as-directory path)))
+              (truename path))))
     (unwind-protect
 	 (progn
 	   (cffi:with-foreign-strings ((%path (namestring path)))
