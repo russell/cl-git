@@ -736,12 +736,9 @@ to the repository."
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
   `(let ((*git-repository* nil))
-     (unwind-protect
-	  (progn
-	    (git-repository-open ,path)
-	    ,@body)
-       (progn
-	 (git-repository-free)))))
+     (git-repository-open ,path)
+     ,@body
+     (git-repository-free)))
 
 (defun git-commit-from-oid (oid)
   "Returns a git-commit object identified by the `oid'.
