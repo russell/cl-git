@@ -736,9 +736,11 @@ to the repository."
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
   `(let ((*git-repository* nil))
-     (git-repository-open ,path)
-     ,@body
-     (git-repository-free)))
+     (prog1
+         (progn
+           (git-repository-open ,path)
+           ,@body)
+       (git-repository-free))))
 
 (defun git-commit-from-oid (oid)
   "Returns a git-commit object identified by the `oid'.
