@@ -17,6 +17,8 @@
    #:git-commit-parent-count
    #:git-commit-parent-oid
    #:git-commit-parent-oids
+   #:git-commit-lookup
+   #:git-commit-close
    #:git-reference-listall
    #:git-reference-create
    #:git-reference-lookup
