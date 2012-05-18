@@ -100,16 +100,22 @@
       (error "Cannot convert type: ~A to git-oid struct" (type-of value))))
 
 (defmethod cffi:translate-from-foreign (value (type oid-type))
+  "Translates a pointer to a libgit2 oid structure to an integer, the lisp
+version of the oid.  If the pointer is a C null pointer return nil.
+This can happen for example when the oid is asked for a reference and the
+reference is symbolic."
   (declare (ignore type))
-  (let ((lisp-oid 0))
-    (loop
-       :for c-index :from 0 :below *git-oid-size*
-       :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
-       :do
-       (setf (ldb (byte 8 byte-index) lisp-oid)
-	   (cffi:mem-aref (cffi:foreign-slot-pointer value 'git-oid 'id)
-			  :unsigned-char c-index)))
-    lisp-oid))
+  (if (cffi:null-pointer-p value)
+      nil
+      (let ((lisp-oid 0))
+	(loop
+	   :for c-index :from 0 :below *git-oid-size*
+	   :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+	   :do
+	   (setf (ldb (byte 8 byte-index) lisp-oid)
+		 (cffi:mem-aref (cffi:foreign-slot-pointer value 'git-oid 'id)
+				:unsigned-char c-index)))
+	lisp-oid)))
 
 (defmethod cffi:free-translated-object (pointer (type oid-type) do-not-free)
   (unless do-not-free (cffi:foreign-free pointer)))
@@ -260,7 +266,7 @@
   (repository :pointer)
   (name :string)
   (oid %oid)
-  (force :int))
+  (force (:boolean :int)))
 
 (cffi:defcfun ("git_reference_free" %git-reference-free)
     :void
@@ -830,7 +836,7 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 	   (handle-git-return-code
 	    (%git-reference-create-oid
 	     reference *git-repository*
-	     name oid (if force 1 0)))
+	     name oid force))
 	(progn
 	  (%git-reference-free (cffi:mem-ref reference :pointer))))))
   name)
@@ -926,9 +932,11 @@ the oid of the target of the tag."
  the value should be a SHA1 id as a string.  The value for the HEAD
  keyword should be a symbolic reference to a git commit."
     (cond
-      (head (let ((object (git-reference-lookup head)))
-	      (prog1 (git-reference-oid object)
-		(git-object-free object))))
+      (head (let* ((original-ref (git-reference-lookup head))
+		   (resolved-ref (git-reference-resolve original-ref)))
+	      (prog1 (git-reference-oid resolved-ref)
+		(git-object-free resolved-ref)
+		(git-object-free original-ref))))
       (sha (git-oid-fromstr sha))))
 
 (defun lookup-commits (&key sha head)

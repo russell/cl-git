@@ -45,6 +45,7 @@
    #:git-tree-close
    #:git-tree-entries
    #:git-object-lookup
+   #:git-object-id
    #:git-object-type
    #:git-object-free
    #:git-blob-raw-size
