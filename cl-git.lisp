@@ -186,7 +186,7 @@ reference is symbolic."
 (cffi::defctype size-t :unsigned-long)
 
 ;;; The return value should not be freed.
-(cffi:defcfun ("git_oid_to_string"
+(cffi:defcfun ("git_oid_tostr"
                %git-oid-tostr)
     (:pointer :char)
   (out (:pointer :char))
@@ -238,7 +238,7 @@ reference is symbolic."
     (:packed 4)
     (:has-peel 8))
 
-(cffi:defcfun ("git_reference_listall" %git-reference-listall)
+(cffi:defcfun ("git_reference_list" %git-reference-list)
     :int
   (strings :pointer)
   (repository :pointer)
@@ -813,7 +813,7 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
-      (handle-git-return-code (%git-reference-listall
+      (handle-git-return-code (%git-reference-list
                                string-array *git-repository*
                                git-flags))
       (cffi:with-foreign-slots ((strings count) string-array git-strings)
