@@ -2,10 +2,10 @@
 
 (in-package #:cl-git)
 
-(defparameter *git-repository* (cffi:null-pointer)
+(defparameter *git-repository* nil
   "A global that stores a pointer to the current Git repository.")
 
-(defparameter *git-repository-index* (cffi:null-pointer)
+(defparameter *git-repository-index* nil
   "A global that stores a pointer to the current Git repository index.")
 
 (cffi:define-foreign-library libgit2
@@ -554,33 +554,27 @@ variable to the open repository.  If the PATH contains a .git
 directory it will be opened instead of the specified path."
   (assert (null-or-nullpointer *git-repository-index*))
   (assert (null-or-nullpointer *git-repository*))
-  (let ((repo (cffi:foreign-alloc :pointer))
-	(path (or (cl-fad:directory-exists-p
-               (merge-pathnames
-                #p".git/"
-                (cl-fad:pathname-as-directory path)))
-              (truename path))))
-    (unwind-protect
-	 (progn
-	   (cffi:with-foreign-strings ((%path (namestring path)))
-	     (handle-git-return-code
-	      (cffi:foreign-funcall "git_repository_open"
-				    git-repository repo
-				    :string (namestring path)
-				    git-code)))
-	   (setf *git-repository* (cffi:mem-ref repo :pointer)))
-      (progn
-	(cffi:foreign-free repo)))))
-
-
-(defun git-repository-free ()
-  "Deallocate repository and re-initialise the *GIT-REPOSITORY*
-variable as a null painter."
-  (assert (not (null-or-nullpointer *git-repository*)))
-  (cffi:foreign-funcall "git_repository_free"
-			git-repository *git-repository*
-			:void)
-  (setf *git-repository* (cffi:null-pointer)))
+  (cffi:with-foreign-pointer (repository-ref 1)
+    (let ((path (or (cl-fad:directory-exists-p
+                     (merge-pathnames
+                      #p".git/"
+                      (cl-fad:pathname-as-directory path)))
+                    (truename path))))
+      (cffi:with-foreign-strings ((%path (namestring path)))
+        (handle-git-return-code
+         (cffi:foreign-funcall "git_repository_open"
+                               git-repository repository-ref
+                               :string (namestring path)
+                               git-code)))
+      (cffi:with-foreign-pointer (repository-ref1 1)
+        (setf repository-ref1 (cffi:mem-ref repository-ref :pointer))
+        (setf repository-ref repository-ref1)
+        (finalize repository-ref
+                  (lambda ()
+                    (cffi:foreign-funcall "git_repository_free"
+                                          :pointer repository-ref1
+                                          :void)))
+        repository-ref))))
 
 
 (defun ensure-git-repository-exist (path &optional bare)
@@ -590,7 +584,6 @@ created repository will be bare."
   (handler-case
       (progn
         (git-repository-open path)
-        (git-repository-free)
         path)
     (git-error ()
       (git-repository-init path bare)
@@ -894,12 +887,8 @@ to the repository."
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
-  `(let ((*git-repository* nil))
-     (prog1
-         (progn
-           (git-repository-open ,path)
-           ,@body)
-       (git-repository-free))))
+  `(let ((*git-repository* (git-repository-open ,path)))
+     ,@body))
 
 (defun git-commit-from-oid (oid)
   "Returns a git-commit object identified by the `oid'.

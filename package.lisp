@@ -2,12 +2,12 @@
 
 (defpackage #:cl-git
   (:use #:cl)
+  (:import-from #:trivial-garbage
+                #:finalize)
   (:export
-   #:*git-repository*
    #:*git-repository-index*
    #:git-repository-init
    #:git-repository-open
-   #:git-repository-free
    #:with-git-revisions
    #:bind-git-commits
    #:git-commit-create

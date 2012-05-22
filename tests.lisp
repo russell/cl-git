@@ -75,8 +75,7 @@ new repository to PATH. "
                 (unwind-protect
                      (progn
                        (cl-git:git-repository-init path :bare)
-                       (cl-git:git-repository-open path)
-                       (cl-git:git-repository-free))
+                       (cl-git:git-repository-open path))
                   (progn
                     (cl-fad:delete-directory-and-files path))))))
 
