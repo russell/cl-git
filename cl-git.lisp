@@ -76,6 +76,13 @@
   (filename-len size)
   (removed :int))
 
+
+;;; Foreign wrapper classes
+
+(defclass commit ()
+  ((pointer :accessor pointer :initarg :pointer)
+   (repository-pointer :accessor repository-pointer :initarg :repository-pointer)))
+
 ;;; Foreign type translation
 
 ;; OID
@@ -342,32 +349,47 @@ reference is symbolic."
   (parent-count :int)
   (parents :pointer))
 
-(cffi:defcfun ("git_commit_message" git-commit-message)
+(cffi:defcfun ("git_commit_message" %git-commit-message)
     :string
   "Return a string containing the commit message."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_author" git-commit-author)
+(defmethod git-commit-message ((c commit))
+  (%git-commit-message (pointer c)))
+
+(cffi:defcfun ("git_commit_author" %git-commit-author)
     %git-signature
   "Given a commit return the commit author's signature."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_committer" git-commit-committer)
+(defmethod git-commit-author ((c commit))
+  (%git-commit-author (pointer c)))
+
+(cffi:defcfun ("git_commit_committer" %git-commit-committer)
     %git-signature
   "Given a commit return the commit committer's signature."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_parentcount" git-commit-parentcount)
+(defmethod git-commit-committer ((c commit))
+  (%git-commit-committer (pointer c)))
+
+(cffi:defcfun ("git_commit_parentcount" %git-commit-parentcount)
     :int
   "Returns the number of parent commits of the argument."
   (commit :pointer))
 
-(cffi:defcfun ("git_commit_parent_oid" git-commit-parent-oid)
+(defmethod git-commit-parentcount ((c commit))
+  (%git-commit-parentcount (pointer c)))
+
+(cffi:defcfun ("git_commit_parent_oid" %git-commit-parent-oid)
     %oid
   "Returns the oid of the parent with index `parent-index' in the list of parents
 of the commit `commit'."
   (commit :pointer)
   (n :int))
+
+(defmethod git-commit-parent-oid ((c commit))
+  (%git-commit-parent-oid (pointer c)))
 
 (cffi:defcfun ("git_commit_tree" %git-commit-tree)
     :int
@@ -661,7 +683,6 @@ reference will be updated.  AUTHOR is an optional instance of a
 GIT-SIGNATURE that details the commit author.  COMMITTER is an
 optional instance of a GIT-SIGNATURE the details the commit committer.
 PARENTS is an optional list of parent commits sha1 hashes."
-
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((newoid (cffi:foreign-alloc 'git-oid))
@@ -677,7 +698,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
                                          (%update-ref update-ref))
                (loop for parent in parents
                      counting parent into i
-                     do (setf (cffi:mem-aref %parents :pointer (1- i)) parent))
+                     do (setf (cffi:mem-aref %parents :pointer (1- i)) (pointer parent)))
                (handle-git-return-code
                 (%git-commit-create
                  newoid
@@ -692,7 +713,6 @@ PARENTS is an optional list of parent commits sha1 hashes."
                  %parents))))
            (git-oid-tostr newoid))
       (progn
-        (mapcar #'(lambda (c) (git-commit-close c)) parents)
         (git-tree-close %tree)
         (cffi:foreign-free newoid)))))
 
@@ -761,7 +781,14 @@ manually with GIT-TREE-CLOSE."
 (defun git-commit-lookup (oid)
   "Look up a commit by oid, return the resulting commit.  This commit
 will need to be freed manually with GIT-COMMIT-CLOSE."
-  (git-object-lookup oid :commit))
+  (let* ((pointer (git-object-lookup oid :commit))
+         (commit (make-instance 'commit
+                                :pointer pointer
+                                :repository-pointer *git-repository*)))
+    (finalize commit
+              (lambda ()
+                (git-commit-close pointer)))
+    commit))
 
 (defun git-commit-close (commit)
   "Close the commit and free the memory allocated to the commit."
@@ -801,7 +828,6 @@ argument."
 (defun git-reference-listall (&rest flags)
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
-
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((git-flags (if flags flags '(:oid))))
@@ -820,7 +846,6 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 (defun git-reference-create (name &key sha head force)
   "Create new reference in the current repository with NAME linking to
 SHA or HEAD.  If FORCE is true then override if it already exists."
-
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((oid (lookup-commit :sha sha :head head)))
@@ -840,7 +865,6 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 OID can be a single object id, or a list of object ids.
 The OIDs can be anything that can be resolved by commit-oid-from-oid.
 In general this means, commits and tags."
-
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((revwalker-pointer (cffi:foreign-alloc :pointer)))
@@ -895,10 +919,18 @@ repositony at path."
 This is an extended version of git-commit-lookup.
 If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
-  (let ((git-object (git-object-lookup oid :any)))
-    (ecase (git-object-type git-object)
-      (:tag (prog1 (git-tag-target git-object) (git-object-free git-object)))
-      (:commit git-object))))
+  (let* ((git-object (git-object-lookup oid :any))
+         (pointer (ecase (git-object-type git-object)
+                    (:tag (prog1 (git-tag-target git-object) (git-object-free git-object)))
+                    (:commit git-object)))
+         (commit (make-instance 'commit
+                                :pointer pointer
+                                :repository-pointer *git-repository*)))
+    (finalize commit
+              (lambda ()
+                (git-commit-close pointer)))
+    commit))
+
 
 (defun commit-oid-from-oid (oid)
   "Returns the oid of a commit referenced by `oid'.
@@ -906,9 +938,7 @@ If the `oid' refers to a commit the function is basically a
 no-op.  However if `oid' refers to a tag, it will return
 the oid of the target of the tag."
   (let ((commit (git-commit-from-oid oid)))
-    (prog1
-	(git-object-id commit)
-      (git-object-free commit))))
+	(git-object-id (pointer commit))))
 
 (defun git-commit-parent-oids (commit)
   "Returns a list of oids identifying the parent commits of `commit'."
@@ -960,15 +990,7 @@ ref path."
 			  (git-commit-from-oid
 			   (lookup-commit ,@(cdr s)))))
 	       bindings)
-	    ,@body)
-       (progn
-	 ,@(mapcar
-	    #'(lambda (s)
-		`(progn
-		   (unless (cffi:null-pointer-p ,(car s))
-		     (git-commit-close ,(car s)))))
-		   ;(cffi:foreign-free ,(car s))))
-	    bindings)))))
+	    ,@body))))
 
 
 (defmacro with-git-revisions ((commit &rest rest &key sha head) &body body)
@@ -986,9 +1008,7 @@ special call to stop iteration."
                         (if (= (%git-revwalk-next oid revwalker) 0)
                             (progn
                               (let ((,commit (git-commit-from-oid oid)))
-                                (unwind-protect
-                                     (progn ,@body)
-                                  (progn (git-commit-close ,commit))))
+                                ,@body)
                               (revision-walker))))))
              (unwind-protect
 		  (revision-walker)
