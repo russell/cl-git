@@ -48,6 +48,16 @@
   (:actual-type :pointer)
   (:simple-parser %tree-entry))
 
+(cffi:defcstruct git-error
+  (message :string)
+  (klass :int))
+
+(cffi:define-foreign-type git-error-type ()
+  nil
+  (:actual-type git-error)
+  (:simple-parser %git-error))
+
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -170,6 +180,13 @@ reference is symbolic."
     (list :attr attr :filename filename
 	  :oid  (cffi:convert-from-foreign oid '%oid) :removed removed)))
 
+
+;;; Git errors
+(defmethod cffi:translate-from-foreign (value (type git-error-type))
+  (cffi:with-foreign-slots ((message klass) value git-error)
+    (list klass message)))
+
+
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
 (cffi:defctype git-repository-index :pointer)
@@ -194,7 +211,8 @@ reference is symbolic."
   (oid %oid))
 
 ;;; Git Error
-(cffi:defcfun ("git_lasterror" git-lasterror) :string)
+
+(cffi:defcfun ("giterr_last" giterr-last) %git-error)
 
 ;;; Git Config
 
@@ -520,9 +538,11 @@ This does count the number of direct children, not recursively."
 
 (defun handle-git-return-code (return-code)
      (unless (= return-code 0)
-	  (error 'git-error
-		 :message (git-lasterror)
-		 :code return-code)))
+       (let ((last-error (giterr-last)))
+         ;; TODO Clear error here
+         (error 'git-error
+                :message (cadr last-error)
+                :code (car last-error)))))
 
 
 (defun git-oid-tostr (oid)
