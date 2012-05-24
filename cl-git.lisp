@@ -747,7 +747,7 @@ Note that the returned git object should be freed with git-object-free."
 (defun git-blob-lookup (oid)
   "Returns a blob identified by the oid."
   (assert (not (null-or-nullpointer *git-repository*)))
-  (git-object-lookup oid))
+  (git-object-lookup oid :blob))
 
 (defun git-blob-raw-content (blob)
   (let ((result (make-array (git-blob-raw-size blob)
