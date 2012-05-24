@@ -367,32 +367,47 @@ reference is symbolic."
   (parent-count :int)
   (parents :pointer))
 
-(defcfun ("git_commit_message" commit-message)
+(defcfun ("git_commit_message" git-commit-message)
     :string
   "Return a string containing the commit message."
   (commit %commit))
 
-(defcfun ("git_commit_author" commit-author)
+(defmethod commit-message ((commit commit))
+  (git-commit-message commit))
+
+(defcfun ("git_commit_author" git-commit-author)
     %git-signature
   "Given a commit return the commit author's signature."
   (commit %commit))
 
-(defcfun ("git_commit_committer" commit-committer)
+(defmethod commit-author ((commit commit))
+  (git-commit-author commit))
+
+(defcfun ("git_commit_committer" git-commit-committer)
     %git-signature
   "Given a commit return the commit committer's signature."
   (commit %commit))
 
-(defcfun ("git_commit_parentcount" commit-parentcount)
+(defmethod commit-committer ((commit commit))
+  (git-commit-committer commit))
+
+(defcfun ("git_commit_parentcount" git-commit-parentcount)
     :int
   "Returns the number of parent commits of the argument."
   (commit %commit))
 
-(defcfun ("git_commit_parent_oid" commit-parent-oid)
+(defmethod commit-parentcount ((commit commit))
+  (git-commit-parentcount commit))
+
+(defcfun ("git_commit_parent_oid" git-commit-parent-oid)
     %oid
   "Returns the oid of the parent with index `parent-index' in the list
 of parents of the commit `commit'."
   (commit %commit)
   (n :int))
+
+(defmethod commit-parent-oid ((commit commit) index)
+  (git-commit-parent-oid commit index))
 
 (cffi:defcfun ("git_commit_tree" %git-commit-tree)
     :int
@@ -402,26 +417,39 @@ of parents of the commit `commit'."
 ;;; Tag functions
 (cffi:defcfun ("git_tag_type" git-tag-type)
     git-object-type
-  (tag :pointer))
+  (tag %tag))
+
+(defmethod tag-type ((tag tag))
+  (git-tag-type tag))
 
 (cffi:defcfun ("git_tag_target" %git-tag-target)
     :int
   (reference :pointer)
-  (tag :pointer))
+  (tag %tag))
 
 (cffi:defcfun ("git_tag_tagger" git-tag-tagger)
     %git-signature
-  (tag :pointer))
+  (tag %tag))
+
+(defmethod tag-tagger ((tag tag))
+  (git-tag-name tag))
 
 (cffi:defcfun ("git_tag_name" git-tag-name)
     :string
   "Returns the name of the tag"
-  (tag :pointer))
+  (tag %tag))
 
-(cffi:defcfun ("git_tag_message" tag-message)
+(defmethod tag-name ((tag tag))
+  (git-tag-name tag))
+
+(cffi:defcfun ("git_tag_message" git-tag-message)
     :string
   "Returns the message of the tag"
   (tag %tag))
+
+(defmethod tag-message ((tag tag))
+  (git-tag-message tag))
+
 
 ;;; Git Tree
 (cffi:defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
@@ -798,7 +826,7 @@ will need to be freed manually with GIT-COMMIT-CLOSE."
   "Close the commit and free the memory allocated to the commit."
   (git-object-free commit))
 
-(defun git-tag-target (tag)
+(defmethod tag-target ((tag tag))
   (let ((obj (cffi:foreign-alloc :pointer)))
     (prog2
 	(handle-git-return-code
