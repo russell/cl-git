@@ -412,7 +412,7 @@ of parents of the commit `commit'."
 (cffi:defcfun ("git_commit_tree" %git-commit-tree)
     :int
   (tree-out :pointer)
-  (commit :pointer))
+  (commit %commit))
 
 ;;; Tag functions
 (cffi:defcfun ("git_tag_type" git-tag-type)
@@ -771,9 +771,10 @@ Note that the returned git object should be freed with git-object-free."
       (handle-git-return-code
        (%git-object-lookup
         obj-ptr *git-repository* oid type))
-    (let* ((obj-type (ecase (git-object-type (mem-ref obj-ptr :pointer))
+    (let* ((obj-type (case (git-object-type (mem-ref obj-ptr :pointer))
                       (:commit 'commit)
-                      (:tag 'tag)))
+                      (:tag 'tag)
+                      (t 'object)))
            (object (make-instance obj-type :pointer (mem-ref obj-ptr :pointer))))
       (with-foreign-object (finalizer-ptr :pointer)
         (setf finalizer-ptr (mem-ref obj-ptr :pointer))
@@ -785,11 +786,7 @@ Note that the returned git object should be freed with git-object-free."
 (defun git-blob-lookup (oid)
   "Returns a blob identified by the oid."
   (assert (not (null-or-nullpointer *git-repository*)))
-
-  (cffi:with-foreign-object (obj :pointer)
-    (handle-git-return-code
-     (%git-blob-lookup obj *git-repository* oid))
-    (cffi:mem-ref obj :pointer)))
+  (git-object-lookup oid :blob))
 
 (defun git-blob-raw-content (blob)
   (let ((result (make-array (git-blob-raw-size blob)
