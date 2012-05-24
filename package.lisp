@@ -4,6 +4,29 @@
   (:use #:cl)
   (:import-from #:trivial-garbage
                 #:finalize)
+  (:import-from #:cffi
+                #:define-parse-method
+                #:define-foreign-type
+                #:use-foreign-library
+                #:foreign-funcall
+                #:translate-to-foreign
+                #:translate-from-foreign
+                #:convert-from-foreign
+                #:with-foreign-object
+                #:with-foreign-strings
+                #:foreign-alloc
+                #:null-pointer
+                #:null-pointer-p
+                #:pointerp
+                #:mem-ref
+                #:defcfun
+                #:defctype
+                #:defcstruct
+                #:defbitfield
+                #:foreign-string-to-lisp
+                #:defcallback
+                #:foreign-free
+                #:defcenum)
   (:export
    #:*git-repository-index*
    #:git-repository-init
