@@ -740,20 +740,19 @@ Note that the returned git object should be freed with git-object-free."
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (cffi:with-foreign-object (obj-ptr :pointer)
-    (let ((obj-type (ecase type
-                      (:any 'object)
-                      (:commit 'commit)
-                      (:tag 'tag))))
       (handle-git-return-code
        (%git-object-lookup
         obj-ptr *git-repository* oid type))
-      (let ((object (make-instance obj-type :pointer (mem-ref obj-ptr :pointer))))
-        (with-foreign-object (finalizer-ptr :pointer)
-          (setf finalizer-ptr (mem-ref obj-ptr :pointer))
-          (finalize object
-                    (lambda ()
-                      (git-object-free finalizer-ptr))))
-        object))))
+    (let* ((obj-type (ecase (git-object-type (mem-ref obj-ptr :pointer))
+                      (:commit 'commit)
+                      (:tag 'tag)))
+           (object (make-instance obj-type :pointer (mem-ref obj-ptr :pointer))))
+      (with-foreign-object (finalizer-ptr :pointer)
+        (setf finalizer-ptr (mem-ref obj-ptr :pointer))
+        (finalize object
+                  (lambda ()
+                    (git-object-free finalizer-ptr))))
+      object)))
 
 (defun git-blob-lookup (oid)
   "Returns a blob identified by the oid."
