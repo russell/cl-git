@@ -25,7 +25,7 @@ What It Can Do
 Requires
 --------
 
-libgit2: 0.16.0
+libgit2: 0.17.0
 
 
 Examples

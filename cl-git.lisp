@@ -64,6 +64,16 @@
   (:actual-type :pointer)
   (:simple-parser %tag))
 
+(cffi:defcstruct git-error
+  (message :string)
+  (klass :int))
+
+(cffi:define-foreign-type git-error-type ()
+  nil
+  (:actual-type git-error)
+  (:simple-parser %git-error))
+
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -187,6 +197,10 @@ reference is symbolic."
     (list :attr attr :filename filename
 	  :oid  (cffi:convert-from-foreign oid '%oid) :removed removed)))
 
+;;; Git errors
+(defmethod cffi:translate-from-foreign (value (type git-error-type))
+  (cffi:with-foreign-slots ((message klass) value git-error)
+    (list klass message)))
 
 ;;; Object
 
@@ -211,7 +225,7 @@ reference is symbolic."
 (cffi::defctype size-t :unsigned-long)
 
 ;;; The return value should not be freed.
-(cffi:defcfun ("git_oid_to_string"
+(cffi:defcfun ("git_oid_tostr"
                %git-oid-tostr)
     (:pointer :char)
   (out (:pointer :char))
@@ -219,7 +233,8 @@ reference is symbolic."
   (oid %oid))
 
 ;;; Git Error
-(cffi:defcfun ("git_lasterror" git-lasterror) :string)
+
+(cffi:defcfun ("giterr_last" giterr-last) %git-error)
 
 ;;; Git Config
 
@@ -263,7 +278,7 @@ reference is symbolic."
     (:packed 4)
     (:has-peel 8))
 
-(cffi:defcfun ("git_reference_listall" %git-reference-listall)
+(cffi:defcfun ("git_reference_list" %git-reference-list)
     :int
   (strings :pointer)
   (repository :pointer)
@@ -333,12 +348,6 @@ reference is symbolic."
   (object :pointer))
 
 ;;; Blobs
-(cffi:defcfun ("git_blob_lookup" %git-blob-lookup)
-    :int
-  (blob-out :pointer)
-  (repository :pointer)
-  (oid %oid))
-
 (cffi:defcfun ("git_blob_rawcontent" %git-blob-raw-content)
     :pointer
   (blob :pointer))
@@ -573,9 +582,11 @@ This does count the number of direct children, not recursively."
 
 (defun handle-git-return-code (return-code)
      (unless (= return-code 0)
-	  (error 'git-error
-		 :message (git-lasterror)
-		 :code return-code)))
+       (let ((last-error (giterr-last)))
+         ;; TODO Clear error here
+         (error 'git-error
+                :message (cadr last-error)
+                :code (car last-error)))))
 
 
 (defun git-oid-tostr (oid)
@@ -861,7 +872,7 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
   (let ((git-flags (if flags flags '(:oid))))
     (cffi:with-foreign-object (string-array 'git-strings)
-      (handle-git-return-code (%git-reference-listall
+      (handle-git-return-code (%git-reference-list
                                string-array *git-repository*
                                git-flags))
       (cffi:with-foreign-slots ((strings count) string-array git-strings)

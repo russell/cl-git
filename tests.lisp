@@ -83,7 +83,7 @@ new repository to PATH. "
   "randomly modify the file in the repo at repo-path."
   (let ((test-file (concatenate 'string repo-path "/" filename))
         (content (with-output-to-string (stream)
-                   (format stream "Random text: ~A.\n" (random-string 100)))))
+                   (format stream "Random text: ~A.~%" (random-string 100)))))
     (with-open-file (stream test-file :direction :output :if-exists :supersede)
       content)
     (cl-git:git-index-add filename)
@@ -113,7 +113,7 @@ then add and commit it to the repository. returns a list containing
 commit-message filename content."
   (let ((commit-message (with-output-to-string (stream)
                           (format
-                           stream "Random commit: ~A.\n"
+                           stream "Random commit: ~A.~%"
                            (random-string 100)))))
     (cl-git:with-git-repository-index
       (multiple-value-bind (author author-alist) (create-random-signature)
@@ -155,7 +155,7 @@ commit-message filename content."
                   (commit-random-file-modification
                    path "test" "Test commit"))
         (is (equal (cl-git:git-commit-message commit)
-                   "Test commit"))))))
+                   (format-string "Test commit~%")))))))
 
 (defun create-random-commits (repo-path number)
   "create a number of random commits to random files."

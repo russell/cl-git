@@ -1,0 +1,10 @@
+A short list of items that need to be done.
+
+* Remove CFFI namespaces
+* Move all foreign-funcall's into defcfun 
+   this is so translations can be used and there is a consistant
+   location for defined functions.
+* Move all groups of funcitons into separate files
+   Probably following the libgit2 breakdown
+* Reorder the files from low-level to high-level functions
+* Change all loops to use the keyword syntax
