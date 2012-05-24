@@ -326,12 +326,6 @@ reference is symbolic."
   (object :pointer))
 
 ;;; Blobs
-(cffi:defcfun ("git_blob_lookup" %git-blob-lookup)
-    :int
-  (blob-out :pointer)
-  (repository :pointer)
-  (oid %oid))
-
 (cffi:defcfun ("git_blob_rawcontent" %git-blob-raw-content)
     :pointer
   (blob :pointer))
@@ -753,11 +747,7 @@ Note that the returned git object should be freed with git-object-free."
 (defun git-blob-lookup (oid)
   "Returns a blob identified by the oid."
   (assert (not (null-or-nullpointer *git-repository*)))
-
-  (cffi:with-foreign-object (obj :pointer)
-    (handle-git-return-code
-     (%git-blob-lookup obj *git-repository* oid))
-    (cffi:mem-ref obj :pointer)))
+  (git-object-lookup oid))
 
 (defun git-blob-raw-content (blob)
   (let ((result (make-array (git-blob-raw-size blob)
