@@ -34,11 +34,11 @@
    #:with-git-revisions
    #:bind-git-commits
    #:git-commit-create
-   #:git-commit-author
-   #:git-commit-message
-   #:git-commit-committer
-   #:git-commit-parent-count
-   #:git-commit-parent-oid
+   #:commit-author
+   #:commit-message
+   #:commit-committer
+   #:commit-parent-count
+   #:commit-parent-oid
    #:git-commit-parent-oids
    #:git-commit-lookup
    #:git-commit-close
@@ -57,7 +57,7 @@
    #:git-tag-type
    #:git-tag-target
    #:git-tag-name
-   #:git-tag-message
+   #:tag-message
    #:git-config-free
    #:git-repository-config
    #:git-config-values

@@ -48,6 +48,22 @@
   (:actual-type :pointer)
   (:simple-parser %tree-entry))
 
+(cffi:define-foreign-type object ()
+  ((%object :accessor pointer :initarg :pointer :initform (null-pointer))
+   (%repository :accessor %repository :initarg :repository-pointer))
+  (:actual-type :pointer)
+  (:simple-parser %object))
+
+(cffi:define-foreign-type commit (object-type)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %commit))
+
+(cffi:define-foreign-type tag (object-type)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %tag))
+
 ;;; Git Common
 (cffi:defctype git-code :int)
 
@@ -76,12 +92,6 @@
   (filename-len size)
   (removed :int))
 
-
-;;; Foreign wrapper classes
-
-(defclass commit ()
-  ((pointer :accessor pointer :initarg :pointer)
-   (repository-pointer :accessor repository-pointer :initarg :repository-pointer)))
 
 ;;; Foreign type translation
 
@@ -176,6 +186,14 @@ reference is symbolic."
   (cffi:with-foreign-slots ((attr filename oid removed) value git-tree-entry)
     (list :attr attr :filename filename
 	  :oid  (cffi:convert-from-foreign oid '%oid) :removed removed)))
+
+
+;;; Object
+
+(defmethod translate-to-foreign (value (type object))
+  (if (pointerp value)
+      value
+      (pointer value)))
 
 ;;; Git Repositories
 (cffi:defctype git-repository :pointer)
@@ -304,7 +322,7 @@ reference is symbolic."
 
 (cffi:defcfun ("git_object_lookup" %git-object-lookup)
     :int
-  (object :pointer)
+  (object %object)
   (repo :pointer)
   (oid %oid)
   (type git-object-type))
@@ -349,47 +367,32 @@ reference is symbolic."
   (parent-count :int)
   (parents :pointer))
 
-(cffi:defcfun ("git_commit_message" %git-commit-message)
+(defcfun ("git_commit_message" commit-message)
     :string
   "Return a string containing the commit message."
-  (commit :pointer))
+  (commit %commit))
 
-(defmethod git-commit-message ((c commit))
-  (%git-commit-message (pointer c)))
-
-(cffi:defcfun ("git_commit_author" %git-commit-author)
+(defcfun ("git_commit_author" commit-author)
     %git-signature
   "Given a commit return the commit author's signature."
-  (commit :pointer))
+  (commit %commit))
 
-(defmethod git-commit-author ((c commit))
-  (%git-commit-author (pointer c)))
-
-(cffi:defcfun ("git_commit_committer" %git-commit-committer)
+(defcfun ("git_commit_committer" commit-committer)
     %git-signature
   "Given a commit return the commit committer's signature."
-  (commit :pointer))
+  (commit %commit))
 
-(defmethod git-commit-committer ((c commit))
-  (%git-commit-committer (pointer c)))
-
-(cffi:defcfun ("git_commit_parentcount" %git-commit-parentcount)
+(defcfun ("git_commit_parentcount" commit-parentcount)
     :int
   "Returns the number of parent commits of the argument."
-  (commit :pointer))
+  (commit %commit))
 
-(defmethod git-commit-parentcount ((c commit))
-  (%git-commit-parentcount (pointer c)))
-
-(cffi:defcfun ("git_commit_parent_oid" %git-commit-parent-oid)
+(defcfun ("git_commit_parent_oid" commit-parent-oid)
     %oid
-  "Returns the oid of the parent with index `parent-index' in the list of parents
-of the commit `commit'."
-  (commit :pointer)
+  "Returns the oid of the parent with index `parent-index' in the list
+of parents of the commit `commit'."
+  (commit %commit)
   (n :int))
-
-(defmethod git-commit-parent-oid ((c commit))
-  (%git-commit-parent-oid (pointer c)))
 
 (cffi:defcfun ("git_commit_tree" %git-commit-tree)
     :int
@@ -415,10 +418,10 @@ of the commit `commit'."
   "Returns the name of the tag"
   (tag :pointer))
 
-(cffi:defcfun ("git_tag_message" git-tag-message)
+(cffi:defcfun ("git_tag_message" tag-message)
     :string
   "Returns the message of the tag"
-  (tag :pointer))
+  (tag %tag))
 
 ;;; Git Tree
 (cffi:defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
@@ -576,7 +579,7 @@ variable to the open repository.  If the PATH contains a .git
 directory it will be opened instead of the specified path."
   (assert (null-or-nullpointer *git-repository-index*))
   (assert (null-or-nullpointer *git-repository*))
-  (cffi:with-foreign-pointer (repository-ref 1)
+  (cffi:with-foreign-object (repository-ref :pointer)
     (let ((path (or (cl-fad:directory-exists-p
                      (merge-pathnames
                       #p".git/"
@@ -588,9 +591,9 @@ directory it will be opened instead of the specified path."
                                git-repository repository-ref
                                :string (namestring path)
                                git-code)))
-      (cffi:with-foreign-pointer (repository-ref1 1)
+      (cffi:with-foreign-object (repository-ref1 :pointer)
         (setf repository-ref1 (cffi:mem-ref repository-ref :pointer))
-        (setf repository-ref repository-ref1)
+        (setf repository-ref (cffi:mem-ref repository-ref :pointer))
         (finalize repository-ref
                   (lambda ()
                     (cffi:foreign-funcall "git_repository_free"
@@ -736,12 +739,21 @@ Note that the returned git object should be freed with git-object-free."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
-  (cffi:with-foreign-object (obj :pointer)
-    (handle-git-return-code
-     (%git-object-lookup
-      obj *git-repository* oid type))
-    (cffi:mem-ref obj :pointer)))
-
+  (cffi:with-foreign-object (obj-ptr :pointer)
+    (let ((obj-type (ecase type
+                      (:any 'object)
+                      (:commit 'commit)
+                      (:tag 'tag))))
+      (handle-git-return-code
+       (%git-object-lookup
+        obj-ptr *git-repository* oid type))
+      (let ((object (make-instance obj-type :pointer (mem-ref obj-ptr :pointer))))
+        (with-foreign-object (finalizer-ptr :pointer)
+          (setf finalizer-ptr (mem-ref obj-ptr :pointer))
+          (finalize object
+                    (lambda ()
+                      (git-object-free finalizer-ptr))))
+        object))))
 
 (defun git-blob-lookup (oid)
   "Returns a blob identified by the oid."
@@ -781,14 +793,7 @@ manually with GIT-TREE-CLOSE."
 (defun git-commit-lookup (oid)
   "Look up a commit by oid, return the resulting commit.  This commit
 will need to be freed manually with GIT-COMMIT-CLOSE."
-  (let* ((pointer (git-object-lookup oid :commit))
-         (commit (make-instance 'commit
-                                :pointer pointer
-                                :repository-pointer *git-repository*)))
-    (finalize commit
-              (lambda ()
-                (git-commit-close pointer)))
-    commit))
+  (git-object-lookup oid :commit))
 
 (defun git-commit-close (commit)
   "Close the commit and free the memory allocated to the commit."
@@ -919,18 +924,10 @@ repositony at path."
 This is an extended version of git-commit-lookup.
 If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
-  (let* ((git-object (git-object-lookup oid :any))
-         (pointer (ecase (git-object-type git-object)
-                    (:tag (prog1 (git-tag-target git-object) (git-object-free git-object)))
-                    (:commit git-object)))
-         (commit (make-instance 'commit
-                                :pointer pointer
-                                :repository-pointer *git-repository*)))
-    (finalize commit
-              (lambda ()
-                (git-commit-close pointer)))
-    commit))
-
+  (let ((git-object (git-object-lookup oid :any)))
+    (ecase (git-object-type git-object)
+      (:tag (prog1 (git-tag-target git-object) (git-object-free git-object)))
+      (:commit git-object))))
 
 (defun commit-oid-from-oid (oid)
   "Returns the oid of a commit referenced by `oid'.
