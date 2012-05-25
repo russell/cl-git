@@ -3,11 +3,6 @@
 (defpackage #:cl-git
   (:use #:cl)
   (:export
-   #:*git-repository*
-   #:*git-repository-index*
-   #:git-repository-init
-   #:git-repository-open
-   #:git-repository-free
    #:with-git-revisions
    #:bind-git-commits
    #:git-commit-create
