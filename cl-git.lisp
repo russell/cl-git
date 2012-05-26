@@ -107,7 +107,6 @@
   (filename-len size)
   (removed :int))
 
-
 ;;; Foreign type translation
 
 ;; OID
@@ -745,9 +744,9 @@ PARENTS is an optional list of parent commits sha1 hashes."
              (with-foreign-strings ((%message message)
                                          (%message-encoding "UTF-8")
                                          (%update-ref update-ref))
-               (loop for parent in parents
-                     counting parent into i
-                  do (setf (mem-aref %parents :pointer (1- i)) (translate-to-foreign parent parent)))
+               (loop :for parent :in parents
+                     :counting parent :into i
+                     :do (setf (mem-aref %parents :pointer (1- i)) (translate-to-foreign parent parent)))
                (handle-git-return-code
                 (%git-commit-create
                  newoid
@@ -874,9 +873,10 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
                                git-flags))
       (with-foreign-slots ((strings count) string-array git-strings)
         (let ((refs
-               (loop for i below count collect
-                    (foreign-string-to-lisp
-                     (mem-aref strings :pointer i)))))
+               (loop
+                  :for i :below count
+                  :collect (foreign-string-to-lisp
+                            (mem-aref strings :pointer i)))))
           (%git-strarray-free string-array)
           refs)))))
 
@@ -912,9 +912,12 @@ In general this means, commits and tags."
     (let ((revwalker (mem-ref revwalker-pointer :pointer)))
       (foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
-      (loop for oid in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids) do
-	   (handle-git-return-code (%git-revwalk-push revwalker
-						      (commit-oid-from-oid oid))))
+      (loop
+         :for oid
+         :in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids)
+         :do (handle-git-return-code
+              (%git-revwalk-push revwalker
+                                 (commit-oid-from-oid oid))))
       revwalker)))
 
 
@@ -973,8 +976,9 @@ the oid of the target of the tag."
 
 (defun git-commit-parent-oids (commit)
   "Returns a list of oids identifying the parent commits of `commit'."
-  (loop for index from 0 below (git-commit-parent-count commit)
-       collect (git-commit-parent-oid commit index)))
+  (loop
+     :for index :from 0 :below (git-commit-parent-count commit)
+     :collect (git-commit-parent-oid commit index)))
 
 (defun lookup-commit (&key sha head)
   "Returns an oid for a single commit (or tag).  It takes a single
@@ -995,11 +999,9 @@ the oid of the target of the tag."
  a single oid.  If the argument was a single reference, it will return
  a list containing a single oid."
    (flet ((lookup-loop (keyword lookup)
-          (loop for reference
-                in
-                (if (atom lookup) (list lookup) lookup)
-                collect
-                (lookup-commit keyword reference))))
+          (loop :for reference
+                :in (if (atom lookup) (list lookup) lookup)
+                :collect (lookup-commit keyword reference))))
      (cond
        (head (lookup-loop :head head))
        (sha (lookup-loop :sha sha)))))
