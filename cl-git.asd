@@ -29,8 +29,9 @@
                  (:file "revwalk")))))
 
 (asdf:defsystem #:cl-git-tests
-  :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell)
+  :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell #:local-time)
   :components ((:module "tests"
+                :serial t
                 :components
                 ((:file "common")
                  (:file "commit")
