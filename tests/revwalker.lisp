@@ -20,7 +20,6 @@
 
 (in-package #:cl-git-tests)
 
-(def-suite :cl-git)
 (in-suite :cl-git)
 
 (test create-random-commits

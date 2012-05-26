@@ -19,15 +19,12 @@
 
 
 (defpackage :cl-git-tests
-  (:use :common-lisp
-   :cl-git
-        :it.bese.FiveAM))
+  (:use :common-lisp :cl-git :it.bese.FiveAM))
 
 
 (in-package #:cl-git-tests)
 
 (def-suite :cl-git)
-(in-suite :cl-git)
 
 (defparameter *test-repository-path* #P"/tmp/")
 
