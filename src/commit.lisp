@@ -19,6 +19,14 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (define-foreign-type commit (object)
   nil
   (:actual-type :pointer)
@@ -42,32 +50,20 @@
   "Return a string containing the commit message."
   (commit %commit))
 
-(defmethod commit-message ((commit commit))
-  (git-commit-message commit))
-
 (defcfun ("git_commit_author" git-commit-author)
     %git-signature
   "Given a commit return the commit author's signature."
   (commit %commit))
-
-(defmethod commit-author ((commit commit))
-  (git-commit-author commit))
 
 (defcfun ("git_commit_committer" git-commit-committer)
     %git-signature
   "Given a commit return the commit committer's signature."
   (commit %commit))
 
-(defmethod commit-committer ((commit commit))
-  (git-commit-committer commit))
-
 (defcfun ("git_commit_parentcount" git-commit-parentcount)
     :int
   "Returns the number of parent commits of the argument."
   (commit %commit))
-
-(defmethod commit-parentcount ((commit commit))
-  (git-commit-parentcount commit))
 
 (defcfun ("git_commit_parent_oid" git-commit-parent-oid)
     %oid
@@ -76,13 +72,18 @@ of parents of the commit `commit'."
   (commit %commit)
   (n :int))
 
-(defmethod commit-parent-oid ((commit commit) index)
-  (git-commit-parent-oid commit index))
-
 (defcfun ("git_commit_tree" %git-commit-tree)
     :int
   (tree-out :pointer)
   (commit %commit))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defun make-commit (oid message &key
                                         (update-ref "HEAD")
@@ -130,12 +131,33 @@ PARENTS is an optional list of parent commits sha1 hashes."
       (progn
         (foreign-free newoid)))))
 
-(defun git-commit-tree (commit)
+(defmethod commit-message ((commit commit))
+  (git-commit-message commit))
+
+(defmethod commit-author ((commit commit))
+  (git-commit-author commit))
+
+(defmethod commit-committer ((commit commit))
+  (git-commit-committer commit))
+
+(defmethod commit-parentcount ((commit commit))
+  (git-commit-parentcount commit))
+
+(defmethod commit-parent-oid ((commit commit) index)
+  (git-commit-parent-oid commit index))
+
+(defmethod commit-tree ((commit commit))
   "Returns the tree object of the commit."
   (with-foreign-object (tree :pointer)
     (handle-git-return-code
      (%git-commit-tree tree commit))
     (mem-aref tree :pointer)))
+
+(defmethod commit-parent-oids ((commit commit))
+  "Returns a list of oids identifying the parent commits of `commit'."
+  (loop
+     :for index :from 0 :below (git-commit-parent-count commit)
+     :collect (git-commit-parent-oid commit index)))
 
 (defun git-commit-lookup (oid)
   "Look up a commit by oid, return the resulting commit."
@@ -158,12 +180,6 @@ no-op.  However if `oid' refers to a tag, it will return
 the oid of the target of the tag."
   (let ((commit (git-commit-from-oid oid)))
 	(git-object-id commit)))
-
-(defun git-commit-parent-oids (commit)
-  "Returns a list of oids identifying the parent commits of `commit'."
-  (loop
-     :for index :from 0 :below (git-commit-parent-count commit)
-     :collect (git-commit-parent-oid commit index)))
 
 (defmacro bind-git-commits (bindings &body body)
   "Lookup commits specified in the bindings.  The bindings syntax is

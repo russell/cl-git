@@ -44,9 +44,9 @@
    #:commit-committer
    #:commit-parent-count
    #:commit-parent-oid
-   #:git-commit-parent-oids
+   #:commit-parent-oids
+   #:commit-tree
    #:git-commit-lookup
-   #:git-commit-close
    #:git-reference-listall
    #:git-reference-create
    #:git-reference-lookup
