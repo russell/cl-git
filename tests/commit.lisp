@@ -30,8 +30,8 @@
 
 (defun make-commit1 (repo-path)
   (cl-git:with-repository-index
-    (write-string-to-file repo-path "test1"
-                          "Some test data~%...~%line 3 still nothing..~%getting on~%")
+      (write-string-to-file repo-path "test1"
+                            "Some test data~%...~%line 3 still nothing..~%getting on~%")
     (cl-git:git-index-add "test1")
     (cl-git:git-index-write)
     (cl-git:make-commit
@@ -69,4 +69,8 @@
              (is (equal (getf committer :email)
                         "test1@example.com"))
              (is (equal (local-time:timestamp-to-unix (getf committer :time))
-                        1338044479)))))))
+                        1338044479)))
+           ;; count the number of commit parents,
+           (is (equal (cl-git:commit-parentcount commit)
+                      0))
+           (is (typep (cl-git:commit-tree commit) (type-of (make-instance 'cl-git::tree))))))))

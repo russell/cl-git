@@ -86,6 +86,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(defun make-instance-object (&key object-ptr repository-ptr type)
+  (let* ((obj-type (case (or (unless (eq type :any) type)
+                             (git-object-type object-ptr))
+                     (:commit 'commit)
+                     (:tag 'tag)
+                     (:tree 'tree)
+                     (t 'object)))
+         (object (make-instance obj-type
+                                :pointer object-ptr
+                                :repository-pointer (or repository-ptr *git-repository*))))
+    (with-foreign-object (finalizer-ptr :pointer)
+      (setf finalizer-ptr object-ptr)
+      (finalize object
+                (lambda ()
+                  (git-object-free finalizer-ptr))))
+    object))
+
 (defun git-object-lookup (oid type)
   "Returns a reference to the git odb (object) which is identified by the oid.
 The type argument specifies which type is expected.  If the found
@@ -101,14 +118,4 @@ Note that the returned git object should be freed with git-object-free."
 
   (with-foreign-object (obj-ptr :pointer)
     (%git-object-lookup obj-ptr *git-repository* oid type)
-    (let* ((obj-type (case (git-object-type (mem-ref obj-ptr :pointer))
-                       (:commit 'commit)
-                       (:tag 'tag)
-                       (t 'object)))
-           (object (make-instance obj-type :pointer (mem-ref obj-ptr :pointer))))
-      (with-foreign-object (finalizer-ptr :pointer)
-        (setf finalizer-ptr (mem-ref obj-ptr :pointer))
-        (finalize object
-                  (lambda ()
-                    (git-object-free finalizer-ptr))))
-      object)))
+    (make-instance-object :object-ptr (mem-ref obj-ptr :pointer))))

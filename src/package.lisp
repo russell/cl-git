@@ -41,7 +41,7 @@
    #:commit-author
    #:commit-message
    #:commit-committer
-   #:commit-parent-count
+   #:commit-parentcount
    #:commit-parent-oid
    #:commit-parent-oids
    #:commit-tree

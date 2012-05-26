@@ -131,25 +131,31 @@ PARENTS is an optional list of parent commits sha1 hashes."
         (foreign-free newoid)))))
 
 (defmethod commit-message ((commit commit))
+  "Return a string containing the commit message."
   (git-commit-message commit))
 
 (defmethod commit-author ((commit commit))
+  "Given a commit return the commit author's signature."
   (git-commit-author commit))
 
 (defmethod commit-committer ((commit commit))
   (git-commit-committer commit))
 
 (defmethod commit-parentcount ((commit commit))
+  "Returns the number of parent commits of the argument."
   (git-commit-parentcount commit))
 
 (defmethod commit-parent-oid ((commit commit) index)
+  "Returns the oid of the parent with index `index' in the list of
+parents of the commit `commit'."
   (git-commit-parent-oid commit index))
 
 (defmethod commit-tree ((commit commit))
   "Returns the tree object of the commit."
   (with-foreign-object (%tree :pointer)
     (%git-commit-tree %tree commit)
-    (mem-aref %tree :pointer)))
+    (make-instance-object :object-ptr (mem-aref %tree :pointer)
+                          :type :tree)))
 
 (defmethod commit-parent-oids ((commit commit))
   "Returns a list of oids identifying the parent commits of `commit'."

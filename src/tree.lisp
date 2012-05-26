@@ -51,18 +51,18 @@
 (defcfun ("git_tree_id" git-tree-oid)
     %oid
   "Returns the oid of the tree."
-  (tree :pointer))
+  (tree %tree))
 
 (defcfun ("git_tree_entrycount" git-tree-entry-count)
     :unsigned-int
   "Returns the number of tree entries in the tree object.
 This does count the number of direct children, not recursively."
-  (tree :pointer))
+  (tree %tree))
 
 (defcfun ("git_tree_entry_byindex" git-tree-entry-by-index)
     %tree-entry
   "Returns the tree entry at index"
-  (tree :pointer)
+  (tree %tree)
   (index :unsigned-int))
 
 
@@ -76,7 +76,7 @@ This does count the number of direct children, not recursively."
 (defmethod translate-from-foreign (value (type git-tree-entry-type))
   (with-foreign-slots ((attr filename oid removed) value git-tree-entry)
     (list :attr attr :filename filename
-          :oid  (convert-from-foreign oid '%oid) :removed removed)))
+          :oid (convert-from-foreign oid '%oid) :removed removed)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
