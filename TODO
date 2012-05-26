@@ -1,5 +1,3 @@
 A short list of items that need to be done.
 
-* Move all foreign-funcall's into defcfun 
-   this is so translations can be used and there is a consistant
-   location for defined functions.
+ * remove unnessary "git" references from symbol names

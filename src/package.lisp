@@ -8,7 +8,6 @@
                 #:define-parse-method
                 #:define-foreign-type
                 #:use-foreign-library
-                #:foreign-funcall
                 #:define-foreign-library
                 #:translate-to-foreign
                 #:translate-from-foreign

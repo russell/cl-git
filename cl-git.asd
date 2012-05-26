@@ -15,9 +15,10 @@
                  (:file "cl-git")
                  (:file "utils")
                  (:file "error")
+                 (:file "oid")
+                 (:file "index")
                  (:file "repository")
                  (:file "config")
-                 (:file "oid")
                  (:file "signature")
                  (:file "references")
                  (:file "tree")
@@ -25,8 +26,7 @@
                  (:file "commit")
                  (:file "tag")
                  (:file "status")
-                 (:file "revwalk")
-                 (:file "index")))))
+                 (:file "revwalk")))))
 
 (asdf:defsystem #:cl-git-tests
   :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell)

@@ -36,12 +36,30 @@
 (defctype git-repository-index :pointer)
 
 ;;; Git Config
+(defcfun ("git_repository_init" %git-repository-init)
+    :int
+  (repository :pointer)
+  (path :string)
+  (bare :boolean))
+
+(defcfun ("git_repository_open" %git-repository-open)
+    :int
+  (repository :pointer)
+  (path :string))
+
+(defcfun ("git_repository_free" %git-repository-free)
+    :void
+  (repository :pointer))
 
 (defcfun ("git_repository_config" %git-repository-config)
     :int
   (out :pointer)
   (repository :pointer))
 
+(defcfun ("git_repository_index" %git-repository-index)
+    :int
+  (index :pointer)
+  (repository :pointer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -55,14 +73,8 @@
 repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (repo :pointer)
     (handle-git-return-code
-     (foreign-funcall "git_repository_init"
-                      git-repository repo
-                      :string (namestring path)
-                      :unsigned-int (if bare 1 0)
-                      :int))
-    (foreign-funcall "git_repository_free"
-                     git-repository (mem-ref repo :pointer)
-                     :void)
+     (%git-repository-init repo (namestring path) bare))
+    (%git-repository-free (mem-ref repo :pointer))
     path))
 
 (defun git-repository-open (path)
@@ -77,20 +89,14 @@ directory it will be opened instead of the specified path."
                       #p".git/"
                       (cl-fad:pathname-as-directory path)))
                     (truename path))))
-      (with-foreign-strings ((%path (namestring path)))
-        (handle-git-return-code
-         (foreign-funcall "git_repository_open"
-                          git-repository repository-ref
-                          :string (namestring path)
-                          :int)))
+      (handle-git-return-code
+       (%git-repository-open repository-ref (namestring path)))
       (with-foreign-object (repository-ref1 :pointer)
         (setf repository-ref1 (mem-ref repository-ref :pointer))
         (setf repository-ref (mem-ref repository-ref :pointer))
         (finalize repository-ref
                   (lambda ()
-                    (foreign-funcall "git_repository_free"
-                                     :pointer repository-ref1
-                                     :void)))
+                    (%git-repository-free repository-ref1)))
         repository-ref))))
 
 
@@ -112,6 +118,24 @@ created repository will be bare."
   (with-foreign-object (config :pointer)
     (handle-git-return-code (%git-repository-config config *git-repository*))
     (mem-ref config :pointer)))
+
+(defmacro with-git-repository-index (&body body)
+  "Load a repository index uses the current *GIT-REPOSITORY* as the
+current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
+index."
+  `(let ((*git-repository-index* (null-pointer)))
+     (unwind-protect
+          (progn
+            (assert (not (null-or-nullpointer *git-repository*)))
+            (let ((index (foreign-alloc :pointer)))
+              (handle-git-return-code
+               (%git-repository-index index  *git-repository*))
+              (setf *git-repository-index* (mem-ref index :pointer))
+              (foreign-free index))
+            ,@body)
+       (progn
+         (%git-index-free *git-repository-index*)))))
+
 
 (defmacro with-git-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
