@@ -60,7 +60,7 @@ new repository to PATH. "
      (finishes
        (unwind-protect
             (progn
-              (cl-git:git-repository-init ,path)
+              (cl-git::git-repository-init ,path)
               ,@body
               (let ((open-files (open-test-files-p)))
                 (when open-files
@@ -74,8 +74,9 @@ new repository to PATH. "
                (finishes
                 (unwind-protect
                      (progn
-                       (cl-git:git-repository-init path :bare)
-                       (cl-git:git-repository-open path))
+                       (cl-git::git-repository-init path :bare)
+                       (cl-git::git-repository-open path)
+                       (cl-git::git-repository-free))
                   (progn
                     (cl-fad:delete-directory-and-files path))))))
 

@@ -9,28 +9,33 @@
                 #:define-foreign-type
                 #:use-foreign-library
                 #:foreign-funcall
+                #:define-foreign-library
                 #:translate-to-foreign
                 #:translate-from-foreign
+                #:free-translated-object
                 #:convert-from-foreign
                 #:with-foreign-object
+                #:with-foreign-slots
                 #:with-foreign-strings
+                #:with-foreign-string
+                #:with-foreign-pointer-as-string
+                #:foreign-slot-pointer
                 #:foreign-alloc
                 #:null-pointer
                 #:null-pointer-p
                 #:pointerp
                 #:mem-ref
+                #:mem-aref
                 #:defcfun
                 #:defctype
                 #:defcstruct
                 #:defbitfield
                 #:foreign-string-to-lisp
                 #:defcallback
+                #:callback
                 #:foreign-free
                 #:defcenum)
   (:export
-   #:*git-repository-index*
-   #:git-repository-init
-   #:git-repository-open
    #:with-git-revisions
    #:bind-git-commits
    #:git-commit-create

@@ -10,7 +10,7 @@
 (asdf:oos 'asdf:load-op :quicklisp)
 (push (probe-file #p"./") asdf:*central-registry*)
 (ql:quickload 'cl-git)
-(asdf:oos 'asdf:load-op :cl-git-tests)
+(ql:quickload 'cl-git-tests)
 
 
 (in-package #:cl-git)
