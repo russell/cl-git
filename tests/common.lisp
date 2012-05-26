@@ -1,7 +1,26 @@
+;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
+
+;; cl-git an Common Lisp interface to git repositories.
+;; Copyright (C) 2011-2012 Russell Sim <russell.sim@gmail.com>
+;;
+;; This program is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU Lesser General Public License
+;; as published by the Free Software Foundation, either version 3 of
+;; the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; Lesser General Public License for more details.
+;;
+;; You should have received a copy of the GNU Lesser General Public
+;; License along with this program.  If not, see
+;; <http://www.gnu.org/licenses/>.
+
 
 (defpackage :cl-git-tests
   (:use :common-lisp
-        :cl-git
+   :cl-git
         :it.bese.FiveAM))
 
 
@@ -17,8 +36,8 @@
   (sb-posix:getpid))
 
 (defmacro format-string (control-string &rest format-arguments)
-    `(with-output-to-string (stream)
-      (format stream ,control-string ,@format-arguments)))
+  `(with-output-to-string (stream)
+     (format stream ,control-string ,@format-arguments)))
 
 (defun open-test-files-p ()
   "check if there were any files left open from a test."
@@ -58,26 +77,15 @@
 new repository to PATH. "
   `(let ((,path (gen-temp-path)))
      (finishes
-       (unwind-protect
-            (progn
-              (cl-git::git-repository-init ,path)
-              ,@body
-              (let ((open-files (open-test-files-p)))
-                (when open-files
-                  (fail "The following files were left open ~S" open-files))))
-         (progn
-           (cl-fad:delete-directory-and-files ,path))))))
-
-(test repository-init
-      "create a repository and open it to make sure that works"
-      (for-all ((path 'gen-temp-path))
-               (finishes
-                (unwind-protect
-                     (progn
-                       (cl-git::git-repository-init path :bare)
-                       (cl-git::git-repository-open path))
-                  (progn
-                    (cl-fad:delete-directory-and-files path))))))
+      (unwind-protect
+           (progn
+             (cl-git::git-repository-init ,path)
+             ,@body
+             (let ((open-files (open-test-files-p)))
+               (when open-files
+                 (fail "The following files were left open ~S" open-files))))
+        (progn
+          (cl-fad:delete-directory-and-files ,path))))))
 
 (defun add-random-file-modification (repo-path filename)
   "randomly modify the file in the repo at repo-path."
@@ -104,8 +112,8 @@ signature to the commit"
   (let ((name (random-string 25))
         (email (random-string 25)))
     (values `(:name ,name :email ,email)
-	    `((name . ,name)
-	      (email . ,email)))))
+            `((name . ,name)
+              (email . ,email)))))
 
 (defun commit-random-file (repo-path &key (parents nil))
   "create a new random file in the repository located at REPO-PATH
@@ -120,17 +128,17 @@ commit-message filename content."
         (multiple-value-bind (committer committer-alist) (create-random-signature)
           (let* ((file (add-new-random-file repo-path))
                  (commit-sha (cl-git:make-commit
-                          (cl-git:git-oid-from-index)
-                          commit-message
-                          :author author
-                          :committer committer
-                          :parents parents)))
+                              (cl-git:git-oid-from-index)
+                              commit-message
+                              :author author
+                              :committer committer
+                              :parents parents)))
 
-        (cons `(commit-sha . ,commit-sha)
-              (cons `(commit-message . ,commit-message)
-                    (cons `(committer . ,committer-alist)
-                          (cons `(author . ,author-alist)
-                                file))))))))))
+            (cons `(commit-sha . ,commit-sha)
+                  (cons `(commit-message . ,commit-message)
+                        (cons `(committer . ,committer-alist)
+                              (cons `(author . ,author-alist)
+                                    file))))))))))
 
 
 (defun commit-random-file-modification (repo-path
@@ -145,18 +153,6 @@ commit-message filename content."
      :parents parents)))
 
 
-(test create-commit
-  "create a repository and add a file to it."
-  (tempory-repository
-      (path)
-    (cl-git:with-git-repository (path)
-      (cl-git:with-git-revisions
-          (commit :sha
-                  (commit-random-file-modification
-                   path "test" "Test commit"))
-        (is (equal (cl-git:commit-message commit)
-                   (format-string "Test commit~%")))))))
-
 (defun create-random-commits (repo-path number)
   "create a number of random commits to random files."
   (if (> 1 (1- number))
@@ -167,47 +163,3 @@ commit-message filename content."
                           repo-path
                           :parents (assoc-default 'commit-sha (car commit)))))
         (cons new-commit commit))))
-
-
-(test create-random-commits
-  "create a repository and add several random commits to it. then
-check that the commit messages match the expected messages."
-  (tempory-repository
-      (path)
-    (cl-git:with-git-repository (path)
-      (create-random-commits path 10))
-    (cl-git:with-git-repository (path)
-      (let* ((commit-list (create-random-commits path 10))
-             (tcommit (pop commit-list)))
-        (cl-git:with-git-revisions
-            (commit :sha (assoc-default 'commit-sha tcommit))
-          (is (equal (cl-git:commit-message commit)
-                     (assoc-default 'commit-message tcommit)))
-          (let ((tauthor (assoc-default 'author tcommit))
-                (author (cl-git:commit-author commit)))
-            (is (equal (getf author :name)
-                       (assoc-default 'name tauthor)))
-            (is (equal (getf author :email)
-                       (assoc-default 'email tauthor))))
-          (let ((tcommitter (assoc-default 'committer tcommit))
-                (committer (cl-git:commit-committer commit)))
-            (is (equal (getf committer :name)
-                       (assoc-default 'name tcommitter)))
-            (is (equal (getf committer :email)
-                       (assoc-default 'email tcommitter))))
-          (setq tcommit (pop commit-list)))))))
-
-(test create-references
-  "create a repository and add a file to it and a commit, then create
-a reference from the commit."
-  (tempory-repository
-      (path)
-    (cl-git:with-git-repository (path)
-      (let ((sha (commit-random-file-modification
-                  path "test" "Test commit")))
-        (let ((reference (cl-git:git-reference-create
-                          "refs/heads/test" :sha sha)))
-          (is
-           (equal
-            (sort-strings (list reference "refs/heads/master"))
-            (sort-strings (cl-git:git-reference-listall)))))))))

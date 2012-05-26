@@ -32,7 +32,11 @@
   :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell)
   :components ((:module "tests"
                 :components
-                ((:file "tests"))))
+                ((:file "common")
+                 (:file "commit")
+                 (:file "repository")
+                 (:file "references")
+                 (:file "revwalker"))))
   :in-order-to ((compile-op (load-op :cl-git))))
 
 (defmethod perform ((op asdf:test-op) (system (eql (find-system :cl-git))))

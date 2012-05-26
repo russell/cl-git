@@ -1,3 +1,5 @@
 A short list of items that need to be done.
 
  * remove unnessary "git" references from symbol names
+ * increase test coverage
+ * figure out a way to calculate coverage
