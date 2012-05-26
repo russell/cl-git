@@ -7,12 +7,32 @@
   :depends-on (#:cffi #:local-time #:cl-fad #:trivial-garbage)
   :author "Russell Sim <russell.sim@gmail.com>"
   :licence "Lisp-LGPL"
-  :components ((:file "package")
-               (:file "cl-git")))
+  :components ((:static-file "cl-git.asd")
+               (:module "src"
+                :serial t
+                :components
+                ((:file "package")
+                 (:file "cl-git")
+                 (:file "utils")
+                 (:file "error")
+                 (:file "repository")
+                 (:file "config")
+                 (:file "oid")
+                 (:file "signature")
+                 (:file "references")
+                 (:file "tree")
+                 (:file "object")
+                 (:file "commit")
+                 (:file "tag")
+                 (:file "status")
+                 (:file "revwalk")
+                 (:file "index")))))
 
 (asdf:defsystem #:cl-git-tests
   :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell)
-  :components ((:file "tests"))
+  :components ((:module "tests"
+                :components
+                ((:file "tests"))))
   :in-order-to ((compile-op (load-op :cl-git))))
 
 (defmethod perform ((op asdf:test-op) (system (eql (find-system :cl-git))))
