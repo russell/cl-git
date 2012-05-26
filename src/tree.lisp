@@ -19,6 +19,13 @@
 
 (in-package #:cl-git)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (define-foreign-type git-tree-entry-type ()
   nil
   (:actual-type :pointer)
@@ -35,15 +42,6 @@
   (oid git-oid)
   (filename-len size)
   (removed :int))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Foreign type translation ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod translate-from-foreign (value (type git-tree-entry-type))
-  (with-foreign-slots ((attr filename oid removed) value git-tree-entry)
-    (list :attr attr :filename filename
-	  :oid  (convert-from-foreign oid '%oid) :removed removed)))
 
 (defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
     :int
@@ -67,6 +65,27 @@ This does count the number of direct children, not recursively."
   (tree :pointer)
   (index :unsigned-int))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Foreign type translation
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defmethod translate-from-foreign (value (type git-tree-entry-type))
+  (with-foreign-slots ((attr filename oid removed) value git-tree-entry)
+    (list :attr attr :filename filename
+          :oid  (convert-from-foreign oid '%oid) :removed removed)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defun git-tree-lookup (oid)
   "Lookup a Git tree object."
   (git-object-lookup oid :tree))
@@ -74,5 +93,5 @@ This does count the number of direct children, not recursively."
 (defun git-tree-entries (tree)
   "Return all direct children of `tree'."
   (loop :repeat (git-tree-entry-count tree)
-     :for index :from 0
-     :collect (git-tree-entry-by-index tree index)))
+        :for index :from 0
+        :collect (git-tree-entry-by-index tree index)))

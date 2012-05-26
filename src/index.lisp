@@ -22,11 +22,19 @@
 (defparameter *git-repository-index* nil
   "A global that stores a pointer to the current Git repository index.")
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defcfun ("git_index_add" %git-index-add)
     :int
-    (index :pointer)
-    (path :pointer)
-    (stage :int)) ; an int from 0 to 4
+  (index :pointer)
+  (path :pointer)
+  (stage :int)) ; an int from 0 to 4
 
 (defcfun ("git_index_clear" %git-index-clear)
     :void
@@ -40,25 +48,33 @@
     :int
   (index :pointer))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defmacro with-git-repository-index (&body body)
   "Load a repository index uses the current *GIT-REPOSITORY* as the
 current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
 index."
-    `(let ((*git-repository-index* (null-pointer)))
-       (unwind-protect
-	    (progn
-	      (assert (not (null-or-nullpointer *git-repository*)))
-	      (let ((index (foreign-alloc :pointer)))
-		(handle-git-return-code (foreign-funcall
-					 "git_repository_index"
-					 :pointer index
-					 git-repository *git-repository*
-					 :int))
-		(setf *git-repository-index* (mem-ref index :pointer))
-		(foreign-free index))
-	      ,@body)
-	 (progn
-	   (%git-index-free *git-repository-index*)))))
+  `(let ((*git-repository-index* (null-pointer)))
+     (unwind-protect
+          (progn
+            (assert (not (null-or-nullpointer *git-repository*)))
+            (let ((index (foreign-alloc :pointer)))
+              (handle-git-return-code (foreign-funcall
+                                       "git_repository_index"
+                                       :pointer index
+                                       git-repository *git-repository*
+                                       :int))
+              (setf *git-repository-index* (mem-ref index :pointer))
+              (foreign-free index))
+            ,@body)
+       (progn
+         (%git-index-free *git-repository-index*)))))
 
 (defun git-index-add (path)
   "Add a file at PATH to the repository, the PATH should be relative

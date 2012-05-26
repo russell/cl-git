@@ -19,12 +19,20 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defbitfield git-reference-flags
-    (:invalid 0)
-    (:oid 1)
-    (:symbolic 2)
-    (:packed 4)
-    (:has-peel 8))
+  (:invalid 0)
+  (:oid 1)
+  (:symbolic 2)
+  (:packed 4)
+  (:has-peel 8))
 
 (defcfun ("git_reference_list" %git-reference-list)
     :int
@@ -64,6 +72,14 @@
     git-reference-flags
   (reference :pointer))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defun git-reference-lookup (name)
   "Find a reference by its full name e.g.: ref/heads/master"
   (assert (not (null-or-nullpointer *git-repository*)))
@@ -94,7 +110,7 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
                                git-flags))
       (with-foreign-slots ((strings count) string-array git-strings)
         (let ((refs
-               (loop
+                (loop
                   :for i :below count
                   :collect (foreign-string-to-lisp
                             (mem-aref strings :pointer i)))))
@@ -110,10 +126,10 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
   (let ((oid (lookup-oid :sha sha :head head)))
     (with-foreign-object (reference :pointer)
       (unwind-protect
-	   (handle-git-return-code
-	    (%git-reference-create-oid
-	     reference *git-repository*
-	     name oid force))
-	(progn
-	  (%git-reference-free (mem-ref reference :pointer))))))
+           (handle-git-return-code
+            (%git-reference-create-oid
+             reference *git-repository*
+             name oid force))
+        (progn
+          (%git-reference-free (mem-ref reference :pointer))))))
   name)

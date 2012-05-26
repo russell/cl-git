@@ -19,6 +19,14 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defcfun ("git_config_free" git-config-free)
     :void
   "Free the git configuration object that is acquired with git-repository-config."
@@ -36,11 +44,19 @@
   (push (cons key value) *config-values*)
   0);;; replace with success
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defun git-config-values (config)
   "Returns the key value pairs in the config as an association list."
   (let ((*config-values* (list)))
     (handle-git-return-code
      (%git-config-foreach config
-			  (callback collect-config-values)
-			  (null-pointer)))
+                          (callback collect-config-values)
+                          (null-pointer)))
     *config-values*))

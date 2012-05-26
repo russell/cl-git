@@ -19,11 +19,19 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defbitfield git-revwalk-flags
-    (:none 0)
-    (:topological 1)
-    (:time 2)
-    (:reverse 4))
+  (:none 0)
+  (:topological 1)
+  (:time 2)
+  (:reverse 4))
 
 (defcfun ("git_revwalk_new" %git-revwalk-new)
     :int
@@ -50,8 +58,16 @@
 
 (defcfun ("git_revwalk_push" %git-revwalk-push)
     :int
-    (revwalk :pointer)
-    (oid %oid))
+  (revwalk :pointer)
+  (oid %oid))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defun git-revwalk (oid-or-oids)
   "Walk all the revisions from a specified OID, or OIDs.
@@ -68,11 +84,11 @@ In general this means, commits and tags."
       (foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
       (loop
-         :for oid
-         :in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids)
-         :do (handle-git-return-code
-              (%git-revwalk-push revwalker
-                                 (commit-oid-from-oid oid))))
+        :for oid
+        :in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids)
+        :do (handle-git-return-code
+             (%git-revwalk-push revwalker
+                                (commit-oid-from-oid oid))))
       revwalker)))
 
 (defmacro with-git-revisions ((commit &rest rest &key sha head) &body body)
@@ -93,5 +109,5 @@ special call to stop iteration."
                                 ,@body)
                               (revision-walker))))))
              (unwind-protect
-		  (revision-walker)
-	       (%git-revwalk-free revwalker))))))))
+                  (revision-walker)
+               (%git-revwalk-free revwalker))))))))

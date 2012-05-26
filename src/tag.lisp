@@ -19,6 +19,14 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (define-foreign-type tag (object)
   nil
   (:actual-type :pointer)
@@ -27,9 +35,6 @@
 (defcfun ("git_tag_type" git-tag-type)
     git-object-type
   (tag %tag))
-
-(defmethod tag-type ((tag tag))
-  (git-tag-type tag))
 
 (defcfun ("git_tag_target" %git-tag-target)
     :int
@@ -40,21 +45,32 @@
     %git-signature
   (tag %tag))
 
-(defmethod tag-tagger ((tag tag))
-  (git-tag-name tag))
-
 (defcfun ("git_tag_name" git-tag-name)
     :string
   "Returns the name of the tag"
   (tag %tag))
 
-(defmethod tag-name ((tag tag))
-  (git-tag-name tag))
-
 (defcfun ("git_tag_message" git-tag-message)
     :string
   "Returns the message of the tag"
   (tag %tag))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defmethod tag-name ((tag tag))
+  (git-tag-name tag))
+
+(defmethod tag-tagger ((tag tag))
+  (git-tag-name tag))
+
+(defmethod tag-type ((tag tag))
+  (git-tag-type tag))
 
 (defmethod tag-message ((tag tag))
   (git-tag-message tag))
@@ -62,7 +78,7 @@
 (defmethod tag-target ((tag tag))
   (let ((obj (foreign-alloc :pointer)))
     (prog2
-	(handle-git-return-code
-	 (%git-tag-target obj tag))
-	(mem-ref obj :pointer)
+        (handle-git-return-code
+         (%git-tag-target obj tag))
+        (mem-ref obj :pointer)
       (foreign-free obj))))

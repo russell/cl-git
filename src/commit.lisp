@@ -86,10 +86,10 @@ of parents of the commit `commit'."
 
 
 (defun make-commit (oid message &key
-                                        (update-ref "HEAD")
-                                        (author nil)
-                                        (committer nil)
-                                        (parents nil))
+                                  (update-ref "HEAD")
+                                  (author nil)
+                                  (committer nil)
+                                  (parents nil))
   "Create a new commit from the tree with the OID specified and
 MESSAGE.  Optional UPDATE-REF is the name of the reference that will
 be updated to point to this commit.  The default value \"HEAD\" will
@@ -106,12 +106,12 @@ PARENTS is an optional list of parent commits sha1 hashes."
         (parents (if (listp parents) parents (list parents))))
     (unwind-protect
          (progn
-           ; lookup all the git commits
+           ;; lookup all the git commits
            (setq parents (mapcar #'(lambda (c) (git-commit-lookup (lookup-oid :sha c))) parents))
            (with-foreign-object (%parents :pointer (length parents))
              (with-foreign-strings ((%message message)
-                                         (%message-encoding "UTF-8")
-                                         (%update-ref update-ref))
+                                    (%message-encoding "UTF-8")
+                                    (%update-ref update-ref))
                (loop :for parent :in parents
                      :counting parent :into i
                      :do (setf (mem-aref %parents :pointer (1- i)) (translate-to-foreign parent parent)))
@@ -156,8 +156,8 @@ PARENTS is an optional list of parent commits sha1 hashes."
 (defmethod commit-parent-oids ((commit commit))
   "Returns a list of oids identifying the parent commits of `commit'."
   (loop
-     :for index :from 0 :below (git-commit-parent-count commit)
-     :collect (git-commit-parent-oid commit index)))
+    :for index :from 0 :below (git-commit-parent-count commit)
+    :collect (git-commit-parent-oid commit index)))
 
 (defun git-commit-lookup (oid)
   "Look up a commit by oid, return the resulting commit."
@@ -188,14 +188,14 @@ initial form key arguments are used.  Atleast one key arguments SHA or
 HEAD must be specified.  SHA is a hash of the commit.  HEAD is a full
 ref path."
   `(let ,(mapcar #'(lambda (s)
-		     `(,(car s) (null-pointer)))
-	  bindings)
+                     `(,(car s) (null-pointer)))
+          bindings)
      (unwind-protect
-	  (progn
-	    ,@(mapcar
-	       #'(lambda (s)
-		   `(setf ,(car s)
-			  (git-commit-from-oid
-			   (lookup-oid ,@(cdr s)))))
-	       bindings)
-	    ,@body))))
+          (progn
+            ,@(mapcar
+               #'(lambda (s)
+                   `(setf ,(car s)
+                          (git-commit-from-oid
+                           (lookup-oid ,@(cdr s)))))
+               bindings)
+            ,@body))))

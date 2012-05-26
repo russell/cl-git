@@ -23,6 +23,14 @@
 (defparameter *git-repository* nil
   "A global that stores a pointer to the current Git repository.")
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 ;;; Git Repositories
 (defctype git-repository :pointer)
 (defctype git-repository-index :pointer)
@@ -34,20 +42,28 @@
   (out :pointer)
   (repository :pointer))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defun git-repository-init (path &optional bare)
   "Init a new Git repository.  A positive value for BARE init a bare
 repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (repo :pointer)
     (handle-git-return-code
-            (foreign-funcall "git_repository_init"
-                                  git-repository repo
-                                  :string (namestring path)
-                                  :unsigned-int (if bare 1 0)
-                                  :int))
-           (foreign-funcall "git_repository_free"
-                                 git-repository (mem-ref repo :pointer)
-                                :void)
-           path))
+     (foreign-funcall "git_repository_init"
+                      git-repository repo
+                      :string (namestring path)
+                      :unsigned-int (if bare 1 0)
+                      :int))
+    (foreign-funcall "git_repository_free"
+                     git-repository (mem-ref repo :pointer)
+                     :void)
+    path))
 
 (defun git-repository-open (path)
   "Open an existing repository and set the global *GIT-REPOSITORY*
@@ -64,17 +80,17 @@ directory it will be opened instead of the specified path."
       (with-foreign-strings ((%path (namestring path)))
         (handle-git-return-code
          (foreign-funcall "git_repository_open"
-                               git-repository repository-ref
-                               :string (namestring path)
-                               :int)))
+                          git-repository repository-ref
+                          :string (namestring path)
+                          :int)))
       (with-foreign-object (repository-ref1 :pointer)
         (setf repository-ref1 (mem-ref repository-ref :pointer))
         (setf repository-ref (mem-ref repository-ref :pointer))
         (finalize repository-ref
                   (lambda ()
                     (foreign-funcall "git_repository_free"
-                                          :pointer repository-ref1
-                                          :void)))
+                                     :pointer repository-ref1
+                                     :void)))
         repository-ref))))
 
 

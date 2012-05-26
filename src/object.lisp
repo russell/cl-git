@@ -19,26 +19,19 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (define-foreign-type object ()
   ((%object :accessor pointer :initarg :pointer :initform (null-pointer))
    (%repository :accessor %repository :initarg :repository-pointer))
   (:actual-type :pointer)
   (:simple-parser %object))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Foreign type translation ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod translate-to-foreign (value (type object))
-  (if (pointerp value)
-      value
-      (pointer value)))
-
-
-(defcfun ("git_object_id" git-object-id)
-    %oid
-  "Returns the oid identifying `object'"
-  (object %object))
 
 (defcenum git-object-type
   (:any -2)       ; Object can be any of the following
@@ -49,6 +42,11 @@
   (:tag 4)        ; An annotated tag object.
   (:ofs_delta 6)  ; A delta, base is given by an offset.
   (:ref_delta 7)) ; A delta, base is given by object id.
+
+(defcfun ("git_object_id" git-object-id)
+    %oid
+  "Returns the oid identifying `object'"
+  (object %object))
 
 (defcfun ("git_object_type" git-object-type)
     git-object-type
@@ -67,6 +65,27 @@
   "Free the git object."
   (object :pointer))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Foreign type translation
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defmethod translate-to-foreign (value (type object))
+  (if (pointerp value)
+      value
+      (pointer value)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defun git-object-lookup (oid type)
   "Returns a reference to the git odb (object) which is identified by the oid.
 The type argument specifies which type is expected.  If the found
@@ -81,13 +100,13 @@ Note that the returned git object should be freed with git-object-free."
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (with-foreign-object (obj-ptr :pointer)
-      (handle-git-return-code
-       (%git-object-lookup
-        obj-ptr *git-repository* oid type))
+    (handle-git-return-code
+     (%git-object-lookup
+      obj-ptr *git-repository* oid type))
     (let* ((obj-type (case (git-object-type (mem-ref obj-ptr :pointer))
-                      (:commit 'commit)
-                      (:tag 'tag)
-                      (t 'object)))
+                       (:commit 'commit)
+                       (:tag 'tag)
+                       (t 'object)))
            (object (make-instance obj-type :pointer (mem-ref obj-ptr :pointer))))
       (with-foreign-object (finalizer-ptr :pointer)
         (setf finalizer-ptr (mem-ref obj-ptr :pointer))

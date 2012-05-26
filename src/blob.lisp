@@ -19,6 +19,14 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defcfun ("git_blob_rawcontent" %git-blob-raw-content)
     :pointer
   (blob :pointer))
@@ -28,6 +36,14 @@
   "The number of content bytes in the blob."
   (blob :pointer))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defun git-blob-lookup (oid)
   "Returns a blob identified by the oid."
   (assert (not (null-or-nullpointer *git-repository*)))
@@ -35,11 +51,11 @@
 
 (defun git-blob-raw-content (blob)
   (let ((result (make-array (git-blob-raw-size blob)
-			    :element-type '(unsigned-byte 8)
-			    :initial-element 0))
-	(content (%git-blob-raw-content blob)))
+                            :element-type '(unsigned-byte 8)
+                            :initial-element 0))
+        (content (%git-blob-raw-content blob)))
     (loop :for index :from 0
-	 :repeat (length result)
-	 :do
-	 (setf (aref result index) (mem-aref content :unsigned-char index)))
+          :repeat (length result)
+          :do (setf (aref result index)
+                    (mem-aref content :unsigned-char index)))
     result))

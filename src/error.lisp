@@ -19,6 +19,14 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defcstruct git-error
   (message :string)
   (klass :int))
@@ -28,17 +36,27 @@
   (:actual-type git-error)
   (:simple-parser %git-error))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Foreign type translation ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Foreign type translation
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defmethod translate-from-foreign (value (type git-error-type))
   (with-foreign-slots ((message klass) value git-error)
     (list klass message)))
 
-;;; Git Error
-
 (defcfun ("giterr_last" giterr-last) %git-error)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (define-condition git-error (error)
   ((message
@@ -52,13 +70,13 @@
     :initform nil
     :documentation "The value of the error code."))
   (:report (lambda (condition stream)
-	     (format stream "git error ~D: ~A"
-		     (git-error-code condition) (git-error-message condition)))))
+             (format stream "git error ~D: ~A"
+                     (git-error-code condition) (git-error-message condition)))))
 
 (defun handle-git-return-code (return-code)
-     (unless (= return-code 0)
-       (let ((last-error (giterr-last)))
-         ;; TODO Clear error here
-         (error 'git-error
-                :message (cadr last-error)
-                :code (car last-error)))))
+  (unless (= return-code 0)
+    (let ((last-error (giterr-last)))
+      ;; TODO Clear error here
+      (error 'git-error
+             :message (cadr last-error)
+             :code (car last-error)))))

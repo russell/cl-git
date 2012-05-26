@@ -24,11 +24,13 @@
 (defparameter *git-oid-hex-size* (+ 40 1)
   "The size of a Git commit hash.")
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Low-level interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (define-foreign-type oid-type ()
   nil
@@ -42,7 +44,7 @@
 
 ;;; The return value should not be freed.
 (defcfun ("git_oid_tostr"
-               %git-oid-tostr)
+          %git-oid-tostr)
     (:pointer :char)
   (out (:pointer :char))
   (n size-t)
@@ -58,16 +60,17 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
 (defmethod translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
   (let ((c-oid (foreign-alloc 'git-oid)))
     (loop
-       :for c-index :from 0 :below *git-oid-size*
-       :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
-       :do
-       (setf (mem-aref (foreign-slot-pointer c-oid 'git-oid 'id)
-			    :unsigned-char c-index)
-	     (ldb (byte 8 byte-index) value)))
+      :for c-index :from 0 :below *git-oid-size*
+      :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+      :do
+         (setf (mem-aref (foreign-slot-pointer c-oid 'git-oid 'id)
+                         :unsigned-char c-index)
+               (ldb (byte 8 byte-index) value)))
     c-oid))
 
 (defmethod translate-to-foreign ((value string) (type oid-type))
@@ -87,14 +90,14 @@ reference is symbolic."
   (if (null-pointer-p value)
       nil
       (let ((lisp-oid 0))
-	(loop
-	   :for c-index :from 0 :below *git-oid-size*
-	   :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
-	   :do
-	   (setf (ldb (byte 8 byte-index) lisp-oid)
-		 (mem-aref (foreign-slot-pointer value 'git-oid 'id)
-				:unsigned-char c-index)))
-	lisp-oid)))
+        (loop
+          :for c-index :from 0 :below *git-oid-size*
+          :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+          :do
+             (setf (ldb (byte 8 byte-index) lisp-oid)
+                   (mem-aref (foreign-slot-pointer value 'git-oid 'id)
+                             :unsigned-char c-index)))
+        lisp-oid)))
 
 (defmethod free-translated-object (pointer (type oid-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))
@@ -115,7 +118,7 @@ reference is symbolic."
 
 (defun git-oid-fromstr (str)
   "Convert a Git hash to an oid."
- (with-foreign-object (oid 'git-oid)
+  (with-foreign-object (oid 'git-oid)
     (handle-git-return-code (%git-oid-fromstr oid str))
     (convert-from-foreign oid '%oid)))
 
@@ -124,23 +127,23 @@ reference is symbolic."
  keyword argument, either SHA or HEAD If the keyword argument is SHA
  the value should be a SHA1 id as a string.  The value for the HEAD
  keyword should be a symbolic reference to a git commit."
-    (cond
-      (head (let* ((original-ref (git-reference-lookup head))
-		   (resolved-ref (git-reference-resolve original-ref)))
-	      (prog1 (git-reference-oid resolved-ref)
-		(git-object-free resolved-ref)
-		(git-object-free original-ref))))
-      (sha (git-oid-fromstr sha))))
+  (cond
+    (head (let* ((original-ref (git-reference-lookup head))
+                 (resolved-ref (git-reference-resolve original-ref)))
+            (prog1 (git-reference-oid resolved-ref)
+              (git-object-free resolved-ref)
+              (git-object-free original-ref))))
+    (sha (git-oid-fromstr sha))))
 
 (defun lookup-oids (&key sha head)
-   "Similar to lookup-commit, except that the keyword arguments also
+  "Similar to lookup-commit, except that the keyword arguments also
  except a list of references.  It will returns list of oids instead of
  a single oid.  If the argument was a single reference, it will return
  a list containing a single oid."
-   (flet ((lookup-loop (keyword lookup)
-          (loop :for reference
-                :in (if (atom lookup) (list lookup) lookup)
-                :collect (lookup-oid keyword reference))))
-     (cond
-       (head (lookup-loop :head head))
-       (sha (lookup-loop :sha sha)))))
+  (flet ((lookup-loop (keyword lookup)
+           (loop :for reference
+                 :in (if (atom lookup) (list lookup) lookup)
+                 :collect (lookup-oid keyword reference))))
+    (cond
+      (head (lookup-loop :head head))
+      (sha (lookup-loop :sha sha)))))

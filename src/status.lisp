@@ -20,7 +20,15 @@
 
 (in-package #:cl-git)
 
-;;; Git Status
+(defparameter *status-values* nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defbitfield git-status-flags
   (:index-new        1)
   (:index-modified   2)
@@ -36,18 +44,25 @@
   (callback :pointer)
   (payload :pointer))
 
-(defparameter *status-values* nil)
 
 (defcallback collect-status-values :int ((path :string) (value git-status-flags) (payload :pointer))
   (declare (ignore payload))
   (push (cons path value) *status-values*)
   0)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defun git-status ()
   (assert (not (null-or-nullpointer *git-repository*)))
   (let ((*status-values* (list)))
     (handle-git-return-code
      (%git-status-for-each *git-repository*
-			   (callback collect-status-values)
-			   (null-pointer)))
+                           (callback collect-status-values)
+                           (null-pointer)))
     *status-values*))

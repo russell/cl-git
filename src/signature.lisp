@@ -19,6 +19,14 @@
 
 (in-package #:cl-git)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (define-foreign-type git-signature-type ()
   nil
   (:actual-type :pointer)
@@ -30,8 +38,8 @@
   (:simple-parser %time))
 
 (defcstruct timeval
-    (time %time)
-    (offset :int))
+  (time %time)
+  (offset :int))
 
 (defcstruct git-signature
   (name :string)
@@ -39,9 +47,11 @@
   (time timeval))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Foreign type translation ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Foreign type translation
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Time
 
@@ -67,11 +77,11 @@
       (setf name (getf value :name (getenv "USER")))
       (setf email (getf value :email (default-email)))
       (with-foreign-slots ((time offset) time timeval)
-	(let ((time-to-set (getf value :time (local-time:now))))
-	  (setf time time-to-set)
-	  (setf offset (/ (local-time:timestamp-subtimezone
-			   time-to-set local-time:*default-timezone*)
-			  60)))))
+        (let ((time-to-set (getf value :time (local-time:now))))
+          (setf time time-to-set)
+          (setf offset (/ (local-time:timestamp-subtimezone
+                           time-to-set local-time:*default-timezone*)
+                          60)))))
     signature))
 
 (defmethod translate-to-foreign ((value t) (type git-signature-type))
@@ -86,6 +96,13 @@
 
 (defmethod free-translated-object (pointer (type git-signature-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Utility Functions
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun default-email ()
   (or (getenv "MAIL")
