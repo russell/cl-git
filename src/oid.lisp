@@ -119,7 +119,7 @@ reference is symbolic."
     (handle-git-return-code (%git-oid-fromstr oid str))
     (convert-from-foreign oid '%oid)))
 
-(defun lookup-commit (&key sha head)
+(defun lookup-oid (&key sha head)
   "Returns an oid for a single commit (or tag).  It takes a single
  keyword argument, either SHA or HEAD If the keyword argument is SHA
  the value should be a SHA1 id as a string.  The value for the HEAD
@@ -132,7 +132,7 @@ reference is symbolic."
 		(git-object-free original-ref))))
       (sha (git-oid-fromstr sha))))
 
-(defun lookup-commits (&key sha head)
+(defun lookup-oids (&key sha head)
    "Similar to lookup-commit, except that the keyword arguments also
  except a list of references.  It will returns list of oids instead of
  a single oid.  If the argument was a single reference, it will return
@@ -140,7 +140,7 @@ reference is symbolic."
    (flet ((lookup-loop (keyword lookup)
           (loop :for reference
                 :in (if (atom lookup) (list lookup) lookup)
-                :collect (lookup-commit keyword reference))))
+                :collect (lookup-oid keyword reference))))
      (cond
        (head (lookup-loop :head head))
        (sha (lookup-loop :sha sha)))))

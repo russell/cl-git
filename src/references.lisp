@@ -107,7 +107,7 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
-  (let ((oid (lookup-commit :sha sha :head head)))
+  (let ((oid (lookup-oid :sha sha :head head)))
     (with-foreign-object (reference :pointer)
       (unwind-protect
 	   (handle-git-return-code

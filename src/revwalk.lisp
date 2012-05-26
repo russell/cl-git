@@ -81,7 +81,7 @@ be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
   (declare (ignore sha))
   (declare (ignore head))
-  `(let ((oids (lookup-commits ,@rest)))
+  `(let ((oids (lookup-oids ,@rest)))
      (let ((revwalker (git-revwalk oids)))
        (with-foreign-object (oid 'git-oid)
          (block nil

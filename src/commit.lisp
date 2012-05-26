@@ -106,7 +106,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
     (unwind-protect
          (progn
            ; lookup all the git commits
-           (setq parents (mapcar #'(lambda (c) (git-commit-lookup (lookup-commit :sha c))) parents))
+           (setq parents (mapcar #'(lambda (c) (git-commit-lookup (lookup-oid :sha c))) parents))
            (with-foreign-object (%parents :pointer (length parents))
              (with-foreign-strings ((%message message)
                                          (%message-encoding "UTF-8")
@@ -180,6 +180,6 @@ ref path."
 	       #'(lambda (s)
 		   `(setf ,(car s)
 			  (git-commit-from-oid
-			   (lookup-commit ,@(cdr s)))))
+			   (lookup-oid ,@(cdr s)))))
 	       bindings)
 	    ,@body))))
