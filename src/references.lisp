@@ -35,7 +35,7 @@
   (:has-peel 8))
 
 (defcfun ("git_reference_list" %git-reference-list)
-    :int
+    %return-value
   (strings :pointer)
   (repository :pointer)
   (flags git-reference-flags))
@@ -46,18 +46,18 @@
   (reference :pointer))
 
 (defcfun ("git_reference_lookup" %git-reference-lookup)
-    :int
+    %return-value
   (reference :pointer)
   (repository :pointer)
   (name :string))
 
 (defcfun ("git_reference_resolve" %git-reference-resolve)
-    :int
+    %return-value
   (resolved-ref :pointer)
   (reference :pointer))
 
 (defcfun ("git_reference_create_oid" %git-reference-create-oid)
-    :int
+    %return-value
   (reference :pointer)
   (repository :pointer)
   (name :string)
@@ -84,8 +84,7 @@
   "Find a reference by its full name e.g.: ref/heads/master"
   (assert (not (null-or-nullpointer *git-repository*)))
   (with-foreign-object (reference :pointer)
-    (handle-git-return-code
-     (%git-reference-lookup reference *git-repository* name))
+    (%git-reference-lookup reference *git-repository* name)
     (mem-ref reference :pointer)))
 
 (defun git-reference-resolve (reference)
@@ -93,8 +92,7 @@
 symbolic reference.  The result should be freed independently from the
 argument."
   (with-foreign-object (resolved-ref :pointer)
-    (handle-git-return-code
-     (%git-reference-resolve resolved-ref reference))
+    (%git-reference-resolve resolved-ref reference)
     (mem-ref resolved-ref :pointer)))
 
 (defun git-reference-listall (&rest flags)
@@ -105,9 +103,7 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
   (let ((git-flags (if flags flags '(:oid))))
     (with-foreign-object (string-array 'git-strings)
-      (handle-git-return-code (%git-reference-list
-                               string-array *git-repository*
-                               git-flags))
+      (%git-reference-list string-array *git-repository* git-flags)
       (with-foreign-slots ((strings count) string-array git-strings)
         (let ((refs
                 (loop
@@ -126,10 +122,8 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
   (let ((oid (lookup-oid :sha sha :head head)))
     (with-foreign-object (reference :pointer)
       (unwind-protect
-           (handle-git-return-code
-            (%git-reference-create-oid
-             reference *git-repository*
-             name oid force))
+           (%git-reference-create-oid reference *git-repository*
+                                      name oid force)
         (progn
           (%git-reference-free (mem-ref reference :pointer))))))
   name)

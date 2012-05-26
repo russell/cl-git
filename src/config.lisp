@@ -33,7 +33,7 @@
   (config :pointer))
 
 (defcfun ("git_config_foreach" %git-config-foreach)
-    :int
+    %return-value
   (config :pointer)
   (callback :pointer)
   (payload :pointer))
@@ -55,8 +55,7 @@
 (defun git-config-values (config)
   "Returns the key value pairs in the config as an association list."
   (let ((*config-values* (list)))
-    (handle-git-return-code
-     (%git-config-foreach config
-                          (callback collect-config-values)
-                          (null-pointer)))
+    (%git-config-foreach config
+                         (callback collect-config-values)
+                         (null-pointer))
     *config-values*))

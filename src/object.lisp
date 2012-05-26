@@ -54,7 +54,7 @@
   (object %object))
 
 (defcfun ("git_object_lookup" %git-object-lookup)
-    :int
+    %return-value
   (object %object)
   (repo :pointer)
   (oid %oid)
@@ -100,9 +100,7 @@ Note that the returned git object should be freed with git-object-free."
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (with-foreign-object (obj-ptr :pointer)
-    (handle-git-return-code
-     (%git-object-lookup
-      obj-ptr *git-repository* oid type))
+    (%git-object-lookup obj-ptr *git-repository* oid type)
     (let* ((obj-type (case (git-object-type (mem-ref obj-ptr :pointer))
                        (:commit 'commit)
                        (:tag 'tag)

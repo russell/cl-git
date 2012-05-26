@@ -43,7 +43,7 @@
   (bare :boolean))
 
 (defcfun ("git_repository_open" %git-repository-open)
-    :int
+    %return-value
   (repository :pointer)
   (path :string))
 
@@ -52,12 +52,12 @@
   (repository :pointer))
 
 (defcfun ("git_repository_config" %git-repository-config)
-    :int
+    %return-value
   (out :pointer)
   (repository :pointer))
 
 (defcfun ("git_repository_index" %git-repository-index)
-    :int
+    %return-value
   (index :pointer)
   (repository :pointer))
 
@@ -72,8 +72,7 @@
   "Init a new Git repository.  A positive value for BARE init a bare
 repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (repo :pointer)
-    (handle-git-return-code
-     (%git-repository-init repo (namestring path) bare))
+    (%git-repository-init repo (namestring path) bare)
     (%git-repository-free (mem-ref repo :pointer))
     path))
 
@@ -89,8 +88,7 @@ directory it will be opened instead of the specified path."
                       #p".git/"
                       (cl-fad:pathname-as-directory path)))
                     (truename path))))
-      (handle-git-return-code
-       (%git-repository-open repository-ref (namestring path)))
+      (%git-repository-open repository-ref (namestring path))
       (with-foreign-object (repository-ref1 :pointer)
         (setf repository-ref1 (mem-ref repository-ref :pointer))
         (setf repository-ref (mem-ref repository-ref :pointer))
@@ -109,6 +107,7 @@ created repository will be bare."
         (git-repository-open path)
         path)
     (git-error ()
+      ;; TODO should catch error 5 not all errors.
       (git-repository-init path bare)
       path)))
 
@@ -116,7 +115,7 @@ created repository will be bare."
   "Return the config object of the current open repository."
   (assert (not (null-or-nullpointer *git-repository*)))
   (with-foreign-object (config :pointer)
-    (handle-git-return-code (%git-repository-config config *git-repository*))
+    (%git-repository-config config *git-repository*)
     (mem-ref config :pointer)))
 
 (defmacro with-git-repository-index (&body body)
@@ -128,8 +127,7 @@ index."
           (progn
             (assert (not (null-or-nullpointer *git-repository*)))
             (let ((index (foreign-alloc :pointer)))
-              (handle-git-return-code
-               (%git-repository-index index  *git-repository*))
+              (%git-repository-index index  *git-repository*)
               (setf *git-repository-index* (mem-ref index :pointer))
               (foreign-free index))
             ,@body)

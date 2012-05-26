@@ -33,7 +33,7 @@
   (:simple-parser %commit))
 
 (defcfun ("git_commit_create" %git-commit-create)
-    :int
+    %return-value
   (oid :pointer)
   (repo :pointer)
   (update-ref :pointer)
@@ -73,7 +73,7 @@ of parents of the commit `commit'."
   (n :int))
 
 (defcfun ("git_commit_tree" %git-commit-tree)
-    :int
+    %return-value
   (tree-out :pointer)
   (commit %commit))
 
@@ -115,18 +115,17 @@ PARENTS is an optional list of parent commits sha1 hashes."
                (loop :for parent :in parents
                      :counting parent :into i
                      :do (setf (mem-aref %parents :pointer (1- i)) (translate-to-foreign parent parent)))
-               (handle-git-return-code
-                (%git-commit-create
-                 newoid
-                 *git-repository*
-                 %update-ref
-                 author
-                 committer
-                 %message-encoding
-                 %message
-                 tree
-                 (length parents)
-                 %parents))))
+               (%git-commit-create
+                newoid
+                *git-repository*
+                %update-ref
+                author
+                committer
+                %message-encoding
+                %message
+                tree
+                (length parents)
+                %parents)))
            (git-oid-tostr newoid))
       (progn
         (foreign-free newoid)))))
@@ -148,10 +147,9 @@ PARENTS is an optional list of parent commits sha1 hashes."
 
 (defmethod commit-tree ((commit commit))
   "Returns the tree object of the commit."
-  (with-foreign-object (tree :pointer)
-    (handle-git-return-code
-     (%git-commit-tree tree commit))
-    (mem-aref tree :pointer)))
+  (with-foreign-object (%tree :pointer)
+    (%git-commit-tree %tree commit)
+    (mem-aref %tree :pointer)))
 
 (defmethod commit-parent-oids ((commit commit))
   "Returns a list of oids identifying the parent commits of `commit'."

@@ -39,7 +39,7 @@
   (:ignored           64))
 
 (defcfun ("git_status_foreach" %git-status-for-each)
-    :int
+    %return-value
   (repository :pointer)
   (callback :pointer)
   (payload :pointer))
@@ -61,8 +61,7 @@
 (defun git-status ()
   (assert (not (null-or-nullpointer *git-repository*)))
   (let ((*status-values* (list)))
-    (handle-git-return-code
-     (%git-status-for-each *git-repository*
-                           (callback collect-status-values)
-                           (null-pointer)))
+    (%git-status-for-each *git-repository*
+                          (callback collect-status-values)
+                          (null-pointer))
     *status-values*))

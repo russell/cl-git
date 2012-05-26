@@ -38,7 +38,7 @@
   (:simple-parser %oid))
 
 (defcfun ("git_oid_fromstr" %git-oid-fromstr)
-    :int
+    %return-value
   (oid :pointer)
   (str :string))
 
@@ -119,7 +119,7 @@ reference is symbolic."
 (defun git-oid-fromstr (str)
   "Convert a Git hash to an oid."
   (with-foreign-object (oid 'git-oid)
-    (handle-git-return-code (%git-oid-fromstr oid str))
+    (%git-oid-fromstr oid str)
     (convert-from-foreign oid '%oid)))
 
 (defun lookup-oid (&key sha head)

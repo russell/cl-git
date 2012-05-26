@@ -34,7 +34,7 @@
   (:reverse 4))
 
 (defcfun ("git_revwalk_new" %git-revwalk-new)
-    :int
+    %return-value
   (revwalk :pointer)
   (repository :pointer))
 
@@ -57,7 +57,7 @@
   (sort-mode git-revwalk-flags))
 
 (defcfun ("git_revwalk_push" %git-revwalk-push)
-    :int
+    %return-value
   (revwalk :pointer)
   (oid %oid))
 
@@ -78,17 +78,14 @@ In general this means, commits and tags."
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((revwalker-pointer (foreign-alloc :pointer)))
-    (handle-git-return-code
-     (%git-revwalk-new revwalker-pointer *git-repository*))
+    (%git-revwalk-new revwalker-pointer *git-repository*)
     (let ((revwalker (mem-ref revwalker-pointer :pointer)))
       (foreign-free revwalker-pointer)
       (%git-revwalk-sorting revwalker :time)
       (loop
         :for oid
         :in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids)
-        :do (handle-git-return-code
-             (%git-revwalk-push revwalker
-                                (commit-oid-from-oid oid))))
+        :do (%git-revwalk-push revwalker (commit-oid-from-oid oid)))
       revwalker)))
 
 (defmacro with-git-revisions ((commit &rest rest &key sha head) &body body)

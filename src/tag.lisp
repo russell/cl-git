@@ -37,7 +37,7 @@
   (tag %tag))
 
 (defcfun ("git_tag_target" %git-tag-target)
-    :int
+    %return-value
   (reference :pointer)
   (tag %tag))
 
@@ -76,9 +76,6 @@
   (git-tag-message tag))
 
 (defmethod tag-target ((tag tag))
-  (let ((obj (foreign-alloc :pointer)))
-    (prog2
-        (handle-git-return-code
-         (%git-tag-target obj tag))
-        (mem-ref obj :pointer)
-      (foreign-free obj))))
+  (with-foreign-object (%object :pointer)
+    (%git-tag-target %object tag)
+    (mem-ref %object :pointer)))

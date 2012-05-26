@@ -31,7 +31,7 @@
 
 
 (defcfun ("git_index_add" %git-index-add)
-    :int
+    %return-value
   (index :pointer)
   (path :pointer)
   (stage :int)) ; an int from 0 to 4
@@ -45,7 +45,7 @@
   (index :pointer))
 
 (defcfun ("git_index_write" %git-index-write)
-    :int
+    %return-value
   (index :pointer))
 
 
@@ -61,25 +61,14 @@ to the repository."
   (assert (not (null-or-nullpointer *git-repository-index*)))
   (let ((path (namestring path)))
     (with-foreign-string (path-str path)
-      (handle-git-return-code
-       (%git-index-add *git-repository-index* path-str 0)))))
+      (%git-index-add *git-repository-index* path-str 0))))
 
 (defun git-index-clear ()
   "Remove all staged data from the index at *GIT-REPOSITORY-INDEX*."
   (assert (not (null-or-nullpointer *git-repository-index*)))
-  (handle-git-return-code
-   (%git-index-clear *git-repository-index*)))
+  (%git-index-clear *git-repository-index*))
 
 (defun git-index-write ()
   "Write the current index stored in *GIT-REPOSITORY-INDEX* to disk."
   (assert (not (null-or-nullpointer *git-repository-index*)))
-  (handle-git-return-code
-   (%git-index-write *git-repository-index*)))
-
-(defun git-oid-from-index ()
-  "Write the current index to the disk and return an oid to it."
-  (assert (not (null-or-nullpointer *git-repository-index*)))
-  (with-foreign-object (oid 'git-oid)
-    (handle-git-return-code
-     (%git-tree-create-fromindex oid *git-repository-index*))
-    (convert-from-foreign oid '%oid)))
+  (%git-index-write *git-repository-index*))

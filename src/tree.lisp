@@ -44,7 +44,7 @@
   (removed :int))
 
 (defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
-    :int
+    %return-value
   (oid :pointer)
   (index :pointer))
 
@@ -95,3 +95,10 @@ This does count the number of direct children, not recursively."
   (loop :repeat (git-tree-entry-count tree)
         :for index :from 0
         :collect (git-tree-entry-by-index tree index)))
+
+(defun git-oid-from-index ()
+  "Write the current index to the disk and return an oid to it."
+  (assert (not (null-or-nullpointer *git-repository-index*)))
+  (with-foreign-object (oid 'git-oid)
+    (%git-tree-create-fromindex oid *git-repository-index*)
+    (convert-from-foreign oid '%oid)))
