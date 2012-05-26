@@ -99,7 +99,7 @@ new repository to PATH. "
   "add a new random file to the index of the repo located at
 REPO-PATH."
   (let ((filename (random-string 25)))
-    (cl-git:with-git-repository-index
+    (cl-git:with-repository-index
       (let ((content (add-random-file-modification repo-path filename)))
         `((filename . ,filename)(content . ,content))))))
 
@@ -120,7 +120,7 @@ commit-message filename content."
                           (format
                            stream "Random commit: ~A.~%"
                            (random-string 100)))))
-    (cl-git:with-git-repository-index
+    (cl-git:with-repository-index
       (multiple-value-bind (author author-alist) (create-random-signature)
         (multiple-value-bind (committer committer-alist) (create-random-signature)
           (let* ((file (add-new-random-file repo-path))
@@ -142,7 +142,7 @@ commit-message filename content."
                                         filename
                                         commit-message
                                         &key (parents nil))
-  (cl-git:with-git-repository-index
+  (cl-git:with-repository-index
     (add-random-file-modification repo-path filename)
     (cl-git:make-commit
      (cl-git:git-oid-from-index)

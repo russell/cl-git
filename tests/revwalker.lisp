@@ -27,9 +27,9 @@
 check that the commit messages match the expected messages."
       (tempory-repository
        (path)
-       (cl-git:with-git-repository (path)
+       (cl-git:with-repository (path)
          (create-random-commits path 10))
-       (cl-git:with-git-repository (path)
+       (cl-git:with-repository (path)
          (let* ((commit-list (create-random-commits path 10))
                 (tcommit (pop commit-list)))
            (cl-git:with-git-revisions

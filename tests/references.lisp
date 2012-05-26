@@ -27,7 +27,7 @@
 a reference from the commit."
       (tempory-repository
        (path)
-       (cl-git:with-git-repository (path)
+       (cl-git:with-repository (path)
          (let ((sha (commit-random-file-modification
                      path "test" "Test commit")))
            (let ((reference (cl-git:git-reference-create

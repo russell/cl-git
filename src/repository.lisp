@@ -76,6 +76,8 @@ repository.  Returns the path of the newly created Git repository."
     (%git-repository-free (mem-ref repo :pointer))
     path))
 
+
+;; XXX This symbol is internal until it returns more than a pointer.
 (defun git-repository-open (path)
   "Open an existing repository and set the global *GIT-REPOSITORY*
 variable to the open repository.  If the PATH contains a .git
@@ -98,7 +100,7 @@ directory it will be opened instead of the specified path."
         repository-ref))))
 
 
-(defun ensure-git-repository-exist (path &optional bare)
+(defun ensure-repository-exist (path &optional bare)
   "Open a repository at location, if the repository doesn't exist
 create it.  BARE is an optional keyword, if specified then the newly
 created repository will be bare."
@@ -111,14 +113,14 @@ created repository will be bare."
       (git-repository-init path bare)
       path)))
 
-(defun git-repository-config ()
+(defun repository-config ()
   "Return the config object of the current open repository."
   (assert (not (null-or-nullpointer *git-repository*)))
   (with-foreign-object (config :pointer)
     (%git-repository-config config *git-repository*)
     (mem-ref config :pointer)))
 
-(defmacro with-git-repository-index (&body body)
+(defmacro with-repository-index (&body body)
   "Load a repository index uses the current *GIT-REPOSITORY* as the
 current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
 index."
@@ -133,7 +135,7 @@ index."
          (%git-index-free *git-repository-index*)))))
 
 
-(defmacro with-git-repository ((path) &body body)
+(defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
   `(let ((*git-repository* (git-repository-open ,path)))

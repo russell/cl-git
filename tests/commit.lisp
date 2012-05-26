@@ -29,7 +29,7 @@
       (format stream content))))
 
 (defun make-commit1 (repo-path)
-  (cl-git:with-git-repository-index
+  (cl-git:with-repository-index
     (write-string-to-file repo-path "test1"
                           "Some test data~%...~%line 3 still nothing..~%getting on~%")
     (cl-git:git-index-add "test1")
@@ -48,7 +48,7 @@
       "create a repository and add a file to it."
       (tempory-repository
        (path)
-       (cl-git:with-git-repository (path)
+       (cl-git:with-repository (path)
          (cl-git:with-git-revisions
              (commit :sha (make-commit1 path))
            ;; check the commit message

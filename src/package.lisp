@@ -51,19 +51,19 @@
    #:git-reference-lookup
    #:git-reference-oid
    #:git-reference-resolve
-   #:with-git-repository-index
+   #:with-repository-index
    #:git-index-add
    #:git-index-write
    #:git-oid-from-index
-   #:with-git-repository
-   #:ensure-git-repository-exist
+   #:with-repository
+   #:ensure-repository-exist
    #:tag-tagger
    #:tag-type
    #:tag-target
    #:tag-name
    #:tag-message
    #:git-config-free
-   #:git-repository-config
+   #:repository-config
    #:git-config-values
    #:git-tree-oid
    #:git-tree-entry-count

@@ -21,7 +21,10 @@
    - git-commit-committer -> commit-committer
    - git-commit-create -> commit-create
    - git-commit-create -> commit-create
-   Most other changes involved removing git- prefixes.
+   - with-git-repository-index -> with-repository-index
+   - ensure-git-repository-exist -> ensure-repository-exist
+   - with-git-repository -> with-repository
+   Most other changes involved removing git- prefixes from symbols.
 
 0.1 - 2012-01-20
 ----------------
