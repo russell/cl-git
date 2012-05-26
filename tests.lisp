@@ -75,8 +75,7 @@ new repository to PATH. "
                 (unwind-protect
                      (progn
                        (cl-git::git-repository-init path :bare)
-                       (cl-git::git-repository-open path)
-                       (cl-git::git-repository-free))
+                       (cl-git::git-repository-open path))
                   (progn
                     (cl-fad:delete-directory-and-files path))))))
 
@@ -155,7 +154,7 @@ commit-message filename content."
           (commit :sha
                   (commit-random-file-modification
                    path "test" "Test commit"))
-        (is (equal (cl-git:git-commit-message commit)
+        (is (equal (cl-git:commit-message commit)
                    (format-string "Test commit~%")))))))
 
 (defun create-random-commits (repo-path number)
@@ -182,16 +181,16 @@ check that the commit messages match the expected messages."
              (tcommit (pop commit-list)))
         (cl-git:with-git-revisions
             (commit :sha (assoc-default 'commit-sha tcommit))
-          (is (equal (cl-git:git-commit-message commit)
+          (is (equal (cl-git:commit-message commit)
                      (assoc-default 'commit-message tcommit)))
           (let ((tauthor (assoc-default 'author tcommit))
-                (author (cl-git:git-commit-author commit)))
+                (author (cl-git:commit-author commit)))
             (is (equal (getf author :name)
                        (assoc-default 'name tauthor)))
             (is (equal (getf author :email)
                        (assoc-default 'email tauthor))))
           (let ((tcommitter (assoc-default 'committer tcommit))
-                (committer (cl-git:git-commit-committer commit)))
+                (committer (cl-git:commit-committer commit)))
             (is (equal (getf committer :name)
                        (assoc-default 'name tcommitter)))
             (is (equal (getf committer :email)

@@ -54,15 +54,20 @@
   (:actual-type :pointer)
   (:simple-parser %object))
 
-(define-foreign-type commit (object-type)
+(define-foreign-type commit (object)
   nil
   (:actual-type :pointer)
   (:simple-parser %commit))
 
-(define-foreign-type tag (object-type)
+(define-foreign-type tag (object)
   nil
   (:actual-type :pointer)
   (:simple-parser %tag))
+
+(define-foreign-type tree (object)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %tree))
 
 (defcstruct git-error
   (message :string)
@@ -334,7 +339,7 @@ reference is symbolic."
 (defcfun ("git_object_type" git-object-type)
     git-object-type
   "Returns the type of the git object."
-  (object :pointer))
+  (object %object))
 
 (defcfun ("git_object_lookup" %git-object-lookup)
     :int
@@ -373,7 +378,7 @@ reference is symbolic."
   (committer %git-signature)
   (message-encoding :pointer)
   (message :pointer)
-  (tree :pointer)
+  (tree %tree)
   (parent-count :int)
   (parents :pointer))
 
@@ -730,7 +735,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((newoid (foreign-alloc 'git-oid))
-        (%tree (git-tree-lookup oid))
+        (tree (git-tree-lookup oid))
         (parents (if (listp parents) parents (list parents))))
     (unwind-protect
          (progn
@@ -742,7 +747,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
                                          (%update-ref update-ref))
                (loop for parent in parents
                      counting parent into i
-                     do (setf (mem-aref %parents :pointer (1- i)) parent))
+                  do (setf (mem-aref %parents :pointer (1- i)) (translate-to-foreign parent parent)))
                (handle-git-return-code
                 (%git-commit-create
                  newoid
@@ -752,12 +757,11 @@ PARENTS is an optional list of parent commits sha1 hashes."
                  committer
                  %message-encoding
                  %message
-                 %tree
+                 tree
                  (length parents)
                  %parents))))
            (git-oid-tostr newoid))
       (progn
-        (git-tree-close %tree)
         (foreign-free newoid)))))
 
 (defun git-commit-tree (commit)
@@ -813,13 +817,8 @@ Note that the returned git object should be freed with git-object-free."
     result))
 
 (defun git-tree-lookup (oid)
-  "Lookup a Git tree object, the value returned will need to be freed
-manually with GIT-TREE-CLOSE."
+  "Lookup a Git tree object."
   (git-object-lookup oid :tree))
-
-(defun git-tree-close (tree)
-  "Close the TREE and free the memory allocated to the tree."
-  (git-object-free tree))
 
 (defun git-tree-entries (tree)
   "Return all direct children of `tree'."
@@ -828,13 +827,8 @@ manually with GIT-TREE-CLOSE."
      :collect (git-tree-entry-by-index tree index)))
 
 (defun git-commit-lookup (oid)
-  "Look up a commit by oid, return the resulting commit.  This commit
-will need to be freed manually with GIT-COMMIT-CLOSE."
+  "Look up a commit by oid, return the resulting commit."
   (git-object-lookup oid :commit))
-
-(defun git-commit-close (commit)
-  "Close the commit and free the memory allocated to the commit."
-  (git-object-free commit))
 
 (defmethod tag-target ((tag tag))
   (let ((obj (foreign-alloc :pointer)))
