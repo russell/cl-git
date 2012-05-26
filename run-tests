@@ -12,8 +12,20 @@
 (ql:quickload 'cl-git)
 (ql:quickload 'cl-git-tests)
 
-
-(in-package #:cl-git)
+(defun safe-trace (sym package)
+  (handler-bind ((simple-error
+                  #'(lambda (c)
+                      (format t "Skipping Symbol (probably a macro)~%")
+                      (invoke-restart 'skip-symbol))))
+    (when (and (fboundp sym)
+               (functionp (symbol-function sym))
+                                        ;(not (macrop sym))
+               (equal (package-name (symbol-package sym))
+                      package))
+      (format t "Trying to trace Symbol ~A~%" sym)
+      (restart-case
+          (eval `(trace ,(intern (symbol-name sym) package)))
+        (skip-symbol () nil)))))
 
 (use-package 'unix-options)
 (with-cli-options ()
@@ -24,19 +36,7 @@
      '(((#\t "trace") nil "trace the functions during a test run.")))
     (cl-user::quit :unix-status 1))
   (when trace
-    (handler-bind ((simple-error
-                     #'(lambda (c)
-                         (format t "Skipping Symbol (probably a macro)~%")
-                         (invoke-restart 'skip-symbol))))
-      (do-symbols (sym 'cl-git)
-        (when (and (fboundp sym)
-                   (functionp (symbol-function sym))
-                                        ;(not (macrop sym))
-                   (equal (package-name (symbol-package sym))
-                          "CL-GIT"))
-          (format t "Trying to trace Symbol ~A~%" sym)
-          (restart-case
-              (eval `(trace ,(intern (symbol-name sym))))
-            (skip-symbol () nil)))))))
+    (do-symbols (sym 'cl-git)
+      (safe-trace sym "CL-GIT"))))
 
 (FiveAM:run! :cl-git)
