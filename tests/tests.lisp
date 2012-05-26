@@ -119,7 +119,7 @@ commit-message filename content."
       (multiple-value-bind (author author-alist) (create-random-signature)
         (multiple-value-bind (committer committer-alist) (create-random-signature)
           (let* ((file (add-new-random-file repo-path))
-                 (commit-sha (cl-git:git-commit-create
+                 (commit-sha (cl-git:make-commit
                           (cl-git:git-oid-from-index)
                           commit-message
                           :author author
@@ -139,7 +139,7 @@ commit-message filename content."
                                         &key (parents nil))
   (cl-git:with-git-repository-index
     (add-random-file-modification repo-path filename)
-    (cl-git:git-commit-create
+    (cl-git:make-commit
      (cl-git:git-oid-from-index)
      commit-message
      :parents parents)))

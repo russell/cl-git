@@ -84,7 +84,7 @@ of parents of the commit `commit'."
   (tree-out :pointer)
   (commit %commit))
 
-(defun git-commit-create (oid message &key
+(defun make-commit (oid message &key
                                         (update-ref "HEAD")
                                         (author nil)
                                         (committer nil)

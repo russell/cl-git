@@ -38,7 +38,7 @@
   (:export
    #:with-git-revisions
    #:bind-git-commits
-   #:git-commit-create
+   #:make-commit
    #:commit-author
    #:commit-message
    #:commit-committer
