@@ -24,13 +24,40 @@
 (defparameter *git-oid-hex-size* (+ 40 1)
   "The size of a Git commit hash.")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Low-level interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define-foreign-type oid-type ()
   nil
   (:actual-type :pointer)
   (:simple-parser %oid))
 
+(defcfun ("git_oid_fromstr" %git-oid-fromstr)
+    :int
+  (oid :pointer)
+  (str :string))
 
+;;; The return value should not be freed.
+(defcfun ("git_oid_tostr"
+               %git-oid-tostr)
+    (:pointer :char)
+  (out (:pointer :char))
+  (n size-t)
+  (oid %oid))
+
+(defcstruct git-oid
+  (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
 ;;; Foreign type translation
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defmethod translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
   (let ((c-oid (foreign-alloc 'git-oid)))
@@ -72,22 +99,13 @@ reference is symbolic."
 (defmethod free-translated-object (pointer (type oid-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))
 
-;;; Git OID
-(defcfun ("git_oid_fromstr" %git-oid-fromstr)
-    :int
-  (oid :pointer)
-  (str :string))
 
-;;; The return value should not be freed.
-(defcfun ("git_oid_tostr"
-               %git-oid-tostr)
-    (:pointer :char)
-  (out (:pointer :char))
-  (n size-t)
-  (oid %oid))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcstruct git-oid
-  (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
 
 (defun git-oid-tostr (oid)
   "Convert an OID to a string."
