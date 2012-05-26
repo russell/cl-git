@@ -321,7 +321,7 @@ reference is symbolic."
 (defcfun ("git_object_id" git-object-id)
     %oid
   "Returns the oid identifying `object'"
-  (object :pointer))
+  (object %object))
 
 
 (defcenum git-object-type
@@ -972,7 +972,7 @@ If the `oid' refers to a commit the function is basically a
 no-op.  However if `oid' refers to a tag, it will return
 the oid of the target of the tag."
   (let ((commit (git-commit-from-oid oid)))
-	(git-object-id (pointer commit))))
+	(git-object-id commit)))
 
 (defun git-commit-parent-oids (commit)
   "Returns a list of oids identifying the parent commits of `commit'."
