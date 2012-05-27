@@ -30,8 +30,8 @@
 
 (defun make-commit1 (repo-path)
   (cl-git:with-repository-index
-      (write-string-to-file repo-path "test1"
-                            "Some test data~%...~%line 3 still nothing..~%getting on~%")
+    (write-string-to-file repo-path "test1"
+                          "Some test data~%...~%line 3 still nothing..~%getting on~%")
     (cl-git:git-index-add "test1")
     (cl-git:git-index-write)
     (cl-git:make-commit
@@ -45,32 +45,32 @@
                       :time (local-time:unix-to-timestamp 1338044479)))))
 
 (test create-commit
-      "create a repository and add a file to it."
-      (tempory-repository
-       (path)
-       (cl-git:with-repository (path)
-         (cl-git:with-git-revisions
-             (commit :sha (make-commit1 path))
-           ;; check the commit message
-           (is (equal (cl-git:commit-message commit)
-                      (format-string "Committing test file test1~%")))
-           ;; check the author
-           (let ((author (cl-git:commit-author commit)))
-             (is (equal (getf author :name)
-                        "Joe Blogs"))
-             (is (equal (getf author :email)
-                        "test@example.com"))
-             (is (equal (local-time:timestamp-to-unix (getf author :time))
-                        1338033679)))
-           ;; check the committer
-           (let ((committer (cl-git:commit-committer commit)))
-             (is (equal (getf committer :name)
-                        "Jim Blogs"))
-             (is (equal (getf committer :email)
-                        "test1@example.com"))
-             (is (equal (local-time:timestamp-to-unix (getf committer :time))
-                        1338044479)))
-           ;; count the number of commit parents,
-           (is (equal (cl-git:commit-parentcount commit)
-                      0))
-           (is (typep (cl-git:commit-tree commit) (type-of (make-instance 'cl-git::tree))))))))
+  "create a repository and add a file to it."
+  (tempory-repository
+      (path)
+    (cl-git:with-repository (path)
+      (cl-git:with-git-revisions
+          (commit :sha (make-commit1 path))
+        ;; check the commit message
+        (is (equal (cl-git:commit-message commit)
+                   (format-string "Committing test file test1~%")))
+        ;; check the author
+        (let ((author (cl-git:commit-author commit)))
+          (is (equal (getf author :name)
+                     "Joe Blogs"))
+          (is (equal (getf author :email)
+                     "test@example.com"))
+          (is (equal (local-time:timestamp-to-unix (getf author :time))
+                     1338033679)))
+        ;; check the committer
+        (let ((committer (cl-git:commit-committer commit)))
+          (is (equal (getf committer :name)
+                     "Jim Blogs"))
+          (is (equal (getf committer :email)
+                     "test1@example.com"))
+          (is (equal (local-time:timestamp-to-unix (getf committer :time))
+                     1338044479)))
+        ;; count the number of commit parents,
+        (is (equal (cl-git:commit-parentcount commit)
+                   0))
+        (is (typep (cl-git:commit-tree commit) (type-of (make-instance 'cl-git::tree))))))))

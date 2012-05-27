@@ -23,16 +23,16 @@
 (in-suite :cl-git)
 
 (test create-references
-      "create a repository and add a file to it and a commit, then create
+  "create a repository and add a file to it and a commit, then create
 a reference from the commit."
-      (tempory-repository
-       (path)
-       (cl-git:with-repository (path)
-         (let ((sha (commit-random-file-modification
-                     path "test" "Test commit")))
-           (let ((reference (cl-git:git-reference-create
-                             "refs/heads/test" :sha sha)))
-             (is
-              (equal
-               (sort-strings (list reference "refs/heads/master"))
-               (sort-strings (cl-git:git-reference-listall)))))))))
+  (tempory-repository
+      (path)
+    (cl-git:with-repository (path)
+      (let ((sha (commit-random-file-modification
+                  path "test" "Test commit")))
+        (let ((reference (cl-git:git-reference-create
+                          "refs/heads/test" :sha sha)))
+          (is
+           (equal
+            (sort-strings (list reference "refs/heads/master"))
+            (sort-strings (cl-git:git-reference-listall)))))))))

@@ -74,15 +74,15 @@
 new repository to PATH. "
   `(let ((,path (gen-temp-path)))
      (finishes
-      (unwind-protect
-           (progn
-             (cl-git::git-repository-init ,path)
-             ,@body
-             (let ((open-files (open-test-files-p)))
-               (when open-files
-                 (fail "The following files were left open ~S" open-files))))
-        (progn
-          (cl-fad:delete-directory-and-files ,path))))))
+       (unwind-protect
+            (progn
+              (cl-git::git-repository-init ,path)
+              ,@body
+              (let ((open-files (open-test-files-p)))
+                (when open-files
+                  (fail "The following files were left open ~S" open-files))))
+         (progn
+           (cl-fad:delete-directory-and-files ,path))))))
 
 (defun add-random-file-modification (repo-path filename)
   "randomly modify the file in the repo at repo-path."
