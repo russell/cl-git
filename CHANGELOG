@@ -5,8 +5,9 @@
 
  * support for multiple start revisions when doing revision walk
    [Willem]
- * git blob interface [Willem]
- * FFI symbol selector for SBCL [Russell]
+ * Git blob interface [Willem]
+ * Signature translation to native types [Willem]
+ * OID Translation to native types [Willem]
  * Complete re-factoring of public API, changes since 0.1
    Removed symbols:
    - *git-repository*
