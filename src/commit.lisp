@@ -45,6 +45,11 @@
   (parent-count :int)
   (parents :pointer))
 
+(defcfun ("git_commit_id" git-commit-id)
+    %oid
+  "Returns the oid of the commit `commit'."
+  (commit %commit))
+
 (defcfun ("git_commit_message" git-commit-message)
     :string
   "Return a string containing the commit message."
@@ -129,6 +134,10 @@ PARENTS is an optional list of parent commits sha1 hashes."
            (git-oid-tostr newoid))
       (progn
         (foreign-free newoid)))))
+
+(defmethod commit-id ((commit commit))
+  "Return a string containing the commit oid hash."
+  (git-oid-tostr (git-commit-id commit)))
 
 (defmethod commit-message ((commit commit))
   "Return a string containing the commit message."

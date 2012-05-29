@@ -38,6 +38,7 @@
    #:with-git-revisions
    #:bind-git-commits
    #:make-commit
+   #:commit-id
    #:commit-author
    #:commit-message
    #:commit-committer
