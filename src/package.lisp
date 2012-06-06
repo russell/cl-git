@@ -39,6 +39,8 @@
                 #:defcenum)
   (:export
    #:with-git-revisions
+   #:revision-walk
+   #:walker-next
    #:bind-git-commits
    #:make-commit
    #:commit-id

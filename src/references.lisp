@@ -145,10 +145,10 @@ are :SHA, :HEAD or :BOTH"
      (lookup-oid :sha name))
     (t (error "Invalid reference named ~A." name)))))
 
-(defun find-oids (names &optional (flags :both))
+(defun find-oids (name-or-names &optional (flags :both))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
-  (if (stringp names)
-      (find-oid names flags)
-      (loop :for name :in names
+  (if (stringp name-or-names)
+      (find-oid name-or-names flags)
+      (loop :for name :in name-or-names
             :collect (find-oid name flags))))
