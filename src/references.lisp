@@ -127,3 +127,28 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
         (progn
           (%git-reference-free (mem-ref reference :pointer))))))
   name)
+
+(defun find-oid (name &optional (flags :both))
+  "Find a head or sha that matches the NAME. Possible flags
+are :SHA, :HEAD or :BOTH"
+  (flet ((and-both (flag other-flag)
+           (find flag (list :both other-flag))))
+  (acond
+    ((and (and-both flags :head)
+          (remove-if-not (lambda (ref) (equal ref name)) (git-reference-listall)))
+     (lookup-oid :head (car it)))
+    ((and (and-both flags :sha)
+          (find (length name) '(40 7))
+          (not (loop :for char :across name
+                     :when (not (find char "1234567890abcdef"))
+                       :collect char)))
+     (lookup-oid :sha name))
+    (t (error "Invalid reference named ~A." name)))))
+
+(defun find-oids (names &optional (flags :both))
+  "Find a head or sha that matches the NAME. Possible flags
+are :SHA, :HEAD or :BOTH"
+  (if (stringp names)
+      (find-oid names flags)
+      (loop :for name :in names
+            :collect (find-oid name flags))))

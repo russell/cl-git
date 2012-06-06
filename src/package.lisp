@@ -2,6 +2,9 @@
 
 (defpackage #:cl-git
   (:use #:cl)
+  (:import-from #:anaphora
+                #:acond
+                #:it)
   (:import-from #:trivial-garbage
                 #:finalize)
   (:import-from #:cffi
