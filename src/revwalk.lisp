@@ -87,6 +87,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod walker-next ((walker revision-walker))
+  "return a git-commit or nil if there are no more commits"
   (with-foreign-object (oid 'git-oid)
     (let ((return-code (%git-revwalk-next oid walker))
           (*git-repository* (%repository walker)))
