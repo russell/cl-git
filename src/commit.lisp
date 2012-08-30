@@ -169,7 +169,7 @@ parents of the commit `commit'."
 (defmethod commit-parent-oids ((commit commit))
   "Returns a list of oids identifying the parent commits of `commit'."
   (loop
-    :for index :from 0 :below (git-commit-parent-count commit)
+    :for index :from 0 :below (git-commit-parentcount commit)
     :collect (git-commit-parent-oid commit index)))
 
 (defun git-commit-lookup (oid)
@@ -183,7 +183,7 @@ If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
   (let ((git-object (git-object-lookup oid :any)))
     (ecase (git-object-type git-object)
-      (:tag (prog1 (git-tag-target git-object) (git-object-free git-object)))
+      (:tag (tag-target git-object))
       (:commit git-object))))
 
 (defun commit-oid-from-oid (oid)
