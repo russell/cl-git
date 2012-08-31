@@ -64,7 +64,9 @@ License along with this program.  If not, see
 * Config::
 * Repository::
 * Commit::
+* Tag::
 * Revisions::
+* Blob::
 * Index::
 @end menu
 
@@ -108,20 +110,44 @@ License along with this program.  If not, see
 @include include/fun-cl-git-ensure-repository-exist.texinfo
 @include include/fun-cl-git-repository-config.texinfo
 
-@node Commit, Revisions, Repository, Temp
+@node Commit, Tag, Repository, Temp
 @section Commit
 
 @include include/macro-cl-git-bind-git-commits.texinfo
 @include include/fun-cl-git-git-commit-lookup.texinfo
 @include include/fun-cl-git-make-commit.texinfo
+@include include/fun-cl-git-commit-author.texinfo
+@include include/fun-cl-git-commit-id.texinfo
+@include include/fun-cl-git-commit-message.texinfo
+@include include/fun-cl-git-commit-parent-oid.texinfo
+@include include/fun-cl-git-commit-parent-oids.texinfo
+@include include/fun-cl-git-commit-parentcount.texinfo
+@include include/fun-cl-git-commit-tree.texinfo
 
-@node  Revisions, Index, Commit, Temp
-@section Revisions
+@node Tag, Revisions, Commit, Temp
+@section Tag
+
+@include include/fun-cl-git-tag-message.texinfo
+@include include/fun-cl-git-tag-name.texinfo
+@include include/fun-cl-git-tag-tagger.texinfo
+@include include/fun-cl-git-tag-target.texinfo
+@include include/fun-cl-git-tag-type.texinfo
+
+@node  Revisions, Blob, Tag, Temp
+@section Revision
 
 @include include/fun-cl-git-revision-walk.texinfo
 @include include/macro-cl-git-with-git-revisions.texinfo
+@include include/fun-cl-git-walker-next.texinfo
 
-@node  Index,  , Revisions, Temp
+
+@node Blob, Index, Revisions, Temp
+@section Blob
+
+@include include/fun-cl-git-git-blob-lookup.texinfo
+@include include/fun-cl-git-git-blob-raw-size.texinfo
+
+@node  Index,  , Blob, Temp
 @section Index
 
 @include include/fun-cl-git-git-index-add.texinfo
