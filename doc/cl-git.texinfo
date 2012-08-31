@@ -10,7 +10,22 @@
 @end direntry
 
 @copying
-Fill in
+cl-git a Common Lisp interface to git repositories.
+Copyright @copyright{} 2011, 2012 Russell Sim @email{russell.sim@@gmail.com}.
+
+This program is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this program.  If not, see
+@url{http://www.gnu.org/licenses/}.
 @end copying
 
 
@@ -29,45 +44,94 @@ Fill in
 
 @include include/sb-texinfo.texinfo
 
-@node  Introduction, Temp
+@node Top, Temp, (dir), (dir)
 @top Introduction
 
 @contents
 
 @menu
 * Temp::
+* Function Index::
 @end menu
 
-@node Temp
+@node Temp, Function Index, Top, Top
 @chapter Temp
 
-@include include/fun-cl-git-ensure-repository-exist.texinfo
-@include include/fun-cl-git-git-commit-lookup.texinfo
-@include include/fun-cl-git-git-config-free.texinfo
-@include include/fun-cl-git-git-config-values.texinfo
-@include include/fun-cl-git-git-index-add.texinfo
-@include include/fun-cl-git-git-index-write.texinfo
-@include include/fun-cl-git-git-object-free.texinfo
-@include include/fun-cl-git-git-object-id.texinfo
-@include include/fun-cl-git-git-object-lookup.texinfo
-@include include/fun-cl-git-git-object-type.texinfo
-@include include/fun-cl-git-git-oid-from-index.texinfo
+@menu
+* Reference::
+* Object::
+* Tree::
+* Config::
+* Repository::
+* Commit::
+* Revisions::
+* Index::
+@end menu
+
+@node  Reference, Object, Temp, Temp
+@section Reference
+
 @include include/fun-cl-git-git-reference-create.texinfo
 @include include/fun-cl-git-git-reference-listall.texinfo
 @include include/fun-cl-git-git-reference-lookup.texinfo
 @include include/fun-cl-git-git-reference-oid.texinfo
 @include include/fun-cl-git-git-reference-resolve.texinfo
+
+@node Object, Tree, Reference, Temp
+@section Object
+
+@include include/fun-cl-git-git-object-free.texinfo
+@include include/fun-cl-git-git-object-id.texinfo
+@include include/fun-cl-git-git-object-lookup.texinfo
+@include include/fun-cl-git-git-object-type.texinfo
+
+@node  Tree, Config, Object, Temp
+@section Tree
+
 @include include/fun-cl-git-git-tree-entries.texinfo
 @include include/fun-cl-git-git-tree-entry-by-index.texinfo
 @include include/fun-cl-git-git-tree-entry-count.texinfo
 @include include/fun-cl-git-git-tree-lookup.texinfo
 @include include/fun-cl-git-git-tree-oid.texinfo
-@include include/fun-cl-git-make-commit.texinfo
-@include include/fun-cl-git-repository-config.texinfo
-@include include/fun-cl-git-revision-walk.texinfo
-@include include/macro-cl-git-bind-git-commits.texinfo
-@include include/macro-cl-git-with-git-revisions.texinfo
+
+@node  Config, Repository, Tree, Temp
+@section Config
+
+@include include/fun-cl-git-git-config-free.texinfo
+@include include/fun-cl-git-git-config-values.texinfo
+
+@node Repository, Commit, Config, Temp
+@section Repository
+
 @include include/macro-cl-git-with-repository-index.texinfo
 @include include/macro-cl-git-with-repository.texinfo
+@include include/fun-cl-git-ensure-repository-exist.texinfo
+@include include/fun-cl-git-repository-config.texinfo
+
+@node Commit, Revisions, Repository, Temp
+@section Commit
+
+@include include/macro-cl-git-bind-git-commits.texinfo
+@include include/fun-cl-git-git-commit-lookup.texinfo
+@include include/fun-cl-git-make-commit.texinfo
+
+@node  Revisions, Index, Commit, Temp
+@section Revisions
+
+@include include/fun-cl-git-revision-walk.texinfo
+@include include/macro-cl-git-with-git-revisions.texinfo
+
+@node  Index,  , Revisions, Temp
+@section Index
+
+@include include/fun-cl-git-git-index-add.texinfo
+@include include/fun-cl-git-git-index-write.texinfo
+@include include/fun-cl-git-git-oid-from-index.texinfo
+
+
+@node Function Index,  , Temp, Top
+@appendix Function Index
+
+@printindex fn
 
 @bye

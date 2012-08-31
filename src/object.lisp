@@ -26,10 +26,12 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;  ((%object :accessor pointer :initarg :pointer :initform (null-pointer))
+;;   (%repository :accessor %repository :initarg :repository-pointer)
 
-(define-foreign-type object ()
-  ((%object :accessor pointer :initarg :pointer :initform (null-pointer))
-   (%repository :accessor %repository :initarg :repository-pointer))
+
+(define-foreign-type git-object ()
+  ()
   (:actual-type :pointer)
   (:simple-parser %object))
 
@@ -73,7 +75,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defmethod translate-to-foreign (value (type object))
+(defmethod translate-to-foreign (value (type git-object))
   (if (pointerp value)
       value
       (pointer value)))
@@ -85,7 +87,59 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass object ()
+  ((libgit2-pointer :accessor pointer :initarg :pointer :initform (null-pointer)
+		    :documentation "A CFFI pointer from libgit2.  
+This is the git object that is wrapped by the instance of this class.")
 
+   (type :accessor object-type :initarg :object-type :initform 'object
+	 :documentation "A symbol indicating which libgit2 type this is.
+This slot is probably uselss in the sense that we do not necessarily know
+on creation time and if we do not know exactly what is the point?
+So this is mainly used for printing") ;;; do we need this??
+
+   (libgit2-repository :accessor %repository :initarg :repository-pointer)
+   (finalizer-data :accessor finalizer-data :initform (cons t nil) ))
+  (:documentation "Object encapsulating git objects from libgit2"))
+
+
+(defun mapc-weak (function list)
+  "Same as mapc, but for lists containing weak-pointers.  The function
+is applied to WEAK-POINTER-VALUE of the objects in the LIST.  Except
+when WEAK-POINTER-VALUE is nul of course, because in that case the
+object is gone."
+  (mapc 
+   (lambda (o)
+     (let ((real-o (trivial-garbage:weak-pointer-value o)))
+       (when real-o (funcall function real-o))))
+   list))
+
+(defgeneric dispose (object)
+  (:documentation "This interface is used to mark as invalid git objects when for example
+the repository is closed.")
+
+  (:method ((object object))
+    (when (car (finalizer-data object))        ;; when not disposed
+      (setf (car (finalizer-data object)) nil) ;; mark as disposed
+      (mapc-weak #'dispose (cdr (finalizer-data object)))  ;; dispose dependends
+      (git-object-free (pointer object))       ;; free git object
+      (setf (pointer object) (null-pointer))))) ;; set git object to null so we get errors if used.
+
+;;; Memory management
+;;;
+;;; The tricky thing is memory management, we use trivial-garbage:finalize, but
+;;; that only takes a function with no arguments, so we do not know what
+;;; we are finalizing.  Now of course we can create a closure containing
+;;; extra information, but if that refers to the object it will keep
+;;; the object alive so it is never collected, so we have to create a parallel
+;;; 'object' containing the relevant information.
+;;;
+;;; What do we need for 'finalize'
+;;;
+;;; 1 - The libgit pointer to call free on
+;;; 2 - All dependend objects that need to be invalidated.
+;;;
+;;; 
 (defun make-instance-object (&key object-ptr repository-ptr type)
   (let* ((obj-type (case (or (unless (eq type :any) type)
                              (git-object-type object-ptr))
@@ -93,14 +147,19 @@
                      (:tag 'tag)
                      (:tree 'tree)
                      (t 'object)))
+
          (object (make-instance obj-type
                                 :pointer object-ptr
-                                :repository-pointer (or repository-ptr *git-repository*))))
-    (with-foreign-object (finalizer-ptr :pointer)
-      (setf finalizer-ptr object-ptr)
+                                :repository-pointer (or repository-ptr *git-repository*)
+				:object-type obj-type)))
+
+    (let ((finalizer-data (finalizer-data object))
+	  (pointer (pointer object)))
       (finalize object
-                (lambda ()
-                  (git-object-free finalizer-ptr))))
+		(lambda ()
+		  (when (car finalizer-data)
+		    (mapc-weak #'dispose (cdr finalizer-data))
+		    (git-object-free pointer)))))
     object))
 
 (defun git-object-lookup (oid type)

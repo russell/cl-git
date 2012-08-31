@@ -53,7 +53,7 @@
           (commit :sha (make-commit1 path))
         ;; check the commit message
         (is (equal (cl-git:commit-message commit)
-                   (format-string "Committing test file test1~%")))
+                   (format-string "Committing test file test1")))
         ;; check the author
         (let ((author (cl-git:commit-author commit)))
           (is (equal (getf author :name)
@@ -73,4 +73,4 @@
         ;; count the number of commit parents,
         (is (equal (cl-git:commit-parentcount commit)
                    0))
-        (is (typep (cl-git:commit-tree commit) (type-of (make-instance 'cl-git::tree))))))))
+        (is (typep (cl-git:commit-tree commit) (type-of (make-instance 'cl-git::object))))))))

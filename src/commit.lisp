@@ -27,7 +27,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-foreign-type commit (object)
+(define-foreign-type git-commit (git-object)
   nil
   (:actual-type :pointer)
   (:simple-parser %commit))
@@ -89,6 +89,8 @@ of parents of the commit `commit'."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass commit (object)
+  ())
 
 (defun make-commit (oid message &key
                                   (update-ref "HEAD")
@@ -119,7 +121,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
                                     (%update-ref update-ref))
                (loop :for parent :in parents
                      :counting parent :into i
-                     :do (setf (mem-aref %parents :pointer (1- i)) (translate-to-foreign parent parent)))
+                     :do (setf (mem-aref %parents :pointer (1- i)) (pointer parent)))
                (%git-commit-create
                 newoid
                 *git-repository*

@@ -31,7 +31,7 @@
   (:actual-type :pointer)
   (:simple-parser %tree-entry))
 
-(define-foreign-type tree (object)
+(define-foreign-type git-tree (git-object) ;; Is this needed????
   nil
   (:actual-type :pointer)
   (:simple-parser %tree))
@@ -85,6 +85,8 @@ This does count the number of direct children, not recursively."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass tree (object)
+  ())
 
 (defun git-tree-lookup (oid)
   "Lookup a Git tree object."

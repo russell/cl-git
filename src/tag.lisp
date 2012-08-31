@@ -27,7 +27,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-foreign-type tag (object)
+(define-foreign-type git-tag (git-object)
   nil
   (:actual-type :pointer)
   (:simple-parser %tag))
@@ -62,6 +62,9 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass tag (object)
+  ())
+
 
 (defmethod tag-name ((tag tag))
   (git-tag-name tag))
@@ -76,6 +79,7 @@
   (git-tag-message tag))
 
 (defmethod tag-target ((tag tag))
+  "Need to rewrite to return an object!!!!"
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
     (mem-ref %object :pointer)))
