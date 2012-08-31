@@ -1,5 +1,5 @@
 *~
-
+*.fasl
 
 /doc/eggs/
 /doc/doctrees/

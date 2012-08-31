@@ -73,4 +73,4 @@
         ;; count the number of commit parents,
         (is (equal (cl-git:commit-parentcount commit)
                    0))
-        (is (typep (cl-git:commit-tree commit) (type-of (make-instance 'cl-git::object))))))))
+        (is (typep (cl-git:commit-tree commit) (type-of (make-instance 'cl-git::tree))))))))

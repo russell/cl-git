@@ -75,7 +75,7 @@
    #:git-tree-entry-count
    #:git-tree-entry-by-index
    #:git-tree-lookup
-   #:git-tree-close
+;   #:git-tree-close
    #:git-tree-entries
    #:git-object-lookup
    #:git-object-id

@@ -12,6 +12,7 @@
                 :serial t
                 :components
                 ((:file "package")
+		 (:file "api")
                  (:file "cl-git")
                  (:file "utils")
                  (:file "error")
@@ -25,6 +26,7 @@
                  (:file "tree")
                  (:file "commit")
                  (:file "tag")
+		 (:file "blob")
                  (:file "status")
                  (:file "revwalk")))))
 
