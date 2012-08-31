@@ -102,7 +102,7 @@ directory it will be opened instead of the specified path."
 
 (defun ensure-repository-exist (path &optional bare)
   "Open a repository at location, if the repository doesn't exist
-create it.  BARE is an optional keyword, if specified then the newly
+create it.  BARE is an optional argument if specified and true, the newly
 created repository will be bare."
   (handler-case
       (progn

@@ -91,7 +91,7 @@ This does count the number of direct children, not recursively."
   (git-object-lookup oid :tree))
 
 (defun git-tree-entries (tree)
-  "Return all direct children of `tree'."
+  "Return all direct children of TREE."
   (loop :repeat (git-tree-entry-count tree)
         :for index :from 0
         :collect (git-tree-entry-by-index tree index)))

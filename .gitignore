@@ -1,3 +1,6 @@
+*~
+
+
 /doc/eggs/
 /doc/doctrees/
 /doc/html/
@@ -5,3 +8,17 @@
 /doc/.installed.cfg
 /doc/Makefile
 /doc/make.bat
+/doc/include/
+
+/doc/cl-git.aux
+/doc/cl-git.cp
+/doc/cl-git.fn
+/doc/cl-git.fns
+/doc/cl-git.ky
+/doc/cl-git.log
+/doc/cl-git.pdf
+/doc/cl-git.pg
+/doc/cl-git.toc
+/doc/cl-git.tp
+/doc/cl-git.vr
+/doc/include-stamp

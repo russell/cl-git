@@ -126,7 +126,7 @@ In general this means, commits and tags."
 
 
 (defmacro with-git-revisions ((commit &rest rest &key sha head) &body body)
-  "Iterate aver all the revisions, the symbol specified by commit will
+  "Iterate aver all the revisions, the symbol specified by COMMIT will
 be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
   (declare (ignore sha))

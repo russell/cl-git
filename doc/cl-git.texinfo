@@ -1,0 +1,73 @@
+\input texinfo
+@c %**start of header
+@setfilename cl-git.info
+@settitle Libgit2 Bindings for Common Lisp
+@c %**end of header
+
+@dircategory Software development
+@direntry
+* cl-git: (cl-git). Libgit2 Bindings for Common Lisp
+@end direntry
+
+@copying
+Fill in
+@end copying
+
+
+@finalout
+@setcontentsaftertitlepage
+
+@titlepage
+@title CL-git
+@subtitle Libgit2 bindings for Common Lisp
+@author Russel Sim
+@author Willem Rein Oudshoorn
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@include include/sb-texinfo.texinfo
+
+@node  Introduction, Temp
+@top Introduction
+
+@contents
+
+@menu
+* Temp::
+@end menu
+
+@node Temp
+@chapter Temp
+
+@include include/fun-cl-git-ensure-repository-exist.texinfo
+@include include/fun-cl-git-git-commit-lookup.texinfo
+@include include/fun-cl-git-git-config-free.texinfo
+@include include/fun-cl-git-git-config-values.texinfo
+@include include/fun-cl-git-git-index-add.texinfo
+@include include/fun-cl-git-git-index-write.texinfo
+@include include/fun-cl-git-git-object-free.texinfo
+@include include/fun-cl-git-git-object-id.texinfo
+@include include/fun-cl-git-git-object-lookup.texinfo
+@include include/fun-cl-git-git-object-type.texinfo
+@include include/fun-cl-git-git-oid-from-index.texinfo
+@include include/fun-cl-git-git-reference-create.texinfo
+@include include/fun-cl-git-git-reference-listall.texinfo
+@include include/fun-cl-git-git-reference-lookup.texinfo
+@include include/fun-cl-git-git-reference-oid.texinfo
+@include include/fun-cl-git-git-reference-resolve.texinfo
+@include include/fun-cl-git-git-tree-entries.texinfo
+@include include/fun-cl-git-git-tree-entry-by-index.texinfo
+@include include/fun-cl-git-git-tree-entry-count.texinfo
+@include include/fun-cl-git-git-tree-lookup.texinfo
+@include include/fun-cl-git-git-tree-oid.texinfo
+@include include/fun-cl-git-make-commit.texinfo
+@include include/fun-cl-git-repository-config.texinfo
+@include include/fun-cl-git-revision-walk.texinfo
+@include include/macro-cl-git-bind-git-commits.texinfo
+@include include/macro-cl-git-with-git-revisions.texinfo
+@include include/macro-cl-git-with-repository-index.texinfo
+@include include/macro-cl-git-with-repository.texinfo
+
+@bye

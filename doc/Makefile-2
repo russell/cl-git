@@ -1,0 +1,47 @@
+all: pdf html info
+
+IMAGE_SOURCE = 
+MAIN_SOURCE = cl-git.texinfo
+HTML_IMAGES = ${IMAGE_SOURCE:.dot=.dot.png} 
+
+include-stamp: ../*.lisp ../*.asd
+	sbcl \
+	--eval '(require :sb-texinfo)' \
+	--eval '(require :cl-git)' \
+	--eval '(sb-texinfo:generate-includes "include/" (list :cl-git) :base-package :cl-git)' \
+	--eval '(quit)'
+	touch include-stamp
+
+
+%.html: %.texinfo style.css include-stamp
+	makeinfo --html --no-split --css-include=style.css $<
+
+%.pdf:  %.texinfo include-stamp
+	texi2pdf $<
+
+%.info: %.texinfo include-stamp
+	makeinfo --no-split $<
+
+
+%.neato.pdf: %.dot
+	neato -Tpdf -o $@ $<
+
+%.dot.pdf: %.dot
+	dot -Tpdf -o $@ $<
+
+%.neato.png: %.dot
+	neato -Tpng -o $@ $<
+
+%.dot.png: %.dot
+	dot -Tpng -o $@ $<
+
+
+
+cl-gi.pdf:  $(MAIN_SOURCE) ${IMAGE_SOURCE:.dot=.dot.pdf} include-stamp
+cl-git.html: $(MAIN_SOURCE) ${IMAGE_SOURCE:.dot=.dot.png} include-stamp
+
+html: cl-git.html
+pdf: cl-git.pdf
+info: cl-git.info
+
+

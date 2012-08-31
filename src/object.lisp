@@ -40,12 +40,12 @@
   (:tree 2)       ; A tree (directory listing) object.
   (:blob 3)       ; A file revision object.
   (:tag 4)        ; An annotated tag object.
-  (:ofs_delta 6)  ; A delta, base is given by an offset.
-  (:ref_delta 7)) ; A delta, base is given by object id.
+  (:ofs-delta 6)  ; A delta, base is given by an offset.
+  (:ref-delta 7)) ; A delta, base is given by object id.
 
 (defcfun ("git_object_id" git-object-id)
     %oid
-  "Returns the oid identifying `object'"
+  "Returns the oid identifying OBJECT"
   (object %object))
 
 (defcfun ("git_object_type" git-object-type)
@@ -104,15 +104,15 @@
     object))
 
 (defun git-object-lookup (oid type)
-  "Returns a reference to the git odb (object) which is identified by the oid.
+  "Returns a reference to the git odb (object) which is identified by the OID.
 The type argument specifies which type is expected.  If the found
 object is not of the right type, an error will be signaled.  The type
-is one of :any, :bad, :commit :tree :blob :tag :ofs_delta :refs_delta.
-:any and :bad are special cases.  :any means return the object found,
+is one of :ANY, :BAD, :COMMIT :TREE :BLOB :TAG :OFS-DELTA :REFS-DELTA.
+:ANY and :BAD are special cases.  :ANY means return the object found,
 do not do a typecheck and is a valid type, but should typically not
 occur.
 
-Note that the returned git object should be freed with git-object-free."
+Note that the returned git object should be freed with GIT-OBJECT-FREE."
 
   (assert (not (null-or-nullpointer *git-repository*)))
 
