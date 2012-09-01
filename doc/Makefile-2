@@ -14,7 +14,7 @@ include-stamp: ../*.lisp ../*.asd
 
 
 %.html: %.texinfo style.css include-stamp
-	makeinfo --html --no-split --css-include=style.css $<
+	makeinfo --html --force --no-split --css-include=style.css $<
 
 %.pdf:  %.texinfo include-stamp
 	texi2pdf $<

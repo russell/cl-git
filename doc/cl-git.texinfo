@@ -143,7 +143,6 @@ TO BE WRITTEN
 * Tree::
 * Config::
 * Repository::
-* Commit::
 * Revisions::
 * Blob::
 * Index::
@@ -231,7 +230,7 @@ to this documentation, or if needed a complete separate section on them.
 @include include/fun-cl-git-git-config-free.texinfo
 @include include/fun-cl-git-git-config-values.texinfo
 
-@node Repository, Commit, Config, Reference By Class
+@node Repository, Revisions, Config, Reference By Class
 @section Repository
 
 @include include/macro-cl-git-with-repository-index.texinfo
@@ -239,19 +238,9 @@ to this documentation, or if needed a complete separate section on them.
 @include include/fun-cl-git-ensure-repository-exist.texinfo
 @include include/fun-cl-git-repository-config.texinfo
 
-@node Commit, Revisions, Repository, Reference By Class
-@section Commit
-
-@include include/macro-cl-git-bind-git-commits.texinfo
-@include include/fun-cl-git-git-lookup.texinfo
-@include include/fun-cl-git-make-commit.texinfo
-@include include/fun-cl-git-git-parent-oid.texinfo
-@include include/fun-cl-git-git-parent-oids.texinfo
-@include include/fun-cl-git-git-parentcount.texinfo
-@include include/fun-cl-git-git-tree.texinfo
 
 
-@node  Revisions, Blob, Commit, Reference By Class
+@node  Revisions, Blob, Repository, Reference By Class
 @section Revision
 
 @include include/fun-cl-git-revision-walk.texinfo
