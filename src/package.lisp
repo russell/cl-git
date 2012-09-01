@@ -43,15 +43,6 @@
    #:walker-next
    #:bind-git-commits
    #:make-commit
-   #:commit-id
-   #:commit-author
-   #:commit-message
-   #:commit-committer
-   #:commit-parentcount
-   #:commit-parent-oid
-   #:commit-parent-oids
-   #:commit-tree
-   #:git-commit-lookup
    #:git-reference-listall
    #:git-reference-create
    #:git-reference-lookup
@@ -63,20 +54,9 @@
    #:git-oid-from-index
    #:with-repository
    #:ensure-repository-exist
-   #:tag-tagger
-   #:tag-type
-   #:tag-target
-   #:tag-name
-   #:tag-message
    #:git-config-free
    #:repository-config
    #:git-config-values
-   #:git-tree-oid
-   #:git-tree-entry-count
-   #:git-tree-entry-by-index
-   #:git-tree-lookup
-;   #:git-tree-close
-   #:git-tree-entries
    #:git-object-lookup
    #:git-object-id
    #:git-object-type
@@ -84,4 +64,20 @@
    #:git-blob-raw-size
    #:git-blob-lookup
    #:git-blob-raw-content
-   #:git-status))
+   #:git-status
+   #:git-id
+   #:git-message
+   #:git-author
+   #:git-committer
+   #:git-parentcount
+   #:git-parent-oid
+   #:git-parent-oids
+   #:git-tree
+   #:git-lookup
+   #:git-name
+   #:git-tagger
+   #:git-type
+   #:git-target
+   #:git-entry-count
+   #:git-entry-by-index
+   #:git-entries))

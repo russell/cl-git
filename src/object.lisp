@@ -178,3 +178,31 @@ Note that the returned git object should be freed with GIT-OBJECT-FREE."
   (with-foreign-object (obj-ptr :pointer)
     (%git-object-lookup obj-ptr *git-repository* oid type)
     (make-instance-object :object-ptr (mem-ref obj-ptr :pointer))))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Some generic functions
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod git-parent-oids (object)
+  "Returns a list of oids identifying the parents of OBJECT."
+  (loop
+    :for index :from 0 :below (git-parentcount object)
+    :collect (git-parent-oid object index)))
+
+
+(defmethod git-lookup (oid &key (type :any))
+  (git-object-lookup oid type))
+
+
+
+(defmethod git-entries (object)
+  "Return all direct children of TREE."
+  (loop :repeat (git-entry-count object)
+        :for index :from 0
+        :collect (git-entry-by-index object index)))
+

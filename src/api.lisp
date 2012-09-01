@@ -1,49 +1,86 @@
 (in-package #:cl-git)
 
-(defgeneric commit-id (object)
-  (:documentation "Return a string containing the commit hash as a 40 bit hex string,
-should be replaced with a generic function for all objects, not just for a commit."))
+(defgeneric git-id (object)
+  (:documentation "Return the identifier of OBJECT. 
+The identifier is typically the SHA-1 checksum or hash code.
 
-(defgeneric commit-author (object)
-  (:documentation "Returns a string containing the commit author's signature.
+Note that this is an integer, and not the string you typically see reported by git.
+
+To get the string representation use format like this:
+
+    (format nil \"~40,'0X\" (git-id object))
+
+or if you want lowercase hexadecimal digits:
+
+    (format nil \"~(~40,'0X~)\" (git-id object))
+
+If you want to be absolutely sure what libgit2 thinks the hash string is do the following:
+
+    (git-oid-tostr (git-id object))
+"))
+
+(defgeneric git-message (object)
+  (:documentation "Return the message associated with OBJECT."))
+
+(defgeneric git-author (object)
+  (:documentation "Returns an alist containing the author's signature of OBJECT.
 A signature is a list with the keys :name :email and :time."))
 
-(defgeneric commit-commiter (object)
-  (:documentation "Returns a string containing the commit commiter's signature.
+(defgeneric git-committer (object)
+  (:documentation "Returns an alist containing the commiter's signature of OBJECT.
 A signature is a list with the keys :name :email and :time."))
 
-(defgeneric commit-message (object)
-  (:documentation "Return a string containing the commit message."))
 
-(defgeneric commit-parentcount (object)
-  (:documentation "Returns the number of parent commits of the argument."))
+(defgeneric git-parentcount (object)
+  (:documentation "Returns the number of parents of OBJECT."))
 
-(defgeneric commit-parent-oid (object index)
+(defgeneric git-parent-oid (object index)
   (:documentation
   "Returns the oid of the parent with index INDEX in the list of
-parents of the commit OBJECT"))
+parents of the object OBJECT"))
 
-(defgeneric commit-parent-oids (object)
+(defgeneric git-parent-oids (object)
   (:documentation "Returns a list of oids identifying the parent commits of OBJECT"))
 
-(defgeneric commit-tree (object)
+(defgeneric git-tree (object)
   (:documentation
-  "Returns the tree object of the commit."))
+  "Returns the tree as a git tree object, for object OBJECT."))
 
-(defgeneric tag-name (object)
+(defgeneric git-lookup (id &key type)
   (:documentation "TODO"))
 
-(defgeneric tag-tagger (object)
+(defgeneric git-name (object)
   (:documentation "TODO"))
 
-(defgeneric tag-type (object)
+(defgeneric git-tagger (object)
   (:documentation "TODO"))
 
-(defgeneric tag-message (object)
+
+(defgeneric git-type (object)
   (:documentation "TODO"))
 
-(defgeneric tag-target (object)
+(defgeneric git-target (object)
   (:documentation "Need to rewrite to return an object!!!!"))
+
+
+(defgeneric git-entry-count (object)
+  (:documentation "TODO"))
+
+(defgeneric git-entry-by-index (object index)
+  (:documentation "TODO"))
+
+(defgeneric git-entries (object)
+  (:documentation "TODO"))
+
+
+
+;;; how it is now:
+
+
+
+
+
+
 
 
 (defgeneric walker-next (walker)

@@ -66,19 +66,19 @@
   ())
 
 
-(defmethod tag-name ((tag tag))
+(defmethod git-name ((tag tag))
   (git-tag-name tag))
 
-(defmethod tag-tagger ((tag tag))
+(defmethod git-tagger ((tag tag))
   (git-tag-name tag))
 
-(defmethod tag-type ((tag tag))
+(defmethod git-type ((tag tag))
   (git-tag-type tag))
 
-(defmethod tag-message ((tag tag))
+(defmethod git-message ((tag tag))
   (git-tag-message tag))
 
-(defmethod tag-target ((tag tag))
+(defmethod git-target ((tag tag))
   "Need to rewrite to return an object!!!!"
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)

@@ -109,12 +109,12 @@ PARENTS is an optional list of parent commits sha1 hashes."
   (assert (not (null-or-nullpointer *git-repository*)))
 
   (let ((newoid (foreign-alloc 'git-oid))
-        (tree (git-tree-lookup oid))
+        (tree (git-lookup oid :type :tree))
         (parents (if (listp parents) parents (list parents))))
     (unwind-protect
          (progn
            ;; lookup all the git commits
-           (setq parents (mapcar #'(lambda (c) (git-commit-lookup (lookup-oid :sha c))) parents))
+           (setq parents (mapcar #'(lambda (c) (git-lookup (lookup-oid :sha c))) parents))
            (with-foreign-object (%parents :pointer (length parents))
              (with-foreign-strings ((%message message)
                                     (%message-encoding "UTF-8")
@@ -137,44 +137,38 @@ PARENTS is an optional list of parent commits sha1 hashes."
       (progn
         (foreign-free newoid)))))
 
-(defmethod commit-id ((commit commit))
-  "Return a string containing the commit oid hash."
-  (git-oid-tostr (git-commit-id commit)))
+(defmethod git-id ((commit commit))
+  (git-commit-id commit))
 
-(defmethod commit-message ((commit commit))
+(defmethod git-message ((commit commit))
   "Return a string containing the commit message."
   (git-commit-message commit))
 
-(defmethod commit-author ((commit commit))
+(defmethod git-author ((commit commit))
   "Given a commit return the commit author's signature."
   (git-commit-author commit))
 
-(defmethod commit-committer ((commit commit))
+(defmethod git-committer ((commit commit))
   (git-commit-committer commit))
 
-(defmethod commit-parentcount ((commit commit))
+(defmethod git-parentcount ((commit commit))
   "Returns the number of parent commits of the argument."
   (git-commit-parentcount commit))
 
-(defmethod commit-parent-oid ((commit commit) index)
+(defmethod git-parent-oid ((commit commit) index)
   "Returns the oid of the parent with index `index' in the list of
 parents of the commit `commit'."
   (git-commit-parent-oid commit index))
 
-(defmethod commit-tree ((commit commit))
+(defmethod git-tree ((commit commit))
   "Returns the tree object of the commit."
   (with-foreign-object (%tree :pointer)
     (%git-commit-tree %tree commit)
     (make-instance-object :object-ptr (mem-aref %tree :pointer)
                           :type :tree)))
 
-(defmethod commit-parent-oids ((commit commit))
-  "Returns a list of oids identifying the parent commits of `commit'."
-  (loop
-    :for index :from 0 :below (git-commit-parentcount commit)
-    :collect (git-commit-parent-oid commit index)))
 
-(defun git-commit-lookup (oid)
+#+nil (defun git-lookup (oid)
   "Look up a commit by oid, return the resulting commit."
   (git-object-lookup oid :commit))
 

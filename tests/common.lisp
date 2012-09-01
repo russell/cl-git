@@ -131,11 +131,10 @@ commit-message filename content."
                               :committer committer
                               :parents parents)))
 
-            (cons `(commit-sha . ,commit-sha)
-                  (cons `(commit-message . ,commit-message)
-                        (cons `(committer . ,committer-alist)
-                              (cons `(author . ,author-alist)
-                                    file))))))))))
+	    `((commit-sha . ,commit-sha)
+	      (commit-message . ,commit-message)
+	      (committer . ,committer-alist)
+	      (author . ,author-alist))))))))
 
 
 (defun commit-random-file-modification (repo-path

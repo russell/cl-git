@@ -8,7 +8,7 @@ include-stamp: ../*.lisp ../*.asd
 	sbcl \
 	--eval '(require :sb-texinfo)' \
 	--eval '(require :cl-git)' \
-	--eval '(sb-texinfo:generate-includes "include/" (list :cl-git) :base-package :cl-git)' \
+	--eval '(sb-texinfo:generate-includes "include/" (list :cl-git) :base-package :cl-git :flatten t)' \
 	--eval '(quit)'
 	touch include-stamp
 

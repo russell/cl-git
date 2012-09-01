@@ -137,9 +137,9 @@ reference is symbolic."
 
 (defun lookup-oids (&key sha head)
   "Similar to lookup-commit, except that the keyword arguments also
- except a list of references.  It will returns list of oids instead of
- a single oid.  If the argument was a single reference, it will return
- a list containing a single oid."
+ accept a list of references.  In that case it will return a list of
+ oids instead of a single oid.  If the argument was a single
+ reference, it will return a list containing a single oid."
   (flet ((lookup-loop (keyword lookup)
            (loop :for reference
                  :in (if (atom lookup) (list lookup) lookup)
