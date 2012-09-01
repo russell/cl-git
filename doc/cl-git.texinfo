@@ -44,20 +44,39 @@ License along with this program.  If not, see
 
 @include include/sb-texinfo.texinfo
 
-@node Top, CLOS Interface, (dir), (dir)
+@node Top, Overview, (dir), (dir)
 @top Introduction
 
 @contents
 
 @menu
+* Overview::
 * CLOS Interface::
 * Reference By Class::
 * Low Level Functions::
 * Function Index::
 @end menu
 
+@node Overview, CLOS Interface, Top, Top
+@chapter Overview
 
-@node CLOS Interface, Reference By Class, Top, Top
+This library wraps the C library libgit2.  As the name implies it deals with git
+and allows you to create/examine and alter git repositories programmatically.
+
+Some knowledge if git is required to make sense of all the concepts.  Also this
+being a wrapper around the libgit2 library, the documentation libgit2, which can be foud
+at @url{http://libgit2.github.com/libgit2/#HEAD} is very helpfull.
+
+@menu
+* Example::
+@end menu
+
+@node Example,  , Overview, Overview
+@section Example
+
+
+
+@node CLOS Interface, Reference By Class, Overview, Top
 @chapter CLOS Interface
 
 The interface exposed by libgit2 is basically an object oriented
