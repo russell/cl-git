@@ -44,33 +44,155 @@ License along with this program.  If not, see
 
 @include include/sb-texinfo.texinfo
 
-@node Top, Temp, (dir), (dir)
+@node Top, CLOS Interface, (dir), (dir)
 @top Introduction
 
 @contents
 
 @menu
-* Temp::
+* CLOS Interface::
+* Reference By Class::
+* Low Level Functions::
 * Function Index::
 @end menu
 
-@node Temp, Function Index, Top, Top
-@chapter Temp
+
+@node CLOS Interface, Reference By Class, Top, Top
+@chapter CLOS Interface
+
+The interface exposed by libgit2 is basically an object oriented
+interface, but expressed in C.  The CLOS interface of cl-git combines
+the myriad of functions back into an object oriented structure.
 
 @menu
-* Reference::
+* Function Name Mapping::
+* Object Hierarchy::
+* Memory Management::
+@end menu
+
+@node  Function Name Mapping, Object Hierarchy, CLOS Interface, CLOS Interface
+@section Function Name Mapping
+
+The mapping from libgit2 names to generic functions is roughly as follows,
+take the libgit2 name such as @code{git_commit_message}, replace the underscore with a hyphen 
+and remove the specific type of object, in this case @samp{commit}.  This yields
+in this case @code{git-message} and that is the generic function name.
+
+@node Object Hierarchy, Memory Management, Function Name Mapping, CLOS Interface
+@section Object Hierarchy
+
+The object hierarchy for objects in the git database is very simple,
+there is one root class called @code{object} and all other objects are
+subclasses, one level deep, of this class.  The subclasses are:
+
+@itemize
+@item commit
+@item tag
+@item tree
+@item blob (not implemented yet)
+@end itemize
+
+There are also objects that are not stored in the git database, such as
+
+@itemize
+@item reference
+@item index
+@item repository
+@item config
+@end itemize
+
+These items are root classes and do not inherit from @code{object}.
+
+@node Memory Management,  , Object Hierarchy, CLOS Interface
+@section Memory Management
+
+TO BE WRITTEN
+
+
+
+
+
+
+@node Reference By Class, Low Level Functions, CLOS Interface, Top
+@chapter Reference By Class
+
+@menu
 * Object::
+* Commit::
+* Tag::
+* Reference::
 * Tree::
 * Config::
 * Repository::
 * Commit::
-* Tag::
 * Revisions::
 * Blob::
 * Index::
 @end menu
 
-@node  Reference, Object, Temp, Temp
+@node Object, Commit, Reference By Class, Reference By Class
+@section Object
+
+@subsection Generic Functions
+
+The functions listed here are generic in the sense that each
+object supports them.
+
+@include include/fun-cl-git-git-id.texinfo
+@include include/fun-cl-git-git-lookup.texinfo
+@include include/fun-cl-git-git-type.texinfo
+
+@subsection Functions Specialized in Sub Classes
+
+The functions listed here are not supported by object itself but by 
+multiple subclasses.  They are listed here to avoid duplication 
+of the documentation.  Each subclass that supports them has a reference
+to this documentation, or if needed a complete separate section on them.
+
+
+@include include/fun-cl-git-git-tree.texinfo
+
+@include include/fun-cl-git-git-entries.texinfo
+@include include/fun-cl-git-git-entry-by-index.texinfo
+@include include/fun-cl-git-git-entry-count.texinfo
+
+@include include/fun-cl-git-git-message.texinfo
+@include include/fun-cl-git-git-name.texinfo
+
+@include include/fun-cl-git-git-author.texinfo
+@include include/fun-cl-git-git-committer.texinfo
+
+@node Commit, Tag, Object, Reference By Class
+@section Commit
+
+@subsection Inherited Functions
+
+@include include/fun-cl-git-git-id.texinfo
+@include include/method-cl-git-git-message-nil-commit-commit.texinfo
+@include include/method-cl-git-git-author-nil-commit-commit.texinfo
+@include include/fun-cl-git-git-committer.texinfo
+@include include/method-cl-git-git-tree-nil-commit-commit.texinfo
+
+
+@subsection Commit Specific Functions
+
+@include include/macro-cl-git-bind-git-commits.texinfo
+
+@include include/fun-cl-git-make-commit.texinfo
+
+@include include/method-cl-git-git-parentcount-nil-commit-commit.texinfo
+@include include/method-cl-git-git-parent-oid-nil-commit-commit-index.texinfo
+@include include/fun-cl-git-git-parent-oids.texinfo
+
+@node Tag, Reference, Commit, Reference By Class
+@section Tag
+
+@include include/fun-cl-git-git-tagger.texinfo
+@include include/fun-cl-git-git-target.texinfo
+@include include/fun-cl-git-git-type.texinfo
+
+
+@node  Reference, Tree, Tag, Reference By Class
 @section Reference
 
 @include include/fun-cl-git-git-reference-create.texinfo
@@ -79,30 +201,18 @@ License along with this program.  If not, see
 @include include/fun-cl-git-git-reference-oid.texinfo
 @include include/fun-cl-git-git-reference-resolve.texinfo
 
-@node Object, Tree, Reference, Temp
-@section Object
 
-@include include/fun-cl-git-git-object-free.texinfo
-@include include/fun-cl-git-git-object-id.texinfo
-@include include/fun-cl-git-git-object-lookup.texinfo
-@include include/fun-cl-git-git-object-type.texinfo
-
-@node  Tree, Config, Object, Temp
+@node  Tree, Config, Reference, Reference By Class
 @section Tree
 
-@include include/fun-cl-git-git-tree-entries.texinfo
-@include include/fun-cl-git-git-tree-entry-by-index.texinfo
-@include include/fun-cl-git-git-tree-entry-count.texinfo
-@include include/fun-cl-git-git-tree-lookup.texinfo
-@include include/fun-cl-git-git-tree-oid.texinfo
 
-@node  Config, Repository, Tree, Temp
+@node  Config, Repository, Tree, Reference By Class
 @section Config
 
 @include include/fun-cl-git-git-config-free.texinfo
 @include include/fun-cl-git-git-config-values.texinfo
 
-@node Repository, Commit, Config, Temp
+@node Repository, Commit, Config, Reference By Class
 @section Repository
 
 @include include/macro-cl-git-with-repository-index.texinfo
@@ -110,30 +220,19 @@ License along with this program.  If not, see
 @include include/fun-cl-git-ensure-repository-exist.texinfo
 @include include/fun-cl-git-repository-config.texinfo
 
-@node Commit, Tag, Repository, Temp
+@node Commit, Revisions, Repository, Reference By Class
 @section Commit
 
 @include include/macro-cl-git-bind-git-commits.texinfo
-@include include/fun-cl-git-git-commit-lookup.texinfo
+@include include/fun-cl-git-git-lookup.texinfo
 @include include/fun-cl-git-make-commit.texinfo
-@include include/fun-cl-git-commit-author.texinfo
-@include include/fun-cl-git-commit-id.texinfo
-@include include/fun-cl-git-commit-message.texinfo
-@include include/fun-cl-git-commit-parent-oid.texinfo
-@include include/fun-cl-git-commit-parent-oids.texinfo
-@include include/fun-cl-git-commit-parentcount.texinfo
-@include include/fun-cl-git-commit-tree.texinfo
+@include include/fun-cl-git-git-parent-oid.texinfo
+@include include/fun-cl-git-git-parent-oids.texinfo
+@include include/fun-cl-git-git-parentcount.texinfo
+@include include/fun-cl-git-git-tree.texinfo
 
-@node Tag, Revisions, Commit, Temp
-@section Tag
 
-@include include/fun-cl-git-tag-message.texinfo
-@include include/fun-cl-git-tag-name.texinfo
-@include include/fun-cl-git-tag-tagger.texinfo
-@include include/fun-cl-git-tag-target.texinfo
-@include include/fun-cl-git-tag-type.texinfo
-
-@node  Revisions, Blob, Tag, Temp
+@node  Revisions, Blob, Commit, Reference By Class
 @section Revision
 
 @include include/fun-cl-git-revision-walk.texinfo
@@ -141,13 +240,13 @@ License along with this program.  If not, see
 @include include/fun-cl-git-walker-next.texinfo
 
 
-@node Blob, Index, Revisions, Temp
+@node Blob, Index, Revisions, Reference By Class
 @section Blob
 
 @include include/fun-cl-git-git-blob-lookup.texinfo
 @include include/fun-cl-git-git-blob-raw-size.texinfo
 
-@node  Index,  , Blob, Temp
+@node  Index,  , Blob, Reference By Class
 @section Index
 
 @include include/fun-cl-git-git-index-add.texinfo
@@ -155,7 +254,19 @@ License along with this program.  If not, see
 @include include/fun-cl-git-git-oid-from-index.texinfo
 
 
-@node Function Index,  , Temp, Top
+@node Low Level Functions, Function Index, Reference By Class, Top
+@chapter Low Level Functions
+
+These functions mostly call directly the underlying C function and 
+the code in the CLOS interface is build on top of this. 
+They should normally not be called and this section
+is only here to document functions that might still be usefull (or are accidentely exported).
+
+@include include/fun-cl-git-git-object-free.texinfo
+
+
+
+@node Function Index,  , Low Level Functions, Top
 @appendix Function Index
 
 @printindex fn

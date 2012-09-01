@@ -181,6 +181,14 @@ Note that the returned git object should be freed with GIT-OBJECT-FREE."
 
 
 
+;; Copy the documentation to the generic function so
+;; we do not have to write it twice.
+(setf (documentation #'git-lookup 'function) 
+      (documentation #'git-object-lookup 'function))
+
+(setf (documentation #'git-type 'function)
+      (documentation #'git-object-type 'function))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -198,7 +206,8 @@ Note that the returned git object should be freed with GIT-OBJECT-FREE."
 (defmethod git-lookup (oid &key (type :any))
   (git-object-lookup oid type))
 
-
+(defmethod git-type ((object object))
+  (git-object-type object))
 
 (defmethod git-entries (object)
   "Return all direct children of TREE."

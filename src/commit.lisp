@@ -152,12 +152,12 @@ PARENTS is an optional list of parent commits sha1 hashes."
   (git-commit-committer commit))
 
 (defmethod git-parentcount ((commit commit))
-  "Returns the number of parent commits of the argument."
+  "Returns the number of parent commits of the argument COMMIT."
   (git-commit-parentcount commit))
 
 (defmethod git-parent-oid ((commit commit) index)
-  "Returns the oid of the parent with index `index' in the list of
-parents of the commit `commit'."
+  "Returns the oid of the parent with index INDEX in the list of
+parents of the commit COMMIT."
   (git-commit-parent-oid commit index))
 
 (defmethod git-tree ((commit commit))
