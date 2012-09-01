@@ -45,3 +45,14 @@ pdf: cl-git.pdf
 info: cl-git.info
 
 
+pages: html
+	git checkout gh-pages
+	cp cl-git.html ../index.html
+	-git commit -a -C master
+	rm ../index.html
+	git checkout -f master
+
+install-info: info
+	cp cl-git.info ~/share/info/
+	install-info cl-git.info ~/share/info/dir
+
