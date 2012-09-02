@@ -26,17 +26,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(define-foreign-type git-signature-type ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %git-signature))
-
-(define-foreign-type time-type ()
-  nil
-  (:actual-type :int64)
-  (:simple-parser %time))
-
 (defcstruct timeval
   (time %time)
   (offset :int))

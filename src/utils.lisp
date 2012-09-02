@@ -32,7 +32,10 @@
 
 ;;; Helper function for debugging
 (defun null-or-nullpointer (obj)
-  (or (not obj) (null-pointer-p obj)))
+  (or (not obj) 
+      (typecase obj
+	(git-pointer (null-pointer-p (pointer obj)))
+	(t (null-pointer-p obj)))))
 
 (defun getenv (name &optional default)
   #+CMU

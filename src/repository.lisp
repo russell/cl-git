@@ -32,8 +32,8 @@
 
 
 ;;; Git Repositories
-(defctype git-repository :pointer)
-(defctype git-repository-index :pointer)
+
+(defctype git-repository-index :pointer) ;; TODO move to index.
 
 ;;; Git Config
 (defcfun ("git_repository_init" %git-repository-init)
@@ -49,23 +49,24 @@
 
 (defcfun ("git_repository_free" %git-repository-free)
     :void
-  (repository :pointer))
+  (repository %repository))
 
 (defcfun ("git_repository_config" %git-repository-config)
     %return-value
   (out :pointer)
-  (repository :pointer))
+  (repository %repository))
 
 (defcfun ("git_repository_index" %git-repository-index)
     %return-value
   (index :pointer)
-  (repository :pointer))
+  (repository %repository))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defclass repository (git-pointer) ())
 
 
 (defun git-repository-init (path &optional bare)
@@ -91,13 +92,9 @@ directory it will be opened instead of the specified path."
                       (cl-fad:pathname-as-directory path)))
                     (truename path))))
       (%git-repository-open repository-ref (namestring path))
-      (with-foreign-object (repository-ref1 :pointer)
-        (setf repository-ref1 (mem-ref repository-ref :pointer))
-        (setf repository-ref (mem-ref repository-ref :pointer))
-        (finalize repository-ref
-                  (lambda ()
-                    (%git-repository-free repository-ref1)))
-        repository-ref))))
+      (make-instance 'repository 
+		     :pointer (mem-ref repository-ref :pointer)
+		     :free-function #'%git-repository-free))))
 
 
 (defun ensure-repository-exist (path &optional bare)

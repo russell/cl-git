@@ -27,11 +27,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-foreign-type git-tag (git-object)
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %tag))
-
 (defcfun ("git_tag_type" git-tag-type)
     git-object-type
   (tag %tag))

@@ -25,17 +25,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(define-foreign-type git-tree-entry-type ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %tree-entry))
-
-(define-foreign-type git-tree (git-object) ;; Is this needed????
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %tree))
-
 (defcstruct git-tree-entry
   (attr :unsigned-int)
   (filename :string)

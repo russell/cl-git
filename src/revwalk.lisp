@@ -26,12 +26,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-foreign-type revision-walker ()
-  ((%object :accessor pointer :initarg :pointer :initform (null-pointer))
-   (%repository :accessor %repository :initarg :repository-pointer))
-  (:actual-type :pointer)
-  (:simple-parser %revwalker))
-
 (defbitfield git-revwalk-flags
   (:none 0)
   (:topological 1)
@@ -41,7 +35,7 @@
 (defcfun ("git_revwalk_new" %git-revwalk-new)
     %return-value
   (revwalk :pointer)
-  (repository :pointer))
+  (repository %repository))
 
 (defcfun ("git_revwalk_free" %git-revwalk-free)
     :void

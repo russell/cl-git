@@ -47,19 +47,6 @@ License along with this program.  If not, see
 @node Top, Overview, (dir), (dir)
 @top Introduction
 
-@contents
-
-@menu
-* Overview::
-* CLOS Interface::
-* Reference By Class::
-* Functions::
-* Function Index::
-@end menu
-
-@node Overview, CLOS Interface, Top, Top
-@chapter Overview
-
 This library wraps the C library libgit2.  As the name implies it deals with git
 and allows you to create/examine and alter git repositories programmatically.
 
@@ -67,16 +54,43 @@ Some knowledge if git is required to make sense of all the concepts.  Also this
 being a wrapper around the libgit2 library, the documentation libgit2, which can be foud
 at @url{http://libgit2.github.com/libgit2/#HEAD} is very helpfull.
 
+@contents
+
 @menu
+* Overview::
 * Example::
+* CLOS Interface::
+* Reference By Class::
+* Functions::
+* Function Index::
 @end menu
 
-@node Example,  , Overview, Overview
-@section Example
+@node Overview, Example, Top, Top
+@chapter Overview
+
+Libgit2 exposes through a C-API basically an object oriented interface.
+The CL-GIT project takes advantage of that and provides a mostly object
+oriented interface to libgit2.  Git concepts such as commits, tags,
+blobs etc are exposed as instances of corresponding classes.  However
+besides the wrapping into objects most of the libgit2 functions are
+almost directly translated into lisp functions, and the libgit2
+documentation is still very relevant. 
+
+In @ref{CLOS Interface} some more details on how the libgit2 concepts
+are mapped into lisp can be found.  And a complete supported list of
+functions can be found near the end in @ref{Functions}.  More
+conventient is the list of functions per type of object you are dealing
+with.  Those can be found in @ref{Reference By Class}.
+
+
+@node Example, CLOS Interface, Overview, Top
+@chapter Example Using CL-GIT 
 
 
 
-@node CLOS Interface, Reference By Class, Overview, Top
+
+
+@node CLOS Interface, Reference By Class, Example, Top
 @chapter CLOS Interface
 
 The interface exposed by libgit2 is basically an object oriented

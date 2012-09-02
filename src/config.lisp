@@ -26,11 +26,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-foreign-type git-config () ;; Is this needed????
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %config))
-
 
 (defcfun ("git_config_free" git-config-free)
     :void

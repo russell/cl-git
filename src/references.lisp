@@ -25,10 +25,6 @@
 ;;; Low-level interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-foreign-type git-reference ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %reference))
 
 (defbitfield git-reference-flags
   (:invalid 0)
@@ -40,7 +36,7 @@
 (defcfun ("git_reference_list" %git-reference-list)
     %return-value
   (strings :pointer)
-  (repository :pointer)
+  (repository %repository)
   (flags git-reference-flags))
 
 (defcfun ("git_reference_oid" git-reference-oid)
@@ -50,8 +46,8 @@
 
 (defcfun ("git_reference_lookup" %git-reference-lookup)
     %return-value
-  (reference %reference)
-  (repository :pointer)
+  (reference :pointer)
+  (repository %repository)
   (name :string))
 
 (defcfun ("git_reference_resolve" %git-reference-resolve)
@@ -61,8 +57,8 @@
 
 (defcfun ("git_reference_create_oid" %git-reference-create-oid)
     %return-value
-  (reference %reference)
-  (repository :pointer)
+  (reference :pointer)
+  (repository %repository)
   (name :string)
   (oid %oid)
   (force (:boolean :int)))

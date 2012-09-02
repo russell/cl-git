@@ -32,11 +32,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-foreign-type oid-type ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %oid))
-
 (defcfun ("git_oid_fromstr" %git-oid-fromstr)
     %return-value
   (oid :pointer)

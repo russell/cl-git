@@ -27,15 +27,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-foreign-type git-commit (git-object)
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %commit))
-
 (defcfun ("git_commit_create" %git-commit-create)
     %return-value
   (oid :pointer)
-  (repo :pointer)
+  (repo %repository)
   (update-ref :pointer)
   (author %git-signature)
   (committer %git-signature)
