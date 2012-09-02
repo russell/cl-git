@@ -90,7 +90,7 @@ Lets start simple, we are going to list all the references present in a reposito
 For this we first have to open a repository with
 @lisp
 > (git-repository-open "/Users/woudshoo/Development/Source/Lisp/cl-git/")
-#<CL-GIT::REPOSITORY {100422BFD3}>
+#<CL-GIT::REPOSITORY @{100422BFD3@}>
 @end lisp
 
 This returns a repository.  Getting a list of references is easy.
