@@ -163,9 +163,6 @@ parents of the commit COMMIT."
                           :type :tree)))
 
 
-#+nil (defun git-lookup (oid)
-  "Look up a commit by oid, return the resulting commit."
-  (git-object-lookup oid :commit))
 
 (defun git-commit-from-oid (oid)
   "Returns a git-commit object identified by the `oid'.
