@@ -1,14 +1,14 @@
 all: pdf html info
 
-IMAGE_SOURCE = 
+IMAGE_SOURCE =
 MAIN_SOURCE = cl-git.texinfo
-HTML_IMAGES = ${IMAGE_SOURCE:.dot=.dot.png} 
+HTML_IMAGES = ${IMAGE_SOURCE:.dot=.dot.png}
 
 include-stamp: ../*.lisp ../*.asd
 	sbcl \
 	--eval '(require :sb-texinfo)' \
 	--eval '(require :cl-git)' \
-	--eval '(sb-texinfo:generate-includes "include/" (list :cl-git) :base-package :cl-git :flatten t)' \
+	--eval '(sb-texinfo:generate-includes "include/" (list :cl-git) :base-package :cl-git :flatten nil)' \
 	--eval '(quit)'
 	touch include-stamp
 
@@ -56,3 +56,9 @@ install-info: info
 	cp cl-git.info ~/share/info/
 	install-info cl-git.info ~/share/info/dir
 
+
+.PHONY: clean
+
+clean:
+	-rm include-stamp
+	-rm -rf include/
