@@ -129,7 +129,7 @@ reference is symbolic."
  keyword should be a symbolic reference to a git commit."
   (cond
     (head (let* ((original-ref (git-reference-lookup head))
-                 (resolved-ref (git-reference-resolve original-ref)))
+                 (resolved-ref (git-resolve original-ref)))
             (prog1 (git-reference-oid resolved-ref)
               (git-object-free resolved-ref)
               (git-object-free original-ref))))

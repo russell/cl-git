@@ -60,8 +60,8 @@
    #:git-repository-config
    #:git-values
    #:git-object-lookup
-   #:git-object-id
-   #:git-object-type
+;   #:git-object-id
+;   #:git-object-type
    #:git-object-free
    #:git-raw-size
    #:git-raw-content
