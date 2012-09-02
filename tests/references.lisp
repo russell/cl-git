@@ -35,4 +35,4 @@ a reference from the commit."
           (is
            (equal
             (sort-strings (list reference "refs/heads/master"))
-            (sort-strings (cl-git:git-reference-listall)))))))))
+            (sort-strings (cl-git:git-reference-list)))))))))
