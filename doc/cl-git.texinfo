@@ -53,7 +53,7 @@ License along with this program.  If not, see
 * Overview::
 * CLOS Interface::
 * Reference By Class::
-* Low Level Functions::
+* Functions::
 * Function Index::
 @end menu
 
@@ -93,7 +93,7 @@ the myriad of functions back into an object oriented structure.
 @section Function Name Mapping
 
 The mapping from libgit2 names to generic functions is roughly as follows,
-take the libgit2 name such as @code{git_commit_message}, replace the underscore with a hyphen 
+take the libgit2 name such as @code{git_commit_message}, replace the underscore with a hyphen
 and remove the specific type of object, in this case @samp{commit}.  This yields
 in this case @code{git-message} and that is the generic function name.
 
@@ -132,149 +132,238 @@ TO BE WRITTEN
 
 
 
-@node Reference By Class, Low Level Functions, CLOS Interface, Top
+@node Reference By Class, Functions, CLOS Interface, Top
 @chapter Reference By Class
 
 @menu
 * Object::
 * Commit::
 * Tag::
-* Reference::
 * Tree::
-* Config::
-* Repository::
-* Revisions::
 * Blob::
+* Config::
+* Reference::
 * Index::
+* Repository::
 @end menu
 
 @node Object, Commit, Reference By Class, Reference By Class
 @section Object
 
-@subsection Generic Functions
-
-The functions listed here are generic in the sense that each
-object supports them.
-
-@include include/fun-cl-git-git-id.texinfo
-@include include/fun-cl-git-git-lookup.texinfo
-@include include/fun-cl-git-git-type.texinfo
-
-@subsection Functions Specialized in Sub Classes
-
-The functions listed here are not supported by object itself but by 
-multiple subclasses.  They are listed here to avoid duplication 
-of the documentation.  Each subclass that supports them has a reference
-to this documentation, or if needed a complete separate section on them.
-
-
-@include include/fun-cl-git-git-tree.texinfo
-
-@include include/fun-cl-git-git-entries.texinfo
-@include include/fun-cl-git-git-entry-by-index.texinfo
-@include include/fun-cl-git-git-entry-count.texinfo
-
-@include include/fun-cl-git-git-message.texinfo
-@include include/fun-cl-git-git-name.texinfo
-
-@include include/fun-cl-git-git-author.texinfo
-@include include/fun-cl-git-git-committer.texinfo
+@table @code
+@item git-id
+@xref{Generic-Function git-id}
+@item git-lookup
+@xref{Generic-Function git-lookup}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
 
 @node Commit, Tag, Object, Reference By Class
 @section Commit
 
-@subsection Inherited Functions
+@table @code
+@item git-author
+@xref{Generic-Function git-author}
+@item git-committer
+@xref{Generic-Function git-committer}
+@item git-id
+@xref{Generic-Function git-id}
+@item git-lookup
+@xref{Generic-Function git-lookup}
+@item git-message
+@xref{Generic-Function git-message}
+@item git-parent-oid
+@xref{Generic-Function git-parent-oid}
+@item git-parentcount
+@xref{Generic-Function git-parentcount}
+@item git-tree
+@xref{Generic-Function git-tree}
+@item git-type
+@xref{Generic-Function git-type}
+@item make-commit
+@xref{Function make-commit}
+@end table
 
-@include include/fun-cl-git-git-id.texinfo
-@include include/method-cl-git-git-message-nil-commit-commit.texinfo
-@include include/method-cl-git-git-author-nil-commit-commit.texinfo
-@include include/fun-cl-git-git-committer.texinfo
-@include include/method-cl-git-git-tree-nil-commit-commit.texinfo
 
-
-@subsection Commit Specific Functions
-
-@include include/macro-cl-git-bind-git-commits.texinfo
-
-@include include/fun-cl-git-make-commit.texinfo
-
-@include include/method-cl-git-git-parentcount-nil-commit-commit.texinfo
-@include include/method-cl-git-git-parent-oid-nil-commit-commit-index.texinfo
-@include include/fun-cl-git-git-parent-oids.texinfo
-
-@node Tag, Reference, Commit, Reference By Class
+@node Tag, Tree, Commit, Reference By Class
 @section Tag
 
-@include include/fun-cl-git-git-tagger.texinfo
-@include include/fun-cl-git-git-target.texinfo
-@include include/fun-cl-git-git-type.texinfo
+@table @code
+@item git-id
+@xref{Generic-Function git-id}
+@item git-lookup
+@xref{Generic-Function git-lookup}
+@item git-message
+@xref{Generic-Function git-message}
+@item git-name
+@xref{Generic-Function git-name}
+@item git-tagger
+@xref{Generic-Function git-tagger}
+@item git-target
+@xref{Generic-Function git-target}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
 
 
-@node  Reference, Tree, Tag, Reference By Class
-@section Reference
-
-@include include/fun-cl-git-git-reference-create.texinfo
-@include include/fun-cl-git-git-reference-listall.texinfo
-@include include/fun-cl-git-git-reference-lookup.texinfo
-@include include/fun-cl-git-git-reference-oid.texinfo
-@include include/fun-cl-git-git-reference-resolve.texinfo
-
-
-@node  Tree, Config, Reference, Reference By Class
+@node  Tree, Blob, Tag, Reference By Class
 @section Tree
 
-
-@node  Config, Repository, Tree, Reference By Class
-@section Config
-
-@include include/fun-cl-git-git-config-free.texinfo
-@include include/fun-cl-git-git-config-values.texinfo
-
-@node Repository, Revisions, Config, Reference By Class
-@section Repository
-
-@include include/macro-cl-git-with-repository-index.texinfo
-@include include/macro-cl-git-with-repository.texinfo
-@include include/fun-cl-git-ensure-repository-exist.texinfo
-@include include/fun-cl-git-repository-config.texinfo
-
-
-
-@node  Revisions, Blob, Repository, Reference By Class
-@section Revision
-
-@include include/fun-cl-git-revision-walk.texinfo
-@include include/macro-cl-git-with-git-revisions.texinfo
-@include include/fun-cl-git-walker-next.texinfo
+@table @code
+@item git-entry-count
+@xref{Generic-Function git-entry-count}
+@item git-id
+@xref{Generic-Function git-id}
+@item git-entry-by-index
+@xref{Generic-Function git-entry-by-index}
+@item git-oid-from-index
+@xref{Function git-oid-from-index}
+@item git-lookup
+@xref{Generic-Function git-lookup}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
 
 
-@node Blob, Index, Revisions, Reference By Class
+@node Blob, Config, Tree, Reference By Class
 @section Blob
 
-@include include/fun-cl-git-git-blob-lookup.texinfo
-@include include/fun-cl-git-git-blob-raw-size.texinfo
+@table @code
+@item git-id
+@xref{Generic-Function git-id}
+@item git-lookup
+@xref{Generic-Function git-lookup}
+@item git-raw-size
+@xref{Function git-raw-size}
+@item git-raw-content
+@xref{Function git-raw-content}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
 
-@node  Index,  , Blob, Reference By Class
+
+@node  Config, Reference, Blob, Reference By Class
+@section Config
+
+@table @code
+@item git-values
+@xref{Generic-Function git-values}
+@end table
+
+@node  Reference, Index, Config, Reference By Class
+@section Reference
+
+@table @code
+@item git-reference-lookup
+@xref{Function git-reference-lookup}
+@item git-resolve
+@xref{Function git-resolve}
+@item git-reference-list
+@xref{Function git-reference-list}
+@item git-reference-create
+@xref{Function git-reference-create}
+@item git-reference-oid
+@xref{Function git-reference-oid}
+@end table
+
+
+@node  Index, Repository, Reference, Reference By Class
 @section Index
 
+All these functions need to be changed to take an explicit index.
+If that is down, it allows us to rename the functions to simpler names.
+
+@table @code
+@item git-index-add
+@xref{Function git-index-add}
+@item git-index-clear
+@xref{Function git-index-clear}
+@item git-index-write
+@xref{Function git-index-write}
+@item with-repository-index
+@xref{Macro with-repository-index}
+@end table
+
+
+
+@node Repository,  , Index, Reference By Class
+@section Repository
+
+@table @code
+@item ensure-repository-exist
+@xref{Function ensure-repository-exist}
+@item git-repository-config
+@xref{Function git-repository-config}
+@item with-repository
+@xref{Macro with-repository}
+@end table
+
+
+
+
+@c @node Low Level Functions, Functions, Reference By Class, Top
+@c @chapter Low Level Functions
+
+@c These functions mostly call directly the underlying C function and
+@c the code in the CLOS interface is build on top of this.
+@c They should normally not be called and this section
+@c is only here to document functions that might still be usefull (or are accidentely exported).
+
+
+
+@node Functions, Function Index, Reference By Class, Top
+@chapter Functions
+
+
+@include include/fun-cl-git-ensure-repository-exist.texinfo
+@include include/fun-cl-git-git-author.texinfo
+@include include/fun-cl-git-git-committer.texinfo
+@include include/fun-cl-git-git-config-free.texinfo
+@include include/fun-cl-git-git-entries.texinfo
+@include include/fun-cl-git-git-entry-by-index.texinfo
+@include include/fun-cl-git-git-entry-count.texinfo
+@include include/fun-cl-git-git-id.texinfo
 @include include/fun-cl-git-git-index-add.texinfo
 @include include/fun-cl-git-git-index-write.texinfo
-@include include/fun-cl-git-git-oid-from-index.texinfo
-
-
-@node Low Level Functions, Function Index, Reference By Class, Top
-@chapter Low Level Functions
-
-These functions mostly call directly the underlying C function and 
-the code in the CLOS interface is build on top of this. 
-They should normally not be called and this section
-is only here to document functions that might still be usefull (or are accidentely exported).
-
+@include include/fun-cl-git-git-index-clear.texinfo
+@include include/fun-cl-git-git-lookup.texinfo
+@include include/fun-cl-git-git-message.texinfo
+@include include/fun-cl-git-git-name.texinfo
 @include include/fun-cl-git-git-object-free.texinfo
+@include include/fun-cl-git-git-oid-from-index.texinfo
+@include include/fun-cl-git-git-parent-oid.texinfo
+@include include/fun-cl-git-git-parent-oids.texinfo
+@include include/fun-cl-git-git-parentcount.texinfo
+@include include/fun-cl-git-git-raw-content.texinfo
+@include include/fun-cl-git-git-raw-size.texinfo
+@include include/fun-cl-git-git-reference-create.texinfo
+@include include/fun-cl-git-git-reference-list.texinfo
+@include include/fun-cl-git-git-reference-lookup.texinfo
+@include include/fun-cl-git-git-reference-oid.texinfo
+@include include/fun-cl-git-git-resolve.texinfo
+@include include/fun-cl-git-git-tagger.texinfo
+@include include/fun-cl-git-git-target.texinfo
+@include include/fun-cl-git-git-tree.texinfo
+@include include/fun-cl-git-git-type.texinfo
+@include include/fun-cl-git-git-values.texinfo
+@include include/fun-cl-git-make-commit.texinfo
+@include include/fun-cl-git-git-repository-config.texinfo
+@include include/fun-cl-git-revision-walk.texinfo
+@include include/fun-cl-git-walker-next.texinfo
+@include include/macro-cl-git-bind-git-commits.texinfo
+@include include/macro-cl-git-with-git-revisions.texinfo
+@include include/macro-cl-git-with-repository-index.texinfo
+@include include/macro-cl-git-with-repository.texinfo
 
 
+@c @include include/method-cl-git-git-author-nil-commit-commit.texinfo
+@c @include include/method-cl-git-git-message-nil-commit-commit.texinfo
+@c @include include/method-cl-git-git-parent-oid-nil-commit-commit-index.texinfo
+@c @include include/method-cl-git-git-parentcount-nil-commit-commit.texinfo
+@c @include include/method-cl-git-git-tree-nil-commit-commit.texinfo
 
-@node Function Index,  , Low Level Functions, Top
+@node Function Index,  , Functions, Top
 @appendix Function Index
 
 @printindex fn
