@@ -81,4 +81,7 @@
    #:git-target
    #:git-entry-count
    #:git-entry-by-index
-   #:git-entries))
+   #:git-entries
+   #:git-repository-open
+   #:git-repository-free
+   #:git-free))

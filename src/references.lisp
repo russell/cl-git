@@ -97,23 +97,22 @@ argument."
     (%git-reference-resolve resolved-ref reference)
     (mem-ref resolved-ref :pointer)))
 
-(defun git-reference-list (&rest flags)
+(defun git-reference-list (&key (repository *git-repository*) (flags '(:oid)))
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
-  (assert (not (null-or-nullpointer *git-repository*)))
+  (assert (not (null-or-nullpointer repository)))
 
-  (let ((git-flags (if flags flags '(:oid))))
-    (with-foreign-object (string-array 'git-strings)
-      (%git-reference-list string-array *git-repository* git-flags)
-      (with-foreign-slots ((strings count) string-array git-strings)
-        (let ((refs
-                (loop
-                  :for i :below count
-                  :collect (foreign-string-to-lisp
-                            (mem-aref strings :pointer i)))))
-          (%git-strarray-free string-array)
-          refs)))))
+  (with-foreign-object (string-array 'git-strings)
+    (%git-reference-list string-array repository flags)
+    (with-foreign-slots ((strings count) string-array git-strings)
+      (let ((refs
+	     (loop
+		:for i :below count
+		:collect (foreign-string-to-lisp
+			  (mem-aref strings :pointer i)))))
+	(%git-strarray-free string-array)
+	refs))))
 
 (defun git-reference-create (name &key sha head force)
   "Create new reference in the current repository with NAME linking to

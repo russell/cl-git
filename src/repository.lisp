@@ -47,7 +47,7 @@
   (repository :pointer)
   (path :string))
 
-(defcfun ("git_repository_free" %git-repository-free)
+(defcfun ("git_repository_free" git-repository-free)
     :void
   (repository %repository))
 
@@ -74,15 +74,16 @@
 repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (repo :pointer)
     (%git-repository-init repo (namestring path) bare)
-    (%git-repository-free (mem-ref repo :pointer))
+    (git-repository-free (mem-ref repo :pointer))
     path))
 
 
-;; XXX This symbol is internal until it returns more than a pointer.
 (defun git-repository-open (path)
   "Open an existing repository and set the global *GIT-REPOSITORY*
 variable to the open repository.  If the PATH contains a .git
-directory it will be opened instead of the specified path."
+directory it will be opened instead of the specified path.
+
+TODO Simplify this function to rely on libgit2."
   (assert (null-or-nullpointer *git-repository-index*))
   (assert (null-or-nullpointer *git-repository*))
   (with-foreign-object (repository-ref :pointer)
@@ -94,7 +95,7 @@ directory it will be opened instead of the specified path."
       (%git-repository-open repository-ref (namestring path))
       (make-instance 'repository 
 		     :pointer (mem-ref repository-ref :pointer)
-		     :free-function #'%git-repository-free))))
+		     :free-function #'git-repository-free))))
 
 
 (defun ensure-repository-exist (path &optional bare)
@@ -122,4 +123,7 @@ created repository will be bare."
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
   `(let ((*git-repository* (git-repository-open ,path)))
-     ,@body))
+     (unwind-protect 
+	  (progn 
+	    ,@body)
+       (git-free *git-repository*))))

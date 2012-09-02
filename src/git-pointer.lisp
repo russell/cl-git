@@ -79,7 +79,11 @@ pointer to null-pointer as well."
       (internal-dispose (finalizer-data object) 
 			(pointer object)
 			(free-function object))
-      (setf (slot-value object 'pointer) (null-pointer))))) 
+      (setf (slot-value object 'libgit2-pointer) (null-pointer))))) 
+
+(defmethod git-free ((object git-pointer))
+  (dispose object)
+  nil)
 
 (defmethod initialize-instance :after ((instance git-pointer) &rest r)
   "Setup the finalizer to call internal-dispose with the right arguments."

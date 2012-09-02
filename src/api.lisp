@@ -74,7 +74,8 @@ parents of the object OBJECT"))
 (defgeneric git-values (object)
   (:documentation "TODO"))
 
-
+(defgeneric git-free (object)
+  (:documentation "TODO"))
 ;;; how it is now:
 
 
