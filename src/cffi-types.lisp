@@ -34,6 +34,11 @@
   (:actual-type :pointer)
   (:simple-parser %tag))
 
+(define-foreign-type git-blob (git-object)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %blob))
+
 (define-foreign-type git-tree-entry-type ()
   nil
   (:actual-type :pointer)

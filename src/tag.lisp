@@ -60,7 +60,6 @@
 (defclass tag (object)
   ())
 
-
 (defmethod git-name ((tag tag))
   (git-tag-name tag))
 
@@ -74,7 +73,6 @@
   (git-tag-message tag))
 
 (defmethod git-target ((tag tag))
-  "Need to rewrite to return an object!!!!"
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
-    (mem-ref %object :pointer)))
+    (make-instance-object :object-ptr (mem-ref %object :pointer))))

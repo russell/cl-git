@@ -116,7 +116,9 @@ created repository will be bare."
   (assert (not (null-or-nullpointer *git-repository*)))
   (with-foreign-object (config :pointer)
     (%git-repository-config config *git-repository*)
-    (mem-ref config :pointer)))
+    (make-instance 'git-pointer 
+		   :pointer (mem-ref config :pointer)
+		   :free-function #'git-config-free)))
 
 
 (defmacro with-repository ((path) &body body)

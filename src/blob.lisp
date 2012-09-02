@@ -29,12 +29,12 @@
 
 (defcfun ("git_blob_rawcontent" %git-blob-raw-content)
     :pointer
-  (blob :pointer))
+  (blob %blob))
 
 (defcfun ("git_blob_rawsize" git-raw-size)
     size
   "The number of content bytes in the blob."
-  (blob :pointer))
+  (blob %blob))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

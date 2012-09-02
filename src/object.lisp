@@ -110,21 +110,20 @@ wrap git pointers to repositories, config, index etc."
 		   :object-type obj-type
 		   :free-function #'git-object-free)))
 
-(defun git-object-lookup (oid type)
-  "Returns a reference to the git odb (object) which is identified by the OID.
+(defun git-object-lookup (oid type &key (repository *git-repository*))
+  "Returns a git object which is identified by the OID.
 The type argument specifies which type is expected.  If the found
 object is not of the right type, an error will be signaled.  The type
 is one of :ANY, :BAD, :COMMIT :TREE :BLOB :TAG :OFS-DELTA :REFS-DELTA.
-:ANY and :BAD are special cases.  :ANY means return the object found,
-do not do a typecheck and is a valid type, but should typically not
-occur.
+:ANY and :BAD are special cases.  
+:ANY means return the object found, regardless of type.  Also :ANY is
+not a type of any real object, but only used for querying like in this function.
+:BAD should never occur, it indicates an error in the data store."
 
-Note that the returned git object should be freed with GIT-OBJECT-FREE."
-
-  (assert (not (null-or-nullpointer *git-repository*)))
+  (assert (not (null-or-nullpointer repository)))
 
   (with-foreign-object (obj-ptr :pointer)
-    (%git-object-lookup obj-ptr *git-repository* oid type)
+    (%git-object-lookup obj-ptr repository oid type)
     (make-instance-object :object-ptr (mem-ref obj-ptr :pointer))))
 
 

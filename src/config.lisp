@@ -30,7 +30,7 @@
 (defcfun ("git_config_free" git-config-free)
     :void
   "Free the git configuration object that is acquired with GIT-REPOSITORY-CONFIG."
-  (config :pointer))
+  (config %config))
 
 (defcfun ("git_config_foreach" %git-config-foreach)
     %return-value
