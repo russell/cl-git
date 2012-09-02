@@ -86,6 +86,8 @@ with.  Those can be found in @ref{Reference By Class}.
 @node Example, CLOS Interface, Overview, Top
 @chapter Example Using CL-GIT 
 
+@section Listing References
+
 Lets start simple, we are going to list all the references present in a repository.
 For this we first have to open a repository with
 @lisp
@@ -118,6 +120,52 @@ the current (default) repository, and executes a body of code.   Like this:
 ("refs/heads/convert-to-classes" "refs/heads/gh-pages"
   ... )
 @end lisp
+
+@section Inspecting a Single Commit
+
+Now suppose we know the hash of a commit we can get to this commit as follows:
+@lisp
+> (setf *repo* (cl-git:git-repository-open 
+                  "/Users/woudshoo/Development/Source/Lisp/wo-git-gui/"))
+
+#<CL-GIT::REPOSITORY @{10083E86C3@}>
+
+> (setf *commit* (cl-git:git-lookup "6a9840f959df6301cba1acbc560b960a6a2787d6" 
+                    :repository *repo*))
+#<CL-GIT::COMMIT @{10084FA0B3@}>
+@end lisp
+
+Now we can inspect this commit to get the commit message and the author:
+
+@lisp
+> (cl-git:git-message *commit*)
+"Started to write some documentation
+"
+> (cl-git:git-author *commit*)
+(:NAME "Willem Rein Oudshoorn" :EMAIL "woudshoo+github@xs4all.nl" :TIME
+ @2012-05-06T18:46:35.000000+02:00)
+@end lisp
+
+Or we can see what is parents are,
+
+@lisp
+> (cl-git:git-parentcount *commit*)
+1
+> (cl-git:git-parent-oids *commit*)
+(706478223342774799146743734860864842687841202176)
+@end lisp
+
+What is important to notice here is that the result of
+@code{git-parent-oids} is a list of numbers.  These numbers are the same
+as the SHA-1 hashes you normally see in git, except displayed, as usual
+in base 10.  The SHA-1 that are displayed in by the git command line
+tools are normally written in base 16.  CL-git uses numbers to identify
+the commits etc.  But if you remember we did lookup the commit with a
+SHA-1 base 16 hash, above.  This works because if a SHA-1 hash is
+expected and a string is supplied, CL-git converts the string to an
+integer by reading it in base 16.
+
+
 
 @node CLOS Interface, Reference By Class, Example, Top
 @chapter CLOS Interface

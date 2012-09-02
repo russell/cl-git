@@ -26,11 +26,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcstruct git-tree-entry
-  (attr :unsigned-int)
-  (filename :string)
+  (removed :uint16)
+  (attr :uint16)
   (oid git-oid)
   (filename-len size)
-  (removed :int))
+  (filename :char))
+
+
 
 (defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
     %return-value
@@ -63,8 +65,11 @@ This does count the number of direct children, not recursively."
 
 
 (defmethod translate-from-foreign (value (type git-tree-entry-type))
-  (with-foreign-slots ((attr filename oid removed) value git-tree-entry)
-    (list :attr attr :filename filename
+  (with-foreign-slots ((attr filename oid removed filename-len) value git-tree-entry)
+    (list :attr attr 
+	  :filename  (foreign-string-to-lisp (foreign-slot-pointer value 'git-tree-entry 'filename)
+					     :count  filename-len)
+	  :filename-length filename-len
           :oid (convert-from-foreign oid '%oid) :removed removed)))
 
 
