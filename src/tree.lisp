@@ -88,10 +88,6 @@ This does count the number of direct children, not recursively."
 (defclass tree (object)
   ())
 
-#+nil (defun git-tree-lookup (oid)
-  "Lookup a Git tree object."
-  (git-object-lookup oid :tree))
-
 (defun git-oid-from-index ()
   "Write the current index to the disk and return an oid to it."
   (assert (not (null-or-nullpointer *git-repository-index*)))

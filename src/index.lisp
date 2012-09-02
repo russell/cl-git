@@ -72,3 +72,19 @@ to the repository."
   "Write the current index stored in *GIT-REPOSITORY-INDEX* to disk."
   (assert (not (null-or-nullpointer *git-repository-index*)))
   (%git-index-write *git-repository-index*))
+
+
+(defmacro with-repository-index (&body body)
+  "Load a repository index uses the current *GIT-REPOSITORY* as the
+current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
+index."
+  `(let ((*git-repository-index* (null-pointer)))
+     (assert (not (null-or-nullpointer *git-repository*)))
+     (unwind-protect
+          (with-foreign-object (%index :pointer)
+            (%git-repository-index %index  *git-repository*)
+            (setf *git-repository-index* (mem-ref %index :pointer))
+            ,@body)
+       (progn
+         (%git-index-free *git-repository-index*)))))
+

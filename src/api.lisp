@@ -71,6 +71,8 @@ parents of the object OBJECT"))
 (defgeneric git-entries (object)
   (:documentation "TODO"))
 
+(defgeneric git-values (object)
+  (:documentation "TODO"))
 
 
 ;;; how it is now:

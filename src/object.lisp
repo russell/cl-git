@@ -87,19 +87,20 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass object ()
+(defclass git-pointer ()
   ((libgit2-pointer :accessor pointer :initarg :pointer :initform (null-pointer)
 		    :documentation "A CFFI pointer from libgit2.  
 This is the git object that is wrapped by the instance of this class.")
+   (free-function :reader free-function :initarg :free-function :initform nil)
+   (finalizer-data :accessor finalizer-data :initform (cons t nil))))
 
-   (type :accessor object-type :initarg :object-type :initform 'object
+(defclass object (git-pointer)
+  ((type :accessor object-type :initarg :object-type :initform 'object
 	 :documentation "A symbol indicating which libgit2 type this is.
 This slot is probably uselss in the sense that we do not necessarily know
 on creation time and if we do not know exactly what is the point?
 So this is mainly used for printing") ;;; do we need this??
-
-   (libgit2-repository :accessor %repository :initarg :repository-pointer)
-   (finalizer-data :accessor finalizer-data :initform (cons t nil) ))
+   (libgit2-repository :accessor %repository :initarg :repository-pointer))
   (:documentation "Object encapsulating git objects from libgit2"))
 
 
@@ -114,16 +115,24 @@ object is gone."
        (when real-o (funcall function real-o))))
    list))
 
+
+(defun internal-dispose (finalizer-data pointer free-function)
+  (when (car finalizer-data)
+    (setf (car finalizer-data) nil)             ;; mark as disposed
+    (mapc-weak #'dispose (cdr finalizer-data))  ;; dispose dependends
+    (funcall free-function pointer)))                 ;; free git object
+    
 (defgeneric dispose (object)
   (:documentation "This interface is used to mark as invalid git objects when for example
 the repository is closed.")
 
-  (:method ((object object))
-    (when (car (finalizer-data object))        ;; when not disposed
-      (setf (car (finalizer-data object)) nil) ;; mark as disposed
-      (mapc-weak #'dispose (cdr (finalizer-data object)))  ;; dispose dependends
-      (git-object-free (pointer object))       ;; free git object
-      (setf (pointer object) (null-pointer))))) ;; set git object to null so we get errors if used.
+  (:method ((object git-pointer))
+    (when (car (finalizer-data object))
+      (internal-dispose (finalizer-data object) 
+			(pointer object)
+			(free-function object))
+      (setf (pointer object) (null-pointer)) ;; set git object to null so we get errors if used.
+))) 
 
 ;;; Memory management
 ;;;
@@ -146,20 +155,20 @@ the repository is closed.")
                      (:commit 'commit)
                      (:tag 'tag)
                      (:tree 'tree)
+		     (:blob 'blob)
                      (t 'object)))
 
          (object (make-instance obj-type
                                 :pointer object-ptr
                                 :repository-pointer (or repository-ptr *git-repository*)
-				:object-type obj-type)))
+				:object-type obj-type
+				:free-function #'git-object-free)))
 
     (let ((finalizer-data (finalizer-data object))
 	  (pointer (pointer object)))
       (finalize object
 		(lambda ()
-		  (when (car finalizer-data)
-		    (mapc-weak #'dispose (cdr finalizer-data))
-		    (git-object-free pointer)))))
+		  (internal-dispose finalizer-data pointer #'git-object-free))))
     object))
 
 (defun git-object-lookup (oid type)
@@ -210,7 +219,10 @@ Note that the returned git object should be freed with GIT-OBJECT-FREE."
   (git-object-type object))
 
 (defmethod git-entries (object)
-  "Return all direct children of TREE."
+  "Return all entries of OBJECT as a list.
+
+Note that this is basically a wrapper around GIT-ENTRY-BY-INDEX, 
+so the objects returned are the same as the ones returned by GIT-ENTRY-BY-INDEX."
   (loop :repeat (git-entry-count object)
         :for index :from 0
         :collect (git-entry-by-index object index)))

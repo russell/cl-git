@@ -25,7 +25,10 @@
 ;;; Low-level interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+(define-foreign-type git-reference ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %reference))
 
 (defbitfield git-reference-flags
   (:invalid 0)
@@ -43,22 +46,22 @@
 (defcfun ("git_reference_oid" git-reference-oid)
     %oid
   "Return the oid from within the reference."
-  (reference :pointer))
+  (reference %reference))
 
 (defcfun ("git_reference_lookup" %git-reference-lookup)
     %return-value
-  (reference :pointer)
+  (reference %reference)
   (repository :pointer)
   (name :string))
 
 (defcfun ("git_reference_resolve" %git-reference-resolve)
     %return-value
   (resolved-ref :pointer)
-  (reference :pointer))
+  (reference %reference))
 
 (defcfun ("git_reference_create_oid" %git-reference-create-oid)
     %return-value
-  (reference :pointer)
+  (reference %reference)
   (repository :pointer)
   (name :string)
   (oid %oid)
@@ -66,11 +69,11 @@
 
 (defcfun ("git_reference_free" %git-reference-free)
     :void
-  (reference :pointer))
+  (reference %reference))
 
-(defcfun ("git_reference_type" %git-reference-type)
+(defcfun ("git_reference_type" git-reference-type)
     git-reference-flags
-  (reference :pointer))
+  (reference %reference))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -79,15 +82,18 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass reference (git-pointer) ())
 
 (defun git-reference-lookup (name)
-  "Find a reference by its full name e.g.: ref/heads/master"
+  "Find a reference by its full name e.g.: ref/heads/master
+Note that this function name clashes with the generic lookup function.
+We need to figure this out by using the type argument to do dispatch."
   (assert (not (null-or-nullpointer *git-repository*)))
   (with-foreign-object (reference :pointer)
     (%git-reference-lookup reference *git-repository* name)
     (mem-ref reference :pointer)))
 
-(defun git-reference-resolve (reference)
+(defun git-resolve (reference)
   "If the reference is symbolic, follow the it until it finds a non
 symbolic reference.  The result should be freed independently from the
 argument."
@@ -95,7 +101,7 @@ argument."
     (%git-reference-resolve resolved-ref reference)
     (mem-ref resolved-ref :pointer)))
 
-(defun git-reference-listall (&rest flags)
+(defun git-reference-list (&rest flags)
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
@@ -135,7 +141,7 @@ are :SHA, :HEAD or :BOTH"
            (find flag (list :both other-flag))))
   (acond
     ((and (and-both flags :head)
-          (remove-if-not (lambda (ref) (equal ref name)) (git-reference-listall)))
+          (remove-if-not (lambda (ref) (equal ref name)) (git-reference-list)))
      (lookup-oid :head (car it)))
     ((and (and-both flags :sha)
           (find (length name) '(40 7))

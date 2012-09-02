@@ -113,26 +113,12 @@ created repository will be bare."
       (git-repository-init path bare)
       path)))
 
-(defun repository-config ()
+(defun git-repository-config ()
   "Return the config object of the current open repository."
   (assert (not (null-or-nullpointer *git-repository*)))
   (with-foreign-object (config :pointer)
     (%git-repository-config config *git-repository*)
     (mem-ref config :pointer)))
-
-(defmacro with-repository-index (&body body)
-  "Load a repository index uses the current *GIT-REPOSITORY* as the
-current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
-index."
-  `(let ((*git-repository-index* (null-pointer)))
-     (assert (not (null-or-nullpointer *git-repository*)))
-     (unwind-protect
-          (with-foreign-object (%index :pointer)
-            (%git-repository-index %index  *git-repository*)
-            (setf *git-repository-index* (mem-ref %index :pointer))
-            ,@body)
-       (progn
-         (%git-index-free *git-repository-index*)))))
 
 
 (defmacro with-repository ((path) &body body)

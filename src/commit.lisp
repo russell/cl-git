@@ -179,7 +179,7 @@ If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
   (let ((git-object (git-object-lookup oid :any)))
     (ecase (git-object-type git-object)
-      (:tag (tag-target git-object))
+      (:tag (git-target git-object))
       (:commit git-object))))
 
 (defun commit-oid-from-oid (oid)

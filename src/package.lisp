@@ -43,27 +43,28 @@
    #:walker-next
    #:bind-git-commits
    #:make-commit
-   #:git-reference-listall
+   #:git-reference-list
    #:git-reference-create
    #:git-reference-lookup
    #:git-reference-oid
-   #:git-reference-resolve
+   #:git-reference-type
+   #:git-resolve
    #:with-repository-index
    #:git-index-add
    #:git-index-write
+   #:git-index-clear
    #:git-oid-from-index
    #:with-repository
    #:ensure-repository-exist
    #:git-config-free
-   #:repository-config
-   #:git-config-values
+   #:git-repository-config
+   #:git-values
    #:git-object-lookup
    #:git-object-id
    #:git-object-type
    #:git-object-free
-   #:git-blob-raw-size
-   #:git-blob-lookup
-   #:git-blob-raw-content
+   #:git-raw-size
+   #:git-raw-content
    #:git-status
    #:git-id
    #:git-message

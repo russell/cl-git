@@ -31,7 +31,7 @@
     :pointer
   (blob :pointer))
 
-(defcfun ("git_blob_rawsize" git-blob-raw-size)
+(defcfun ("git_blob_rawsize" git-raw-size)
     size
   "The number of content bytes in the blob."
   (blob :pointer))
@@ -43,14 +43,11 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass blob (object) ())
 
-(defun git-blob-lookup (oid)
-  "Returns a blob identified by the oid."
-  (assert (not (null-or-nullpointer *git-repository*)))
-  (git-object-lookup oid :blob))
-
-(defun git-blob-raw-content (blob)
-  (let ((result (make-array (git-blob-raw-size blob)
+(defun git-raw-content (blob)
+  "Returns the content of the blob BLOB as an array of UNSIGNED-BYTE's"
+  (let ((result (make-array (git-raw-size blob)
                             :element-type '(unsigned-byte 8)
                             :initial-element 0))
         (content (%git-blob-raw-content blob)))

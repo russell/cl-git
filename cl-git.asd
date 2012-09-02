@@ -19,7 +19,6 @@
                  (:file "oid")
                  (:file "index")
                  (:file "repository")
-                 (:file "config")
                  (:file "signature")
                  (:file "references")
                  (:file "object")
@@ -27,6 +26,7 @@
                  (:file "commit")
                  (:file "tag")
 		 (:file "blob")
+                 (:file "config")
                  (:file "status")
                  (:file "revwalk")))))
 
