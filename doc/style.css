@@ -7,7 +7,7 @@
   .contents { border: 2px solid black;
               margin: 1cm 1cm 1cm 1cm;
               padding-left: 3mm; }
-  .lisp { padding: 0; margin: 0em; }
+  .lisp { padding: 0; margin: 0em; background-color: lightgray;}
   code { font-family: sans-serif; font-style: italic;}
   body { padding: 2em 8em; font-family: sans-serif; }
   h1 { padding: 1em; text-align: center; }
