@@ -206,9 +206,13 @@ To see what is in the commit we can get the tree out of the commit with
 ...)
 @end lisp
 So this gives you a list of files and directories in the commit.  Note
-that this gives only the top level entries, you need to traverse
-sub directories yourself.  In the example above @code{src} is a directory, which
-you can tell by interpreting the @code{:ATTR} value.
+that this gives only the top level entries, you need to traverse sub
+directories yourself.  In the example above @code{src} is a directory,
+which you can tell by interpreting the @code{:ATTR} value.  The meaning
+of the attribute flag is the same as in C and the flags are defined in
+@file{/usr/include/cpio.h} ad @file{/usr/include/sys/stat.h}.  For us
+the important thing to know is that 16384 (= @code{#8R40000}) indicates
+it is a directory.
 
 Before we dive into this, we can get the content of the .gitignore file 
 by extracting the OID, @code{1166326251727089714911644542196064058758301591936}
@@ -235,7 +239,6 @@ So to extract the content we can do
 And to convert it to a string you can do the following (however this is only likely
 to work for ASCII).
 
-
 @lisp
 CL-USER> (map 'string #'code-char *)
 "*~
@@ -244,6 +247,31 @@ CL-USER> (map 'string #'code-char *)
 /doc/eggs/
 ......"
 @end lisp
+
+For proper decoding you should use your favorite method, e.g. use babel.
+
+@subsection Sub Directories
+
+As mentioned before, you can see from the attribute directory if an
+entry in the tree is a sub directory.  The way to access a sub directory
+is by looking up the OID from the entry.  For this example we take the
+OID from the @file{src} entry in the section above.
+
+@lisp
+> (cl-git:git-lookup  1088911882924495776433938337720561272818465626581
+                      :repository *repo*)
+#<CL-GIT::TREE @{10078100B3@}>
+@end lisp
+
+Now notice that we knew beforehand that this was a directory because the
+@code{:ATTR} was @code{#8R40000}, but we can also tell it was a sub directory
+because the return value for looking up the entry is a a tree object.
+
+This tree object has entries, containing the files and sub directories
+of the @file{src} directory of the git project.
+
+And we can repeat the same inspection, lookup etc as in the previous
+section.
 
 
 @node CLOS Interface, Reference By Class, Example, Top
@@ -295,10 +323,62 @@ These items are root classes and do not inherit from @code{object}.
 @node Memory Management,  , Object Hierarchy, CLOS Interface
 @section Memory Management
 
-TO BE WRITTEN
+NOTE STILL UNDER IMPLEMENTATION
 
+Because C has manual memory management and Lisp automatic memory
+management there is the question on how these two systems integrate.
 
+First most libgit2 objects need to be freeed.  There are different free calls in libgit2, but 
+in CL-git they are all replaced by @code{git-free}.  
 
+Second of all, this call is made optional. The package
+@samp{trivial-garbage} takes care of freeing the object when the garbage
+collector collects the Lisp git object wrappers. 
+
+So normally you do not have to call the free explicitly.  However there
+are a few reasons you might want to do it anyway:
+
+@itemize
+@item Having a repository and commit objects open has the
+      side effect that file descriptors to the underlying git files stay open.
+      When you iterate over may commits manually (not using the convience macros)
+      can trigger the Lisp process to run out of available file handles.
+@item Some libgit2 calls can potentially allocate lots of memory.
+      Because the Lisp garbage collector does not see the memory
+      allocated by the libgit2 library, it helps to call the
+      @code{git-free} call to avoid usage build up.
+@end itemize
+
+@section Dependend Objects
+
+Some objects, such as commits, are only valid as long as another object
+is valid, like a repository.  This means that as soon as a repository is
+@code{git-free}'ed the commit becomes invalid.  Also conversely, as long
+as we keep a reference to a commit and we expect that one to be valid,
+the repository can not be collected.  We call the commit the depend object and
+the repository the facilitating object.
+
+These dependencies are handled in CL-git in the following way:
+
+@itemize
+@item When a facilitating object is explicitly freed, or when a convenience macro
+such as @code{with-repository} frees the object because the execution path leaves scope, 
+all dependend objects on that facilitating object are freed.
+@item Any depenend object holds a reference to its facilitator as long as it is not freed.
+@end itemize
+
+The consequences are that the following is not correct
+@lisp
+(with-git-repository (..)
+   (git-lookup ...))
+@end lisp
+Because the returned object from the lookup call is not valid anymore
+because the repository is closed.
+
+However the following, although uncertain when the repository is closed, is correct
+@lisp
+(git-lookup ... :repository (git-repository-open ...))
+@end lisp
 
 
 
