@@ -86,12 +86,16 @@
 This slot is probably uselss in the sense that we do not necessarily know
 on creation time and if we do not know exactly what is the point?
 So this is mainly used for printing") ;;; do we need this??
-   (libgit2-repository :accessor %repository :initarg :repository-pointer))
+   (facilitator :accessor facilitator :initarg :facilitator))
   (:documentation "Object encapsulating git objects from libgit2"))
 
-
+(defmethod initialize-instance :after ((instance object) &rest r)
+  "Add ourself as dependend on our facilitator"
+  (declare (ignore r))
+  (when (facilitator instance)
+    (push instance (cdr (finalizer-data (facilitator instance))))))
 ;;; 
-(defun make-instance-object (&key object-ptr repository-ptr type)
+(defun make-instance-object (&key object-ptr facilitator type)
   "Creates an object wrapping OBJECT-PTR.  
 OBJECT-PTR needs to point to one of the git storage types, such as:
 :commit :tag :tree or :blob.  This function is not suitable to 
@@ -106,9 +110,14 @@ wrap git pointers to repositories, config, index etc."
 
     (make-instance obj-type
 		   :pointer object-ptr
-		   :repository-pointer (or repository-ptr *git-repository*)
+		   :facilitator facilitator
 		   :object-type obj-type
 		   :free-function #'git-object-free)))
+
+(defmethod dispose ((object object))
+  "Do the normal free and dispose children, but also clear reference to facilitator."
+  (call-next-method object)
+  (setf (facilitator object) nil))
 
 (defun git-object-lookup (oid type &key (repository *git-repository*))
   "Returns a git object which is identified by the OID.

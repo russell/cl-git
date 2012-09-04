@@ -323,8 +323,6 @@ These items are root classes and do not inherit from @code{object}.
 @node Memory Management,  , Object Hierarchy, CLOS Interface
 @section Memory Management
 
-NOTE STILL UNDER IMPLEMENTATION
-
 Because C has manual memory management and Lisp automatic memory
 management there is the question on how these two systems integrate.
 
