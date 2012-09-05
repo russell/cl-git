@@ -125,9 +125,7 @@ reference is symbolic."
   (cond
     (head (let* ((original-ref (git-reference-lookup head))
                  (resolved-ref (git-resolve original-ref)))
-            (prog1 (git-reference-oid resolved-ref)
-              (git-object-free resolved-ref)
-              (git-object-free original-ref))))
+            (git-reference-oid resolved-ref)))
     (sha (git-oid-fromstr sha))))
 
 (defun lookup-oids (&key sha head)

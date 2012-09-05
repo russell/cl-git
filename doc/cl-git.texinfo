@@ -144,6 +144,10 @@ the current (default) repository, and executes a body of code.   Like this:
   ... )
 @end lisp
 
+@section Finding Commits
+
+
+
 @section Inspecting a Single Commit
 
 Now suppose we know the hash of a commit we can get to this commit as follows:
@@ -377,7 +381,6 @@ However the following, although uncertain when the repository is closed, is corr
 @lisp
 (git-lookup ... :repository (git-repository-open ...))
 @end lisp
-
 
 
 @node Reference By Class, Functions, CLOS Interface, Top

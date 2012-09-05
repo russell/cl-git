@@ -80,14 +80,16 @@
 
 (defclass reference (git-pointer) ())
 
-(defun git-reference-lookup (name)
+(defun git-reference-lookup (name &key (repository *git-repository*))
   "Find a reference by its full name e.g.: ref/heads/master
 Note that this function name clashes with the generic lookup function.
 We need to figure this out by using the type argument to do dispatch."
-  (assert (not (null-or-nullpointer *git-repository*)))
+  (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (reference :pointer)
-    (%git-reference-lookup reference *git-repository* name)
-    (mem-ref reference :pointer)))
+    (%git-reference-lookup reference repository name)
+    (make-instance 'reference
+		   :pointer (mem-ref reference :pointer)
+		   :free-function #'%git-reference-free)))
 
 (defun git-resolve (reference)
   "If the reference is symbolic, follow the it until it finds a non
@@ -95,7 +97,9 @@ symbolic reference.  The result should be freed independently from the
 argument."
   (with-foreign-object (resolved-ref :pointer)
     (%git-reference-resolve resolved-ref reference)
-    (mem-ref resolved-ref :pointer)))
+    (make-instance 'reference
+		   :pointer (mem-ref resolved-ref :pointer)
+		   :free-function #'%git-reference-free)))
 
 (defun git-reference-list (&key (repository *git-repository*) (flags '(:oid)))
   "List all the refs, filter by FLAGS.  The flag options
@@ -153,3 +157,7 @@ are :SHA, :HEAD or :BOTH"
       (find-oid name-or-names flags)
       (loop :for name :in name-or-names
             :collect (find-oid name flags))))
+
+(defmethod git-type ((object reference))
+  "TODO"
+  (git-reference-type object))
