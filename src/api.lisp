@@ -61,6 +61,8 @@ parents of the object OBJECT"))
 (defgeneric git-target (object)
   (:documentation "Need to rewrite to return an object!!!!"))
 
+(defgeneric git-peel (object)
+  (:documentation "TODO"))
 
 (defgeneric git-entry-count (object)
   (:documentation "TODO"))

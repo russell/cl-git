@@ -146,11 +146,10 @@ the current (default) repository, and executes a body of code.   Like this:
 
 @section Finding Commits
 
+There are a few ways to find commits in the repository, the easiest is
+to find a commit when we know the SHA-1 has.  In that case
+the process is as follows:
 
-
-@section Inspecting a Single Commit
-
-Now suppose we know the hash of a commit we can get to this commit as follows:
 @lisp
 > (setf *repo* (cl-git:git-repository-open 
                   "/Users/woudshoo/Development/Source/Lisp/wo-git-gui/"))
@@ -162,7 +161,55 @@ Now suppose we know the hash of a commit we can get to this commit as follows:
 #<CL-GIT::COMMIT @{10084FA0B3@}>
 @end lisp
 
-Now we can inspect this commit to get the commit message and the author:
+
+However if we do not know the SHA-1 but we do know a reference, such as
+a branch name or tag.  We can get to the commit in a slightly more cumbersome way.
+(A list of references is easy to get, see the previous section.)
+
+@lisp
+> (cl-git:git-reference-lookup "refs/heads/master" :repository *repo*)
+#<CL-GIT::REFERENCE @{1007A7CFD3@}>
+@end lisp
+
+However to get from a reference to a commit is a bit of work.  First of
+all there are two basic kind of references.  Symbolic references and OID
+references.  Symbolic references hold a string naming another reference.
+OID references hold an OID (not an object!).  So to correctly get to an
+object (not necessarily a commit) in the git repository you have to
+first follow the chain of symbolic references until you get to a OID
+reference.  Secondly, take the OID from the reference and thirdly look
+up the reference.
+
+The whole process is like this:
+@lisp
+> (cl-git:git-resolve *)
+#<CL-GIT::REFERENCE @{10087F8963@}>
+> (cl-git:git-reference-oid *)
+207587661134746736018471038537375579765499147706
+> (cl-git:git-lookup * :repository *repo*)
+#<CL-GIT::COMMIT @{1008BDDA13@}>
+@end lisp
+
+In this case we ended up with a commit, however a reference can refer to
+any object in the git database, so tags, blobs and trees are also
+possible.
+
+Now in normal use you do not see references to blobs or trees very
+frequently, but references to tags are more common.
+
+So in normal code you have to check for that and act accordingly.
+
+NOTE: Need to write convenience functions so it follows the chain to
+commits etc.
+
+
+@section Inspecting a Single Commit
+
+If we have found a commit and assinged it @code{*commit*} we can
+inspect this object to find out various bits of information.
+
+First we get the commit message and author as follows:
+
 
 @lisp
 > (cl-git:git-message *commit*)

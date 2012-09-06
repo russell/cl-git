@@ -36,6 +36,11 @@
   (reference :pointer)
   (tag %tag))
 
+(defcfun ("git_tag_target" %git-tag-peel)
+    %return-value
+  (reference :pointer)
+  (tag %tag))
+
 (defcfun ("git_tag_tagger" git-tag-tagger)
     %git-signature
   (tag %tag))
@@ -75,4 +80,12 @@
 (defmethod git-target ((tag tag))
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
+    (make-instance-object :object-ptr (mem-ref %object :pointer))))
+
+(defmethod git-peel ((tag tag))
+  "Peels layers of the tag until the resulting object is not a tag anymore.
+Basically calls GIT-TARGET on tag and if the result of that is a TAG,
+repeat the process."
+  (with-foreign-object (%object :pointer)
+    (%git-tag-peel %object tag)
     (make-instance-object :object-ptr (mem-ref %object :pointer))))

@@ -27,7 +27,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defbitfield git-reference-flags
-  (:invalid 0)
   (:oid 1)
   (:symbolic 2)
   (:packed 4)
@@ -70,7 +69,6 @@
 (defcfun ("git_reference_type" git-reference-type)
     git-reference-flags
   (reference %reference))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
