@@ -134,30 +134,33 @@ SHA or HEAD.  If FORCE is true then override if it already exists."
           (%git-reference-free (mem-ref reference :pointer))))))
   name)
 
-(defun find-oid (name &optional (flags :both))
+(defun find-oid (name &key (flags :both)
+			(repository *git-repository*))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
   (flet ((and-both (flag other-flag)
            (find flag (list :both other-flag))))
   (acond
     ((and (and-both flags :head)
-          (remove-if-not (lambda (ref) (equal ref name)) (git-reference-list)))
-     (lookup-oid :head (car it)))
+          (remove-if-not (lambda (ref) (equal ref name)) 
+			 (git-reference-list :repository repository)))
+     (lookup-oid :head (car it) :repository repository))
     ((and (and-both flags :sha)
           (find (length name) '(40 7))
           (not (loop :for char :across name
                      :when (not (find char "1234567890abcdef"))
                        :collect char)))
-     (lookup-oid :sha name))
+     (lookup-oid :sha name :repository repository))
     (t (error "Invalid reference named ~A." name)))))
 
-(defun find-oids (name-or-names &optional (flags :both))
+(defun find-oids (name-or-names &key (flags :both) 
+				  (repository *git-repository*))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
   (if (stringp name-or-names)
-      (find-oid name-or-names flags)
+      (find-oid name-or-names :flags flags :repository repository)
       (loop :for name :in name-or-names
-            :collect (find-oid name flags))))
+            :collect (find-oid name :flags flags :repository repository))))
 
 (defmethod git-type ((object reference))
   "TODO"

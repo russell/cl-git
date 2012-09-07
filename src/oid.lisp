@@ -98,6 +98,21 @@ reference is symbolic."
   (unless do-not-free (foreign-free pointer)))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Helper functions
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun oid-from-string-or-number (value)
+  "Returns an OID (integer) from value.  This is a very 
+limited function, it converts strings by interpreting them
+as base 16 numbers and returns a number straight through."
+  (typecase value
+    (number value)
+    (string (parse-integer value :radix 16))
+    (t (error "Wrong type: ~A in oid-from-string-or-number" (type-of value)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface
@@ -117,18 +132,20 @@ reference is symbolic."
     (%git-oid-fromstr oid str)
     (convert-from-foreign oid '%oid)))
 
-(defun lookup-oid (&key sha head)
+(defun lookup-oid (&key sha head (repository *git-repository*))
   "Returns an oid for a single commit (or tag).  It takes a single
  keyword argument, either SHA or HEAD If the keyword argument is SHA
- the value should be a SHA1 id as a string.  The value for the HEAD
- keyword should be a symbolic reference to a git commit."
+ the value should be a SHA1 id as a string, or an OID as a number.
+ The value for the HEAD keyword should be a symbolic reference to a git commit.
+
+TODO, this function is a bit messy, need to think about cleaning this up."
   (cond
-    (head (let* ((original-ref (git-reference-lookup head))
+    (head (let* ((original-ref (git-reference-lookup head :repository repository))
                  (resolved-ref (git-resolve original-ref)))
             (git-reference-oid resolved-ref)))
-    (sha (git-oid-fromstr sha))))
+    (sha (oid-from-string-or-number sha))))
 
-(defun lookup-oids (&key sha head)
+(defun lookup-oids (&key sha head (repository *git-repository*))
   "Similar to lookup-commit, except that the keyword arguments also
  accept a list of references.  In that case it will return a list of
  oids instead of a single oid.  If the argument was a single
@@ -136,7 +153,7 @@ reference is symbolic."
   (flet ((lookup-loop (keyword lookup)
            (loop :for reference
                  :in (if (atom lookup) (list lookup) lookup)
-                 :collect (lookup-oid keyword reference))))
+                 :collect (lookup-oid keyword reference :repository repository))))
     (cond
       (head (lookup-loop :head head))
       (sha (lookup-loop :sha sha)))))

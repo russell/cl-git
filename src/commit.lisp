@@ -133,7 +133,7 @@ PARENTS is an optional list of parent commits sha1 hashes."
 	 tree
 	 (length parents)
 	 %parents))
-      (git-oid-tostr newoid))))
+      (convert-from-foreign newoid '%oid))))
 
 (defmethod git-id ((commit commit))
   (git-commit-id commit))
@@ -168,22 +168,22 @@ parents of the commit COMMIT."
 
 
 
-(defun git-commit-from-oid (oid)
+(defun git-commit-from-oid (oid &key (repository *git-repository*))
   "Returns a git-commit object identified by the `oid'.
 This is an extended version of git-commit-lookup.
 If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
-  (let ((git-object (git-object-lookup oid :any)))
+  (let ((git-object (git-object-lookup oid :any :repository repository)))
     (ecase (git-object-type git-object)
       (:tag (git-target git-object))
       (:commit git-object))))
 
-(defun commit-oid-from-oid (oid)
+(defun commit-oid-from-oid (oid &key (repository *git-repository*))
   "Returns the oid of a commit referenced by `oid'.
 If the `oid' refers to a commit the function is basically a
 no-op.  However if `oid' refers to a tag, it will return
 the oid of the target of the tag."
-  (let ((commit (git-commit-from-oid oid)))
+  (let ((commit (git-commit-from-oid oid :repository repository)))
 	(git-object-id commit)))
 
 (defmacro bind-git-commits (bindings &body body)
