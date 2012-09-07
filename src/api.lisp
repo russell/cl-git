@@ -46,7 +46,11 @@ parents of the object OBJECT"))
   (:documentation
   "Returns the tree as a git tree object, for object OBJECT."))
 
-(defgeneric git-lookup (id &key type repository)) ;; Documentation is copied in.
+(defgeneric git-create (class id/name &key repository &allow-other-keys))
+
+(defgeneric git-lookup (class id &key repository &allow-other-keys)) ;; Documentation is copied in.
+
+(defgeneric git-list (class &key repository &allow-other-keys))
 
 (defgeneric git-name (object)
   (:documentation "TODO"))

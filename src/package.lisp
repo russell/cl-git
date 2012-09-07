@@ -45,11 +45,8 @@
    #:walker-next
    #:bind-git-commits
    #:make-commit
-   #:git-reference-list
-   #:git-reference-create
-   #:git-reference-lookup
+   #:git-create
    #:git-reference-oid
-   #:git-reference-type
    #:git-resolve
    #:with-repository-index
    #:git-index-add
@@ -61,9 +58,6 @@
    #:git-config-free
    #:git-repository-config
    #:git-values
-   #:git-object-lookup
-;   #:git-object-id
-;   #:git-object-type
    #:git-object-free
    #:git-raw-size
    #:git-raw-content
@@ -77,6 +71,7 @@
    #:git-parent-oids
    #:git-tree
    #:git-lookup
+   #:git-list
    #:git-name
    #:git-tagger
    #:git-type

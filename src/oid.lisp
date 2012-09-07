@@ -32,19 +32,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defcfun ("git_oid_fromstr" %git-oid-fromstr)
-    %return-value
-  (oid :pointer)
-  (str :string))
-
-;;; The return value should not be freed.
-(defcfun ("git_oid_tostr"
-          %git-oid-tostr)
-    (:pointer :char)
-  (out (:pointer :char))
-  (n size-t)
-  (oid %oid))
-
 (defcstruct git-oid
   (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
 
@@ -120,18 +107,6 @@ as base 16 numbers and returns a number straight through."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defun git-oid-tostr (oid)
-  "Convert an OID to a string."
-  (with-foreign-pointer-as-string (str *git-oid-hex-size*)
-    (%git-oid-tostr str *git-oid-hex-size* oid)
-    (foreign-string-to-lisp str)))
-
-(defun git-oid-fromstr (str)
-  "Convert a Git hash to an oid."
-  (with-foreign-object (oid 'git-oid)
-    (%git-oid-fromstr oid str)
-    (convert-from-foreign oid '%oid)))
-
 (defun lookup-oid (&key sha head (repository *git-repository*))
   "Returns an oid for a single commit (or tag).  It takes a single
  keyword argument, either SHA or HEAD If the keyword argument is SHA
@@ -140,9 +115,12 @@ as base 16 numbers and returns a number straight through."
 
 TODO, this function is a bit messy, need to think about cleaning this up."
   (cond
-    (head (let* ((original-ref (git-reference-lookup head :repository repository))
+    (head (let* ((original-ref (git-lookup 'reference head :repository repository))
                  (resolved-ref (git-resolve original-ref)))
-            (git-reference-oid resolved-ref)))
+	    (prog1
+		(git-reference-oid resolved-ref)
+	      (git-free original-ref)
+	      (git-free resolved-ref))))
     (sha (oid-from-string-or-number sha))))
 
 (defun lookup-oids (&key sha head (repository *git-repository*))

@@ -84,10 +84,8 @@
 
 (defmethod walker-next ((walker revision-walker))
   (with-foreign-object (oid 'git-oid)
-    (let ((return-code (%git-revwalk-next oid walker))
-          (*git-repository* (facilitator walker)))
-      (when (= return-code 0)
-        (git-commit-from-oid oid)))))
+    (when (= 0 (%git-revwalk-next oid walker))
+      (git-commit-from-oid oid :repository (facilitator walker)))))
 
 
 (defun git-revwalk-new (&key (repository *git-repository*))

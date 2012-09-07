@@ -88,13 +88,13 @@ on creation time and if we do not know exactly what is the point?
 So this is mainly used for printing"))
   (:documentation "Object encapsulating git objects from libgit2"))
 
-(defun make-instance-object (&key object-ptr facilitator type)
+(defun make-instance-object (&key pointer facilitator type)
   "Creates an object wrapping OBJECT-PTR.  
 OBJECT-PTR needs to point to one of the git storage types, such as:
 :commit :tag :tree or :blob.  This function is not suitable to 
 wrap git pointers to repositories, config, index etc."
   (let ((obj-type (case (or (unless (eq type :any) type)
-			    (git-object-type object-ptr))
+			    (git-object-type pointer))
 		    (:commit 'commit)
 		    (:tag 'tag)
 		    (:tree 'tree)
@@ -102,7 +102,7 @@ wrap git pointers to repositories, config, index etc."
 		    (t 'object))))
 
     (make-instance obj-type
-		   :pointer object-ptr
+		   :pointer pointer
 		   :facilitator facilitator
 		   :object-type obj-type
 		   :free-function #'git-object-free)))
@@ -126,20 +126,21 @@ not a type of any real object, but only used for querying like in this function.
 
   (with-foreign-object (obj-ptr :pointer)
     (%git-object-lookup obj-ptr repository oid type)
-    (make-instance-object :object-ptr (mem-ref obj-ptr :pointer)
+    (make-instance-object :pointer (mem-ref obj-ptr :pointer)
 			  :facilitator repository)))
 
 
 
 ;; Copy the documentation to the generic function so
 ;; we do not have to write it twice.
+#|
 (setf (documentation #'git-lookup 'function) 
       (documentation #'git-object-lookup 'function))
 
 (setf (documentation #'git-type 'function)
       (documentation #'git-object-type 'function))
 
-
+|#
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Some generic functions
@@ -153,7 +154,8 @@ not a type of any real object, but only used for querying like in this function.
     :collect (git-parent-oid object index)))
 
 
-(defmethod git-lookup (oid &key (type :any) (repository *git-repository*))
+(defmethod git-lookup ((class (eql 'object))
+		       oid &key (type :any) (repository *git-repository*))
   (git-object-lookup oid type :repository repository))
 
 (defmethod git-type ((object object))

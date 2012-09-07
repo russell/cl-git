@@ -80,7 +80,7 @@
 (defmethod git-target ((tag tag))
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
-    (make-instance-object :object-ptr (mem-ref %object :pointer)
+    (make-instance-object :pointer (mem-ref %object :pointer)
 			  :facilitator (facilitator tag))))
 
 (defmethod git-peel ((tag tag))
@@ -89,5 +89,5 @@ Basically calls GIT-TARGET on tag and if the result of that is a TAG,
 repeat the process."
   (with-foreign-object (%object :pointer)
     (%git-tag-peel %object tag)
-    (make-instance-object :object-ptr (mem-ref %object :pointer)
+    (make-instance-object :pointer (mem-ref %object :pointer)
 			  :facilitator (facilitator tag))))
