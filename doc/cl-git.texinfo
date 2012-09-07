@@ -114,7 +114,7 @@ the package sb-texinfo.
 Lets start simple, we are going to list all the references present in a
 repository.  For this we first have to open a repository with
 @lisp
-> (git-repository-open "/Users/woudshoo/Development/Source/Lisp/cl-git/")
+> (git-open 'cl-git:repository "/Users/woudshoo/Development/Source/Lisp/cl-git/")
 #<CL-GIT::REPOSITORY 79002A0 @{100853C603@}>
 @end lisp
 
@@ -436,7 +436,7 @@ because the repository is closed.
 
 However the following, although uncertain when the repository is closed, is correct
 @lisp
-(git-lookup ... :repository (git-repository-open ...))
+(git-lookup ... :repository (git-open 'cl-git:repository ...))
 @end lisp
 
 
@@ -461,8 +461,8 @@ However the following, although uncertain when the repository is closed, is corr
 @table @code
 @item git-id
 @xref{Generic-Function git-id}
-@item git-lookup
-@xref{Generic-Function git-lookup}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
 @item git-type
 @xref{Generic-Function git-type}
 @end table
@@ -477,8 +477,8 @@ However the following, although uncertain when the repository is closed, is corr
 @xref{Generic-Function git-committer}
 @item git-id
 @xref{Generic-Function git-id}
-@item git-lookup
-@xref{Generic-Function git-lookup}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
 @item git-message
 @xref{Generic-Function git-message}
 @item git-parent-oid
@@ -500,8 +500,8 @@ However the following, although uncertain when the repository is closed, is corr
 @table @code
 @item git-id
 @xref{Generic-Function git-id}
-@item git-lookup
-@xref{Generic-Function git-lookup}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
 @item git-message
 @xref{Generic-Function git-message}
 @item git-name
@@ -525,10 +525,10 @@ However the following, although uncertain when the repository is closed, is corr
 @xref{Generic-Function git-id}
 @item git-entry-by-index
 @xref{Generic-Function git-entry-by-index}
-@item git-oid-from-index
-@xref{Function git-oid-from-index}
-@item git-lookup
-@xref{Generic-Function git-lookup}
+@item git-create-from-index
+@xref{Function git-create-from-index}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
 @item git-type
 @xref{Generic-Function git-type}
 @end table
@@ -540,8 +540,8 @@ However the following, although uncertain when the repository is closed, is corr
 @table @code
 @item git-id
 @xref{Generic-Function git-id}
-@item git-lookup
-@xref{Generic-Function git-lookup}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
 @item git-raw-size
 @xref{Function git-raw-size}
 @item git-raw-content
@@ -563,14 +563,14 @@ However the following, although uncertain when the repository is closed, is corr
 @section Reference
 
 @table @code
-@item git-reference-lookup
-@xref{Function git-reference-lookup}
+@c @item git-reference-lookup
+@c @xref{Function git-reference-lookup}
 @item git-resolve
 @xref{Function git-resolve}
-@item git-reference-list
-@xref{Function git-reference-list}
-@item git-reference-create
-@xref{Function git-reference-create}
+@c @item git-reference-list
+@c @xref{Function git-reference-list}
+@c @item git-reference-create
+@c @xref{Function git-reference-create}
 @item git-reference-oid
 @xref{Function git-reference-oid}
 @end table
@@ -599,13 +599,13 @@ If that is down, it allows us to rename the functions to simpler names.
 @section Repository
 
 @table @code
-@item ensure-repository-exist
-@xref{Function ensure-repository-exist}
-@item git-repository-config
-@xref{Function git-repository-config}
-@item git-repository-open
-@xref{Function git-repository-open}
-@item with-repository
+@c @item ensure-repository-exist
+@c @xref{Function ensure-repository-exist}
+@c @item git-config
+@c @xref{Function git-config}
+@item git-open
+@c @xref{Function git-open}
+@c @item with-repository
 @xref{Macro with-repository}
 @end table
 
