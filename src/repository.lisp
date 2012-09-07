@@ -78,23 +78,13 @@ repository.  Returns the path of the newly created Git repository."
     path))
 
 
-(defun git-repository-open (path)
-  "Open an existing repository located at PATH.
-If the PATH contains a .git directory it will be opened instead of the
-specified path.
-
-TODO Simplify this function to rely on libgit2."
-
+(defmethod git-open ((class (eql 'repository)) (path string) &key &allow-other-keys)
+  "Open an existing repository located at PATH."
   (with-foreign-object (repository-ref :pointer)
-    (let ((path (or (cl-fad:directory-exists-p
-                     (merge-pathnames
-                      #p".git/"
-                      (cl-fad:pathname-as-directory path)))
-                    (truename path))))
-      (%git-repository-open repository-ref (namestring path))
-      (make-instance 'repository 
-		     :pointer (mem-ref repository-ref :pointer)
-		     :free-function #'git-repository-free))))
+    (%git-repository-open repository-ref (namestring path))
+    (make-instance 'repository
+		   :pointer (mem-ref repository-ref :pointer)
+		   :free-function #'git-repository-free)))
 
 
 (defun ensure-repository-exist (path &optional bare)
@@ -124,7 +114,7 @@ created repository will be bare."
 (defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
-  `(let ((*git-repository* (git-repository-open ,path)))
+  `(let ((*git-repository* (git-open 'repository ,path)))
      (unwind-protect 
 	  (progn 
 	    ,@body)

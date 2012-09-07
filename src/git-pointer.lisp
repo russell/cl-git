@@ -40,17 +40,11 @@
 		    :documentation "A CFFI pointer from libgit2.  
 This is the git object that is wrapped by the instance of this class.")
    (free-function :reader free-function :initarg :free-function :initform nil)
-   (facilitator :accessor facilitator :initarg :facilitator)
+   (facilitator :accessor facilitator :initarg :facilitator :initform nil)
    (finalizer-data :accessor finalizer-data :initform (cons t nil)))
   (:documentation "Class wrapping a pointer, handles finalization and freeing of the underlying object"))
 
 
-(defmethod initialize-instance :after ((instance git-pointer) &rest r)
-  "Add ourself as dependend on our facilitator"
-  (declare (ignore r))
-  (when (facilitator instance)
-    (push (make-weak-pointer instance)
-	  (cdr (finalizer-data (facilitator instance))))))
 
 (defun mapc-weak (function list)
   "Same as mapc, but for lists containing weak-pointers.  The function
@@ -72,8 +66,7 @@ object directly."
   (when (car finalizer-data)
     (setf (car finalizer-data) nil)             ;; mark as disposed
     (mapc-weak #'dispose (cdr finalizer-data))  ;; dispose dependends
-    (unless free-function (break))
-    (funcall free-function pointer)))                 ;; free git object
+    (funcall free-function pointer)))           ;; free git object
 
     
 (defgeneric dispose (object)
@@ -87,8 +80,14 @@ pointer to null-pointer as well."
       (internal-dispose (finalizer-data object) 
 			(pointer object)
 			(free-function object))
-      (setf (slot-value object 'libgit2-pointer) (null-pointer))))) 
+      (setf (slot-value object 'libgit2-pointer) nil)))) 
 
+(defmethod print-object ((object git-pointer) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (if (pointer object)
+	(format stream "~X" (pointer-address (pointer object)))
+	(princ "(disposed)" stream))))
+  
 (defmethod git-free ((object git-pointer))
   (dispose object)
   nil)
@@ -99,8 +98,16 @@ pointer to null-pointer as well."
   (let ((finalizer-data (finalizer-data instance))
 	(pointer (pointer instance))
 	(free-function (free-function instance)))
-    (unless finalizer-data (error "No Finalizer data")) ;; Need to relax this condition
+
+    (unless finalizer-data (error "No Finalizer data")) 
     (unless free-function (error "No Free function"))
+
+    (when (facilitator instance)
+      (push (make-weak-pointer instance)
+	    (cdr (finalizer-data (facilitator instance)))))
+    
     (finalize instance
 	      (lambda ()
 		(internal-dispose finalizer-data pointer free-function)))))
+
+

@@ -38,6 +38,7 @@
                 #:defcallback
                 #:callback
                 #:foreign-free
+		#:pointer-address
                 #:defcenum)
   (:export
    #:with-git-revisions
@@ -79,6 +80,11 @@
    #:git-entry-count
    #:git-entry-by-index
    #:git-entries
-   #:git-repository-open
+   #:git-open
    #:git-repository-free
-   #:git-free))
+   #:git-free
+   #:reference
+   #:commit
+   #:tree
+   #:object
+   #:repository))

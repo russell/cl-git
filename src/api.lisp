@@ -52,6 +52,8 @@ parents of the object OBJECT"))
 
 (defgeneric git-list (class &key repository &allow-other-keys))
 
+(defgeneric git-open (class path/name &key &allow-other-keys))
+
 (defgeneric git-name (object)
   (:documentation "TODO"))
 

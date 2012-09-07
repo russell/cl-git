@@ -29,6 +29,6 @@
       (unwind-protect
            (progn
              (cl-git::git-repository-init path :bare)
-             (cl-git::git-repository-open path))
+             (cl-git::git-open 'cl-git:repository path))
         (progn
           (cl-fad:delete-directory-and-files path))))))
