@@ -26,17 +26,14 @@
 
 (define-foreign-type git-commit (git-object)
   nil
-  (:actual-type :pointer)
   (:simple-parser %commit))
 
 (define-foreign-type git-tag (git-object)
   nil
-  (:actual-type :pointer)
   (:simple-parser %tag))
 
 (define-foreign-type git-blob (git-object)
   nil
-  (:actual-type :pointer)
   (:simple-parser %blob))
 
 (define-foreign-type git-tree-entry-type ()
@@ -46,7 +43,6 @@
 
 (define-foreign-type git-tree (git-object) ;; Is this needed????
   nil
-  (:actual-type :pointer)
   (:simple-parser %tree))
 
 (define-foreign-type git-config () 
@@ -56,22 +52,16 @@
 
 (define-foreign-type git-reference (git-object)
   nil
-  (:actual-type :pointer)
   (:simple-parser %reference))
 
 (define-foreign-type git-repository (git-object)
   ()
-  (:actual-type :pointer)
   (:simple-parser %repository))
 
-
-;;; TODO FIX THIS!!!!
-(define-foreign-type revision-walker ()
-  ((%object :accessor pointer :initarg :pointer :initform (null-pointer))
-   (%repository :accessor %repository :initarg :repository-pointer))
-  (:actual-type :pointer)
+(define-foreign-type git-revision-walker (git-object)
+  ()
   (:simple-parser %revwalker))
-
+  
 (define-foreign-type oid-type ()
   nil
   (:actual-type :pointer)
@@ -86,7 +76,6 @@
   nil
   (:actual-type :int64)
   (:simple-parser %time))
-
 
 ;;; ERRORS
 (define-foreign-type git-error-type ()

@@ -85,16 +85,9 @@
 	 :documentation "A symbol indicating which libgit2 type this is.
 This slot is probably uselss in the sense that we do not necessarily know
 on creation time and if we do not know exactly what is the point?
-So this is mainly used for printing") ;;; do we need this??
-   (facilitator :accessor facilitator :initarg :facilitator))
+So this is mainly used for printing"))
   (:documentation "Object encapsulating git objects from libgit2"))
 
-(defmethod initialize-instance :after ((instance object) &rest r)
-  "Add ourself as dependend on our facilitator"
-  (declare (ignore r))
-  (when (facilitator instance)
-    (push instance (cdr (finalizer-data (facilitator instance))))))
-;;; 
 (defun make-instance-object (&key object-ptr facilitator type)
   "Creates an object wrapping OBJECT-PTR.  
 OBJECT-PTR needs to point to one of the git storage types, such as:
@@ -133,7 +126,8 @@ not a type of any real object, but only used for querying like in this function.
 
   (with-foreign-object (obj-ptr :pointer)
     (%git-object-lookup obj-ptr repository oid type)
-    (make-instance-object :object-ptr (mem-ref obj-ptr :pointer))))
+    (make-instance-object :object-ptr (mem-ref obj-ptr :pointer)
+			  :facilitator repository)))
 
 
 

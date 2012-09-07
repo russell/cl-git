@@ -6,6 +6,7 @@
                 #:acond
                 #:it)
   (:import-from #:trivial-garbage
+		#:make-weak-pointer
                 #:finalize)
   (:import-from #:cffi
                 #:define-parse-method
@@ -17,6 +18,7 @@
                 #:free-translated-object
                 #:convert-from-foreign
                 #:with-foreign-object
+                #:with-foreign-objects
                 #:with-foreign-slots
                 #:with-foreign-strings
                 #:with-foreign-string

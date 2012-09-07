@@ -58,10 +58,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defun git-status ()
-  (assert (not (null-or-nullpointer *git-repository*)))
+(defun git-status (&key (repository *git-repository*))
+  (assert (not (null-or-nullpointer repository)))
   (let ((*status-values* (list)))
-    (%git-status-for-each *git-repository*
+    (%git-status-for-each repository
                           (callback collect-status-values)
                           (null-pointer))
     *status-values*))

@@ -79,13 +79,12 @@ repository.  Returns the path of the newly created Git repository."
 
 
 (defun git-repository-open (path)
-  "Open an existing repository and set the global *GIT-REPOSITORY*
-variable to the open repository.  If the PATH contains a .git
-directory it will be opened instead of the specified path.
+  "Open an existing repository located at PATH.
+If the PATH contains a .git directory it will be opened instead of the
+specified path.
 
 TODO Simplify this function to rely on libgit2."
-  (assert (null-or-nullpointer *git-repository-index*))
-  (assert (null-or-nullpointer *git-repository*))
+
   (with-foreign-object (repository-ref :pointer)
     (let ((path (or (cl-fad:directory-exists-p
                      (merge-pathnames
@@ -111,13 +110,14 @@ created repository will be bare."
       (git-repository-init path bare)
       path)))
 
-(defun git-repository-config ()
+(defun git-repository-config (&key (repository *git-repository*))
   "Return the config object of the current open repository."
-  (assert (not (null-or-nullpointer *git-repository*)))
+  (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (config :pointer)
-    (%git-repository-config config *git-repository*)
+    (%git-repository-config config repository)
     (make-instance 'git-pointer 
 		   :pointer (mem-ref config :pointer)
+		   :facilitator repository
 		   :free-function #'git-config-free)))
 
 

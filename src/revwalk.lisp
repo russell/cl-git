@@ -68,7 +68,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defmethod translate-to-foreign (value (type revision-walker))
+(defmethod translate-to-foreign (value (type git-revision-walker))
   (if (pointerp value)
       value
       (pointer value)))
@@ -80,24 +80,28 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass revision-walker (git-pointer) ())
+
 (defmethod walker-next ((walker revision-walker))
   (with-foreign-object (oid 'git-oid)
     (let ((return-code (%git-revwalk-next oid walker))
-          (*git-repository* (%repository walker)))
+          (*git-repository* (facilitator walker)))
       (when (= return-code 0)
         (git-commit-from-oid oid)))))
 
 
-(defun git-revwalk (oid-or-oids &optional (ordering :time))
+(defun git-revwalk (oid-or-oids &optional 
+				  (ordering :time)
+				  (repository *git-repository*))
   "Walk all the revisions from a specified OID, or OIDs.
 OID can be a single object id, or a list of object ids.
 The OIDs can be anything that can be resolved by commit-oid-from-oid.
 In general this means, commits and tags."
 
-  (assert (not (null-or-nullpointer *git-repository*)))
+  (assert (not (null-or-nullpointer repository)))
 
   (with-foreign-object (revwalker-pointer :pointer)
-    (%git-revwalk-new revwalker-pointer *git-repository*)
+    (%git-revwalk-new revwalker-pointer repository)
     (let ((revwalker (mem-ref revwalker-pointer :pointer)))
       (%git-revwalk-sorting revwalker ordering)
       (loop
@@ -107,16 +111,11 @@ In general this means, commits and tags."
       revwalker)))
 
 
-(defun make-instance-revwalker (&key object-ptr repository-ptr)
-  (let ((object (make-instance 'revision-walker
-                               :pointer object-ptr
-                               :repository-pointer (or repository-ptr *git-repository*))))
-    (with-foreign-object (finalizer-ptr :pointer)
-      (setf finalizer-ptr object-ptr)
-      (finalize object
-                (lambda ()
-                  (%git-revwalk-free finalizer-ptr))))
-    object))
+(defun make-instance-revwalker (&key object-ptr (repository *git-repository*))
+  (make-instance 'revision-walker
+		 :pointer object-ptr
+		 :facilitator repository
+		 :free-function #'%git-revwalk-free))
 
 
 (defmacro with-git-revisions ((commit &rest rest &key sha head) &body body)

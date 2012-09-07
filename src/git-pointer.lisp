@@ -40,9 +40,17 @@
 		    :documentation "A CFFI pointer from libgit2.  
 This is the git object that is wrapped by the instance of this class.")
    (free-function :reader free-function :initarg :free-function :initform nil)
+   (facilitator :accessor facilitator :initarg :facilitator)
    (finalizer-data :accessor finalizer-data :initform (cons t nil)))
   (:documentation "Class wrapping a pointer, handles finalization and freeing of the underlying object"))
 
+
+(defmethod initialize-instance :after ((instance git-pointer) &rest r)
+  "Add ourself as dependend on our facilitator"
+  (declare (ignore r))
+  (when (facilitator instance)
+    (push (make-weak-pointer instance)
+	  (cdr (finalizer-data (facilitator instance))))))
 
 (defun mapc-weak (function list)
   "Same as mapc, but for lists containing weak-pointers.  The function

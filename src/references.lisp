@@ -87,6 +87,7 @@ We need to figure this out by using the type argument to do dispatch."
     (%git-reference-lookup reference repository name)
     (make-instance 'reference
 		   :pointer (mem-ref reference :pointer)
+		   :facilitator repository
 		   :free-function #'%git-reference-free)))
 
 (defun git-resolve (reference)
@@ -97,6 +98,7 @@ argument."
     (%git-reference-resolve resolved-ref reference)
     (make-instance 'reference
 		   :pointer (mem-ref resolved-ref :pointer)
+		   :facilitator (facilitator reference)
 		   :free-function #'%git-reference-free)))
 
 (defun git-reference-list (&key (repository *git-repository*) (flags '(:oid)))
@@ -116,16 +118,17 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 	(%git-strarray-free string-array)
 	refs))))
 
-(defun git-reference-create (name &key sha head force)
+(defun git-reference-create (name &key sha head force 
+				    (repository *git-repository*))
   "Create new reference in the current repository with NAME linking to
 SHA or HEAD.  If FORCE is true then override if it already exists."
 
-  (assert (not (null-or-nullpointer *git-repository*)))
+  (assert (not (null-or-nullpointer repository)))
 
   (let ((oid (lookup-oid :sha sha :head head)))
     (with-foreign-object (reference :pointer)
       (unwind-protect
-           (%git-reference-create-oid reference *git-repository*
+           (%git-reference-create-oid reference repository
                                       name oid force)
         (progn
           (%git-reference-free (mem-ref reference :pointer))))))
