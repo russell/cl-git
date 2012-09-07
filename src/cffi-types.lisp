@@ -45,9 +45,8 @@
   nil
   (:simple-parser %tree))
 
-(define-foreign-type git-config () 
+(define-foreign-type git-config (git-object) 
   nil
-  (:actual-type :pointer)
   (:simple-parser %config))
 
 (define-foreign-type git-reference (git-object)

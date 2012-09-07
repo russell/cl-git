@@ -98,7 +98,7 @@ repository.  Returns the path of the newly created Git repository."
 (defmethod git-config ((repository repository))
   (with-foreign-object (config :pointer)
     (%git-repository-config config repository)
-    (make-instance 'git-pointer 
+    (make-instance 'config
 		   :pointer (mem-ref config :pointer)
 		   :facilitator repository
 		   :free-function #'git-config-free)))
