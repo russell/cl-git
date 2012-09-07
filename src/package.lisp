@@ -53,11 +53,9 @@
    #:git-index-add
    #:git-index-write
    #:git-index-clear
-   #:git-oid-from-index
+   #:git-create-from-index
    #:with-repository
-   #:ensure-repository-exist
-   #:git-config-free
-   #:git-repository-config
+   #:git-config
    #:git-values
    #:git-object-free
    #:git-raw-size
@@ -81,6 +79,7 @@
    #:git-entry-by-index
    #:git-entries
    #:git-open
+   #:git-init
    #:git-repository-free
    #:git-free
    #:reference

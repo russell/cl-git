@@ -76,7 +76,7 @@ new repository to PATH. "
      (finishes
        (unwind-protect
             (progn
-              (cl-git::git-repository-init ,path)
+              (cl-git:git-init 'cl-git:repository ,path)
               ,@body
               (let ((open-files (open-test-files-p)))
                 (when open-files
@@ -125,7 +125,8 @@ commit-message filename content."
         (multiple-value-bind (committer committer-alist) (create-random-signature)
           (let* ((file (add-new-random-file repo-path))
                  (commit-sha (cl-git:make-commit
-                              (cl-git:git-oid-from-index)
+                              (cl-git:git-create-from-index 
+			       cl-git::*git-repository-index*)
                               commit-message
                               :author author
                               :committer committer
@@ -144,7 +145,7 @@ commit-message filename content."
   (cl-git:with-repository-index
     (add-random-file-modification repo-path filename)
     (cl-git:make-commit
-     (cl-git:git-oid-from-index)
+     (cl-git:git-create-from-index cl-git::*git-repository-index*)
      commit-message
      :parents parents)))
 

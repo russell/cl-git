@@ -82,7 +82,7 @@ This does count the number of direct children, not recursively."
 (defclass tree (object)
   ())
 
-(defun git-oid-from-index (&key (index *git-repository-index*))
+(defun git-create-from-index (index)
   "Write the current index to the disk and return an oid to it."
   (assert (not (null-or-nullpointer index)))
   (with-foreign-object (oid 'git-oid)

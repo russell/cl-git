@@ -54,6 +54,8 @@ parents of the object OBJECT"))
 
 (defgeneric git-open (class path/name &key &allow-other-keys))
 
+(defgeneric git-init (class path/name &key &allow-other-keys))
+
 (defgeneric git-name (object)
   (:documentation "TODO"))
 
@@ -84,6 +86,10 @@ parents of the object OBJECT"))
 
 (defgeneric git-free (object)
   (:documentation "TODO"))
+
+
+(defgeneric git-config (object))
+
 ;;; how it is now:
 
 

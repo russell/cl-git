@@ -69,47 +69,39 @@
 (defclass repository (git-pointer) ())
 
 
-(defun git-repository-init (path &optional bare)
+(defmethod git-init ((class (eql 'repository)) (path string) 
+		     &key bare &allow-other-keys)
   "Init a new Git repository.  A positive value for BARE init a bare
 repository.  Returns the path of the newly created Git repository."
-  (with-foreign-object (repo :pointer)
-    (%git-repository-init repo (namestring path) bare)
-    (git-repository-free (mem-ref repo :pointer))
-    path))
-
-
-(defmethod git-open ((class (eql 'repository)) (path string) &key &allow-other-keys)
-  "Open an existing repository located at PATH."
   (with-foreign-object (repository-ref :pointer)
-    (%git-repository-open repository-ref (namestring path))
+    (%git-repository-init repository-ref path bare)
     (make-instance 'repository
 		   :pointer (mem-ref repository-ref :pointer)
 		   :free-function #'git-repository-free)))
 
+(defmethod git-init ((class (eql 'repository)) (path pathname) &rest r)
+  (apply #'git-init class (namestring path) r))
 
-(defun ensure-repository-exist (path &optional bare)
-  "Open a repository at location, if the repository doesn't exist
-create it.  BARE is an optional argument if specified and true, the newly
-created repository will be bare."
-  (handler-case
-      (progn
-        (git-repository-open path)
-        path)
-    (git-error ()
-      ;; TODO should catch error 5 not all errors.
-      (git-repository-init path bare)
-      path)))
+(defmethod git-open ((class (eql 'repository)) (path string) &key &allow-other-keys)
+  "Open an existing repository located at PATH."
+  (with-foreign-object (repository-ref :pointer)
+    (%git-repository-open repository-ref path)
+    (make-instance 'repository
+		   :pointer (mem-ref repository-ref :pointer)
+		   :free-function #'git-repository-free)))
 
-(defun git-repository-config (&key (repository *git-repository*))
-  "Return the config object of the current open repository."
-  (assert (not (null-or-nullpointer repository)))
+(defmethod git-open ((class (eql 'repository)) (path pathname) &rest r)
+  (apply #'git-open class (namestring path) r))
+
+
+
+(defmethod git-config ((repository repository))
   (with-foreign-object (config :pointer)
     (%git-repository-config config repository)
     (make-instance 'git-pointer 
 		   :pointer (mem-ref config :pointer)
 		   :facilitator repository
 		   :free-function #'git-config-free)))
-
 
 (defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened

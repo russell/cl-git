@@ -35,7 +35,7 @@
     (cl-git:git-index-add "test1")
     (cl-git:git-index-write)
     (cl-git:make-commit
-     (cl-git:git-oid-from-index)
+     (cl-git:git-create-from-index cl-git::*git-repository-index*)
      "Committing test file test1"
      :author (list :name "Joe Blogs"
                    :email "test@example.com"
