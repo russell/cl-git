@@ -626,30 +626,25 @@ If that is down, it allows us to rename the functions to simpler names.
 @chapter Functions
 
 
-@include include/fun-cl-git-ensure-repository-exist.texinfo
 @include include/fun-cl-git-git-author.texinfo
 @include include/fun-cl-git-git-committer.texinfo
-@include include/fun-cl-git-git-config-free.texinfo
+@include include/fun-cl-git-git-create-from-index.texinfo
 @include include/fun-cl-git-git-entries.texinfo
 @include include/fun-cl-git-git-entry-by-index.texinfo
 @include include/fun-cl-git-git-entry-count.texinfo
+@include include/fun-cl-git-git-free.texinfo
 @include include/fun-cl-git-git-id.texinfo
 @include include/fun-cl-git-git-index-add.texinfo
-@include include/fun-cl-git-git-index-write.texinfo
 @include include/fun-cl-git-git-index-clear.texinfo
-@include include/fun-cl-git-git-lookup.texinfo
+@include include/fun-cl-git-git-index-write.texinfo
 @include include/fun-cl-git-git-message.texinfo
 @include include/fun-cl-git-git-name.texinfo
 @include include/fun-cl-git-git-object-free.texinfo
-@include include/fun-cl-git-git-oid-from-index.texinfo
 @include include/fun-cl-git-git-parent-oid.texinfo
 @include include/fun-cl-git-git-parent-oids.texinfo
 @include include/fun-cl-git-git-parentcount.texinfo
 @include include/fun-cl-git-git-raw-content.texinfo
 @include include/fun-cl-git-git-raw-size.texinfo
-@include include/fun-cl-git-git-reference-create.texinfo
-@include include/fun-cl-git-git-reference-list.texinfo
-@include include/fun-cl-git-git-reference-lookup.texinfo
 @include include/fun-cl-git-git-reference-oid.texinfo
 @include include/fun-cl-git-git-resolve.texinfo
 @include include/fun-cl-git-git-tagger.texinfo
@@ -658,8 +653,6 @@ If that is down, it allows us to rename the functions to simpler names.
 @include include/fun-cl-git-git-type.texinfo
 @include include/fun-cl-git-git-values.texinfo
 @include include/fun-cl-git-make-commit.texinfo
-@include include/fun-cl-git-git-repository-config.texinfo
-@include include/fun-cl-git-git-repository-open.texinfo
 @include include/fun-cl-git-revision-walk.texinfo
 @include include/fun-cl-git-walker-next.texinfo
 @include include/macro-cl-git-bind-git-commits.texinfo
@@ -667,6 +660,7 @@ If that is down, it allows us to rename the functions to simpler names.
 @include include/macro-cl-git-with-repository-index.texinfo
 @include include/macro-cl-git-with-repository.texinfo
 
+@c --------------------------------------------------------------------------------
 
 @c @include include/method-cl-git-git-author-nil-commit-commit.texinfo
 @c @include include/method-cl-git-git-message-nil-commit-commit.texinfo
