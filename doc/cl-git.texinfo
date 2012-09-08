@@ -12,6 +12,7 @@
 @copying
 cl-git a Common Lisp interface to git repositories.
 Copyright @copyright{} 2011, 2012 Russell Sim @email{russell.sim@@gmail.com}.
+and Copyright @copyright{} 2012 Willem Rein Oudshoorn @email{woudshoo@@xs4all.nl}.
 
 This program is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License
@@ -35,7 +36,7 @@ License along with this program.  If not, see
 @titlepage
 @title CL-git
 @subtitle Libgit2 bindings for Common Lisp
-@author Russel Sim
+@author Russell Sim
 @author Willem Rein Oudshoorn
 @page
 @vskip 0pt plus 1filll
@@ -639,7 +640,7 @@ If that is down, it allows us to rename the functions to simpler names.
 @include include/fun-cl-git-git-index-write.texinfo
 @include include/fun-cl-git-git-message.texinfo
 @include include/fun-cl-git-git-name.texinfo
-@include include/fun-cl-git-git-object-free.texinfo
+@include include/fun-cl-git-git-next.texinfo
 @include include/fun-cl-git-git-parent-oid.texinfo
 @include include/fun-cl-git-git-parent-oids.texinfo
 @include include/fun-cl-git-git-parentcount.texinfo
@@ -654,7 +655,6 @@ If that is down, it allows us to rename the functions to simpler names.
 @include include/fun-cl-git-git-values.texinfo
 @include include/fun-cl-git-make-commit.texinfo
 @include include/fun-cl-git-revision-walk.texinfo
-@include include/fun-cl-git-walker-next.texinfo
 @include include/macro-cl-git-bind-git-commits.texinfo
 @include include/macro-cl-git-with-git-revisions.texinfo
 @include include/macro-cl-git-with-repository-index.texinfo

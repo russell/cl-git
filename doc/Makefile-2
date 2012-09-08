@@ -40,7 +40,7 @@ include-stamp: ../*.lisp ../*.asd
 cl-git.pdf: $(MAIN_SOURCE) ${IMAGE_SOURCE:.dot=.dot.pdf} include-stamp
 cl-git.html: $(MAIN_SOURCE) ${IMAGE_SOURCE:.dot=.dot.png} include-stamp
 
-html: cl-git.html
+html: clean cl-git.html
 pdf: cl-git.pdf
 info: cl-git.info
 

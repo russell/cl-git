@@ -20,9 +20,6 @@
 
 (in-package #:cl-git)
 
-(defparameter *git-repository* nil
-  "A global that stores a pointer to the current Git repository.")
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

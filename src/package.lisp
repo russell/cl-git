@@ -41,23 +41,18 @@
 		#:pointer-address
                 #:defcenum)
   (:export
-   #:with-git-revisions
    #:revision-walk
    #:walker-next
-   #:bind-git-commits
-   #:make-commit
+
    #:git-create
    #:git-reference-oid
    #:git-resolve
-   #:with-repository-index
    #:git-index-add
    #:git-index-write
    #:git-index-clear
    #:git-create-from-index
-   #:with-repository
    #:git-config
    #:git-values
-   #:git-object-free
    #:git-raw-size
    #:git-raw-content
    #:git-status
@@ -72,6 +67,7 @@
    #:git-lookup
    #:git-list
    #:git-name
+   #:git-next
    #:git-tagger
    #:git-type
    #:git-target
@@ -80,8 +76,18 @@
    #:git-entries
    #:git-open
    #:git-init
-   #:git-repository-free
    #:git-free
+
+   ;; Bigger functions 
+   #:make-commit
+
+   ;; Macros
+   #:with-repository
+   #:with-repository-index
+   #:with-git-revisions
+   #:bind-git-commits
+
+   ;; Classes.
    #:reference
    #:commit
    #:tree

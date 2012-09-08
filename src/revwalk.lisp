@@ -82,7 +82,7 @@
 
 (defclass revision-walker (git-pointer) ())
 
-(defmethod walker-next ((walker revision-walker))
+(defmethod git-next ((walker revision-walker))
   (with-foreign-object (oid 'git-oid)
     (when (= 0 (%git-revwalk-next oid walker))
       (git-commit-from-oid oid :repository (facilitator walker)))))
