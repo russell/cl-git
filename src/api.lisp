@@ -4,6 +4,9 @@
 (defparameter *git-repository* nil
   "A global that stores the current Git repository.")
 
+(defparameter *git-repository-index* nil
+  "A global that stores the current Git index")
+
 (defgeneric git-id (object)
   (:documentation "Return the identifier of OBJECT. 
 The identifier is typically the SHA-1 checksum or hash code.
@@ -114,6 +117,12 @@ Supported Objects
 
 (defgeneric git-init (class path/name &key &allow-other-keys))
 
+(defgeneric git-add (object &key &allow-other-keys))
+
+(defgeneric git-clear (object))
+
+(defgeneric git-write (object))
+
 (defgeneric git-name (object)
   (:documentation "TODO"))
 
@@ -148,9 +157,14 @@ Supported Objects
 
 (defgeneric git-config (object))
 
+(defgeneric git-index (object)
+  (:documentation "Returns an index object for OBJECT (a repository)"))
+
 (defgeneric git-next (walker)
   (:documentation "Returns the next object for the walker. 
 If no objects are available anymore return nil."))
+
+
 
 ;;; how it is now:
 

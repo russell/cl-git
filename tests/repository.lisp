@@ -32,3 +32,14 @@
              (cl-git:git-open 'cl-git:repository path))
         (progn
           (cl-fad:delete-directory-and-files path))))))
+
+
+(test with-repository
+  (for-all ((path 'gen-temp-path))
+    (finishes
+      (unwind-protect
+	   (progn 
+	     (cl-git:git-init 'cl-git:repository path :bare t)
+	     (with-repository (path)))
+	(progn
+	  (cl-fad:delete-directory-and-files path))))))

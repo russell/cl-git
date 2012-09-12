@@ -47,9 +47,9 @@
    #:git-create
    #:git-reference-oid
    #:git-resolve
-   #:git-index-add
-   #:git-index-write
-   #:git-index-clear
+   #:git-add
+   #:git-write
+   #:git-clear
    #:git-create-from-index
    #:git-config
    #:git-values
@@ -92,4 +92,5 @@
    #:commit
    #:tree
    #:object
-   #:repository))
+   #:repository
+   #:*git-repository-index*))

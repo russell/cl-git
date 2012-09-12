@@ -37,7 +37,7 @@
 (defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
     %return-value
   (oid :pointer)
-  (index :pointer))
+  (index %index))
 
 (defcfun ("git_tree_id" git-tree-oid)
     %oid

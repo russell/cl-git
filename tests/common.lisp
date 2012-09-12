@@ -17,11 +17,6 @@
 ;; License along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
 
-
-(defpackage :cl-git-tests
-  (:use :common-lisp :cl-git :it.bese.FiveAM))
-
-
 (in-package #:cl-git-tests)
 
 (def-suite :cl-git)
@@ -91,8 +86,8 @@ new repository to PATH. "
                    (format stream "Random text: ~A.~%" (random-string 100)))))
     (with-open-file (stream test-file :direction :output :if-exists :supersede)
       content)
-    (cl-git:git-index-add filename)
-    (cl-git:git-index-write)
+    (cl-git:git-add filename)
+    (cl-git:git-write cl-git:*git-repository-index*)
     content))
 
 (defun add-new-random-file (repo-path)

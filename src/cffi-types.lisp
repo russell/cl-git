@@ -57,6 +57,10 @@
   ()
   (:simple-parser %repository))
 
+(define-foreign-type git-index (git-object)
+  ()
+  (:simple-parser %index))
+
 (define-foreign-type git-revision-walker (git-object)
   ()
   (:simple-parser %revwalker))

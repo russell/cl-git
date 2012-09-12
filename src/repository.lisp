@@ -100,6 +100,14 @@ repository.  Returns the path of the newly created Git repository."
 		   :facilitator repository
 		   :free-function #'git-config-free)))
 
+(defmethod git-index ((repository repository))
+  (with-foreign-object (index :pointer)
+    (%git-repository-index index repository)
+    (make-instance 'index
+		   :pointer (mem-ref index :pointer)
+		   :facilitator repository
+		   :free-function #'%git-index-free)))
+
 (defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
