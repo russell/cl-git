@@ -93,4 +93,7 @@
    #:tree
    #:object
    #:repository
-   #:*git-repository-index*))
+   #:*git-repository-index*
+   #:git-capabilities
+   #:git-tracking
+   #:git-version))

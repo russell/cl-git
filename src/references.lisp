@@ -120,18 +120,11 @@ argument."
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
-  (assert (not (null-or-nullpointer repository)))
-
   (with-foreign-object (string-array 'git-strings)
     (%git-reference-list string-array repository flags)
-    (with-foreign-slots ((strings count) string-array git-strings)
-      (let ((refs
-	     (loop
-		:for i :below count
-		:collect (foreign-string-to-lisp
-			  (mem-aref strings :pointer i)))))
-	(%git-strarray-free string-array)
-	refs))))
+    (prog1
+	(git-strings-to-list string-array)
+      (%git-strarray-free string-array))))
 
 
 (defmethod git-create ((class (eql :reference)) name 

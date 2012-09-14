@@ -19,6 +19,13 @@
 
 (in-package #:cl-git)
 
+(defctype size :unsigned-long)
+(defctype size-t :unsigned-long)
+
+(defcstruct git-strings
+  (strings :pointer)
+  (count size))
+
 (define-foreign-type git-object ()
   ()
   (:actual-type :pointer)
