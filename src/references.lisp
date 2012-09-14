@@ -90,7 +90,7 @@
 
 (defclass reference (git-pointer) ())
 
-(defmethod git-lookup ((class (eql 'reference)) name 
+(defmethod git-lookup ((class (eql :reference)) name 
 		       &key (repository *git-repository*))
   "Find a reference by its full name e.g.: ref/heads/master
 Note that this function name clashes with the generic lookup function.
@@ -115,7 +115,7 @@ argument."
 		   :free-function #'%git-reference-free)))
 
 
-(defmethod git-list ((class (eql 'reference))
+(defmethod git-list ((class (eql :reference))
 		     &key (repository *git-repository*) (flags '(:oid)))
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
@@ -134,7 +134,7 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 	refs))))
 
 
-(defmethod git-create ((class (eql 'reference)) name 
+(defmethod git-create ((class (eql :reference)) name 
 		       &key 
 			 (repository *git-repository*)
 			 (type :oid)

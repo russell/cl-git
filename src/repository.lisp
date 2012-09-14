@@ -66,7 +66,7 @@
 (defclass repository (git-pointer) ())
 
 
-(defmethod git-init ((class (eql 'repository)) (path string) 
+(defmethod git-init ((class (eql :repository)) (path string) 
 		     &key bare &allow-other-keys)
   "Init a new Git repository.  A positive value for BARE init a bare
 repository.  Returns the path of the newly created Git repository."
@@ -76,10 +76,10 @@ repository.  Returns the path of the newly created Git repository."
 		   :pointer (mem-ref repository-ref :pointer)
 		   :free-function #'git-repository-free)))
 
-(defmethod git-init ((class (eql 'repository)) (path pathname) &rest r)
+(defmethod git-init ((class (eql :repository)) (path pathname) &rest r)
   (apply #'git-init class (namestring path) r))
 
-(defmethod git-open ((class (eql 'repository)) (path string) &key &allow-other-keys)
+(defmethod git-open ((class (eql :repository)) (path string) &key &allow-other-keys)
   "Open an existing repository located at PATH."
   (with-foreign-object (repository-ref :pointer)
     (%git-repository-open repository-ref path)
@@ -87,7 +87,7 @@ repository.  Returns the path of the newly created Git repository."
 		   :pointer (mem-ref repository-ref :pointer)
 		   :free-function #'git-repository-free)))
 
-(defmethod git-open ((class (eql 'repository)) (path pathname) &rest r)
+(defmethod git-open ((class (eql :repository)) (path pathname) &rest r)
   (apply #'git-open class (namestring path) r))
 
 
