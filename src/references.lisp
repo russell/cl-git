@@ -171,7 +171,7 @@ are :SHA, :HEAD or :BOTH"
   (acond
     ((and (and-both flags :head)
           (remove-if-not (lambda (ref) (equal ref name)) 
-			 (git-list 'reference :repository repository)))
+			 (git-list :reference :repository repository)))
      (lookup-oid :head (car it) :repository repository))
     ((and (and-both flags :sha)
           (find (length name) '(40 7))

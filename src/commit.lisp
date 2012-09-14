@@ -104,12 +104,12 @@ PARENTS is an optional list of parent commits sha1 hashes."
 
   (assert (not (null-or-nullpointer repository)))
 
-  (let ((tree (git-lookup 'object oid :type :tree :repository repository))
+  (let ((tree (git-lookup :object oid :type :tree :repository repository))
         (parents (if (listp parents) parents (list parents))))
 
       ;; lookup all the git commits
     (setq parents (mapcar #'(lambda (c) 
-			      (git-lookup 'object 
+			      (git-lookup :object 
 					  (lookup-oid :sha c) 
 					  :repository repository))
 			  parents))

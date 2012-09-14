@@ -111,7 +111,7 @@ repository.  Returns the path of the newly created Git repository."
 (defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
-  `(let ((*git-repository* (git-open 'repository ,path)))
+  `(let ((*git-repository* (git-open :repository ,path)))
      (unwind-protect 
 	  (progn 
 	    ,@body)

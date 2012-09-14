@@ -28,8 +28,8 @@
     (finishes
       (unwind-protect
            (progn
-             (cl-git:git-init 'cl-git:repository path :bare t)
-             (cl-git:git-open 'cl-git:repository path))
+             (cl-git:git-init :repository path :bare t)
+             (cl-git:git-open :repository path))
         (progn
           (cl-fad:delete-directory-and-files path))))))
 
@@ -39,7 +39,7 @@
     (finishes
       (unwind-protect
 	   (progn 
-	     (cl-git:git-init 'cl-git:repository path :bare t)
+	     (cl-git:git-init :repository path :bare t)
 	     (with-repository (path)))
 	(progn
 	  (cl-fad:delete-directory-and-files path))))))

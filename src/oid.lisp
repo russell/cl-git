@@ -115,7 +115,7 @@ as base 16 numbers and returns a number straight through."
 
 TODO, this function is a bit messy, need to think about cleaning this up."
   (cond
-    (head (let* ((original-ref (git-lookup 'reference head :repository repository))
+    (head (let* ((original-ref (git-lookup :reference head :repository repository))
                  (resolved-ref (git-resolve original-ref)))
 	    (prog1
 		(git-reference-oid resolved-ref)

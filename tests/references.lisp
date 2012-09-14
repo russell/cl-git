@@ -30,9 +30,9 @@ a reference from the commit."
     (cl-git:with-repository (path)
       (let ((oid (commit-random-file-modification
                   path "test" "Test commit")))
-        (let ((reference (cl-git:git-create 'cl-git::reference 
+        (let ((reference (cl-git:git-create :reference 
                           "refs/heads/test" :target oid)))
           (is
            (equal
             (sort-strings (list (cl-git:git-name reference) "refs/heads/master"))
-            (sort-strings (cl-git:git-list 'cl-git::reference)))))))))
+            (sort-strings (cl-git:git-list :reference)))))))))

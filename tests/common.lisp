@@ -71,7 +71,7 @@ new repository to PATH. "
      (finishes
        (unwind-protect
             (progn
-              (cl-git:git-init 'cl-git:repository ,path)
+              (cl-git:git-init :repository ,path)
               ,@body
               (let ((open-files (open-test-files-p)))
                 (when open-files
