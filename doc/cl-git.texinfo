@@ -115,14 +115,14 @@ the package sb-texinfo.
 Lets start simple, we are going to list all the references present in a
 repository.  For this we first have to open a repository with
 @lisp
-> (git-open 'cl-git:repository "/Users/woudshoo/Development/Source/Lisp/cl-git/")
+> (git-open :repository "/Users/woudshoo/Development/Source/Lisp/cl-git/")
 #<CL-GIT::REPOSITORY 79002A0 @{100853C603@}>
 @end lisp
 
 This returns a repository.  Getting a list of references is easy,
 use the generic list command and tell it you want references.
 @lisp
-> (cl-git:git-list 'cl-git:reference :repository *)
+> (cl-git:git-list :reference :repository *)
 ("refs/heads/convert-to-classes" "refs/heads/gh-pages" "refs/heads/master"
   ...                                 
  "refs/tags/my-working-version")
@@ -143,7 +143,7 @@ which opens the repository, sets the special variable @code{*git-repository*} wh
 the current (default) repository, and executes a body of code.   Like this:
 @lisp
 > (cl-git:with-repository ("/Users/woudshoo/Development/Source/Lisp/cl-git/")
-      (cl-git:git-list 'cl-git:reference))
+      (cl-git:git-list :reference))
 ("refs/heads/convert-to-classes" "refs/heads/gh-pages"
   ... )
 @end lisp
@@ -155,20 +155,20 @@ to find a commit when we know the SHA-1 has.  In that case
 the process is as follows:
 
 @lisp
-> (setf *repo* (cl-git:git-open 'cl-git:repository
+> (setf *repo* (cl-git:git-open :repository
                   "/Users/woudshoo/Development/Source/Lisp/cl-git/"))
 
 #<CL-GIT:REPOSITORY 94676D0 @{10081A6903@}>
 
-> (setf *commit* (cl-git:git-lookup 'cl-git:object
+> (setf *commit* (cl-git:git-lookup :object
                     "6a9840f959df6301cba1acbc560b960a6a2787d6" 
                     :repository *repo*))
 #<CL-GIT:COMMIT 7915080 @{1008732463@}>
 @end lisp
 
 Note that although we are looking up a commit we specify as class
-@code{cl-git:object}.  The advantage of specifying @code{cl-git:object} instead
-of @code{cl-git:commit} is that you do not need to know that the 
+@code{:object}.  The advantage of specifying @code{:object} instead
+of @code{:commit} is that you do not need to know that the 
 SHA refers to a commit.  If the SHA refers to a tag a tag will be returned.
 
 However if we do not know the SHA-1 but we do know a reference, such as
@@ -176,7 +176,7 @@ a branch name or tag.  We can get to the commit in a slightly more cumbersome wa
 (A list of references is easy to get, see the previous section.)
 
 @lisp
-> (cl-git:git-lookup 'cl-git:reference "refs/heads/master" :repository *repo*)
+> (cl-git:git-lookup :reference "refs/heads/master" :repository *repo*)
 #<CL-GIT:REFERENCE 9468390 @{1008AB5263@}>
 @end lisp
 
@@ -195,7 +195,7 @@ The whole process is like this:
 #<CL-GIT:REFERENCE 812C070 @{1008B926D3@}>
 > (cl-git:git-reference-oid *)
 1449567594127912097590291965092159144580443086963
-> (cl-git:git-lookup 'cl-git:object * :repository *repo*)
+> (cl-git:git-lookup :object * :repository *repo*)
 #<CL-GIT:COMMIT 812C500 @{1008D5D1D3@}>
 @end lisp
 
@@ -279,7 +279,7 @@ by extracting the OID, @code{1166326251727089714911644542196064058758301591936}
 and lookup this object:
 
 @lisp
-> (cl-git:git-lookup 'cl-git:object
+> (cl-git:git-lookup :object
                      1166326251727089714911644542196064058758301591936 
                     :repository *repo*)
 #<CL-GIT::BLOB 7915440 @{1009EA5893@}>
@@ -319,7 +319,7 @@ is by looking up the OID from the entry.  For this example we take the
 OID from the @file{src} entry in the section above.
 
 @lisp
-> (cl-git:git-lookup 'cl-git:object
+> (cl-git:git-lookup :object
                       229929308993846155940317335928954649878590463873
                       :repository *repo*)
 #<CL-GIT:TREE 812D4D0 @{100A22AA93@}>
@@ -437,7 +437,7 @@ because the repository is closed.
 
 However the following, although uncertain when the repository is closed, is correct
 @lisp
-(git-lookup ... :repository (git-open 'cl-git:repository ...))
+(git-lookup ... :repository (git-open :repository ...))
 @end lisp
 
 
