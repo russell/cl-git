@@ -117,36 +117,109 @@ Supported Objects
 
 (defgeneric git-init (class path/name &key &allow-other-keys))
 
-(defgeneric git-add (object &key &allow-other-keys))
+(defgeneric git-add (path &key &allow-other-keys)
+  (:documentation
+   "Adds the PATH to the current index (*GIT-REPOSITORY-INDEX*) or the explicit keyword argument :INDEX"))
 
-(defgeneric git-clear (object))
+(defgeneric git-clear (object)
+  (:documentation
+   "Clears the content of OBJECT
 
-(defgeneric git-write (object))
+Supported Objects
+
+- TREE
+"))
+
+(defgeneric git-write (object)
+  (:documentation 
+   "Writes the OBJECT to its store.  
+
+Supported Objects
+
+- TREE"))
 
 (defgeneric git-name (object)
-  (:documentation "TODO"))
+  (:documentation "Returns the name of OBJECT, as a string.
+
+What exactly the name is depends on the type of the object.
+
+- REFERENCE -- The name of the of the reference, e.g.: \"refs/heads/master\"
+- TAG       -- The name of the tag, e.g.: \"v0.17\"
+
+Supported Objects
+
+- REFERENCE
+- TAG"))
 
 (defgeneric git-tagger (object)
-  (:documentation "TODO"))
+  (:documentation "Returns the signature of the tagger of OBJECT.
+
+The return value is a signature (a property list with keys :NAME, :EMAIL and :TIME
+
+Supported Objects
+
+- TAG"))
 
 
 (defgeneric git-type (object)
-  (:documentation "TODO"))
+  (:documentation "Returns the type of OBJECT.
+
+What exactly is returned depends on the class of OBJECT.
+
+- REFERENCE -- returns either :SYMBOLIC or :OID
+- TAG -- ???
+- OBJECT (and subclasses) -- Type e.g. :COMMIT, :TREE, :REFERENCE
+
+Note that although REFERENCE is a subclass of OBJECT it will not
+return :REFERENCE, but the more specific type.
+
+Supported Objects
+
+- OBJECT
+- TAG
+- REFERENCE"))
 
 (defgeneric git-target (object)
-  (:documentation "Need to rewrite to return an object!!!!"))
+  (:documentation "Returns the target of OBJECT.
+
+- TAG -- only works for :OID tags.
+
+Supported Objects
+
+- TAG"))
+
 
 (defgeneric git-peel (object)
-  (:documentation "TODO"))
+  (:documentation "Returns the final target of OBJECT.
+
+This is to follow symbolic tag chains to find the object pointed to.
+
+Supported Objects
+
+- TAG"))
 
 (defgeneric git-entry-count (object)
-  (:documentation "TODO"))
+  (:documentation "Returns the number elements in the collection OBJECT.
+
+Supported Objects
+
+- TREE
+"))
 
 (defgeneric git-entry-by-index (object index)
-  (:documentation "TODO"))
+  (:documentation "Returns the element at position INDEX from the collection OBJECT.
+
+Supported Objects
+
+- TREE"))
 
 (defgeneric git-entries (object)
-  (:documentation "TODO"))
+  (:documentation "Returns the elements of the collection OBJECT as a list.
+
+Supported Objects
+
+- The same as GIT-ENTRY-BY-INDEX and GIT-ENTRY-COUNT.
+"))
 
 (defgeneric git-values (object)
   (:documentation "TODO"))

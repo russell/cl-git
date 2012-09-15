@@ -584,12 +584,12 @@ All these functions need to be changed to take an explicit index.
 If that is down, it allows us to rename the functions to simpler names.
 
 @table @code
-@item git-index-add
-@xref{Function git-index-add}
-@item git-index-clear
-@xref{Function git-index-clear}
-@item git-index-write
-@xref{Function git-index-write}
+@item git-add
+@xref{Generic-Function git-add}
+@item git-clear
+@xref{Generic-Function git-clear}
+@item git-write
+@xref{Generic-Function git-write}
 @item with-repository-index
 @xref{Macro with-repository-index}
 @end table
@@ -635,9 +635,9 @@ If that is down, it allows us to rename the functions to simpler names.
 @include include/fun-cl-git-git-entry-count.texinfo
 @include include/fun-cl-git-git-free.texinfo
 @include include/fun-cl-git-git-id.texinfo
-@include include/fun-cl-git-git-index-add.texinfo
-@include include/fun-cl-git-git-index-clear.texinfo
-@include include/fun-cl-git-git-index-write.texinfo
+@include include/fun-cl-git-git-add.texinfo
+@include include/fun-cl-git-git-clear.texinfo
+@include include/fun-cl-git-git-write.texinfo
 @include include/fun-cl-git-git-message.texinfo
 @include include/fun-cl-git-git-name.texinfo
 @include include/fun-cl-git-git-next.texinfo
