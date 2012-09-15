@@ -45,6 +45,10 @@
 
 (defclass blob (object) ())
 
+(defmethod git-lookup ((class (eql :blob))
+		       oid &key (repository *git-repository*))
+  (git-object-lookup oid class :repository repository))
+
 (defun git-raw-content (blob)
   "Returns the content of the blob BLOB as an array of UNSIGNED-BYTE's"
   (let ((result (make-array (git-raw-size blob)

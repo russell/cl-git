@@ -109,7 +109,7 @@ Supported Objects
 
 (defgeneric git-create (class id/name &key repository &allow-other-keys))
 
-(defgeneric git-lookup (class id &key repository &allow-other-keys)) ;; Documentation is copied in.
+(defgeneric git-lookup (class id/name &key repository &allow-other-keys)) ;; Documentation is copied in.
 
 (defgeneric git-list (class &key repository &allow-other-keys))
 

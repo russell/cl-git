@@ -93,6 +93,7 @@ So this is mainly used for printing"))
 OBJECT-PTR needs to point to one of the git storage types, such as:
 :commit :tag :tree or :blob.  This function is not suitable to 
 wrap git pointers to repositories, config, index etc."
+
   (let ((obj-type (case (or (unless (eq type :any) type)
 			    (git-object-type pointer))
 		    (:commit 'commit)
@@ -127,7 +128,8 @@ not a type of any real object, but only used for querying like in this function.
   (with-foreign-object (obj-ptr :pointer)
     (%git-object-lookup obj-ptr repository oid type)
     (make-instance-object :pointer (mem-ref obj-ptr :pointer)
-			  :facilitator repository)))
+			  :facilitator repository
+			  :type type)))
 
 
 
@@ -155,8 +157,8 @@ not a type of any real object, but only used for querying like in this function.
 
 
 (defmethod git-lookup ((class (eql :object))
-		       oid &key (type :any) (repository *git-repository*))
-  (git-object-lookup oid type :repository repository))
+		       oid &key (repository *git-repository*))
+  (git-object-lookup oid :any :repository repository))
 
 (defmethod git-type ((object object))
   (git-object-type object))

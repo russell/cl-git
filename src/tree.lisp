@@ -82,6 +82,10 @@ This does count the number of direct children, not recursively."
 (defclass tree (object)
   ())
 
+(defmethod git-lookup ((class (eql :tree))
+		       oid &key (repository *git-repository*))
+  (git-object-lookup oid class :repository repository))
+
 (defun git-create-from-index (index)
   "Write the current index to the disk and return an oid to it."
   (assert (not (null-or-nullpointer index)))

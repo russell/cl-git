@@ -96,4 +96,5 @@
    #:*git-repository-index*
    #:git-capabilities
    #:git-tracking
-   #:git-version))
+   #:git-version
+   #:git-peel))

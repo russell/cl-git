@@ -136,6 +136,10 @@ PARENTS is an optional list of parent commits sha1 hashes."
 	 %parents))
       (convert-from-foreign newoid '%oid))))
 
+(defmethod git-lookup ((class (eql :commit))
+		       oid &key (repository *git-repository*))
+  (git-object-lookup oid class :repository repository))
+
 (defmethod git-id ((commit commit))
   (git-commit-id commit))
 

@@ -65,6 +65,10 @@
 (defclass tag (object)
   ())
 
+(defmethod git-lookup ((class (eql :tag))
+		       oid &key (repository *git-repository*))
+  (git-object-lookup oid class :repository repository))
+
 (defmethod git-name ((tag tag))
   (git-tag-name tag))
 
