@@ -6,6 +6,7 @@
                 #:acond
                 #:it)
   (:import-from #:trivial-garbage
+		#:make-weak-pointer
                 #:finalize)
   (:import-from #:cffi
                 #:define-parse-method
@@ -17,6 +18,7 @@
                 #:free-translated-object
                 #:convert-from-foreign
                 #:with-foreign-object
+                #:with-foreign-objects
                 #:with-foreign-slots
                 #:with-foreign-strings
                 #:with-foreign-string
@@ -36,52 +38,69 @@
                 #:defcallback
                 #:callback
                 #:foreign-free
+		#:pointer-address
                 #:defcenum)
   (:export
-   #:with-git-revisions
    #:revision-walk
    #:walker-next
-   #:bind-git-commits
-   #:make-commit
-   #:commit-id
-   #:commit-author
-   #:commit-message
-   #:commit-committer
-   #:commit-parentcount
-   #:commit-parent-oid
-   #:commit-parent-oids
-   #:commit-tree
-   #:git-commit-lookup
-   #:git-reference-listall
-   #:git-reference-create
-   #:git-reference-lookup
+
+   #:git-create
    #:git-reference-oid
-   #:git-reference-resolve
-   #:with-repository-index
-   #:git-index-add
-   #:git-index-write
-   #:git-oid-from-index
+   #:git-resolve
+   #:git-add
+   #:git-write
+   #:git-clear
+   #:git-create-from-index
+   #:git-config
+   #:git-values
+   #:git-raw-size
+   #:git-raw-content
+   #:git-status
+   #:git-id
+   #:git-message
+   #:git-author
+   #:git-committer
+   #:git-parentcount
+   #:git-parent-oid
+   #:git-parent-oids
+   #:git-tree
+   #:git-lookup
+   #:git-list
+   #:git-name
+   #:git-next
+   #:git-tagger
+   #:git-type
+   #:git-target
+   #:git-entry-count
+   #:git-entry-by-index
+   #:git-entries
+   #:git-open
+   #:git-init
+   #:git-free
+
+   ;; Bigger functions 
+   #:make-commit
+
+   ;; Macros
    #:with-repository
-   #:ensure-repository-exist
-   #:tag-tagger
-   #:tag-type
-   #:tag-target
-   #:tag-name
-   #:tag-message
-   #:git-config-free
-   #:repository-config
-   #:git-config-values
-   #:git-tree-oid
-   #:git-tree-entry-count
-   #:git-tree-entry-by-index
-   #:git-tree-lookup
-   #:git-tree-close
-   #:git-tree-entries
-   #:git-object-lookup
-   #:git-object-id
-   #:git-object-type
-   #:git-object-free
-   #:git-blob-raw-size
-   #:git-blob-lookup
-   #:git-blob-raw-content
-   #:git-status))
+   #:with-repository-index
+   #:with-git-revisions
+   #:bind-git-commits
+
+   ;; Classes.
+   #:reference
+   #:commit
+   #:tree
+   #:object
+   #:repository
+   #:*git-repository-index*
+   #:git-capabilities
+   #:git-tracking
+   #:git-version
+   #:git-peel
+   #:git-load
+   #:git-push-url
+   #:git-url
+   #:git-odb
+   #:git-size
+   #:git-data))

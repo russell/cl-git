@@ -25,28 +25,19 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(define-foreign-type git-tree-entry-type ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %tree-entry))
-
-(define-foreign-type tree (object)
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %tree))
-
 (defcstruct git-tree-entry
-  (attr :unsigned-int)
-  (filename :string)
+  (removed :uint16)
+  (attr :uint16)
   (oid git-oid)
   (filename-len size)
-  (removed :int))
+  (filename :char))
+
+
 
 (defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
     %return-value
   (oid :pointer)
-  (index :pointer))
+  (index %index))
 
 (defcfun ("git_tree_id" git-tree-oid)
     %oid
@@ -74,8 +65,11 @@ This does count the number of direct children, not recursively."
 
 
 (defmethod translate-from-foreign (value (type git-tree-entry-type))
-  (with-foreign-slots ((attr filename oid removed) value git-tree-entry)
-    (list :attr attr :filename filename
+  (with-foreign-slots ((attr filename oid removed filename-len) value git-tree-entry)
+    (list :attr attr 
+	  :filename  (foreign-string-to-lisp (foreign-slot-pointer value 'git-tree-entry 'filename)
+					     :count  filename-len)
+	  :filename-length filename-len
           :oid (convert-from-foreign oid '%oid) :removed removed)))
 
 
@@ -85,20 +79,22 @@ This does count the number of direct children, not recursively."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass tree (object)
+  ())
 
-(defun git-tree-lookup (oid)
-  "Lookup a Git tree object."
-  (git-object-lookup oid :tree))
+(defmethod git-lookup ((class (eql :tree))
+		       oid &key (repository *git-repository*))
+  (git-object-lookup oid class :repository repository))
 
-(defun git-tree-entries (tree)
-  "Return all direct children of `tree'."
-  (loop :repeat (git-tree-entry-count tree)
-        :for index :from 0
-        :collect (git-tree-entry-by-index tree index)))
-
-(defun git-oid-from-index ()
+(defun git-create-from-index (index)
   "Write the current index to the disk and return an oid to it."
-  (assert (not (null-or-nullpointer *git-repository-index*)))
+  (assert (not (null-or-nullpointer index)))
   (with-foreign-object (oid 'git-oid)
-    (%git-tree-create-fromindex oid *git-repository-index*)
+    (%git-tree-create-fromindex oid index)
     (convert-from-foreign oid '%oid)))
+
+(defmethod git-entry-count ((object tree))
+  (git-tree-entry-count object))
+
+(defmethod git-entry-by-index ((object tree) index)
+  (git-tree-entry-by-index object index))

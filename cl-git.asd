@@ -12,35 +12,33 @@
                 :serial t
                 :components
                 ((:file "package")
+		 (:file "api")
+		 (:file "cffi-types")
+		 (:file "git-pointer")
                  (:file "cl-git")
                  (:file "utils")
                  (:file "error")
+		 (:file "libgit2")
                  (:file "oid")
+                 (:file "object")
                  (:file "index")
                  (:file "repository")
-                 (:file "config")
                  (:file "signature")
                  (:file "references")
-                 (:file "object")
+		 (:file "branch")
                  (:file "tree")
                  (:file "commit")
                  (:file "tag")
+		 (:file "blob")
+                 (:file "config")
                  (:file "status")
-                 (:file "revwalk")))))
+                 (:file "revwalk")
+		 (:file "remote")
+		 (:file "odb")))))
 
-(asdf:defsystem #:cl-git-tests
-  :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell #:local-time)
-  :components ((:module "tests"
-                :serial t
-                :components
-                ((:file "common")
-                 (:file "commit")
-                 (:file "repository")
-                 (:file "references")
-                 (:file "revwalker"))))
-  :in-order-to ((compile-op (load-op :cl-git))))
 
 (defmethod perform ((op asdf:test-op) (system (eql (find-system :cl-git))))
   (asdf:oos 'asdf:load-op :cl-git-tests)
   (funcall (intern (string :run!) (string :it.bese.FiveAM))
            :cl-git))
+

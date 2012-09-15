@@ -26,16 +26,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-foreign-type git-error-type ()
-  nil
-  (:actual-type git-error)
-  (:simple-parser %git-error))
-
-(define-foreign-type return-value-type ()
-  nil
-  (:actual-type :int)
-  (:simple-parser %return-value))
-
 (defcstruct git-error
   (message :string)
   (klass :int))

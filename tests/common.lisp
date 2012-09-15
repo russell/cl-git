@@ -17,11 +17,6 @@
 ;; License along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
 
-
-(defpackage :cl-git-tests
-  (:use :common-lisp :cl-git :it.bese.FiveAM))
-
-
 (in-package #:cl-git-tests)
 
 (def-suite :cl-git)
@@ -76,7 +71,7 @@ new repository to PATH. "
      (finishes
        (unwind-protect
             (progn
-              (cl-git::git-repository-init ,path)
+              (cl-git:git-init :repository ,path)
               ,@body
               (let ((open-files (open-test-files-p)))
                 (when open-files
@@ -91,8 +86,8 @@ new repository to PATH. "
                    (format stream "Random text: ~A.~%" (random-string 100)))))
     (with-open-file (stream test-file :direction :output :if-exists :supersede)
       content)
-    (cl-git:git-index-add filename)
-    (cl-git:git-index-write)
+    (cl-git:git-add filename)
+    (cl-git:git-write cl-git:*git-repository-index*)
     content))
 
 (defun add-new-random-file (repo-path)
@@ -125,17 +120,17 @@ commit-message filename content."
         (multiple-value-bind (committer committer-alist) (create-random-signature)
           (let* ((file (add-new-random-file repo-path))
                  (commit-sha (cl-git:make-commit
-                              (cl-git:git-oid-from-index)
+                              (cl-git:git-create-from-index 
+			       cl-git::*git-repository-index*)
                               commit-message
                               :author author
                               :committer committer
                               :parents parents)))
 
-            (cons `(commit-sha . ,commit-sha)
-                  (cons `(commit-message . ,commit-message)
-                        (cons `(committer . ,committer-alist)
-                              (cons `(author . ,author-alist)
-                                    file))))))))))
+	    `((commit-sha . ,commit-sha)
+	      (commit-message . ,commit-message)
+	      (committer . ,committer-alist)
+	      (author . ,author-alist))))))))
 
 
 (defun commit-random-file-modification (repo-path
@@ -145,7 +140,7 @@ commit-message filename content."
   (cl-git:with-repository-index
     (add-random-file-modification repo-path filename)
     (cl-git:make-commit
-     (cl-git:git-oid-from-index)
+     (cl-git:git-create-from-index cl-git::*git-repository-index*)
      commit-message
      :parents parents)))
 

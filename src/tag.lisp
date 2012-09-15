@@ -27,16 +27,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-foreign-type tag (object)
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %tag))
-
 (defcfun ("git_tag_type" git-tag-type)
     git-object-type
   (tag %tag))
 
 (defcfun ("git_tag_target" %git-tag-target)
+    %return-value
+  (reference :pointer)
+  (tag %tag))
+
+(defcfun ("git_tag_target" %git-tag-peel)
     %return-value
   (reference :pointer)
   (tag %tag))
@@ -62,20 +62,36 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass tag (object)
+  ())
 
-(defmethod tag-name ((tag tag))
+(defmethod git-lookup ((class (eql :tag))
+		       oid &key (repository *git-repository*))
+  (git-object-lookup oid class :repository repository))
+
+(defmethod git-name ((tag tag))
   (git-tag-name tag))
 
-(defmethod tag-tagger ((tag tag))
+(defmethod git-tagger ((tag tag))
   (git-tag-name tag))
 
-(defmethod tag-type ((tag tag))
+(defmethod git-type ((tag tag))
   (git-tag-type tag))
 
-(defmethod tag-message ((tag tag))
+(defmethod git-message ((tag tag))
   (git-tag-message tag))
 
-(defmethod tag-target ((tag tag))
+(defmethod git-target ((tag tag))
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
-    (mem-ref %object :pointer)))
+    (make-instance-object :pointer (mem-ref %object :pointer)
+			  :facilitator (facilitator tag))))
+
+(defmethod git-peel ((tag tag))
+  "Peels layers of the tag until the resulting object is not a tag anymore.
+Basically calls GIT-TARGET on tag and if the result of that is a TAG,
+repeat the process."
+  (with-foreign-object (%object :pointer)
+    (%git-tag-peel %object tag)
+    (make-instance-object :pointer (mem-ref %object :pointer)
+			  :facilitator (facilitator tag))))

@@ -28,11 +28,11 @@ a reference from the commit."
   (tempory-repository
       (path)
     (cl-git:with-repository (path)
-      (let ((sha (commit-random-file-modification
+      (let ((oid (commit-random-file-modification
                   path "test" "Test commit")))
-        (let ((reference (cl-git:git-reference-create
-                          "refs/heads/test" :sha sha)))
+        (let ((reference (cl-git:git-create :reference 
+                          "refs/heads/test" :target oid)))
           (is
            (equal
-            (sort-strings (list reference "refs/heads/master"))
-            (sort-strings (cl-git:git-reference-listall)))))))))
+            (sort-strings (list (cl-git:git-name reference) "refs/heads/master"))
+            (sort-strings (cl-git:git-list :reference)))))))))
