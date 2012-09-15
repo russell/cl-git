@@ -25,10 +25,29 @@
   (strings :pointer)
   (repository %repository))
 
+(defcfun ("git_remote_load" %git-remote-load)
+    %return-value
+  (remote-out :pointer)
+  (repository %repository)
+  (name :string))
 
+(defcfun ("git_remote_free" %git-remote-free)
+    :void
+  (remote %remote))
 
+(defcfun ("git_remote_pushurl" git-push-url)
+    :string
+  (remote %remote))
+
+(defcfun ("git_remote_url" git-url)
+    :string
+  (remote %remote))
+
+(defcfun ("git_remote_name" %git-remote-name)
+    :string
+  (remote %remote))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+(defclass remote (git-pointer) ())
 
 (defmethod git-list ((class (eql :remote))
 		     &key (repository *git-repository*))
@@ -37,3 +56,15 @@
     (prog1 
 	(git-strings-to-list string-array)
       (%git-strarray-free string-array))))
+
+(defmethod git-load ((class (eql :remote))
+		     name &key (repository *git-repository*))
+  (with-foreign-object (remote-out :pointer)
+    (%git-remote-load remote-out repository name)
+    (make-instance 'remote
+		   :pointer (mem-ref remote-out :pointer)
+		   :facilitator repository
+		   :free-function #'%git-remote-free)))
+
+(defmethod git-name ((remote remote))
+  (%git-remote-name remote))

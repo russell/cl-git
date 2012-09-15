@@ -56,6 +56,10 @@
   nil
   (:simple-parser %config))
 
+(define-foreign-type git-remote (git-object) 
+  nil
+  (:simple-parser %remote))
+
 (define-foreign-type git-reference (git-object)
   nil
   (:simple-parser %reference))
@@ -64,9 +68,17 @@
   ()
   (:simple-parser %repository))
 
+(define-foreign-type git-odb (git-object)
+  ()
+  (:simple-parser %odb))
+
 (define-foreign-type git-index (git-object)
   ()
   (:simple-parser %index))
+
+(define-foreign-type git-odb-object (git-object)
+  ()
+  (:simple-parser %odb-object))
 
 (define-foreign-type git-revision-walker (git-object)
   ()

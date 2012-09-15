@@ -97,4 +97,10 @@
    #:git-capabilities
    #:git-tracking
    #:git-version
-   #:git-peel))
+   #:git-peel
+   #:git-load
+   #:git-push-url
+   #:git-url
+   #:git-odb
+   #:git-size
+   #:git-data))

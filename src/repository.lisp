@@ -30,7 +30,7 @@
 
 ;;; Git Repositories
 
-(defctype git-repository-index :pointer) ;; TODO move to index.
+;;(defctype git-repository-index :pointer) ;; TODO move to index.
 
 ;;; Git Config
 (defcfun ("git_repository_init" %git-repository-init)
@@ -58,6 +58,10 @@
   (index :pointer)
   (repository %repository))
 
+(defcfun ("git_repository_odb" %git-repository-odb)
+    %return-value
+  (odb :pointer)
+  (repository %repository))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface
@@ -107,6 +111,14 @@ repository.  Returns the path of the newly created Git repository."
 		   :pointer (mem-ref index :pointer)
 		   :facilitator repository
 		   :free-function #'%git-index-free)))
+
+(defmethod git-odb ((repository repository))
+  (with-foreign-object (odb :pointer)
+    (%git-repository-odb odb repository)
+    (make-instance 'odb
+		   :pointer (mem-ref odb :pointer)
+		   :facilitator repository
+		   :free-function #'%git-odb-free)))
 
 (defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened

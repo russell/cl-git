@@ -1,11 +1,39 @@
+;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
+
+;; cl-git an Common Lisp interface to git repositories.
+;; Copyright (C) 2011-2012 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2012 Willem Rein Oudshoorn <woudshoo@xs4all.nl>
+;;
+;; This program is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU Lesser General Public License
+;; as published by the Free Software Foundation, either version 3 of
+;; the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; Lesser General Public License for more details.
+;;
+;; You should have received a copy of the GNU Lesser General Public
+;; License along with this program.  If not, see
+;; <http://www.gnu.org/licenses/>.
+
+
 (in-package #:cl-git)
 
 
 (defparameter *git-repository* nil
-  "A global that stores the current Git repository.")
+  "A global that stores the current Git repository.
+
+The value is used as a default argument to functions requiring a repository.
+It is bound by (WITH-REPOSITORY ...),  but can also be bound by the user.")
 
 (defparameter *git-repository-index* nil
-  "A global that stores the current Git index")
+  "A global that stores the current Git index.
+
+This value is used as the default index for all index related functions.
+It is set bound by (WITH-REPOSITORY-INDEX ..)
+But can also be set by user code.")
 
 (defgeneric git-id (object)
   (:documentation "Return the identifier of OBJECT. 
@@ -105,7 +133,15 @@ Supported Objects
 
 (defgeneric git-tree (object)
   (:documentation
-  "Returns the tree as a git tree object, for object OBJECT."))
+  "Returns the tree as a git tree object, for object OBJECT.
+
+The tree from for example a commit is the object that contains a directory listing
+of the files in the commit with OIDs pointing to the content of the files.
+So basically the tree of a commit corresponds to the content of the commit.
+
+Supported Objects
+
+- COMMIT"))
 
 (defgeneric git-create (class id/name &key repository &allow-other-keys))
 
@@ -116,6 +152,8 @@ Supported Objects
 (defgeneric git-open (class path/name &key &allow-other-keys))
 
 (defgeneric git-init (class path/name &key &allow-other-keys))
+
+(defgeneric git-load (class path/name &key &allow-other-keys))
 
 (defgeneric git-add (path &key &allow-other-keys)
   (:documentation

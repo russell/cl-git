@@ -33,10 +33,12 @@
                  (:file "config")
                  (:file "status")
                  (:file "revwalk")
-		 (:file "remote")))))
+		 (:file "remote")
+		 (:file "odb")))))
 
 
 (defmethod perform ((op asdf:test-op) (system (eql (find-system :cl-git))))
   (asdf:oos 'asdf:load-op :cl-git-tests)
   (funcall (intern (string :run!) (string :it.bese.FiveAM))
            :cl-git))
+
