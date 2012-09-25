@@ -29,14 +29,20 @@
 
 (defcfun ("git_config_free" git-config-free)
     :void
-  "Free the git configuration object that is acquired with git-repository-config."
-  (config :pointer))
+  "Free the git configuration object that is acquired with GIT-REPOSITORY-CONFIG."
+  (config %config))
 
 (defcfun ("git_config_foreach" %git-config-foreach)
     %return-value
-  (config :pointer)
+  (config %config)
   (callback :pointer)
   (payload :pointer))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Support for callbackes
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *config-values* nil)
 
@@ -51,8 +57,9 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass config (git-pointer) ()) 
 
-(defun git-config-values (config)
+(defmethod git-values ((config config))
   "Returns the key value pairs in the config as an association list."
   (let ((*config-values* (list)))
     (%git-config-foreach config

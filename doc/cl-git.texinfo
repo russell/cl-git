@@ -1,0 +1,678 @@
+\input texinfo
+@c %**start of header
+@setfilename cl-git.info
+@settitle Libgit2 Bindings for Common Lisp
+@c %**end of header
+
+@dircategory Software development
+@direntry
+* cl-git: (cl-git). Libgit2 Bindings for Common Lisp
+@end direntry
+
+@copying
+cl-git a Common Lisp interface to git repositories.
+Copyright @copyright{} 2011, 2012 Russell Sim @email{russell.sim@@gmail.com}.
+and Copyright @copyright{} 2012 Willem Rein Oudshoorn @email{woudshoo@@xs4all.nl}.
+
+This program is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this program.  If not, see
+@url{http://www.gnu.org/licenses/}.
+@end copying
+
+
+@finalout
+@setcontentsaftertitlepage
+
+@titlepage
+@title CL-git
+@subtitle Libgit2 bindings for Common Lisp
+@author Russell Sim
+@author Willem Rein Oudshoorn
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@include include/sb-texinfo.texinfo
+
+@node Top, Overview, (dir), (dir)
+@top Introduction
+
+This library wraps the C library libgit2.  As the name implies it deals with git
+and allows you to create/examine and alter git repositories programmatically.
+
+Some knowledge if git is required to make sense of all the concepts.  Also this
+being a wrapper around the libgit2 library, the documentation libgit2, which can be found
+at @url{http://libgit2.github.com/libgit2/#HEAD} is very help full.
+
+@contents
+
+@menu
+* Overview::
+* Installation::
+* Example::
+* CLOS Interface::
+* Reference By Class::
+* Functions::
+* Function Index::
+@end menu
+
+@node Overview, Installation, Top, Top
+@chapter Overview
+
+Libgit2 exposes through a C-API basically an object oriented interface.
+The CL-GIT project takes advantage of that and provides a mostly object
+oriented interface to libgit2.  Git concepts such as commits, tags,
+blobs etc are exposed as instances of corresponding classes.  However
+besides the wrapping into objects most of the libgit2 functions are
+almost directly translated into lisp functions, and the libgit2
+documentation is still very relevant. 
+
+In @ref{CLOS Interface} some more details on how the libgit2 concepts
+are mapped into lisp can be found.  And a complete supported list of
+functions can be found near the end in @ref{Functions}.  More
+convenient is the list of functions per type of object you are dealing
+with.  Those can be found in @ref{Reference By Class}.
+
+@node Installation, Example, Overview, Top
+@chapter Installation
+
+You need to download CL-git from github at either
+@url{http://github.com/russell/cl-git} or
+@url{http://github.com/woudshoo/cl-git}.  
+
+In addition you need a recent version of the libgit2 library, which can
+be found at @url{http://github.com/libgit2/libgit2}.
+
+The versions this manual is tested with are the
+@url{http://github.com/woudshoo/cl-git} version and version 0.17 of
+libgit2.
+
+The libgit2 library should be installed as usual, per the libgit2 documentation,
+and the cl-git package should be downloaded into a place that ASDF can find it.
+
+The dependencies for CL-git itself are: cffi, local-time, cl-fad, trivial-garbage, anaphora.
+The tests in package cl-git-tests, need in addition to cl-git the following packages: FiveAM, unix-options, inferior-shell.
+In order to build this documentation, a fully working texinfo environment should be present and
+the package sb-texinfo.
+
+
+@node Example, CLOS Interface, Installation, Top
+@chapter Example Using CL-GIT 
+
+@section Listing References
+
+Lets start simple, we are going to list all the references present in a
+repository.  For this we first have to open a repository with
+@lisp
+> (git-open :repository "/Users/woudshoo/Development/Source/Lisp/cl-git/")
+#<CL-GIT::REPOSITORY 79002A0 @{100853C603@}>
+@end lisp
+
+This returns a repository.  Getting a list of references is easy,
+use the generic list command and tell it you want references.
+@lisp
+> (cl-git:git-list :reference :repository *)
+("refs/heads/convert-to-classes" "refs/heads/gh-pages" "refs/heads/master"
+  ...                                 
+ "refs/tags/my-working-version")
+@end lisp
+
+Because the repository is a libgit2 construct, it needs to be freed. 
+We can do this explicitly with the the generic @code{git-free} function like this
+@lisp
+> (cl-git:git-free **)
+nil
+> ***
+#<CL-GIT::REPOSITORY (disposed) @{1008507BA3@}>
+@end lisp
+Or we can wait until the garbage collector comes around to do this for us.
+
+Now a better way of doing this is with the convenience macro @code{with-repository}
+which opens the repository, sets the special variable @code{*git-repository*} which holds
+the current (default) repository, and executes a body of code.   Like this:
+@lisp
+> (cl-git:with-repository ("/Users/woudshoo/Development/Source/Lisp/cl-git/")
+      (cl-git:git-list :reference))
+("refs/heads/convert-to-classes" "refs/heads/gh-pages"
+  ... )
+@end lisp
+
+@section Finding Commits
+
+There are a few ways to find commits in the repository, the easiest is
+to find a commit when we know the SHA-1 has.  In that case
+the process is as follows:
+
+@lisp
+> (setf *repo* (cl-git:git-open :repository
+                  "/Users/woudshoo/Development/Source/Lisp/cl-git/"))
+
+#<CL-GIT:REPOSITORY 94676D0 @{10081A6903@}>
+
+> (setf *commit* (cl-git:git-lookup :object
+                    "6a9840f959df6301cba1acbc560b960a6a2787d6" 
+                    :repository *repo*))
+#<CL-GIT:COMMIT 7915080 @{1008732463@}>
+@end lisp
+
+Note that although we are looking up a commit we specify as class
+@code{:object}.  The advantage of specifying @code{:object} instead
+of @code{:commit} is that you do not need to know that the 
+SHA refers to a commit.  If the SHA refers to a tag a tag will be returned.
+
+However if we do not know the SHA-1 but we do know a reference, such as
+a branch name or tag.  We can get to the commit in a slightly more cumbersome way.
+(A list of references is easy to get, see the previous section.)
+
+@lisp
+> (cl-git:git-lookup :reference "refs/heads/master" :repository *repo*)
+#<CL-GIT:REFERENCE 9468390 @{1008AB5263@}>
+@end lisp
+
+However to get from a reference to a commit is a bit of work.  First of
+all there are two basic kind of references.  Symbolic references and OID
+references.  Symbolic references hold a string naming another reference.
+OID references hold an OID (not an object!).  So to correctly get to an
+object (not necessarily a commit) in the git repository you have to
+first follow the chain of symbolic references until you get to a OID
+reference.  Secondly, take the OID from the reference and thirdly look
+up the reference.
+
+The whole process is like this:
+@lisp
+> (cl-git:git-resolve *)
+#<CL-GIT:REFERENCE 812C070 @{1008B926D3@}>
+> (cl-git:git-reference-oid *)
+1449567594127912097590291965092159144580443086963
+> (cl-git:git-lookup :object * :repository *repo*)
+#<CL-GIT:COMMIT 812C500 @{1008D5D1D3@}>
+@end lisp
+
+In this case we ended up with a commit, however a reference can refer to
+any object in the git database, so tags, blobs and trees are also
+possible.
+
+Now in normal use you do not see references to blobs or trees very
+frequently, but references to tags are more common.
+
+So in normal code you have to check for that and act accordingly.
+
+NOTE: Need to write convenience functions so it follows the chain to
+commits etc.
+
+
+@section Inspecting a Single Commit
+
+If we have found a commit and assinged it @code{*commit*} we can
+inspect this object to find out various bits of information.
+
+First we get the commit message and author as follows:
+
+
+@lisp
+> (cl-git:git-message *commit*)
+"Started to write some documentation
+"
+> (cl-git:git-author *commit*)
+(:NAME "Willem Rein Oudshoorn" :EMAIL "woudshoo+github@@xs4all.nl" :TIME
+ @@2012-05-06T18:46:35.000000+02:00)
+@end lisp
+
+Or we can see what is parents are,
+
+@lisp
+> (cl-git:git-parentcount *commit*)
+1
+> (cl-git:git-parent-oids *commit*)
+(706478223342774799146743734860864842687841202176)
+@end lisp
+
+What is important to notice here is that the result of
+@code{git-parent-oids} is a list of numbers.  These numbers are the same
+as the SHA-1 hashes you normally see in git, except displayed, in base
+10.  The SHA-1 that are displayed in by the git command line tools are
+normally written in base 16.  CL-git uses numbers to identify the
+commits etc.  But you can lookup objects with the base 16 SHA strings,
+as we did above.  This works because if a SHA-1 hash is expected and a
+string is supplied, CL-git converts the string to an integer by reading
+it in base 16.
+
+@subsection The Content of A Commit
+
+To see what is in the commit we can get the tree out of the commit with
+
+@lisp
+> (cl-git:git-tree *commit*)
+#<CL-GIT:TREE 812BDA0 @{1009C89393@}>
+> (cl-git:git-entries *)
+((:ATTR 33188 :FILENAME ".gitignore" :FILENAME-LENGTH 10 :OID
+  1166326251727089714911644542196064058758301591936 :REMOVED 0)
+ (:ATTR 33188 :FILENAME "AUTHORS" :FILENAME-LENGTH 7 :OID
+  241890539580627595024686576348750077422898574058 :REMOVED 0)
+...
+ (:ATTR 16384 :FILENAME "src" :FILENAME-LENGTH 3 :OID
+  229929308993846155940317335928954649878590463873 :REMOVED 0)
+...)
+@end lisp
+So this gives you a list of files and directories in the commit.  Note
+that this gives only the top level entries, you need to traverse sub
+directories yourself.  In the example above @code{src} is a directory,
+which you can tell by interpreting the @code{:ATTR} value.  The meaning
+of the attribute flag is the same as in C and the flags are defined in
+@file{/usr/include/cpio.h} ad @file{/usr/include/sys/stat.h}.  For us
+the important thing to know is that 16384 (= @code{#8R40000}) indicates
+it is a directory.
+
+Before we dive into this, we can get the content of the .gitignore file 
+by extracting the OID, @code{1166326251727089714911644542196064058758301591936}
+and lookup this object:
+
+@lisp
+> (cl-git:git-lookup :object
+                     1166326251727089714911644542196064058758301591936 
+                    :repository *repo*)
+#<CL-GIT::BLOB 7915440 @{1009EA5893@}>
+@end lisp
+
+A blob is just raw data, stored as raw bytes.  Basically everything
+in the git database is stored as blobs.  
+So to extract the content we can do
+@lisp
+> (cl-git:git-raw-content *)
+#(42 126 10 42 46 102 97 115 108 10 10 47 100 111 99 47 101 103 103 115 47 10
+  47 100 111 99 47 100 111 99 116 114 101 101 115 47 10 47 100 111 99 47 104
+  116 109 108 47 10 47 100 111 99 47 98 105 110 47 10 47 100 111 99 47 46 105
+  110 115 116 97 108 108 101 100 46 99 102 103 10 47 100 111 99 47 77 97 107
+  101 102 105 108 101 10 47 100 111 99 47 109 97 107 ...)
+@end lisp
+
+And to convert it to a string you can do the following (however this is only likely
+to work for ASCII).
+
+@lisp
+CL-USER> (map 'string #'code-char *)
+"*~
+*.fasl
+
+/doc/eggs/
+......"
+@end lisp
+
+For proper decoding you should use your favorite method, e.g. use babel.
+
+@subsection Sub Directories
+
+As mentioned before, you can see from the attribute directory if an
+entry in the tree is a sub directory.  The way to access a sub directory
+is by looking up the OID from the entry.  For this example we take the
+OID from the @file{src} entry in the section above.
+
+@lisp
+> (cl-git:git-lookup :object
+                      229929308993846155940317335928954649878590463873
+                      :repository *repo*)
+#<CL-GIT:TREE 812D4D0 @{100A22AA93@}>
+@end lisp
+
+Now notice that we knew beforehand that this was a directory because the
+@code{:ATTR} was @code{#8R40000}, but we can also tell it was a sub directory
+because the return value for looking up the entry is a a tree object.
+
+This tree object has entries, containing the files and sub directories
+of the @file{src} directory of the git project.
+
+And we can repeat the same inspection, lookup etc as in the previous
+section.
+
+
+@node CLOS Interface, Reference By Class, Example, Top
+@chapter CLOS Interface
+
+The interface exposed by libgit2 is basically an object oriented
+interface, but expressed in C.  The CLOS interface of cl-git combines
+the myriad of functions back into an object oriented structure.
+
+@menu
+* Function Name Mapping::
+* Object Hierarchy::
+* Memory Management::
+@end menu
+
+@node  Function Name Mapping, Object Hierarchy, CLOS Interface, CLOS Interface
+@section Function Name Mapping
+
+The mapping from libgit2 names to generic functions is roughly as follows,
+take the libgit2 name such as @code{git_commit_message}, replace the underscore with a hyphen
+and remove the specific type of object, in this case @samp{commit}.  This yields
+in this case @code{git-message} and that is the generic function name.
+
+@node Object Hierarchy, Memory Management, Function Name Mapping, CLOS Interface
+@section Object Hierarchy
+
+The object hierarchy for objects in the git database is very simple,
+there is one root class called @code{object} and all other objects are
+sub classes, one level deep, of this class.  The sub classes are:
+
+@itemize
+@item commit
+@item tag
+@item tree
+@item blob (not implemented yet)
+@end itemize
+
+There are also objects that are not stored in the git database, such as
+
+@itemize
+@item reference
+@item index
+@item repository
+@item config
+@end itemize
+
+These items are root classes and do not inherit from @code{object}.
+
+@node Memory Management,  , Object Hierarchy, CLOS Interface
+@section Memory Management
+
+Because C has manual memory management and Lisp automatic memory
+management there is the question on how these two systems integrate.
+
+First most libgit2 objects need to be freeed.  There are different free calls in libgit2, but 
+in CL-git they are all replaced by @code{git-free}.  
+
+Second of all, this call is made optional. The package
+@samp{trivial-garbage} takes care of freeing the object when the garbage
+collector collects the Lisp git object wrappers. 
+
+So normally you do not have to call the free explicitly.  However there
+are a few reasons you might want to do it anyway:
+
+@itemize
+@item Having a repository and commit objects open has the
+      side effect that file descriptors to the underlying git files stay open.
+      When you iterate over may commits manually (not using the convience macros)
+      can trigger the Lisp process to run out of available file handles.
+@item Some libgit2 calls can potentially allocate lots of memory.
+      Because the Lisp garbage collector does not see the memory
+      allocated by the libgit2 library, it helps to call the
+      @code{git-free} call to avoid usage build up.
+@end itemize
+
+@section Dependend Objects
+
+Some objects, such as commits, are only valid as long as another object
+is valid, like a repository.  This means that as soon as a repository is
+@code{git-free}'ed the commit becomes invalid.  Also conversely, as long
+as we keep a reference to a commit and we expect that one to be valid,
+the repository can not be collected.  We call the commit the depend object and
+the repository the facilitating object.
+
+These dependencies are handled in CL-git in the following way:
+
+@itemize
+@item When a facilitating object is explicitly freed, or when a convenience macro
+such as @code{with-repository} frees the object because the execution path leaves scope, 
+all dependend objects on that facilitating object are freed.
+@item Any depenend object holds a reference to its facilitator as long as it is not freed.
+@end itemize
+
+The consequences are that the following is not correct
+@lisp
+(with-git-repository (..)
+   (git-lookup ...))
+@end lisp
+Because the returned object from the lookup call is not valid anymore
+because the repository is closed.
+
+However the following, although uncertain when the repository is closed, is correct
+@lisp
+(git-lookup ... :repository (git-open :repository ...))
+@end lisp
+
+
+@node Reference By Class, Functions, CLOS Interface, Top
+@chapter Reference By Class
+
+@menu
+* Object::
+* Commit::
+* Tag::
+* Tree::
+* Blob::
+* Config::
+* Reference::
+* Index::
+* Repository::
+@end menu
+
+@node Object, Commit, Reference By Class, Reference By Class
+@section Object
+
+@table @code
+@item git-id
+@xref{Generic-Function git-id}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
+
+@node Commit, Tag, Object, Reference By Class
+@section Commit
+
+@table @code
+@item git-author
+@xref{Generic-Function git-author}
+@item git-committer
+@xref{Generic-Function git-committer}
+@item git-id
+@xref{Generic-Function git-id}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
+@item git-message
+@xref{Generic-Function git-message}
+@item git-parent-oid
+@xref{Generic-Function git-parent-oid}
+@item git-parentcount
+@xref{Generic-Function git-parentcount}
+@item git-tree
+@xref{Generic-Function git-tree}
+@item git-type
+@xref{Generic-Function git-type}
+@item make-commit
+@xref{Function make-commit}
+@end table
+
+
+@node Tag, Tree, Commit, Reference By Class
+@section Tag
+
+@table @code
+@item git-id
+@xref{Generic-Function git-id}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
+@item git-message
+@xref{Generic-Function git-message}
+@item git-name
+@xref{Generic-Function git-name}
+@item git-tagger
+@xref{Generic-Function git-tagger}
+@item git-target
+@xref{Generic-Function git-target}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
+
+
+@node  Tree, Blob, Tag, Reference By Class
+@section Tree
+
+@table @code
+@item git-entry-count
+@xref{Generic-Function git-entry-count}
+@item git-id
+@xref{Generic-Function git-id}
+@item git-entry-by-index
+@xref{Generic-Function git-entry-by-index}
+@item git-create-from-index
+@xref{Function git-create-from-index}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
+
+
+@node Blob, Config, Tree, Reference By Class
+@section Blob
+
+@table @code
+@item git-id
+@xref{Generic-Function git-id}
+@c @item git-lookup
+@c @xref{Generic-Function git-lookup}
+@item git-raw-size
+@xref{Function git-raw-size}
+@item git-raw-content
+@xref{Function git-raw-content}
+@item git-type
+@xref{Generic-Function git-type}
+@end table
+
+
+@node  Config, Reference, Blob, Reference By Class
+@section Config
+
+@table @code
+@item git-values
+@xref{Generic-Function git-values}
+@end table
+
+@node  Reference, Index, Config, Reference By Class
+@section Reference
+
+@table @code
+@c @item git-reference-lookup
+@c @xref{Function git-reference-lookup}
+@item git-resolve
+@xref{Function git-resolve}
+@c @item git-reference-list
+@c @xref{Function git-reference-list}
+@c @item git-reference-create
+@c @xref{Function git-reference-create}
+@item git-reference-oid
+@xref{Function git-reference-oid}
+@end table
+
+
+@node  Index, Repository, Reference, Reference By Class
+@section Index
+
+All these functions need to be changed to take an explicit index.
+If that is down, it allows us to rename the functions to simpler names.
+
+@table @code
+@item git-add
+@xref{Generic-Function git-add}
+@item git-clear
+@xref{Generic-Function git-clear}
+@item git-write
+@xref{Generic-Function git-write}
+@item with-repository-index
+@xref{Macro with-repository-index}
+@end table
+
+
+
+@node Repository,  , Index, Reference By Class
+@section Repository
+
+@table @code
+@c @item ensure-repository-exist
+@c @xref{Function ensure-repository-exist}
+@c @item git-config
+@c @xref{Function git-config}
+@item git-open
+@c @xref{Function git-open}
+@c @item with-repository
+@xref{Macro with-repository}
+@end table
+
+
+
+
+@c @node Low Level Functions, Functions, Reference By Class, Top
+@c @chapter Low Level Functions
+
+@c These functions mostly call directly the underlying C function and
+@c the code in the CLOS interface is build on top of this.
+@c They should normally not be called and this section
+@c is only here to document functions that might still be useful (or are accidentally exported).
+
+
+
+@node Functions, Function Index, Reference By Class, Top
+@chapter Functions
+
+
+@include include/fun-cl-git-git-author.texinfo
+@include include/fun-cl-git-git-committer.texinfo
+@include include/fun-cl-git-git-create-from-index.texinfo
+@include include/fun-cl-git-git-entries.texinfo
+@include include/fun-cl-git-git-entry-by-index.texinfo
+@include include/fun-cl-git-git-entry-count.texinfo
+@include include/fun-cl-git-git-free.texinfo
+@include include/fun-cl-git-git-id.texinfo
+@include include/fun-cl-git-git-add.texinfo
+@include include/fun-cl-git-git-clear.texinfo
+@include include/fun-cl-git-git-write.texinfo
+@include include/fun-cl-git-git-message.texinfo
+@include include/fun-cl-git-git-name.texinfo
+@include include/fun-cl-git-git-next.texinfo
+@include include/fun-cl-git-git-parent-oid.texinfo
+@include include/fun-cl-git-git-parent-oids.texinfo
+@include include/fun-cl-git-git-parentcount.texinfo
+@include include/fun-cl-git-git-raw-content.texinfo
+@include include/fun-cl-git-git-raw-size.texinfo
+@include include/fun-cl-git-git-reference-oid.texinfo
+@include include/fun-cl-git-git-resolve.texinfo
+@include include/fun-cl-git-git-tagger.texinfo
+@include include/fun-cl-git-git-target.texinfo
+@include include/fun-cl-git-git-tree.texinfo
+@include include/fun-cl-git-git-type.texinfo
+@include include/fun-cl-git-git-values.texinfo
+@include include/fun-cl-git-make-commit.texinfo
+@include include/fun-cl-git-revision-walk.texinfo
+@include include/macro-cl-git-bind-git-commits.texinfo
+@include include/macro-cl-git-with-git-revisions.texinfo
+@include include/macro-cl-git-with-repository-index.texinfo
+@include include/macro-cl-git-with-repository.texinfo
+
+@c --------------------------------------------------------------------------------
+
+@c @include include/method-cl-git-git-author-nil-commit-commit.texinfo
+@c @include include/method-cl-git-git-message-nil-commit-commit.texinfo
+@c @include include/method-cl-git-git-parent-oid-nil-commit-commit-index.texinfo
+@c @include include/method-cl-git-git-parentcount-nil-commit-commit.texinfo
+@c @include include/method-cl-git-git-tree-nil-commit-commit.texinfo
+
+@node Function Index,  , Functions, Top
+@appendix Function Index
+
+@printindex fn
+
+@bye
+
+@c  LocalWords:  CLOS API ASDF ATTR FILENAME OID

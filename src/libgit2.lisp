@@ -2,6 +2,7 @@
 
 ;; cl-git an Common Lisp interface to git repositories.
 ;; Copyright (C) 2011-2012 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2012 Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -17,36 +18,35 @@
 ;; License along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
 
+
 (in-package #:cl-git)
 
+(defbitfield git-capabilities
+  (:threads 1)
+  (:https 2))
 
-(defcfun ("git_strarray_free" %git-strarray-free)
+(defcfun ("git_libgit2_capabilities" git-capabilities)
+    git-capabilities)
+
+(defcfun ("git_libgit2_version" %git-version)
     :void
-  (strings :pointer))
+  (major :pointer)
+  (minor :pointer)
+  (revision :pointer))
 
 
-(defun git-strings-to-list (string-array)
-  (with-foreign-slots ((strings count) string-array git-strings)
-    (loop :for i :below count
-       :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; Helper function for debugging
-(defun null-or-nullpointer (obj)
-  (or (not obj) 
-      (typecase obj
-	(git-pointer (null-pointer-p (pointer obj)))
-	(t (null-pointer-p obj)))))
 
-(defun getenv (name &optional default)
-  #+CMU
-  (let ((x (assoc name ext:*environment-list*
-                  :test #'string=)))
-    (if x (cdr x) default))
-  #-CMU
-  (or
-   #+Allegro (sys:getenv name)
-   #+CLISP (ext:getenv name)
-   #+ECL (si:getenv name)
-   #+SBCL (sb-unix::posix-getenv name)
-   #+LISPWORKS (lispworks:environment-variable name)
-   default))
+(defun git-version ()
+  "Returns the libgit2 C-library version number as a list of three integers,
+\(major minor revision\)
+"
+  (with-foreign-objects
+      ((maj :int)
+       (min :int)
+       (rev :int))
+    (%git-version maj min rev)
+    (list (mem-ref maj :int) 
+	  (mem-ref min :int)
+	  (mem-ref rev :int))))
