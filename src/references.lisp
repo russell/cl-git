@@ -166,6 +166,8 @@ are :SHA, :HEAD or :BOTH"
           (remove-if-not (lambda (ref) (equal ref name)) 
 			 (git-list :reference :repository repository)))
      (lookup-oid :head (car it) :repository repository))
+    ((numberp name)
+     (lookup-oid :sha name :repository repository))
     ((and (and-both flags :sha)
           (find (length name) '(40 7))
           (not (loop :for char :across name

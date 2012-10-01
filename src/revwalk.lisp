@@ -153,5 +153,8 @@ flags :SHA, :HEAD or :BOTH.
 
 Once created iteration over commits can be done with the method
 WALKER-NEXT."
-  (let ((oids (find-oids name-or-names :flags flags :repository repository)))
+  (let* ((names (if (listp name-or-names)
+                     name-or-names
+                     (list name-or-names)))
+         (oids (find-oids names :flags flags :repository repository)))
     (git-revwalk oids :repository repository)))

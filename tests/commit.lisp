@@ -53,7 +53,7 @@
           (commit :sha (make-commit1 path))
         ;; check the commit message
         (is (equal (cl-git:git-message commit)
-                   (format-string "Committing test file test1")))
+                   (format-string "Committing test file test1~%")))
         ;; check the author
         (let ((author (cl-git:git-author commit)))
           (is (equal (getf author :name)
