@@ -35,6 +35,13 @@
 (defcstruct git-oid
   (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
 
+(defcfun ("git_oid_tostr" git-oid-tostr)
+    :pointer
+  "Returns the buffer that the string is written into.  The size of
+the input buffer should be equal to git oid hex size + 1."
+  (buffer :pointer)
+  (size size-t)
+  (oid %oid))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

@@ -143,6 +143,10 @@ PARENTS is an optional list of parent commits sha1 hashes."
 (defmethod git-id ((commit commit))
   (git-commit-id commit))
 
+(defmethod git-name ((commit commit))
+  (with-foreign-pointer-as-string (str 41 :encoding :ascii)
+    (git-oid-tostr str 41 (git-id commit))))
+
 (defmethod git-message ((commit commit))
   "Return a string containing the commit message."
   (git-commit-message commit))
