@@ -167,15 +167,16 @@ PARENTS is an optional list of parent commits sha1 hashes."
 parents of the commit COMMIT."
   (git-commit-parent-oid commit index))
 
-(defmethod git-tree ((commit commit))
+(defmethod git-tree ((commit commit) &key path (repository *git-repository*))
   "Returns the tree object of the commit."
-  (with-foreign-object (%tree :pointer)
-    (%git-commit-tree %tree commit)
-    (make-instance-object :pointer (mem-aref %tree :pointer)
-			  :facilitator (facilitator commit)
-                          :type :tree)))
-
-
+  (let ((tree (with-foreign-object (%tree :pointer)
+                (%git-commit-tree %tree commit)
+                (make-instance-object :pointer (mem-aref %tree :pointer)
+                                      :facilitator (facilitator commit)
+                                      :type :tree))))
+    (if path
+        (git-tree tree :path path :repository repository)
+        tree)))
 
 (defun git-commit-from-oid (oid &key (repository *git-repository*))
   "Returns a git-commit object identified by the `oid'.
