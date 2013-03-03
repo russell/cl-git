@@ -91,7 +91,7 @@ This does count the number of direct children, not recursively."
   (assert (not (null-or-nullpointer index)))
   (with-foreign-object (oid 'git-oid)
     (%git-tree-create-fromindex oid index)
-    (convert-from-foreign oid '%oid)))
+    (convert-from-foreign oid '%oid))) ;; Is this free needed????
 
 (defmethod git-entry-count ((object tree))
   (git-tree-entry-count object))

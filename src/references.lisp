@@ -123,8 +123,8 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
   (with-foreign-object (string-array 'git-strings)
     (%git-reference-list string-array repository flags)
     (prog1
-	(git-strings-to-list string-array)
-      (%git-strarray-free string-array))))
+	(convert-from-foreign string-array '%git-strings)
+      (free-translated-object string-array '%git-strings t))))
 
 
 (defmethod git-create ((class (eql :reference)) name 

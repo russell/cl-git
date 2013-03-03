@@ -20,12 +20,32 @@
 (in-package #:cl-git)
 
 
+(defcstruct git-strings
+  (strings :pointer)
+  (count size))
+
 (defcfun ("git_strarray_free" %git-strarray-free)
     :void
-  (strings :pointer))
+  (strings %git-strings))
 
+;;; New translation
 
-(defun git-strings-to-list (string-array)
+(defmethod translate-to-foreign ((value t) (type git-strings-type))
+  (if (pointerp value)
+      (values value t)
+      (error "Cannot convert type: ~A to git-strings" (type-of value))))
+
+(defmethod translate-from-foreign (value (type git-strings-type))
+  (with-foreign-slots ((strings count) value git-strings)
+    (loop :for i :below count
+       :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
+
+(defmethod free-translated-object (pointer (type git-strings-type) do-not-free)
+  (%git-strarray-free pointer)
+  (unless do-not-free (foreign-free pointer)))
+
+;;; Old code
+#+nil (defun git-strings-to-list (string-array)
   (with-foreign-slots ((strings count) string-array git-strings)
     (loop :for i :below count
        :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
