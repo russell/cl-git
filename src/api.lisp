@@ -131,17 +131,20 @@ Supported Objects
 
 - COMMIT"))
 
-(defgeneric git-tree (object)
+(defgeneric git-tree (object &key path repository)
   (:documentation
   "Returns the tree as a git tree object, for object OBJECT.
 
-The tree from for example a commit is the object that contains a directory listing
-of the files in the commit with OIDs pointing to the content of the files.
-So basically the tree of a commit corresponds to the content of the commit.
+The tree from for example a commit is the object that contains a
+directory listing of the files in the commit with OIDs pointing to the
+content of the files.  So basically the tree of a commit corresponds
+to the content of the commit.  If PATH is specified then the tree
+returned node will be a child node of the tree.
 
 Supported Objects
 
-- COMMIT"))
+- COMMIT
+- TREE"))
 
 (defgeneric git-create (class id/name &key repository &allow-other-keys))
 
@@ -278,14 +281,3 @@ If no objects are available anymore return nil."))
 
 
 ;;; how it is now:
-
-
-
-
-
-
-
-
-
-
-

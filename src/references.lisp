@@ -90,7 +90,7 @@
 
 (defclass reference (git-pointer) ())
 
-(defmethod git-lookup ((class (eql :reference)) name 
+(defmethod git-lookup ((class (eql :reference)) name
 		       &key (repository *git-repository*))
   "Find a reference by its full name e.g.: ref/heads/master
 Note that this function name clashes with the generic lookup function.
@@ -127,8 +127,8 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
       (free-translated-object string-array '%git-strings t))))
 
 
-(defmethod git-create ((class (eql :reference)) name 
-		       &key 
+(defmethod git-create ((class (eql :reference)) name
+		       &key
 			 (repository *git-repository*)
 			 (type :oid)
 			 force
@@ -144,9 +144,9 @@ the same name already exists.  If FORCE is nil, it will return an
 error if that is the case."
   (with-foreign-object (reference :pointer)
     (ecase type
-      (:oid 
+      (:oid
        (%git-reference-create-oid reference repository name target force))
-      (:symbolic 
+      (:symbolic
        (%git-reference-create-symbolic reference repository name target force)))
     (make-instance 'reference
 		   :pointer (mem-ref reference :pointer)
@@ -163,9 +163,11 @@ are :SHA, :HEAD or :BOTH"
            (find flag (list :both other-flag))))
   (acond
     ((and (and-both flags :head)
-          (remove-if-not (lambda (ref) (equal ref name)) 
+          (remove-if-not (lambda (ref) (equal ref name))
 			 (git-list :reference :repository repository)))
      (lookup-oid :head (car it) :repository repository))
+    ((numberp name)
+     (lookup-oid :sha name :repository repository))
     ((and (and-both flags :sha)
           (find (length name) '(40 7))
           (not (loop :for char :across name
@@ -174,7 +176,7 @@ are :SHA, :HEAD or :BOTH"
      (lookup-oid :sha name :repository repository))
     (t (error "Invalid reference named ~A." name)))))
 
-(defun find-oids (name-or-names &key (flags :both) 
+(defun find-oids (name-or-names &key (flags :both)
 				  (repository *git-repository*))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"

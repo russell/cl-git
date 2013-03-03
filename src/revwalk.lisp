@@ -83,6 +83,7 @@
 (defclass revision-walker (git-pointer) ())
 
 (defmethod git-next ((walker revision-walker))
+  "return a git-commit or nil if there are no more commits"
   (with-foreign-object (oid 'git-oid)
     (when (= 0 (%git-revwalk-next oid walker))
       (git-commit-from-oid oid :repository (facilitator walker)))))
@@ -97,7 +98,7 @@
     (make-instance-revwalker :object-ptr (mem-ref revwalker-pointer :pointer)
 			     :repository repository)))
 
-(defun git-revwalk (oid-or-oids &key 
+(defun git-revwalk (oid-or-oids &key
 				  (ordering :time)
 				  (repository *git-repository*))
   "Walk all the revisions from a specified OID, or OIDs.
@@ -109,7 +110,7 @@ In general this means, commits and tags."
     (loop
        :for oid
        :in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids)
-       :do (%git-revwalk-push revwalker 
+       :do (%git-revwalk-push revwalker
 			      (commit-oid-from-oid oid :repository repository)))
     revwalker))
 
@@ -144,13 +145,16 @@ special call to stop iteration."
                (git-free revwalker))))))))
 
 
-(defun revision-walk (name-or-names &key (flags :both) 
+(defun revision-walk (name-or-names &key (flags :both)
 				      (repository *git-repository*))
   "Create a revision walker starts iteration from the commits listed
-in NAME-OR-NAMES. A head or sha that matches can be filterd using the
+in NAME-OR-NAMES.  A head or sha that matches can be filterd using the
 flags :SHA, :HEAD or :BOTH.
 
 Once created iteration over commits can be done with the method
 WALKER-NEXT."
-  (let ((oids (find-oids name-or-names :flags flags :repository repository)))
+  (let* ((names (if (listp name-or-names)
+                     name-or-names
+                     (list name-or-names)))
+         (oids (find-oids names :flags flags :repository repository)))
     (git-revwalk oids :repository repository)))

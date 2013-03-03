@@ -26,15 +26,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcstruct git-tree-entry
-  (removed :uint16)
-  (attr :uint16)
+  (attr :unsigned-int)
+  (filename :pointer)
   (oid git-oid)
-  (filename-len size)
-  (filename :char))
+  (filename-len size-t)
+  (removed :unsigned-int))
 
 
 
-(defcfun ("git_tree_create_fromindex" %git-tree-create-fromindex)
+(defcfun ("git_tree_create_fromindex" git-tree-create-fromindex)
     %return-value
   (oid :pointer)
   (index %index))
@@ -56,6 +56,29 @@ This does count the number of direct children, not recursively."
   (tree %tree)
   (index :unsigned-int))
 
+(defcfun ("git_tree_entry_name" git-tree-entry-name)
+    :string
+  "Returns the tree entry name."
+  (tree %tree))
+
+(defcfun ("git_tree_entry_attributes" git-tree-entry-attributes)
+    :unsigned-int
+  "Returns the tree entry attributes."
+  (tree %tree))
+
+(defcfun ("git_tree_entry_type" git-tree-entry-type)
+    git-object-type
+  "Returns the tree entry type."
+  (tree %tree))
+
+(defcfun ("git_tree_entry_byname" git-tree-entry-byname)
+    %tree-entry
+  (tree %tree)
+  (name :string))
+
+(defcfun ("git_tree_entry_id" git-tree-entry-id)
+    %oid
+  (entry %tree-entry))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -65,12 +88,12 @@ This does count the number of direct children, not recursively."
 
 
 (defmethod translate-from-foreign (value (type git-tree-entry-type))
-  (with-foreign-slots ((attr filename oid removed filename-len) value git-tree-entry)
-    (list :attr attr 
-	  :filename  (foreign-string-to-lisp (foreign-slot-pointer value 'git-tree-entry 'filename)
-					     :count  filename-len)
-	  :filename-length filename-len
-          :oid (convert-from-foreign oid '%oid) :removed removed)))
+  (unless (null-pointer-p value)
+    (list
+     :attr (git-tree-entry-attributes value)
+     :filename (git-tree-entry-name value)
+     :oid (git-tree-entry-id value)
+     :type (git-tree-entry-type value))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -90,11 +113,18 @@ This does count the number of direct children, not recursively."
   "Write the current index to the disk and return an oid to it."
   (assert (not (null-or-nullpointer index)))
   (with-foreign-object (oid 'git-oid)
-    (%git-tree-create-fromindex oid index)
-    (convert-from-foreign oid '%oid))) ;; Is this free needed????
+    (git-tree-create-fromindex oid index)
+    (convert-from-foreign oid '%oid)))
+
 
 (defmethod git-entry-count ((object tree))
   (git-tree-entry-count object))
 
 (defmethod git-entry-by-index ((object tree) index)
   (git-tree-entry-by-index object index))
+
+(defmethod git-tree ((object tree) &key path (repository *git-repository*))
+  (with-foreign-string (%path path)
+    (let ((entry (git-tree-entry-byname object %path)))
+      (when entry
+        (git-lookup :object (getf entry :oid) :repository repository)))))
