@@ -47,7 +47,7 @@ Repositories
       ("refs/remotes/origin/master" "refs/remotes/origin/verrazano"
       "refs/heads/master" "refs/heads/verrazano")
 
-.. cl:function:: ensure-git-repository-exist
+.. cl:function:: ensure-repository-exist
 
    :param path: the path to the git repository.
    :param bare: if truthful, then create a bare repository.
@@ -76,17 +76,17 @@ Manipulating the Index
 
 .. cl:package:: cl-git
 
-.. cl:macro:: with-git-repository-index
+.. cl:macro:: with-repository-index
 
    :param body: the body of the macro.
 
-.. cl:function:: git-index-add
+.. cl:generic:: git-add
 
    :param path: the relative path of a file to be added to the repository.
 
-.. cl:function:: git-index-clear
+.. cl:generic:: git-clear
 
-.. cl:function:: git-index-write
+.. cl:generic:: git-write
 
 .. cl:function:: git-oid-from-index
 
@@ -134,11 +134,11 @@ Reading Commit Details
       "added better logging messages
       "
 
-.. cl:function:: git-commit-message
+.. cl:generic:: git-message
 
-.. cl:function:: git-commit-author
+.. cl:generic:: git-author
 
-.. cl:function:: git-commit-committer
+.. cl:generic:: git-committer
 
 
 Signatures
