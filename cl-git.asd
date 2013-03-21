@@ -4,6 +4,7 @@
   :description "A CFFI wrapper of libgit2."
   :version "0.2"
   :serial t
+  :defsystem-depends-on (:asdf)
   :depends-on (#:cffi #:local-time #:cl-fad #:trivial-garbage #:anaphora)
   :author "Russell Sim <russell.sim@gmail.com>"
   :licence "Lisp-LGPL"
