@@ -37,7 +37,7 @@
 
 (defclass git-pointer ()
   ((libgit2-pointer :reader pointer :initarg :pointer :initform (null-pointer)
-		    :documentation "A CFFI pointer from libgit2.  
+            :documentation "A CFFI pointer from libgit2.
 This is the git object that is wrapped by the instance of this class.")
    (free-function :reader free-function :initarg :free-function :initform nil)
    (facilitator :accessor facilitator :initarg :facilitator :initform nil)
@@ -51,7 +51,7 @@ This is the git object that is wrapped by the instance of this class.")
 is applied to WEAK-POINTER-VALUE of the objects in the LIST.  Except
 when WEAK-POINTER-VALUE is nul of course, because in that case the
 object is gone."
-  (mapc 
+  (mapc
    (lambda (o)
      (let ((real-o (trivial-garbage:weak-pointer-value o)))
        (when real-o (funcall function real-o))))
@@ -59,7 +59,7 @@ object is gone."
 
 
 (defun internal-dispose (finalizer-data pointer free-function)
-  "Helps disposing objects.  
+  "Helps disposing objects.
 This function implements most of the disposing/freeing logic, but
 because it is called from the finalize method it cannot access the relevant
 object directly."
@@ -68,7 +68,7 @@ object directly."
     (mapc-weak #'dispose (cdr finalizer-data))  ;; dispose dependends
     (funcall free-function pointer)))           ;; free git object
 
-    
+
 (defgeneric dispose (object)
   (:documentation "This interface is used to mark as invalid git objects when for example
 the repository is closed.")
@@ -77,17 +77,17 @@ the repository is closed.")
     "Basically identical to internal-dispose but sets the underlying
 pointer to null-pointer as well."
     (when (car (finalizer-data object))
-      (internal-dispose (finalizer-data object) 
-			(pointer object)
-			(free-function object))
-      (setf (slot-value object 'libgit2-pointer) nil)))) 
+      (internal-dispose (finalizer-data object)
+            (pointer object)
+            (free-function object))
+      (setf (slot-value object 'libgit2-pointer) nil))))
 
 (defmethod print-object ((object git-pointer) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (if (pointer object)
-	(format stream "~X" (pointer-address (pointer object)))
-	(princ "(disposed)" stream))))
-  
+    (format stream "~X" (pointer-address (pointer object)))
+    (princ "(disposed)" stream))))
+
 (defmethod git-free ((object git-pointer))
   (dispose object)
   nil)
@@ -96,18 +96,16 @@ pointer to null-pointer as well."
   "Setup the finalizer to call internal-dispose with the right arguments."
   (declare (ignore r))
   (let ((finalizer-data (finalizer-data instance))
-	(pointer (pointer instance))
-	(free-function (free-function instance)))
+    (pointer (pointer instance))
+    (free-function (free-function instance)))
 
-    (unless finalizer-data (error "No Finalizer data")) 
+    (unless finalizer-data (error "No Finalizer data"))
     (unless free-function (error "No Free function"))
 
     (when (facilitator instance)
       (push (make-weak-pointer instance)
-	    (cdr (finalizer-data (facilitator instance)))))
-    
+        (cdr (finalizer-data (facilitator instance)))))
+
     (finalize instance
-	      (lambda ()
-		(internal-dispose finalizer-data pointer free-function)))))
-
-
+          (lambda ()
+        (internal-dispose finalizer-data pointer free-function)))))

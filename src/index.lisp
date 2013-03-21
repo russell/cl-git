@@ -54,7 +54,10 @@
 ;;; Highlevel Interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defclass index (git-pointer) ())
+(defclass index
+    (git-pointer)
+  ()
+  (:documentation "A git index"))
 
 
 (defmethod git-add ((path string) &key (index *git-repository-index*) (stage 0))
@@ -90,6 +93,5 @@ current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
 index."
   `(let ((*git-repository-index* (git-index *git-repository*)))
      (unwind-protect
-	  (progn ,@body)
+      (progn ,@body)
        (git-free *git-repository-index*))))
-

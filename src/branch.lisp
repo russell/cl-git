@@ -59,32 +59,32 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmethod git-list ((class (eql :branch))
-		     &key (repository *git-repository*)
-		       (type '(:local :remote)))
+             &key (repository *git-repository*)
+               (type '(:local :remote)))
   (let ((*branch-values* (list)))
     (%git-branch-for-each repository
-			  type
-			  (callback collect-branch-values)
-			  (null-pointer))
+              type
+              (callback collect-branch-values)
+              (null-pointer))
     *branch-values*))
 
 
 (defmethod git-lookup ((class (eql :branch))
-		       (name string)
-		       &key (repository *git-repository*)
-			 (type :local))
+               (name string)
+               &key (repository *git-repository*)
+             (type :local))
   (with-foreign-object (reference :pointer)
     (%git-branch-lookup reference repository name type)
     (make-instance 'reference
-		   :pointer (mem-ref reference :pointer)
-		   :facilitator repository
-		   :free-function #'%git-reference-free)))
+           :pointer (mem-ref reference :pointer)
+           :facilitator repository
+           :free-function #'%git-reference-free)))
 
 
 (defmethod git-tracking ((in-ref reference))
   (with-foreign-object (out-ref :pointer)
     (%git-branch-tracking out-ref in-ref)
     (make-instance 'reference
-		   :pointer (mem-ref out-ref :pointer)
-		   :facilitator (facilitator in-ref)
-		   :free-function #'%git-reference-free)))
+           :pointer (mem-ref out-ref :pointer)
+           :facilitator (facilitator in-ref)
+           :free-function #'%git-reference-free)))

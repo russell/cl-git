@@ -4,7 +4,7 @@
                 :serial t
                 :components
                 ((:file "package")
-		 (:file "common")
+                 (:file "common")
                  (:file "commit")
                  (:file "repository")
                  (:file "references")

@@ -62,23 +62,26 @@
     %return-value
   (odb :pointer)
   (repository %repository))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defclass repository (git-pointer) ())
+
+(defclass repository (git-pointer) ()
+  (:documentation "A git repository."))
 
 
-(defmethod git-init ((class (eql :repository)) (path string) 
-		     &key bare &allow-other-keys)
+(defmethod git-init ((class (eql :repository)) (path string)
+             &key bare &allow-other-keys)
   "Init a new Git repository.  A positive value for BARE init a bare
 repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (repository-ref :pointer)
     (%git-repository-init repository-ref path bare)
     (make-instance 'repository
-		   :pointer (mem-ref repository-ref :pointer)
-		   :free-function #'git-repository-free)))
+           :pointer (mem-ref repository-ref :pointer)
+           :free-function #'git-repository-free)))
 
 (defmethod git-init ((class (eql :repository)) (path pathname) &rest r)
   (apply #'git-init class (namestring path) r))
@@ -88,8 +91,8 @@ repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (repository-ref :pointer)
     (%git-repository-open repository-ref path)
     (make-instance 'repository
-		   :pointer (mem-ref repository-ref :pointer)
-		   :free-function #'git-repository-free)))
+           :pointer (mem-ref repository-ref :pointer)
+           :free-function #'git-repository-free)))
 
 (defmethod git-open ((class (eql :repository)) (path pathname) &rest r)
   (apply #'git-open class (namestring path) r))
@@ -100,31 +103,31 @@ repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (config :pointer)
     (%git-repository-config config repository)
     (make-instance 'config
-		   :pointer (mem-ref config :pointer)
-		   :facilitator repository
-		   :free-function #'git-config-free)))
+           :pointer (mem-ref config :pointer)
+           :facilitator repository
+           :free-function #'git-config-free)))
 
 (defmethod git-index ((repository repository))
   (with-foreign-object (index :pointer)
     (%git-repository-index index repository)
     (make-instance 'index
-		   :pointer (mem-ref index :pointer)
-		   :facilitator repository
-		   :free-function #'%git-index-free)))
+           :pointer (mem-ref index :pointer)
+           :facilitator repository
+           :free-function #'%git-index-free)))
 
 (defmethod git-odb ((repository repository))
   (with-foreign-object (odb :pointer)
     (%git-repository-odb odb repository)
     (make-instance 'odb
-		   :pointer (mem-ref odb :pointer)
-		   :facilitator repository
-		   :free-function #'%git-odb-free)))
+           :pointer (mem-ref odb :pointer)
+           :facilitator repository
+           :free-function #'%git-odb-free)))
 
 (defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
 repositony at path."
   `(let ((*git-repository* (git-open :repository ,path)))
-     (unwind-protect 
-	  (progn 
-	    ,@body)
+     (unwind-protect
+      (progn
+        ,@body)
        (git-free *git-repository*))))

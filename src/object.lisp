@@ -82,31 +82,31 @@
 
 (defclass object (git-pointer)
   ((type :accessor object-type :initarg :object-type :initform 'object
-	 :documentation "A symbol indicating which libgit2 type this is.
+     :documentation "A symbol indicating which libgit2 type this is.
 This slot is probably uselss in the sense that we do not necessarily know
 on creation time and if we do not know exactly what is the point?
 So this is mainly used for printing"))
   (:documentation "Object encapsulating git objects from libgit2"))
 
 (defun make-instance-object (&key pointer facilitator type)
-  "Creates an object wrapping OBJECT-PTR.  
+  "Creates an object wrapping OBJECT-PTR.
 OBJECT-PTR needs to point to one of the git storage types, such as:
-:commit :tag :tree or :blob.  This function is not suitable to 
+:commit :tag :tree or :blob.  This function is not suitable to
 wrap git pointers to repositories, config, index etc."
 
   (let ((obj-type (case (or (unless (eq type :any) type)
-			    (git-object-type pointer))
-		    (:commit 'commit)
-		    (:tag 'tag)
-		    (:tree 'tree)
-		    (:blob 'blob)
-		    (t 'object))))
+                (git-object-type pointer))
+            (:commit 'commit)
+            (:tag 'tag)
+            (:tree 'tree)
+            (:blob 'blob)
+            (t 'object))))
 
     (make-instance obj-type
-		   :pointer pointer
-		   :facilitator facilitator
-		   :object-type obj-type
-		   :free-function #'git-object-free)))
+           :pointer pointer
+           :facilitator facilitator
+           :object-type obj-type
+           :free-function #'git-object-free)))
 
 (defmethod dispose ((object object))
   "Do the normal free and dispose children, but also clear reference to facilitator."
@@ -118,7 +118,7 @@ wrap git pointers to repositories, config, index etc."
 The type argument specifies which type is expected.  If the found
 object is not of the right type, an error will be signaled.  The type
 is one of :ANY, :BAD, :COMMIT :TREE :BLOB :TAG :OFS-DELTA :REFS-DELTA.
-:ANY and :BAD are special cases.  
+:ANY and :BAD are special cases.
 :ANY means return the object found, regardless of type.  Also :ANY is
 not a type of any real object, but only used for querying like in this function.
 :BAD should never occur, it indicates an error in the data store."
@@ -128,15 +128,15 @@ not a type of any real object, but only used for querying like in this function.
   (with-foreign-object (obj-ptr :pointer)
     (%git-object-lookup obj-ptr repository oid type)
     (make-instance-object :pointer (mem-ref obj-ptr :pointer)
-			  :facilitator repository
-			  :type type)))
+              :facilitator repository
+              :type type)))
 
 
 
 ;; Copy the documentation to the generic function so
 ;; we do not have to write it twice.
 #|
-(setf (documentation #'git-lookup 'function) 
+(setf (documentation #'git-lookup 'function)
       (documentation #'git-object-lookup 'function))
 
 (setf (documentation #'git-type 'function)
@@ -157,7 +157,7 @@ not a type of any real object, but only used for querying like in this function.
 
 
 (defmethod git-lookup ((class (eql :object))
-		       oid &key (repository *git-repository*))
+               oid &key (repository *git-repository*))
   (git-object-lookup oid :any :repository repository))
 
 (defmethod git-type ((object object))
@@ -166,9 +166,8 @@ not a type of any real object, but only used for querying like in this function.
 (defmethod git-entries (object)
   "Return all entries of OBJECT as a list.
 
-Note that this is basically a wrapper around GIT-ENTRY-BY-INDEX, 
+Note that this is basically a wrapper around GIT-ENTRY-BY-INDEX,
 so the objects returned are the same as the ones returned by GIT-ENTRY-BY-INDEX."
   (loop :repeat (git-entry-count object)
         :for index :from 0
         :collect (git-entry-by-index object index)))
-

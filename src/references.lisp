@@ -91,7 +91,7 @@
 (defclass reference (git-pointer) ())
 
 (defmethod git-lookup ((class (eql :reference)) name
-		       &key (repository *git-repository*))
+               &key (repository *git-repository*))
   "Find a reference by its full name e.g.: ref/heads/master
 Note that this function name clashes with the generic lookup function.
 We need to figure this out by using the type argument to do dispatch."
@@ -99,9 +99,9 @@ We need to figure this out by using the type argument to do dispatch."
   (with-foreign-object (reference :pointer)
     (%git-reference-lookup reference repository name)
     (make-instance 'reference
-		   :pointer (mem-ref reference :pointer)
-		   :facilitator repository
-		   :free-function #'%git-reference-free)))
+           :pointer (mem-ref reference :pointer)
+           :facilitator repository
+           :free-function #'%git-reference-free)))
 
 (defun git-resolve (reference)
   "If the reference is symbolic, follow the it until it finds a non
@@ -110,29 +110,29 @@ argument."
   (with-foreign-object (resolved-ref :pointer)
     (%git-reference-resolve resolved-ref reference)
     (make-instance 'reference
-		   :pointer (mem-ref resolved-ref :pointer)
-		   :facilitator (facilitator reference)
-		   :free-function #'%git-reference-free)))
+           :pointer (mem-ref resolved-ref :pointer)
+           :facilitator (facilitator reference)
+           :free-function #'%git-reference-free)))
 
 
 (defmethod git-list ((class (eql :reference))
-		     &key (repository *git-repository*) (flags '(:oid)))
+             &key (repository *git-repository*) (flags '(:oid)))
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
   (with-foreign-object (string-array 'git-strings)
     (%git-reference-list string-array repository flags)
     (prog1
-	(git-strings-to-list string-array)
+    (git-strings-to-list string-array)
       (%git-strarray-free string-array))))
 
 
 (defmethod git-create ((class (eql :reference)) name
-		       &key
-			 (repository *git-repository*)
-			 (type :oid)
-			 force
-			 target)
+               &key
+             (repository *git-repository*)
+             (type :oid)
+             force
+             target)
   "Create a reference to TARGET.
 The type of reference depends on TYPE.  If TYPE is :OID the value of
 TARGET should be an OID and a direct reference is created.  If TYPE
@@ -149,14 +149,14 @@ error if that is the case."
       (:symbolic
        (%git-reference-create-symbolic reference repository name target force)))
     (make-instance 'reference
-		   :pointer (mem-ref reference :pointer)
-		   :facilitator repository
-		   :free-function #'%git-reference-free)))
+           :pointer (mem-ref reference :pointer)
+           :facilitator repository
+           :free-function #'%git-reference-free)))
 
 
 
 (defun find-oid (name &key (flags :both)
-			(repository *git-repository*))
+            (repository *git-repository*))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
   (flet ((and-both (flag other-flag)
@@ -164,7 +164,7 @@ are :SHA, :HEAD or :BOTH"
   (acond
     ((and (and-both flags :head)
           (remove-if-not (lambda (ref) (equal ref name))
-			 (git-list :reference :repository repository)))
+             (git-list :reference :repository repository)))
      (lookup-oid :head (car it) :repository repository))
     ((numberp name)
      (lookup-oid :sha name :repository repository))
@@ -177,7 +177,7 @@ are :SHA, :HEAD or :BOTH"
     (t (error "Invalid reference named ~A." name)))))
 
 (defun find-oids (name-or-names &key (flags :both)
-				  (repository *git-repository*))
+                  (repository *git-repository*))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
   (if (stringp name-or-names)
