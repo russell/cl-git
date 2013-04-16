@@ -95,13 +95,13 @@ of parents of the commit `commit'."
                                   (parents nil)
                                   (repository *git-repository*))
   "Create a new commit from the tree with the OID specified and
-MESSAGE.  Optional UPDATE-REF is the name of the reference that will
+MESSAGE.  Optional :UPDATE-REF is the name of the reference that will
 be updated to point to this commit.  The default value \"HEAD\" will
 updote the head of the current branch.  If it's value is NULL then no
-reference will be updated.  AUTHOR is an optional instance of a
-GIT-SIGNATURE that details the commit author.  COMMITTER is an
-optional instance of a GIT-SIGNATURE the details the commit committer.
-PARENTS is an optional list of parent commits sha1 hashes."
+reference will be updated.  :AUTHOR is an optional instance of a
+GIT-SIGNATURE that details the commit author.  :COMMITTER is an
+optional instance of a GIT-SIGNATURE the details the committer.
+:PARENTS is an optional list of parent commits sha1 hashes."
 
   (assert (not (null-or-nullpointer repository)))
 
