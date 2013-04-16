@@ -120,7 +120,7 @@ commit-message filename content."
         (multiple-value-bind (committer committer-alist) (create-random-signature)
           (let* ((file (add-new-random-file repo-path))
                  (commit-sha (cl-git:make-commit
-                              (cl-git:git-create-from-index 
+                              (cl-git:git-create-from-index
 			       cl-git::*git-repository-index*)
                               commit-message
                               :author author
