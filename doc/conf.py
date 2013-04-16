@@ -65,7 +65,7 @@ cl_quicklisp = expandvars('$HOME/.quicklisp/')
 # built documents.
 #
 __version__ = open(join(dirname(__file__), "..",
-                        "version.lisp-expr")).read().strip('"')
+                        "version.lisp-expr")).read().strip().strip('"')
 
 # The short X.Y version.
 version = __version__
