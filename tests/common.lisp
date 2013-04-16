@@ -24,8 +24,15 @@
 (defparameter *test-repository-path* #P"/tmp/")
 
 (defun getpid ()
-  #+SBCL
-  (sb-posix:getpid))
+  #+clisp (os:process-id)
+  #+(or cmu scl) (unix:unix-getpid)
+  #+sbcl (sb-unix:unix-getpid)
+  #+gcl (system:getpid)
+  #+openmcl (ccl::getpid)
+  #+lispworks (system::getpid)
+  #+ecl (si:getpid)
+  #+ccl (ccl::getpid)
+  #-(or clisp cmu scl sbcl gcl openmcl lispworks ecl ccl) (getpid-from-environment))
 
 (defmacro format-string (control-string &rest format-arguments)
   `(with-output-to-string (stream)
@@ -120,7 +127,7 @@ commit-message filename content."
         (multiple-value-bind (committer committer-alist) (create-random-signature)
           (let* ((file (add-new-random-file repo-path))
                  (commit-sha (cl-git:make-commit
-                              (cl-git:git-create-from-index 
+                              (cl-git:git-create-from-index
 			       cl-git::*git-repository-index*)
                               commit-message
                               :author author

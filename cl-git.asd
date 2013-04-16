@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:cl-git
   :description "A CFFI wrapper of libgit2."
-  :version "0.2"
+  :version (:read-file-form "version.lisp-expr")
   :serial t
   :defsystem-depends-on (:asdf)
   :depends-on (#:cffi #:local-time #:cl-fad #:trivial-garbage #:anaphora)

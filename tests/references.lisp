@@ -30,7 +30,7 @@ a reference from the commit."
     (cl-git:with-repository (path)
       (let ((oid (commit-random-file-modification
                   path "test" "Test commit")))
-        (let ((reference (cl-git:git-create :reference 
+        (let ((reference (cl-git:git-create :reference
                           "refs/heads/test" :target oid)))
           (is
            (equal
