@@ -24,3 +24,7 @@
 /doc/include-stamp
 /doc/cl-git.info
 /doc/.venv/
+/doc/info/
+/doc/latex/
+/doc/man/
+/doc/text/
