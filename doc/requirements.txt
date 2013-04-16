@@ -1,3 +1,4 @@
 sphinx
 sphinxcontrib-cldomain
 sphinxcontrib-googleanalytics
+sphinx-bootstrap-theme
