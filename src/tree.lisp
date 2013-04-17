@@ -106,7 +106,7 @@ This does count the number of direct children, not recursively."
   ())
 
 (defmethod git-lookup ((class (eql :tree))
-		       oid &key (repository *git-repository*))
+               oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
 
 (defun git-create-from-index (index)

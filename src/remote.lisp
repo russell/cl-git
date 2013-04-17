@@ -50,7 +50,7 @@
 (defclass remote (git-pointer) ())
 
 (defmethod git-list ((class (eql :remote))
-		     &key (repository *git-repository*))
+             &key (repository *git-repository*))
   (with-foreign-object (string-array 'git-strings)
     (%git-remote-list string-array repository)
     (prog1 
@@ -58,13 +58,13 @@
       (free-translated-object string-array '%git-strings t))))
 
 (defmethod git-load ((class (eql :remote))
-		     name &key (repository *git-repository*))
+             name &key (repository *git-repository*))
   (with-foreign-object (remote-out :pointer)
     (%git-remote-load remote-out repository name)
     (make-instance 'remote
-		   :pointer (mem-ref remote-out :pointer)
-		   :facilitator repository
-		   :free-function #'%git-remote-free)))
+           :pointer (mem-ref remote-out :pointer)
+           :facilitator repository
+           :free-function #'%git-remote-free)))
 
 (defmethod git-name ((remote remote))
   (%git-remote-name remote))

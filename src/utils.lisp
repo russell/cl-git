@@ -44,18 +44,12 @@
   (%git-strarray-free pointer)
   (unless do-not-free (foreign-free pointer)))
 
-;;; Old code
-#+nil (defun git-strings-to-list (string-array)
-  (with-foreign-slots ((strings count) string-array git-strings)
-    (loop :for i :below count
-       :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
-
 ;;; Helper function for debugging
 (defun null-or-nullpointer (obj)
-  (or (not obj) 
+  (or (not obj)
       (typecase obj
-	(git-pointer (null-pointer-p (pointer obj)))
-	(t (null-pointer-p obj)))))
+    (git-pointer (null-pointer-p (pointer obj)))
+    (t (null-pointer-p obj)))))
 
 (defun getenv (name &optional default)
   #+CMU

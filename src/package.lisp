@@ -6,7 +6,7 @@
                 #:acond
                 #:it)
   (:import-from #:trivial-garbage
-		#:make-weak-pointer
+                #:make-weak-pointer
                 #:finalize)
   (:import-from #:cffi
                 #:define-parse-method
@@ -38,7 +38,7 @@
                 #:defcallback
                 #:callback
                 #:foreign-free
-		#:pointer-address
+                #:pointer-address
                 #:defcenum)
   (:export
    #:revision-walk
@@ -78,7 +78,7 @@
    #:git-init
    #:git-free
 
-   ;; Bigger functions 
+   ;; Bigger functions
    #:make-commit
 
    ;; Macros
@@ -92,6 +92,7 @@
    #:commit
    #:tree
    #:object
+   #:index
    #:repository
    #:*git-repository-index*
    #:git-capabilities

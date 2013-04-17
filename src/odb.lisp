@@ -47,7 +47,7 @@
   (object %odb-object))
 
 (defcfun ("git_odb_object_size" %git-odb-object-size)
-    size-t 
+    size-t
   (objecgt %odb-object))
 
 (defcfun ("git_odb_object_data" %git-odb-object-data)
@@ -66,25 +66,25 @@
 (defclass odb-object (git-pointer) ())
 
 (defmethod git-list ((class (eql :oid)) &key
-				  (repository *git-repository*)
-				  odb)
+                  (repository *git-repository*)
+                  odb)
   (let ((odb (or odb (git-odb repository)))
-	(*oid-values* (list)))
+    (*oid-values* (list)))
     (%git-odb-for-each odb
-		       (callback collect-oid-values)
-		       (null-pointer))
+               (callback collect-oid-values)
+               (null-pointer))
     *oid-values*))
 
-(defmethod git-load ((class (eql :odb-object)) 
-		     oid
-		     &key odb
-		       (repository *git-repository*))
+(defmethod git-load ((class (eql :odb-object))
+             oid
+             &key odb
+               (repository *git-repository*))
   (with-foreign-object (out :pointer)
     (%git-odb-read out (or odb (git-odb repository)) oid)
     (make-instance 'odb-object
-		   :pointer (mem-ref out :pointer)
-		   :facilitator odb
-		   :free-function #'%git-odb-object-free)))
+           :pointer (mem-ref out :pointer)
+           :facilitator odb
+           :free-function #'%git-odb-object-free)))
 
 (defmethod git-type ((object odb-object))
   (%git-odb-object-type object))
@@ -94,11 +94,11 @@
 
 (defmethod git-data ((object odb-object))
   (let ((result (make-array (git-size object)
-			    :element-type '(unsigned-byte 8)
-			    :initial-element 0))
-	(content (%git-odb-object-data object)))
+                :element-type '(unsigned-byte 8)
+                :initial-element 0))
+    (content (%git-odb-object-data object)))
     (loop :for index :from 0
        :repeat (length result)
        :do (setf (aref result index)
-		 (mem-aref content :unsigned-char index)))
+         (mem-aref content :unsigned-char index)))
     result))

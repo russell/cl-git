@@ -66,7 +66,7 @@
   ())
 
 (defmethod git-lookup ((class (eql :tag))
-		       oid &key (repository *git-repository*))
+               oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
 
 (defmethod git-name ((tag tag))
@@ -85,7 +85,7 @@
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
     (make-instance-object :pointer (mem-ref %object :pointer)
-			  :facilitator (facilitator tag))))
+              :facilitator (facilitator tag))))
 
 (defmethod git-peel ((tag tag))
   "Peels layers of the tag until the resulting object is not a tag anymore.
@@ -94,4 +94,4 @@ repeat the process."
   (with-foreign-object (%object :pointer)
     (%git-tag-peel %object tag)
     (make-instance-object :pointer (mem-ref %object :pointer)
-			  :facilitator (facilitator tag))))
+              :facilitator (facilitator tag))))

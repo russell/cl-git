@@ -1,8 +1,6 @@
 cl-git
 ======
 
-.. contents::
-
 About
 -----
 
@@ -30,127 +28,22 @@ downloaded from `github`_.
 
 .. _github: https://github.com/russell/cl-git/
 
-Repositories
-------------
 
-.. cl:package:: cl-git
+Documentation
+-------------
 
-.. cl:macro:: with-git-repository
+.. toctree::
+   :maxdepth: 2
 
-   :param path: the path to the git repository.
-   :param body: the body of the macro.
+   repositories
+   references
+   indexs
+   commits
 
-   .. code-block:: common-lisp
-
-      CL-GIT> (with-git-repository (#p"/home/russell/projects/cl-git/")
-			     (git-reference-listall))
-      ("refs/remotes/origin/master" "refs/remotes/origin/verrazano"
-      "refs/heads/master" "refs/heads/verrazano")
-
-.. cl:function:: ensure-git-repository-exist
-
-   :param path: the path to the git repository.
-   :param bare: if truthful, then create a bare repository.
-
-   .. code-block:: common-lisp
-
-      CL-GIT> (ensure-git-repository-exist #p"/tmp/test-repo/")
-      #P"/tmp/test-repo/"
-
-
-References
-----------
-
-.. cl:function:: git-reference-listall
-
-   .. code-block:: common-lisp
-
-      CL-GIT> (with-git-repository (#p"/home/russell/projects/cl-git/")
-			     (git-reference-listall))
-      ("refs/remotes/origin/master" "refs/remotes/origin/verrazano"
-      "refs/heads/master" "refs/heads/verrazano")
-
-
-Manipulating the Index
-----------------------
-
-.. cl:package:: cl-git
-
-.. cl:macro:: with-git-repository-index
-
-   :param body: the body of the macro.
-
-.. cl:function:: git-index-add
-
-   :param path: the relative path of a file to be added to the repository.
-
-.. cl:function:: git-index-clear
-
-.. cl:function:: git-index-write
-
-.. cl:function:: git-oid-from-index
-
-
-Commits
--------
-
-.. cl:package:: cl-git
-
-
-Creating Commits
-~~~~~~~~~~~~~~~~
-
-.. cl:function:: git-commit-create
-
-
-Walking Commits
-~~~~~~~~~~~~~~~
-
-.. cl:macro:: with-git-revisions
-
-   .. code-block:: common-lisp
-
-      CL-GIT> (with-git-repository (#p"/home/russell/projects/cl-git/")
-                (with-git-revisions (commit :sha "69fec1d5938a0c1c8c14a3a120936aa8937af163")
-                  (princ (git-commit-message commit))))
-      added git str to oid
-      added some lowlevel methods for revtree walking
-      added error condition strings
-      added repository open and list all refs
-      initial commit
-      NIL
-
-Reading Commit Details
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. cl:macro:: bind-git-commits
-
-   .. code-block:: common-lisp
-
-      CL-GIT> (with-git-repository (#p"/home/russell/projects/txirods/")
-                (with-git-commits ((commit :sha "46153869f3652de5dbb6ddd598c58445383dcba2"))
-                  (princ (git-commit-message commit))))
-      added better logging messages
-      "added better logging messages
-      "
-
-.. cl:function:: git-commit-message
-
-.. cl:function:: git-commit-author
-
-.. cl:function:: git-commit-committer
-
-
-Signatures
-----------
-
-.. cl:package:: cl-git
-
-.. cl:function:: git-signature-create
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`search`

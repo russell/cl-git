@@ -85,14 +85,15 @@ of parents of the commit `commit'."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass commit (object)
-  ())
+  ()
+  (:documentation "A git commit."))
 
 (defun make-commit (oid message &key
                                   (update-ref "HEAD")
                                   (author nil)
                                   (committer nil)
                                   (parents nil)
-				  (repository *git-repository*))
+                                  (repository *git-repository*))
   "Create a new commit from the tree with the OID specified and
 MESSAGE.  Optional UPDATE-REF is the name of the reference that will
 be updated to point to this commit.  The default value \"HEAD\" will
@@ -107,37 +108,37 @@ PARENTS is an optional list of parent commits sha1 hashes."
   (let ((tree (git-lookup :object oid :type :tree :repository repository))
         (parents (if (listp parents) parents (list parents))))
 
-      ;; lookup all the git commits
-    (setq parents (mapcar #'(lambda (c) 
-			      (git-lookup :object 
-					  (lookup-oid :sha c) 
-					  :repository repository))
-			  parents))
+    ;; lookup all the git commits
+    (setq parents (mapcar #'(lambda (c)
+                              (git-lookup :object
+                                          (lookup-oid :sha c)
+                                          :repository repository))
+                          parents))
 
     (with-foreign-objects ((%parents :pointer (length parents))
-			   (newoid 'git-oid))
+                           (newoid 'git-oid))
       (with-foreign-strings ((%message message)
-			     (%message-encoding "UTF-8")
-			     (%update-ref update-ref))
+                             (%message-encoding "UTF-8")
+                             (%update-ref update-ref))
 
-	(loop :for parent :in parents
-	   :counting parent :into i
-	   :do (setf (mem-aref %parents :pointer (1- i)) (pointer parent)))
-	(%git-commit-create
-	 newoid
-	 repository
-	 %update-ref
-	 author
-	 committer
-	 %message-encoding
-	 %message
-	 tree
-	 (length parents)
-	 %parents))
+        (loop :for parent :in parents
+              :counting parent :into i
+              :do (setf (mem-aref %parents :pointer (1- i)) (pointer parent)))
+        (%git-commit-create
+         newoid
+         repository
+         %update-ref
+         author
+         committer
+         %message-encoding
+         %message
+         tree
+         (length parents)
+         %parents))
       (convert-from-foreign newoid '%oid))))
 
 (defmethod git-lookup ((class (eql :commit))
-		       oid &key (repository *git-repository*))
+               oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
 
 (defmethod git-id ((commit commit))
@@ -194,7 +195,7 @@ If the `oid' refers to a commit the function is basically a
 no-op.  However if `oid' refers to a tag, it will return
 the oid of the target of the tag."
   (let ((commit (git-commit-from-oid oid :repository repository)))
-	(git-object-id commit)))
+    (git-object-id commit)))
 
 (defmacro bind-git-commits (bindings &body body)
   "Lookup commits specified in the bindings.  The bindings syntax is

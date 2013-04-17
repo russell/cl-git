@@ -20,7 +20,7 @@
 (in-package #:cl-git)
 
 (defctype size :unsigned-long)
-(defctype size-t :unsigned-long)
+(defctype size-t :unsigned-int)
 
 
 (define-foreign-type git-object ()
@@ -49,11 +49,11 @@
   nil
   (:simple-parser %tree))
 
-(define-foreign-type git-config (git-object) 
+(define-foreign-type git-config (git-object)
   nil
   (:simple-parser %config))
 
-(define-foreign-type git-remote (git-object) 
+(define-foreign-type git-remote (git-object)
   nil
   (:simple-parser %remote))
 
@@ -80,7 +80,7 @@
 (define-foreign-type git-revision-walker (git-object)
   ()
   (:simple-parser %revwalker))
-  
+
 (define-foreign-type oid-type ()
   nil
   (:actual-type :pointer)
