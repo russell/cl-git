@@ -53,9 +53,9 @@
              &key (repository *git-repository*))
   (with-foreign-object (string-array 'git-strings)
     (%git-remote-list string-array repository)
-    (prog1
-    (git-strings-to-list string-array)
-      (%git-strarray-free string-array))))
+    (prog1 
+	(convert-from-foreign string-array '%git-strings)
+      (free-translated-object string-array '%git-strings t))))
 
 (defmethod git-load ((class (eql :remote))
              name &key (repository *git-repository*))

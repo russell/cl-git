@@ -116,6 +116,7 @@ This does count the number of direct children, not recursively."
     (git-tree-create-fromindex oid index)
     (convert-from-foreign oid '%oid)))
 
+
 (defmethod git-entry-count ((object tree))
   (git-tree-entry-count object))
 
