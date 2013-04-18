@@ -25,18 +25,31 @@ What It Can Do
 Requires
 --------
 
-libgit2: 0.17.0
+* SBCL 1.0.56 (sbcl-1.0.56.55-b06f72f-linux-x86)
+* libgit2: 0.17.0
 
 
-Examples
---------
+Building Documentation
+----------------------
 
-Listing specific details of a commit:
+Documentation requires sphinxcontirb.cldomain which depends on
 
-   (with-git-repository ("/hame/user/projects/repo/.git/")
-                      (with-git-revisions (commit :sha "859d33fcbeeafeb65a9ed4c07d7d9e4f40684694")
-		        (princ (git-commit-message commit)
-		        (princ (git-commit-author commit)))))
+* Sphinx
+* cl-launch 3.21.7
+* asdf 2.33.3
+* quicklisp
+
+Using `virtualenv`_ run::
+
+   pip install -r doc/requirements.txt
+   
+If you do not have fabric::
+
+   pip install fabric
+
+To build run::
+
+   fab build
 
 
 License
@@ -48,3 +61,4 @@ the LGPL but with `preamble`_ that puts the Lisp terminology in context.
 
 .. _libgit2: http://libgit2.github.com/
 .. _preamble: http://opensource.franz.com/preamble.html
+.. _virtualenv: http://www.virtualenv.org/
