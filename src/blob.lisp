@@ -43,7 +43,9 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass blob (object) ())
+(defclass blob (object)
+  ()
+  (:documentation "A git blob."))
 
 (defmethod git-lookup ((class (eql :blob))
                oid &key (repository *git-repository*))

@@ -88,6 +88,7 @@
    #:bind-git-commits
 
    ;; Classes.
+   #:blob
    #:reference
    #:commit
    #:tree
