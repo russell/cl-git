@@ -3,6 +3,8 @@ Repositories
 
 .. cl:package:: cl-git
 
+.. cl:type:: repository
+
 .. cl:macro:: with-repository
 
    :param path: the path to the git repository.
@@ -17,13 +19,10 @@ Repositories
 
 .. cl:generic:: git-init
 
-   :param path: the path to the git repository.
-   :param bare: if truthful, then create a bare repository.
-
    .. code-block:: common-lisp
 
-      CL-GIT> (git-init #p"/tmp/test-repo/")
-      #P"/tmp/test-repo/"
+      CL-GIT> (git-init :repository #p"/tmp/test-repo/")
+      #<REPOSITORY 644AF0 {100611F003}>
 
 .. cl:generic:: git-open
 
