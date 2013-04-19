@@ -22,9 +22,6 @@
 (defctype size :unsigned-long)
 (defctype size-t :unsigned-int)
 
-(defcstruct git-strings
-  (strings :pointer)
-  (count size))
 
 (define-foreign-type git-object ()
   ()
@@ -93,6 +90,11 @@
   nil
   (:actual-type :pointer)
   (:simple-parser %git-signature))
+
+(define-foreign-type git-strings-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %git-strings))
 
 (define-foreign-type time-type ()
   nil
