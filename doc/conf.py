@@ -104,7 +104,10 @@ exclude_patterns = ['_build', '.venv']
 highlight_language = 'common-lisp'
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'tango'
+# ['monokai', 'manni', 'rrt', 'perldoc', 'borland', 'colorful',
+# 'default', 'murphy', 'vs', 'trac', 'tango', 'fruity', 'autumn',
+# 'bw', 'emacs', 'vim', 'pastie', 'friendly', 'native']
+pygments_style = 'emacs'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -154,7 +157,7 @@ html_theme_options = {
     # such as "amelia" or "cosmo".
     #
     # Note that this is served off CDN, so won't be available offline.
-    'bootswatch_theme': "cerulean",
+    'bootswatch_theme': "readable",
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme

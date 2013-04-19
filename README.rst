@@ -32,7 +32,7 @@ Requires
 Building Documentation
 ----------------------
 
-Documentation requires sphinxcontirb.cldomain which depends on
+Documentation requires sphinxcontrib.cldomain which depends on
 
 * Sphinx
 * cl-launch 3.21.7
