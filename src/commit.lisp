@@ -86,7 +86,11 @@ of parents of the commit `commit'."
 
 (defclass commit (object)
   ()
-  (:documentation "A git commit."))
+  (:documentation "Commit objects link the state of the tree with a
+description.  Commits contain a description of the author, commit
+author and a message about the commit.  They also contain state
+information about the current tree and links to any parent commits.
+Commits that have more then one parent are considered to be merges."))
 
 (defun make-commit (oid message &key
                                   (update-ref "HEAD")
