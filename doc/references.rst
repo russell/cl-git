@@ -25,7 +25,7 @@ the generic list command and tell it you want references.
       "refs/tags/my-working-version")
 
 Because the repository is a libgit2 construct, it needs to be
-freed. We can do this explicitly with the the generic git-free
+freed. We can do this explicitly with the generic git-free
 function like this..
 
 .. code-block:: common-lisp
