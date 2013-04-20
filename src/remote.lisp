@@ -20,6 +20,29 @@
 
 (in-package #:cl-git)
 
+(defbitfield (refspec-flags :unsigned-int)
+  :force
+  :pattern
+  :matching)
+
+(defcstruct (git-refspec :class refspec-struct-type)
+  (next :pointer)
+  (src :string)
+  (dst :string)
+  (flags refspec-flags))
+
+(defmethod translate-from-foreign (value (type refspec-struct-type))
+  (translate-from-foreign value (make-instance 'refspec-type)))
+
+(defmethod translate-from-foreign (value (type refspec-type))
+  (unless (null-pointer-p value)
+    (with-foreign-slots ((next src dst flags) value (:struct git-refspec))
+			(cons (list  :src src
+				     :dst dst
+				     :flags flags)
+			      (translate-from-foreign next type)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcfun ("git_remote_list" %git-remote-list)
     %return-value
   (strings :pointer)
@@ -46,6 +69,32 @@
 (defcfun ("git_remote_name" %git-remote-name)
     :string
   (remote %remote))
+
+(defcfun ("git_remote_connected" %git-remote-connected)
+  %bool
+  (remote %remote))
+
+(defcenum %direction
+  :pull
+  :push)
+
+(defcfun ("git_remote_connect" %git-remote-connect)
+  %return-value
+  (remote %remote)
+  (direction %direction))
+
+(defcfun ("git_remote_disconnect" %git-remote-disconnect)
+  :void
+  (remote %remote))
+
+(defcfun ("git_remote_fetchspec" %git-remote-fetchspec)
+  %refspec
+  (remote %remote))
+
+(defcfun ("git_remote_pushspec" %git-remote-pushspec)
+  %refspec
+  (remote %remote))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defclass remote (git-pointer) ())
 
@@ -68,3 +117,18 @@
 
 (defmethod git-name ((remote remote))
   (%git-remote-name remote))
+
+(defmethod git-connect ((remote remote) &key (direction :pull))
+  (%git-remote-connect remote direction))
+
+(defmethod git-connected ((remote remote))
+  (%git-remote-connected remote))
+
+(defmethod git-disconnected ((remote remote))
+  (%git-remote-disconnect remote))
+
+(defmethod git-pushspec ((remote remote))
+  (%git-remote-pushspec remote))
+
+(defmethod git-fetchspec ((remote remote))
+  (%git-remote-fetchspec remote))

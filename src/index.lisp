@@ -29,6 +29,22 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+#+nil (defbitfield (index-entry-flag :unsigned-short)
+  :update
+  :remove
+  :uptodate
+  :added
+  :hashed
+  :unhashed
+  :worktree-remove
+  :conflicted
+  :unpacked
+  :new-skip-worktree
+  (:intent-to-add #.(ash 1 13))
+  :skip-worktree
+  :extended-2)
+
+
 (defcstruct (git-index-time :class index-time-struct-type)
   (seconds %time)
   (nanoseconds :unsigned-int))
@@ -49,8 +65,14 @@
 
 
 (defmethod translate-from-foreign (value (type index-entry-type))
-  (with-foreign-slots ((ctime mtime file-size oid path) value (:struct git-index-entry))
-    (list :c-time ctime :m-time mtime :file-size file-size :oid oid :path path)))
+  (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path) value (:struct git-index-entry))
+    (list :c-time ctime 
+	  :m-time mtime 
+	  :file-size file-size 
+	  :oid oid 
+	  :flags flags
+	  :flags-extended flags-extended
+	  :path path)))
 
 (defmethod translate-from-foreign (value (type index-time-struct-type))
   (with-foreign-slots ((seconds nanoseconds) value (:struct git-index-time))
