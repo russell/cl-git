@@ -26,7 +26,14 @@
   (:https 2))
 
 (defcfun ("git_libgit2_capabilities" git-capabilities)
-    git-capabilities)
+    git-capabilities
+    "Returns the capabilities of the libgit2 library.
+The return value is a list of symbols, each describing a capability.  
+Currently the following capabilities are possible:
+
+- :threads, Experimental thread support
+- :https, if the https support protocol is supported.  
+  Will require the open ssl library to be present.")
 
 (defcfun ("git_libgit2_version" %git-version)
     :void

@@ -25,14 +25,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcstruct git-tree-entry
-  (attr :unsigned-int)
-  (filename :pointer)
-  (oid git-oid)
-  (filename-len size-t)
-  (removed :unsigned-int))
-
-
 
 (defcfun ("git_tree_create_fromindex" git-tree-create-fromindex)
     %return-value

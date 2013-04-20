@@ -29,6 +29,35 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defcstruct (git-index-time :class index-time-struct-type)
+  (seconds %time)
+  (nanoseconds :unsigned-int))
+
+(defcstruct git-index-entry
+  (ctime (:struct git-index-time))
+  (mtime (:struct git-index-time))
+  (dev :unsigned-int)
+  (ino :unsigned-int)
+  (mode :unsigned-int)
+  (uid :unsigned-int)
+  (gid :unsigned-int)
+  (file-size off-t)
+  (oid (:struct git-oid))
+  (flags :unsigned-short)
+  (flags-extended :unsigned-short)
+  (path :string))
+
+
+(defmethod translate-from-foreign (value (type index-entry-type))
+  (with-foreign-slots ((ctime mtime file-size oid path) value (:struct git-index-entry))
+    (list :c-time ctime :m-time mtime :file-size file-size :oid oid :path path)))
+
+(defmethod translate-from-foreign (value (type index-time-struct-type))
+  (with-foreign-slots ((seconds nanoseconds) value (:struct git-index-time))
+    (local-time:timestamp+ seconds nanoseconds :nsec)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defcfun ("git_index_add" %git-index-add)
     %return-value
@@ -48,6 +77,14 @@
     %return-value
   (index %index))
 
+(defcfun ("git_index_entrycount" git-index-entry-count)
+    :unsigned-int
+  (index %index))
+
+(defcfun ("git_index_get" git-index-get)
+    %index-entry
+  (index %index)
+  (position :unsigned-int))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -66,26 +103,11 @@
 (defmethod git-add ((path pathname) &key (index *git-repository-index*) (stage 0))
   (git-add (namestring path) :index index :stage stage))
 
-#+nil (defun git-index-add (path)
-  "Add a file at PATH to the repository, the PATH should be relative
-to the repository."
-  (let ((path (namestring path)))
-    (%git-index-add *git-repository-index* path 0)))
-
 (defmethod git-clear ((index index))
   (%git-index-clear index))
 
-#+nil (defun git-index-clear ()
-  "Remove all staged data from the index at *GIT-REPOSITORY-INDEX*."
-  (%git-index-clear *git-repository-index*))
-
 (defmethod git-write ((index index))
   (%git-index-write index))
-
-#+nil (defun git-index-write ()
-  "Write the current index stored in *GIT-REPOSITORY-INDEX* to disk."
-  (%git-index-write *git-repository-index*))
-
 
 (defmacro with-repository-index (&body body)
   "Load a repository index uses the current *GIT-REPOSITORY* as the
@@ -95,3 +117,11 @@ index."
      (unwind-protect
       (progn ,@body)
        (git-free *git-repository-index*))))
+
+
+(defmethod git-entry-count ((index index))
+  (git-index-entry-count index))
+
+(defmethod git-entry-by-index ((index index) position)
+  (git-index-get index position))
+
