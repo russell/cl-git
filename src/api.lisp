@@ -130,7 +130,14 @@ returned node will be a child node of the tree.
 
 (defgeneric git-open (class path/name &key &allow-other-keys))
 
-(defgeneric git-init (class path/name &key &allow-other-keys))
+(defgeneric git-init (class path/name &key &allow-other-keys)
+  (:documentation
+   "Create a new Git repository.  CLASS should be the
+keyword :REPOSITORY.  PATH/NAME can be either an instance of a STRING
+or a PATHNAME.  A truthful value for the key BARE will init a
+repository that does not have a local checkout, it's normally
+appropriate for the basename of the path to end in '.git'.  A
+REPOSITORY instance is returned."))
 
 (defgeneric git-load (class path/name &key &allow-other-keys))
 

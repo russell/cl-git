@@ -70,13 +70,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass repository (git-pointer) ()
-  (:documentation "A git repository."))
+  (:documentation "Repository is the root type, it
+contains the object database."))
 
 
 (defmethod git-init ((class (eql :repository)) (path string)
              &key bare &allow-other-keys)
-  "Init a new Git repository.  A positive value for BARE init a bare
-repository.  Returns the path of the newly created Git repository."
   (with-foreign-object (repository-ref :pointer)
     (%git-repository-init repository-ref path bare)
     (make-instance 'repository
