@@ -45,7 +45,6 @@
    #:walker-next
 
    #:git-create
-   #:git-reference-oid
    #:git-resolve
    #:git-add
    #:git-write
@@ -92,10 +91,14 @@
    #:reference
    #:commit
    #:tree
+   #:remote
+   #:config
    #:object
    #:index
+   #:tag
    #:repository
    #:*git-repository-index*
+   #:*git-repository*
    #:git-capabilities
    #:git-tracking
    #:git-version

@@ -49,17 +49,34 @@ The dependencies for CL-git itself are: cffi, local-time, cl-fad,
 trivial-garbage, anaphora. The tests in package cl-git-tests, need in
 addition to cl-git the following packages: FiveAM and inferior-shell.
 
-
 Usage
 -----
 
 .. toctree::
    :maxdepth: 4
 
+   git
    repositories
    references
+   tag
+   tree
+   blob
+   objects
    indexes
+   remote
    commits
+   config
+
+
+General Information
+-------------------
+
+.. toctree::
+   :maxdepth: 4
+
+   generic
+   memory
+
 
 Contributing
 ------------

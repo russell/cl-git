@@ -26,7 +26,9 @@
   (:https 2))
 
 (defcfun ("git_libgit2_capabilities" git-capabilities)
-    git-capabilities)
+  git-capabilities
+  "A combination of GIT_CAP_*
+values. http://libgit2.github.com/libgit2/#HEAD/group/libgit2/git_libgit2_capabilities")
 
 (defcfun ("git_libgit2_version" %git-version)
     :void

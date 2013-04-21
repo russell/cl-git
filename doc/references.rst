@@ -1,10 +1,24 @@
-
 References
 ==========
 
 .. cl:package:: cl-git
 
+.. cl:type:: reference
+
+.. cl:method:: git-type reference
+
+.. cl:method:: git-name reference
+
+.. cl:method:: git-create :reference common-lisp:t
+
+.. cl:method:: git-lookup :reference common-lisp:t
+
 .. cl:method:: git-list :reference
+
+.. cl:function:: git-resolve
+
+Listing
+-------
 
 Lets start simple, we are going to list all the references present in
 a repository. For this we first have to open a repository with
@@ -23,20 +37,6 @@ the generic list command and tell it you want references.
      ("refs/heads/convert-to-classes" "refs/heads/gh-pages" "refs/heads/master"
        ...
       "refs/tags/my-working-version")
-
-Because the repository is a libgit2 construct, it needs to be
-freed. We can do this explicitly with the generic git-free
-function like this..
-
-.. code-block:: common-lisp
-
-     > (cl-git:git-free **)
-     nil
-     > ***
-     #<CL-GIT::REPOSITORY (disposed) {1008507BA3}>
-
-Or we can wait until the garbage collector comes around to do this for
-us.
 
 Now a better way of doing this is with the convenience macro
 with-repository which opens the repository, sets the special variable
