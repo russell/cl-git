@@ -226,7 +226,3 @@ list."))
 (defgeneric git-next (walker)
   (:documentation "Returns the next object for the walker.  If no
 objects are available anymore return nil."))
-
-
-
-;;; how it is now:

@@ -28,12 +28,18 @@ Using
    :param path: the path to the git repository.
    :param body: the body of the macro.
 
-   .. code-block:: common-lisp
 
-      CL-GIT> (with-git-repository (#p"/home/russell/projects/cl-git/")
-                 (git-reference-listall))
-      ("refs/remotes/origin/master" "refs/remotes/origin/verrazano"
-      "refs/heads/master" "refs/heads/verrazano")
+With-repository is a convenience macro that binds a repository to
+*GIT-REPOSITORY*.  It wraps GIT-OPEN and specializes it on
+:REPOSITORY.
+
+.. code-block:: common-lisp
+
+   CL-GIT> (with-repository (#p"/home/russell/projects/cl-git/")
+                 (git-list :reference))
+   ("refs/remotes/origin/master" "refs/remotes/origin/verrazano"
+   "refs/heads/master" "refs/heads/verrazano")
+
 
 Status
 ------

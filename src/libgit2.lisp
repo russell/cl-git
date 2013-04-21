@@ -27,8 +27,8 @@
 
 (defcfun ("git_libgit2_capabilities" git-capabilities)
   git-capabilities
-  "A combination of GIT_CAP_*
-values. http://libgit2.github.com/libgit2/#HEAD/group/libgit2/git_libgit2_capabilities")
+  "Return a list of the libgit2 capabilities, possible values in the
+list return values are :THREADS and :HTTPS.")
 
 (defcfun ("git_libgit2_version" %git-version)
     :void
@@ -42,8 +42,7 @@ values. http://libgit2.github.com/libgit2/#HEAD/group/libgit2/git_libgit2_capabi
 
 (defun git-version ()
   "Returns the libgit2 C-library version number as a list of three integers,
-\(major minor revision\)
-"
+\(major minor revision\)."
   (with-foreign-objects
       ((maj :int)
        (min :int)
