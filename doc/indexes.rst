@@ -1,9 +1,11 @@
-Manipulating the Index
-----------------------
+Index
+=====
 
 .. cl:package:: cl-git
 
 .. cl:type:: index
+
+.. cl:variable:: *git-repository-index*
 
 .. cl:macro:: with-repository-index
 
@@ -16,5 +18,3 @@ Manipulating the Index
 .. cl:generic:: git-clear
 
 .. cl:generic:: git-write
-
-

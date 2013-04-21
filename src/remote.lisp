@@ -42,6 +42,19 @@
 				     :flags flags)
 			      (translate-from-foreign next type)))))
 
+
+(defcstruct (git-indexer-stats :class indexer-stats-struct-type)
+  (total :unsigned-int)
+  (processed :unsigned-int))
+
+#+nil (defmethod translate-from-foreign (value (type indexer-stats-struct-type))
+  (translate-from-foreign value (make-instance 'indexer-stats-type)))
+
+#+nil (defmethod translate-from-foreign (value (type indexer-stats-type))
+  (with-foreign-slots ((total processed) value (:struct git-indexer-stats))
+		      (list :processed processed
+			    :total total)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcfun ("git_remote_list" %git-remote-list)
     %return-value
@@ -95,6 +108,13 @@
   %refspec
   (remote %remote))
 
+
+(defcfun ("git_remote_download" %git-remote-download)
+  %return-value
+  (remote %remote)
+  (bytes :pointer)
+  (stats :pointer))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defclass remote (git-pointer) ())
 
@@ -132,3 +152,8 @@
 
 (defmethod git-fetchspec ((remote remote))
   (%git-remote-fetchspec remote))
+
+(defmethod git-download ((remote remote))
+  (with-foreign-object (stats '(:struct git-indexer-stats))
+    (with-foreign-object (bytes 'off-t)
+      (%git-remote-download remote bytes stats))))

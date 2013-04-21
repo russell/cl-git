@@ -59,6 +59,8 @@
 
 
 (defun git-status (&key (repository *git-repository*))
+  "Return the current status values for each of the object in the
+repository."
   (let ((*status-values* (list)))
     (%git-status-for-each repository
                           (callback collect-status-values)

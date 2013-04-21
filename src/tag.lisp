@@ -72,6 +72,8 @@
 (defmethod git-name ((tag tag))
   (git-tag-name tag))
 
+;; XXX (RS) is this correct, i would think that a different value
+;; should be getting returned.
 (defmethod git-tagger ((tag tag))
   (git-tag-name tag))
 

@@ -15,8 +15,8 @@ full.
 
 The following configuration on Linux (Debian Sid) is known to work:
 
-* SBCL 1.0.56 (sbcl-1.0.56.55-b06f72f-linux-x86)
-* libgit2 0.17.0
+* SBCL
+* libgit2 0.18
 
 CL-GIT's API is modelled off the underlying Libgit2 interface.  The
 CL-GIT project takes advantage of it and provides a object oriented
@@ -30,8 +30,8 @@ are instances of corresponding classes in CL-GIT.
 Download
 --------
 
-Since there is currently no released version, the source can be
-downloaded from `github`_.
+Since there is currently no released version, the source is available
+on `github`_.
 
 .. _github: https://github.com/russell/cl-git/
 
@@ -41,14 +41,12 @@ Installation
 You'll need a recent version of the libgit2 library, which
 can from http://github.com/libgit2/libgit2.
 
-The libgit2 library should be installed as usual, per the libgit2
-documentation, and the cl-git package should be downloaded into a
-place that ASDF can find it.
+cl-git package should be added to the systems load path so that ASDF
+can find it.
 
-The dependencies for CL-git itself are: cffi, local-time, cl-fad,
+The dependencies for cl-git itself are: cffi, local-time, cl-fad,
 trivial-garbage, anaphora. The tests in package cl-git-tests, need in
 addition to cl-git the following packages: FiveAM and inferior-shell.
-
 
 Usage
 -----
@@ -56,10 +54,28 @@ Usage
 .. toctree::
    :maxdepth: 4
 
+   git
    repositories
    references
+   tag
+   tree
+   blob
+   objects
    indexes
+   remote
    commits
+   config
+
+
+General Information
+-------------------
+
+.. toctree::
+   :maxdepth: 4
+
+   generic
+   memory
+
 
 Contributing
 ------------

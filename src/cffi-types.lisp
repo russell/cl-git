@@ -56,7 +56,9 @@
   (:actual-type :pointer)
   (:simple-parser %tree-entry))
 
-(define-foreign-type git-tree (git-object) ;; Is this needed????
+;; XXX (RS) Is this needed???? it also adds confusion because it has
+;; the same name as a function.
+(define-foreign-type git-tree (git-object)
   nil
   (:simple-parser %tree))
 
@@ -121,6 +123,11 @@
   nil
   (:actual-type :pointer)
   (:simple-parser %refspec))
+
+#+nil (define-foreign-type indexer-stats-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %indexer-stats))
 
 ;;; ERRORS
 (define-foreign-type git-error-type ()

@@ -26,14 +26,9 @@
   (:https 2))
 
 (defcfun ("git_libgit2_capabilities" git-capabilities)
-    git-capabilities
-    "Returns the capabilities of the libgit2 library.
-The return value is a list of symbols, each describing a capability.  
-Currently the following capabilities are possible:
-
-- :threads, Experimental thread support
-- :https, if the https support protocol is supported.  
-  Will require the open ssl library to be present.")
+  git-capabilities
+  "Return a list of the libgit2 capabilities, possible values in the
+list return values are :THREADS and :HTTPS.")
 
 (defcfun ("git_libgit2_version" %git-version)
     :void
@@ -47,8 +42,7 @@ Currently the following capabilities are possible:
 
 (defun git-version ()
   "Returns the libgit2 C-library version number as a list of three integers,
-\(major minor revision\)
-"
+\(major minor revision\)."
   (with-foreign-objects
       ((maj :int)
        (min :int)

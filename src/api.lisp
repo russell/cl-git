@@ -227,14 +227,11 @@ list."))
   (:documentation "Returns the next object for the walker.  If no
 objects are available anymore return nil."))
 
-
-
 (defgeneric git-connect (object &key &allow-other-keys)
   (:documentation "Connects the object if applicable.
 
 At the moment only supported for 
 - REMOTE"))
-
 
 (defgeneric git-disconnect (object)
   (:documentation "Disconnects the object if applicable.
@@ -242,13 +239,11 @@ At the moment only supported for
 At the moment only supported for 
 - REMOTE"))
 
-
 (defgeneric git-connected (object)
   (:documentation "Returns if the object is connected.
 
 At the moment only supported for
 - REMOTE"))
-
 
 (defgeneric git-pushspec (remote))
 (defgeneric git-fetchspec (remote))
