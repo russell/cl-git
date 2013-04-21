@@ -20,6 +20,8 @@
 
 (in-package #:cl-git)
 
+(defparameter *remote-ls-values* nil)
+
 (defbitfield (refspec-flags :unsigned-int)
   :force
   :pattern
@@ -55,6 +57,19 @@
 		      (list :processed processed
 			    :total total)))
 
+(defcstruct (git-remote-head :class remote-head-struct-type)
+  (local %bool)
+  (oid (:struct git-oid))
+  (loid (:struct git-oid))
+  (name :string))
+
+(defmethod translate-from-foreign (value (type remote-head-struct-type))
+  (with-foreign-slots ((local oid loid name) value (:struct git-remote-head))
+		      (list :local local
+			    :oid oid
+			    :loid loid
+			    :name name)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcfun ("git_remote_list" %git-remote-list)
     %return-value
@@ -88,7 +103,7 @@
   (remote %remote))
 
 (defcenum %direction
-  :pull
+  :fetch
   :push)
 
 (defcfun ("git_remote_connect" %git-remote-connect)
@@ -114,6 +129,20 @@
   (remote %remote)
   (bytes :pointer)
   (stats :pointer))
+
+(defcallback collect-remote-ls-values :int ((remote-head 
+					     (:pointer (:struct git-remote-head))) 
+					    (payload :pointer))
+  (declare (ignore payload))
+  (push (convert-from-foreign remote-head '(:struct git-remote-head)) 
+	*remote-ls-values*)
+  0)
+
+(defcfun ("git_remote_ls" %git-remote-ls)
+  %return-value
+  (remote %remote)
+  (callback :pointer)
+  (payload :pointer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defclass remote (git-pointer) ())
@@ -157,3 +186,8 @@
   (with-foreign-object (stats '(:struct git-indexer-stats))
     (with-foreign-object (bytes 'off-t)
       (%git-remote-download remote bytes stats))))
+
+(defmethod git-ls ((remote remote))
+  (let ((*remote-ls-values* (list)))
+    (%git-remote-ls remote (callback collect-remote-ls-values) (null-pointer))
+    *remote-ls-values*))

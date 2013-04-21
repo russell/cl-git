@@ -247,3 +247,7 @@ At the moment only supported for
 
 (defgeneric git-pushspec (remote))
 (defgeneric git-fetchspec (remote))
+
+(defgeneric git-download (remote))
+
+(defgeneric git-ls (remote))
