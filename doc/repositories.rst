@@ -7,6 +7,12 @@ Repositories
 
 .. cl:variable:: *git-repository*
 
+.. cl:method:: git-config repository
+
+.. cl:method:: git-index repository
+
+.. cl:method:: git-odb repository
+
 Creating
 --------
 
