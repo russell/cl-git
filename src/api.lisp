@@ -151,6 +151,10 @@ explicit keyword argument :INDEX"))
    "Clears the content of OBJECT
 "))
 
+(defgeneric git-read (object)
+  (:documentation
+   "Reads the OBJECT from disk or object store."))
+
 (defgeneric git-write (object)
   (:documentation
    "Writes the OBJECT to its store.

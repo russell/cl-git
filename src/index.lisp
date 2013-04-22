@@ -99,6 +99,10 @@
     %return-value
   (index %index))
 
+(defcfun ("git_index_read" %git-index-read)
+    %return-value
+  (index %index))
+
 (defcfun ("git_index_entrycount" git-index-entry-count)
     :unsigned-int
   (index %index))
@@ -127,6 +131,9 @@
 
 (defmethod git-clear ((index index))
   (%git-index-clear index))
+
+(defmethod git-read ((index index))
+  (%git-index-read index))
 
 (defmethod git-write ((index index))
   (%git-index-write index))
