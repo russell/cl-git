@@ -129,7 +129,7 @@ TODO, this function is a bit messy, need to think about cleaning this up."
     (head (let* ((original-ref (git-lookup :reference head :repository repository))
                  (resolved-ref (git-resolve original-ref)))
         (prog1
-        (git-reference-oid resolved-ref)
+        (git-reference-target resolved-ref)
           (git-free original-ref)
           (git-free resolved-ref))))
     (sha (oid-from-string-or-number sha))))

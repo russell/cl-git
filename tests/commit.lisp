@@ -35,7 +35,7 @@
     (cl-git:git-add "test1")
     (cl-git:git-write cl-git:*git-repository-index*)
     (cl-git:make-commit
-     (cl-git:git-create-from-index cl-git:*git-repository-index*)
+     (cl-git:git-write-tree cl-git:*git-repository-index*)
      "Committing test file test1"
      :author (list :name "Joe Blogs"
                    :email "test@example.com"

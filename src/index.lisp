@@ -49,6 +49,8 @@
   (seconds %time)
   (nanoseconds :unsigned-int))
 
+(defctype struct-index-time (:struct git-index-time))
+
 (defcstruct git-index-entry
   (ctime (:struct git-index-time))
   (mtime (:struct git-index-time))
@@ -81,7 +83,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defcfun ("git_index_add" %git-index-add)
+(defcfun ("git_index_add_bypath" %git-index-add-by-path)
     %return-value
   (index %index)
   (path :string)
@@ -101,6 +103,11 @@
 
 (defcfun ("git_index_read" %git-index-read)
     %return-value
+  (index %index))
+
+(defcfun ("git_index_write_tree" %git-index-write-tree)
+    %return-value
+  (oid :pointer)
   (index %index))
 
 (defcfun ("git_index_entrycount" git-index-entry-count)
@@ -124,7 +131,7 @@
 
 
 (defmethod git-add ((path string) &key (index *git-repository-index*) (stage 0))
-  (%git-index-add index path stage))
+  (%git-index-add-by-path index path stage))
 
 (defmethod git-add ((path pathname) &key (index *git-repository-index*) (stage 0))
   (git-add (namestring path) :index index :stage stage))
@@ -154,3 +161,7 @@ index."
 (defmethod git-entry-by-index ((index index) position)
   (git-index-get index position))
 
+(defmethod git-write-tree ((index index))
+  (with-foreign-object (oid-pointer '(:struct git-oid))
+    (%git-index-write-tree oid-pointer index)
+    (convert-from-foreign oid-pointer '%oid)))

@@ -216,7 +216,10 @@ And to convert it to a string you can do the following (however this is only lik
    ......"
 
 For proper decoding you should use your favorite method, e.g. use
-babel.  3.3.2 Sub Directories
+babel. 
+
+Sub Directories
+...............
 
 As mentioned before, you can see from the attribute directory if an
 entry in the tree is a sub directory. The way to access a sub

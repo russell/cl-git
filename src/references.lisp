@@ -38,9 +38,8 @@
   (repository %repository)
   (flags git-reference-flags))
 
-(defcfun ("git_reference_oid" git-reference-oid)
+(defcfun ("git_reference_target" %git-reference-target)
     %oid
-  "Return the oid from within the reference."
   (reference %reference))
 
 (defcfun ("git_reference_name" %git-reference-name)
@@ -58,21 +57,21 @@
   (resolved-ref :pointer)
   (reference %reference))
 
-(defcfun ("git_reference_create_oid" %git-reference-create-oid)
+(defcfun ("git_reference_create" %git-reference-create)
     %return-value
   (reference :pointer)
   (repository %repository)
   (name :string)
   (oid %oid)
-  (force (:boolean :int)))
+  (force %bool))
 
-(defcfun ("git_reference_create_symbolic" %git-reference-create-symbolic)
+(defcfun ("git_reference_symbolic_create" %git-reference-symbolic-create)
     %return-value
   (reference :pointer)
   (repository %repository)
   (name :string)
   (target :string)
-  (force (:boolean :int)))
+  (force %bool))
 
 (defcfun ("git_reference_free" %git-reference-free)
     :void
@@ -146,9 +145,9 @@ error if that is the case."
   (with-foreign-object (reference :pointer)
     (ecase type
       (:oid
-       (%git-reference-create-oid reference repository name target force))
+       (%git-reference-create reference repository name target force))
       (:symbolic
-       (%git-reference-create-symbolic reference repository name target force)))
+       (%git-reference-symbolic-create reference repository name target force)))
     (make-instance 'reference
            :pointer (mem-ref reference :pointer)
            :facilitator repository
@@ -192,3 +191,12 @@ are :SHA, :HEAD or :BOTH"
 
 (defmethod git-name ((object reference))
   (%git-reference-name object))
+
+(defmethod git-target ((reference reference))
+  "Returns the OID that this reference points to. 
+Only valid for direct references, this call will not
+work for symbolic references.  
+
+To get the target of a symbolic, first call (git-resolve reference)
+which will return a direct reference.  Than call this method."
+  (%git-reference-target reference))

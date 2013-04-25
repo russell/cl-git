@@ -49,7 +49,6 @@
    #:git-add
    #:git-write
    #:git-clear
-   #:git-create-from-index
    #:git-config
    #:git-values
    #:git-raw-size
@@ -111,4 +110,7 @@
    #:git-data
    #:git-download
    #:git-fetchspec
-   #:git-pushspec))
+   #:git-pushspec
+   #:git-ls
+   #:git-is-head
+   #:git-write-tree))

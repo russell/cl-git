@@ -56,6 +56,7 @@ Usage
 
    git
    repositories
+   branch
    references
    tag
    tree

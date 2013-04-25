@@ -36,7 +36,7 @@
       (error "Cannot convert type: ~A to git-strings" (type-of value))))
 
 (defmethod translate-from-foreign (value (type git-strings-type))
-  (with-foreign-slots ((strings count) value git-strings)
+  (with-foreign-slots ((strings count) value (:struct git-strings))
     (loop :for i :below count
        :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
 

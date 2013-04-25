@@ -39,10 +39,11 @@
 (defmethod translate-from-foreign (value (type refspec-type))
   (unless (null-pointer-p value)
     (with-foreign-slots ((next src dst flags) value (:struct git-refspec))
-			(cons (list  :src src
-				     :dst dst
-				     :flags flags)
-			      (translate-from-foreign next type)))))
+			(when (or src dst flags)
+			  (cons (list  :src src
+				       :dst dst
+				       :flags flags)
+				(translate-from-foreign next type))))))
 
 
 (defcstruct (git-indexer-stats :class indexer-stats-struct-type)
@@ -149,7 +150,7 @@
 
 (defmethod git-list ((class (eql :remote))
              &key (repository *git-repository*))
-  (with-foreign-object (string-array 'git-strings)
+  (with-foreign-object (string-array '(:struct git-strings))
     (%git-remote-list string-array repository)
     (prog1 
 	(convert-from-foreign string-array '%git-strings)
@@ -165,21 +166,40 @@
            :free-function #'%git-remote-free)))
 
 (defmethod git-name ((remote remote))
+  "The name of the remote.  Is the opposite of git-load for a remote."
   (%git-remote-name remote))
 
-(defmethod git-connect ((remote remote) &key (direction :pull))
+(defmethod git-connect ((remote remote) &key (direction :fetch))
+  "Opens the remote connection.  
+The url used for the connection can be queried by `git-url'.
+
+The opened connection is one way, either data is retrieved from the remote, 
+or data is send to the remote.  The direction is specified with the :direction argument,
+:fetch is for retrieving data, :push is for sending data."
   (%git-remote-connect remote direction))
 
 (defmethod git-connected ((remote remote))
+  "Returns t if the connection is open, nil otherwise."
   (%git-remote-connected remote))
 
-(defmethod git-disconnected ((remote remote))
+(defmethod git-disconnect ((remote remote))
+  "Disconnects an opened connection."
   (%git-remote-disconnect remote))
 
 (defmethod git-pushspec ((remote remote))
+  "Returns a list of push specifications of the remote.
+Each specification is property list with the following keys:
+
+- SRC, a string matching the source references,
+- DST, the pattern used to rewrite the references at the remote.
+- FLAGS, a combination of the following flags :FORCE, :PATTERN, :MATCHING."
   (%git-remote-pushspec remote))
 
 (defmethod git-fetchspec ((remote remote))
+  "Returns a list of fetch specifications for the remote.
+Each specification is propety list with the keys: SRC, DST and FLAGS.
+
+See also git-pushspec."
   (%git-remote-fetchspec remote))
 
 (defmethod git-download ((remote remote))
