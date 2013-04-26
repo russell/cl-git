@@ -19,13 +19,23 @@
 
 (in-package #:cl-git)
 
-
+(defparameter *tag-values* nil)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Low-level interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defcfun ("git_tag_list" %git-tag-list)
+    %return-value
+  (strings :pointer)
+  (repository %repository))
+
+(defcfun ("git_tag_foreach" %git-tag-foreach)
+    %return-value
+  (repository %repository)
+  (callback :pointer)
+  (payload :pointer))
 
 (defcfun ("git_tag_type" git-tag-type)
     git-object-type
@@ -65,6 +75,36 @@
 (defclass tag (object)
   ())
 
+(defmethod git-list ((class (eql :tag))
+		     &key (repository *git-repository*))
+  "Returns a list of tag names for the repository.  
+
+Important Note:  This is the list of tag names as the user thinks of tags.
+Tag objects in libgit2 and cl-git are however a different thing.  
+
+Also the list of these values are the strings the user see, but not the
+strings they are identified with.  So this call is rather useless."
+  (with-foreign-object (string-array '(:struct git-strings))
+    (%git-tag-list string-array repository)
+    (prog1 
+	(convert-from-foreign string-array '%git-strings)
+      (free-translated-object string-array '%git-strings t))))
+
+#|
+(defcallback collect-tag-values :int ((tag-name :string) (oid %oid) (payload :pointer))
+  (declare (ignore payload))
+  (push (cons tag-name oid) *tag-values*)
+  0)
+
+(defmethod git-list ((class (eql :tag))
+		     &key (repository *git-repository*))
+  (let ((*tag-values* nil))
+    (%git-tag-foreach repository
+		      (callback collect-tag-values)
+		      (null-pointer))
+    *tag-values*))
+|#
+
 (defmethod git-lookup ((class (eql :tag))
                oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
@@ -72,10 +112,8 @@
 (defmethod git-name ((tag tag))
   (git-tag-name tag))
 
-;; XXX (RS) is this correct, i would think that a different value
-;; should be getting returned.
 (defmethod git-tagger ((tag tag))
-  (git-tag-name tag))
+  (git-tag-tagger tag))
 
 (defmethod git-type ((tag tag))
   (git-tag-type tag))

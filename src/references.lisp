@@ -104,8 +104,7 @@ We need to figure this out by using the type argument to do dispatch."
 
 (defun git-resolve (reference)
   "If the reference is symbolic, follow the it until it finds a non
-symbolic reference.  The result should be freed independently from the
-argument."
+symbolic reference."
   (with-foreign-object (resolved-ref :pointer)
     (%git-reference-resolve resolved-ref reference)
     (make-instance 'reference
@@ -199,4 +198,5 @@ work for symbolic references.
 
 To get the target of a symbolic, first call (git-resolve reference)
 which will return a direct reference.  Than call this method."
-  (%git-reference-target reference))
+  (git-lookup :object (%git-reference-target reference) 
+	      :repository (facilitator reference)))

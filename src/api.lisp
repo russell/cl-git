@@ -141,6 +141,11 @@ REPOSITORY instance is returned."))
 
 (defgeneric git-load (class path/name &key &allow-other-keys))
 
+(defgeneric git-path (object)
+  (:documentation "Path to the object."))
+
+(defgeneric git-workdir (object))
+
 (defgeneric git-add (path &key &allow-other-keys)
   (:documentation
    "Adds the PATH to the current index *GIT-REPOSITORY-INDEX* or the
@@ -255,3 +260,6 @@ At the moment only supported for
 (defgeneric git-download (remote))
 
 (defgeneric git-ls (remote))
+
+
+(defgeneric git-head (repository))

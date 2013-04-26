@@ -45,3 +45,9 @@ Status
 ------
 
 .. cl:function:: git-status
+
+.. cl:method:: git-head repository
+
+.. cl:method:: git-path repository
+
+.. cl:method:: git-workdir repository

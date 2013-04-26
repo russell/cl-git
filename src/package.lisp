@@ -113,4 +113,8 @@
    #:git-pushspec
    #:git-ls
    #:git-is-head
-   #:git-write-tree))
+   #:git-write-tree
+   #:git-head
+   #:git-path
+   #:git-workdir
+   #:git-head-detached))

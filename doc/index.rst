@@ -10,8 +10,7 @@ programmatically.
 
 Some knowledge if git is required to make sense of all the
 concepts. Also this being a wrapper around the libgit2 library, the
-documentation libgit2 http://libgit2.github.com/libgit2/#HEAD is help
-full.
+documentation libgit2 http://libgit2.github.com/libgit2/#HEAD is helpful.
 
 The following configuration on Linux (Debian Sid) is known to work:
 
