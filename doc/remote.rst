@@ -19,4 +19,4 @@ Remote
 
 .. cl:method:: git-connect remote
 
-.. cl:method:: get-download remote
+.. cl:method:: git-download remote

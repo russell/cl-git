@@ -48,6 +48,8 @@ Status
 
 .. cl:method:: git-head repository
 
+.. cl:function:: git-head-detached
+
 .. cl:method:: git-path repository
 
 .. cl:method:: git-workdir repository

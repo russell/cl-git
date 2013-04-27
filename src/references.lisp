@@ -193,7 +193,13 @@ are :SHA, :HEAD or :BOTH"
 
 (defmethod git-target ((reference reference) &key (type :object))
   "Returns the Object that this reference points to. 
-Only valid for direct references, this call will not
+
+The optional keyword argument :type controls inwhich form the target is returned.
+
+- if :type is :object it will return the git object.
+- if :type id :oid it will return the OID of the target.
+
+This call is only valid for direct references, this call will not
 work for symbolic references.  
 
 To get the target of a symbolic, first call (git-resolve reference)

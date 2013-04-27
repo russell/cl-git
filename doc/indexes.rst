@@ -18,3 +18,8 @@ Index
 .. cl:generic:: git-clear
 
 .. cl:generic:: git-write
+
+.. cl:generic:: git-read
+
+.. cl:generic:: git-write-tree
+

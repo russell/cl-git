@@ -122,13 +122,19 @@ strings they are identified with.  So this call is rather useless."
   (git-tag-message tag))
 
 (defmethod git-target ((tag tag) &key (type :object))
+  "Returns the target of a tag.  
+The optional :type keyword arguments specifies in which form the target is returned:
+
+- if :type is :object it will return a git object.
+- if :type is :oid, it will return an OID for the target object."
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
     (case type
       (:object
        (make-instance-object :pointer (mem-ref %object :pointer)
 			     :facilitator (facilitator tag)))
-      (:oid (git-object-id (mem-ref %object :pointer))))))
+      (:oid (git-object-id (mem-ref %object :pointer)))
+      (t (error "Unknown type, type should be either :oid or :object but got: ~A" type)))))
 
 (defmethod git-peel ((tag tag))
   "Peels layers of the tag until the resulting object is not a tag anymore.
