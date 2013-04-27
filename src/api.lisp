@@ -195,7 +195,7 @@ Note that although REFERENCE is a subclass of OBJECT it will not
 return :REFERENCE, but the more specific type.
 "))
 
-(defgeneric git-target (object)
+(defgeneric git-target (object &key &allow-other-keys)
   (:documentation "Returns the target of OBJECT.
 
 - TAG -- only works for :OID tags.

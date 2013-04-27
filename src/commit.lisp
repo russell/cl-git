@@ -65,7 +65,7 @@
   "Returns the number of parent commits of the argument."
   (commit %commit))
 
-(defcfun ("git_commit_parent_oid" git-commit-parent-oid)
+(defcfun ("git_commit_parent_id" git-commit-parent-oid)
     %oid
   "Returns the oid of the parent with index `parent-index' in the list
 of parents of the commit `commit'."
@@ -146,7 +146,9 @@ optional instance of a GIT-SIGNATURE the details the committer.
   (git-object-lookup oid class :repository repository))
 
 (defmethod git-id ((commit commit))
-  (git-commit-id commit))
+  ;;; This does not work because the function is GIT_INLINE
+  #+nil (git-commit-id commit)
+  (git-object-id commit))
 
 (defmethod git-name ((commit commit))
   (with-foreign-pointer-as-string (str 41 :encoding :ascii)

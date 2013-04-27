@@ -121,11 +121,14 @@ strings they are identified with.  So this call is rather useless."
 (defmethod git-message ((tag tag))
   (git-tag-message tag))
 
-(defmethod git-target ((tag tag))
+(defmethod git-target ((tag tag) &key (type :object))
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
-    (make-instance-object :pointer (mem-ref %object :pointer)
-              :facilitator (facilitator tag))))
+    (case type
+      (:object
+       (make-instance-object :pointer (mem-ref %object :pointer)
+			     :facilitator (facilitator tag)))
+      (:oid (git-object-id (mem-ref %object :pointer))))))
 
 (defmethod git-peel ((tag tag))
   "Peels layers of the tag until the resulting object is not a tag anymore.

@@ -191,12 +191,17 @@ are :SHA, :HEAD or :BOTH"
 (defmethod git-name ((object reference))
   (%git-reference-name object))
 
-(defmethod git-target ((reference reference))
-  "Returns the OID that this reference points to. 
+(defmethod git-target ((reference reference) &key (type :object))
+  "Returns the Object that this reference points to. 
 Only valid for direct references, this call will not
 work for symbolic references.  
 
 To get the target of a symbolic, first call (git-resolve reference)
 which will return a direct reference.  Than call this method."
-  (git-lookup :object (%git-reference-target reference) 
-	      :repository (facilitator reference)))
+  (let ((oid (%git-reference-target reference)))
+    (case type
+      (:oid oid)
+      (:object 
+       (git-lookup :object oid
+		   :repository (facilitator reference)))
+      (t (error "Unknown type, type should be either :oid or :object but got: ~A" type)))))
