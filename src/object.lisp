@@ -155,6 +155,9 @@ not a type of any real object, but only used for querying like in this function.
     :for index :from 0 :below (git-parentcount object)
     :collect (git-parent-oid object index)))
 
+(defmethod git-id ((object object))
+  (git-object-id object))
+
 
 (defmethod git-lookup ((class (eql :object))
                oid &key (repository *git-repository*))
