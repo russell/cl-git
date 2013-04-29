@@ -33,10 +33,13 @@
   (:index-new        1)
   (:index-modified   2)
   (:index-deleted    4)
-  (:worktree-new     8)
-  (:worktree-modified 16)
-  (:worktree-deleted  32)
-  (:ignored           64))
+  (:index-renamed    8)
+  (:index-typechanged 16)
+  ;;;
+  (:worktree-new      128)
+  (:worktree-modified 256)
+  (:worktree-deleted  512)
+  (:ignored           16384))
 
 (defcfun ("git_status_foreach" %git-status-for-each)
     %return-value
