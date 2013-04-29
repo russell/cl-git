@@ -11,4 +11,3 @@ Tree
 
 .. cl:generic:: git-entry-by-index
 
-.. cl:function:: git-create-from-index

@@ -33,7 +33,7 @@
 (defcstruct git-signature
   (name :string)
   (email :string)
-  (time timeval))
+  (time (:struct timeval)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -61,11 +61,13 @@
 
 (defmethod translate-to-foreign ((value list) (type git-signature-type))
   (declare (ignore type))
-  (let ((signature (foreign-alloc 'git-signature)))
-    (with-foreign-slots ((name email time) signature git-signature)
+  (let ((signature (foreign-alloc '(:struct git-signature))))
+    (with-foreign-slots ((name email) signature (:struct git-signature))
       (setf name (getf value :name (getenv "USER")))
       (setf email (getf value :email (default-email)))
-      (with-foreign-slots ((time offset) time timeval)
+      (with-foreign-slots ((time offset) 
+			   (foreign-slot-pointer signature '(:struct git-signature) 'time) 
+			   (:struct timeval))
         (let ((time-to-set (getf value :time (local-time:now))))
           (setf time time-to-set)
           (setf offset (/ (local-time:timestamp-subtimezone
@@ -79,9 +81,8 @@
       (error "Cannot convert type: ~A to git-signature struct" (type-of value))))
 
 (defmethod translate-from-foreign (value (type git-signature-type))
-  (with-foreign-slots ((name email time) value git-signature)
-    (with-foreign-slots ((time) time timeval)
-      (list :name name :email email :time time))))
+  (with-foreign-slots ((name email time) value (:struct git-signature))
+    (list :name name :email email :time (getf time 'time))))
 
 (defmethod free-translated-object (pointer (type git-signature-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))

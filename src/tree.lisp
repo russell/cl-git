@@ -25,16 +25,8 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcstruct git-tree-entry
-  (attr :unsigned-int)
-  (filename :pointer)
-  (oid git-oid)
-  (filename-len size-t)
-  (removed :unsigned-int))
 
-
-
-(defcfun ("git_tree_create_fromindex" git-tree-create-fromindex)
+#+nil (defcfun ("git_tree_create_fromindex" git-tree-create-fromindex)
     %return-value
   (oid :pointer)
   (index %index))
@@ -109,7 +101,7 @@ This does count the number of direct children, not recursively."
                oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
 
-(defun git-create-from-index (index)
+#+nil (defun git-create-from-index (index)
   "Write the current index to the disk and return an oid to it."
   (assert (not (null-or-nullpointer index)))
   (with-foreign-object (oid 'git-oid)

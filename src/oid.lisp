@@ -30,10 +30,9 @@
 ;;; Low-level interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defcstruct git-oid
+(defcstruct (git-oid :class oid-struct-type)
   (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
+
 
 (defcfun ("git_oid_tostr" git-oid-tostr)
     :pointer
@@ -52,12 +51,12 @@ the input buffer should be equal to git oid hex size + 1."
 
 (defmethod translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
-  (let ((c-oid (foreign-alloc 'git-oid)))
+  (let ((c-oid (foreign-alloc '(:struct git-oid))))
     (loop
       :for c-index :from 0 :below *git-oid-size*
       :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
       :do
-         (setf (mem-aref (foreign-slot-pointer c-oid 'git-oid 'id)
+       (setf (mem-aref (foreign-slot-pointer c-oid '(:struct git-oid) 'id)
                          :unsigned-char c-index)
                (ldb (byte 8 byte-index) value)))
     c-oid))
@@ -84,9 +83,14 @@ reference is symbolic."
           :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
           :do
              (setf (ldb (byte 8 byte-index) lisp-oid)
-                   (mem-aref (foreign-slot-pointer value 'git-oid 'id)
+                   (mem-aref (foreign-slot-pointer value '(:struct git-oid) 'id)
                              :unsigned-char c-index)))
         lisp-oid)))
+
+(defmethod translate-from-foreign (value (type oid-struct-type))
+  "No clue why this all works, seems dodgy to me.  But I think it does."
+  (translate-from-foreign value (make-instance 'oid-type)))
+
 
 (defmethod free-translated-object (pointer (type oid-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))
@@ -125,7 +129,7 @@ TODO, this function is a bit messy, need to think about cleaning this up."
     (head (let* ((original-ref (git-lookup :reference head :repository repository))
                  (resolved-ref (git-resolve original-ref)))
         (prog1
-        (git-reference-oid resolved-ref)
+        (git-target resolved-ref :type :oid)
           (git-free original-ref)
           (git-free resolved-ref))))
     (sha (oid-from-string-or-number sha))))

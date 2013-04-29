@@ -95,7 +95,7 @@ In addition you need a recent version of the libgit2 library, which can
 be found at @url{http://github.com/libgit2/libgit2}.
 
 The versions this manual is tested with are the
-@url{http://github.com/woudshoo/cl-git} version and version 0.17 of
+@url{http://github.com/woudshoo/cl-git} version and version 0.18 of
 libgit2.
 
 The libgit2 library should be installed as usual, per the libgit2 documentation,

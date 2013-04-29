@@ -64,3 +64,11 @@ Status
     ("doc/repositories.rst" :CURRENT :WORKTREE-MODIFIED)
     ("doc/cl-git.html" :CURRENT :WORKTREE-NEW)
     ("doc/.installed.cfg" :CURRENT :IGNORED))
+
+.. cl:method:: git-head repository
+
+.. cl:function:: git-head-detached
+
+.. cl:method:: git-path repository
+
+.. cl:method:: git-workdir repository

@@ -41,16 +41,16 @@
   (name :string)
   (type git-branch-type-flags))
 
-(defcfun ("git_branch_tracking" %git-branch-tracking)
-    %return-value
-  (ref-out :pointer)
-  (ref-in %reference))
-
 (defcallback collect-branch-values :int ((branch-name :string) (type git-branch-type-flags) (payload :pointer))
   (declare (ignore payload))
   (push (cons branch-name type) *branch-values*)
   0)
 
+(defcfun ("git_branch_is_head" git-is-head)
+    %bool
+  "Returns t is the current HEAD points to this branch.  
+This means that this is the branch that is checked out."
+  (branch %reference))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel interface.
@@ -61,6 +61,15 @@
 (defmethod git-list ((class (eql :branch))
              &key (repository *git-repository*)
                (type '(:local :remote)))
+  "Returns a list of all branche names in the repository.  Each
+branch is represented as cons pair (branch-name . type-flags)
+
+The type flags are :LOCAL and :REMOTE.  
+
+By default all the branches, both remote and local are returned.  
+It is possible to limit the list of branches to just the local or remote by
+specifying :LOCAL or :REMOTE as argument to the :TYPE parameter.
+"
   (let ((*branch-values* (list)))
     (%git-branch-for-each repository
               type
@@ -73,6 +82,8 @@
                (name string)
                &key (repository *git-repository*)
              (type :local))
+  "Converts a branch name to a git REFERENCE.  The optional :type argument 
+specifies if the branch name names a local branch or a remote branch."
   (with-foreign-object (reference :pointer)
     (%git-branch-lookup reference repository name type)
     (make-instance 'reference
@@ -80,11 +91,20 @@
            :facilitator repository
            :free-function #'%git-reference-free)))
 
+(defmethod git-lookup ((class (eql :branch))
+		       (branch-name-and-type cons)
+		       &key (repository *git-repository*))
+  "Converts a branch/type combination to a git REFERENCE.
+The branch-name-and-type should be a cons pair like
+\(branch-name branch-type\).
 
-(defmethod git-tracking ((in-ref reference))
-  (with-foreign-object (out-ref :pointer)
-    (%git-branch-tracking out-ref in-ref)
-    (make-instance 'reference
-           :pointer (mem-ref out-ref :pointer)
-           :facilitator (facilitator in-ref)
-           :free-function #'%git-reference-free)))
+This is the same format as the elements returned by the 
+
+\(git-list :branch ...\)
+
+call.
+"
+  (git-lookup class (car branch-name-and-type) 
+	      :repository repository 
+	      :type (cdr branch-name-and-type)))
+

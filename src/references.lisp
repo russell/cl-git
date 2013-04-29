@@ -38,9 +38,8 @@
   (repository %repository)
   (flags git-reference-flags))
 
-(defcfun ("git_reference_oid" git-reference-oid)
+(defcfun ("git_reference_target" %git-reference-target)
     %oid
-  "Return the oid from within the reference."
   (reference %reference))
 
 (defcfun ("git_reference_name" %git-reference-name)
@@ -58,21 +57,21 @@
   (resolved-ref :pointer)
   (reference %reference))
 
-(defcfun ("git_reference_create_oid" %git-reference-create-oid)
+(defcfun ("git_reference_create" %git-reference-create)
     %return-value
   (reference :pointer)
   (repository %repository)
   (name :string)
   (oid %oid)
-  (force (:boolean :int)))
+  (force %bool))
 
-(defcfun ("git_reference_create_symbolic" %git-reference-create-symbolic)
+(defcfun ("git_reference_symbolic_create" %git-reference-symbolic-create)
     %return-value
   (reference :pointer)
   (repository %repository)
   (name :string)
   (target :string)
-  (force (:boolean :int)))
+  (force %bool))
 
 (defcfun ("git_reference_free" %git-reference-free)
     :void
@@ -105,8 +104,7 @@ We need to figure this out by using the type argument to do dispatch."
 
 (defun git-resolve (reference)
   "If the reference is symbolic, follow the it until it finds a non
-symbolic reference.  The result should be freed independently from the
-argument."
+symbolic reference."
   (with-foreign-object (resolved-ref :pointer)
     (%git-reference-resolve resolved-ref reference)
     (make-instance 'reference
@@ -146,9 +144,9 @@ error if that is the case."
   (with-foreign-object (reference :pointer)
     (ecase type
       (:oid
-       (%git-reference-create-oid reference repository name target force))
+       (%git-reference-create reference repository name target force))
       (:symbolic
-       (%git-reference-create-symbolic reference repository name target force)))
+       (%git-reference-symbolic-create reference repository name target force)))
     (make-instance 'reference
            :pointer (mem-ref reference :pointer)
            :facilitator repository
@@ -192,3 +190,24 @@ are :SHA, :HEAD or :BOTH"
 
 (defmethod git-name ((object reference))
   (%git-reference-name object))
+
+(defmethod git-target ((reference reference) &key (type :object))
+  "Returns the Object that this reference points to. 
+
+The optional keyword argument :type controls inwhich form the target is returned.
+
+- if :type is :object it will return the git object.
+- if :type id :oid it will return the OID of the target.
+
+This call is only valid for direct references, this call will not
+work for symbolic references.  
+
+To get the target of a symbolic, first call (git-resolve reference)
+which will return a direct reference.  Than call this method."
+  (let ((oid (%git-reference-target reference)))
+    (case type
+      (:oid oid)
+      (:object 
+       (git-lookup :object oid
+		   :repository (facilitator reference)))
+      (t (error "Unknown type, type should be either :oid or :object but got: ~A" type)))))

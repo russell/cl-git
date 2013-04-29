@@ -21,7 +21,18 @@
 
 (defctype size :unsigned-long)
 (defctype size-t :unsigned-int)
+(defctype off-t :uint64)
 
+(define-foreign-type bool-type ()
+  nil
+  (:actual-type :int)
+  (:simple-parser %bool))
+
+(defmethod translate-to-foreign (value (type bool-type))
+  (if value 1 0))
+
+(defmethod translate-from-foreign (value (type bool-type))
+  (if (= value 0) nil t))
 
 (define-foreign-type git-object ()
   ()
@@ -103,10 +114,25 @@
   (:actual-type :int64)
   (:simple-parser %time))
 
+(define-foreign-type index-entry-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %index-entry))
+
+(define-foreign-type refspec-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %refspec))
+
+#+nil (define-foreign-type indexer-stats-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %indexer-stats))
+
 ;;; ERRORS
 (define-foreign-type git-error-type ()
   nil
-  (:actual-type git-error)
+  (:actual-type :pointer)
   (:simple-parser %git-error))
 
 (define-foreign-type return-value-type ()
