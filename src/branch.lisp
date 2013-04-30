@@ -51,6 +51,12 @@
   "Returns t is the current HEAD points to this branch.  
 This means that this is the branch that is checked out."
   (branch %reference))
+
+(defcfun ("git_branch_upstream" %git-branch-upstream)
+    %return-value
+  (out :pointer)
+  (branch %reference))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel interface.
@@ -108,3 +114,13 @@ call.
 	      :repository repository 
 	      :type (cdr branch-name-and-type)))
 
+
+(defmethod git-upstream ((branch reference))
+  "Returns the reference for the remote tracking branch, corresponding to the local
+branch BRANCH."
+  (with-foreign-object (reference :pointer)
+    (%git-branch-upstream reference branch)
+    (make-instance 'reference
+		   :pointer (mem-ref reference :pointer)
+		   :facilitator (facilitator branch)
+		   :free-function #'%git-reference-free)))

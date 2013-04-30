@@ -40,16 +40,19 @@
 
 
 (defmethod translate-from-foreign (value (type git-error-type))
-  (with-foreign-slots ((message klass) value git-error)
-    (list klass message)))
+  (if (null-pointer-p value)
+      nil
+      (with-foreign-slots ((message klass) value (:struct git-error))
+	(list klass message))))
 
 (defmethod translate-from-foreign (return-value (type return-value-type))
   (unless (and return-value (= return-value 0))
     (let ((last-error (giterr-last)))
       ;; TODO Clear error here
       (error 'git-error
+	     :code return-value
              :message (cadr last-error)
-             :code (car last-error)))))
+             :class (car last-error)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -68,7 +71,14 @@
     :initarg :code
     :accessor git-error-code
     :initform nil
-    :documentation "The value of the error code."))
+    :documentation "The error value returned by a function.")
+   (class
+    :initarg :class
+    :accessor git-error-class
+    :initform nil
+    :documentation "The error code/class returned by git_lasterr."))
   (:report (lambda (condition stream)
-             (format stream "git error ~D: ~A"
-                     (git-error-code condition) (git-error-message condition)))))
+             (format stream "git error ~D/~D: ~A"
+                     (git-error-code condition) 
+		     (git-error-class condition)
+		     (git-error-message condition)))))

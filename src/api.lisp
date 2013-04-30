@@ -263,3 +263,5 @@ At the moment only supported for
 
 
 (defgeneric git-head (repository))
+
+(defgeneric git-upstream (branch))

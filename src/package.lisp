@@ -117,4 +117,8 @@
    #:git-head
    #:git-path
    #:git-workdir
-   #:git-head-detached))
+   #:git-head-detached
+   #:git-has-log
+   #:git-is-remote
+   #:git-is-branch
+   #:git-upstream))
