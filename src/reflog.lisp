@@ -79,7 +79,7 @@
 (defmethod git-entry-by-index ((reflog reflog) index)
   (make-instance 'reflog-entry
 		 :pointer (%git-reflog-entry-by-index reflog index)
-		 :facilitator (facilitator reflog)
+		 :facilitator reflog
 		 :free-function #'identity))
 
 (defmethod git-committer ((reflog-entry reflog-entry))

@@ -216,9 +216,15 @@ This is to follow symbolic tag chains to find the object pointed to.
   (:documentation "Returns the element at position INDEX from the
 collection OBJECT."))
 
-(defgeneric git-entries (object)
+(defgeneric git-entries (object &key start end)
   (:documentation "Returns the elements of the collection OBJECT as a
-list."))
+list.  The start and end keyword arguments allow to retrieve a subset of all elements.
+All entries with index satisfying 
+  
+   start <= index < end
+
+are returned.  If end is not specified or nil, no end condition exists.
+start defaults to 0."))
 
 (defgeneric git-values (object)
   (:documentation "TODO"))
