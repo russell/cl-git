@@ -121,4 +121,7 @@
    #:git-has-log
    #:git-is-remote
    #:git-is-branch
-   #:git-upstream))
+   #:git-upstream
+   #:git-remote-name
+   #:git-upstream-name
+   #:git-lookup-byname))

@@ -65,6 +65,11 @@
   "Returns the message of the tag"
   (tag %tag))
 
+(defcfun ("git_tag_lookup_byname" %git-tag-lookup-byname)
+    %return-value
+  (out :pointer)
+  (repository %repository)
+  (name :string))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -108,6 +113,15 @@ strings they are identified with.  So this call is rather useless."
 (defmethod git-lookup ((class (eql :tag))
                oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
+
+(defmethod git-lookup-byname ((class (eql :tag)) (name string) 
+			      &key (repository *git-repository*))
+  (with-foreign-object (reference :pointer)
+    (%git-tag-lookup-byname reference repository name)
+    (make-instance 'reference
+		   :pointer (mem-ref reference :pointer)
+		   :facilitator repository
+		   :free-function #'%git-reference-free)))
 
 (defmethod git-name ((tag tag))
   (git-tag-name tag))

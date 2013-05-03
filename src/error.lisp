@@ -46,13 +46,13 @@
 	(list klass message))))
 
 (defmethod translate-from-foreign (return-value (type return-value-type))
-  (unless (and return-value (= return-value 0))
-    (let ((last-error (giterr-last)))
-      ;; TODO Clear error here
-      (error 'git-error
-	     :code return-value
-             :message (cadr last-error)
-             :class (car last-error)))))
+  (if (or (not return-value) (< return-value 0))
+      (let ((last-error (giterr-last)))
+	(error 'git-error
+	       :code return-value
+	       :message (cadr last-error)
+	       :class (car last-error)))
+      return-value))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

@@ -57,6 +57,20 @@ This means that this is the branch that is checked out."
   (out :pointer)
   (branch %reference))
 
+(defcfun ("git_branch_upstream_name" %git-branch-upstream-name)
+    %return-value
+  (out :pointer)
+  (size size-t)
+  (repository %repository)
+  (branch-name :string))
+
+
+(defcfun ("git_branch_remote_name" %git-branch-remote-name)
+    %return-value
+  (out :pointer)
+  (size size-t)
+  (repository %repository)
+  (branch-name :string))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel interface.
@@ -124,3 +138,20 @@ branch BRANCH."
 		   :pointer (mem-ref reference :pointer)
 		   :facilitator (facilitator branch)
 		   :free-function #'%git-reference-free)))
+
+
+(defmethod git-upstream-name ((branch-name string) &key (repository *git-repository*))
+  (with-foreign-pointer-as-string ((out size) (%git-branch-upstream-name
+					       (null-pointer) 0 
+					       repository
+					       branch-name))
+        (%git-branch-upstream-name out size repository branch-name)))
+
+
+(defmethod git-remote-name ((branch-name string) &key (repository *git-repository*))
+  (with-foreign-pointer-as-string ((out size) (%git-branch-remote-name
+					       (null-pointer) 0 
+					       repository
+					       branch-name))
+        (%git-branch-remote-name out size repository branch-name)))
+
