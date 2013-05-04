@@ -54,8 +54,7 @@
 
 (defmethod translate-to-foreign ((value integer) (type time-type))
   "Translate a universal-time to a git time_t"
-  (translate-to-foreign
-   (local-time:unix-to-timestamp value) type))
+  (translate-to-foreign (local-time:unix-to-timestamp value) type))
 
 (defgeneric timezone-offset (time)
   (:documentation "Calculate the current timezone offset."))
