@@ -165,7 +165,7 @@ parents of the commit COMMIT."
   (git-commit-parent-oid commit index))
 
 (defmethod git-tree ((commit commit) &key path (repository *git-repository*))
-  "Returns the tree object of the commit."
+  "Returns the TREE object of the commit."
   (let ((tree (with-foreign-object (%tree :pointer)
                 (%git-commit-tree %tree commit)
                 (make-instance-object :pointer (mem-aref %tree :pointer)
@@ -177,7 +177,7 @@ parents of the commit COMMIT."
 
 (defun git-commit-from-oid (oid &key (repository *git-repository*))
   "Returns a git-commit object identified by the `oid'.
-This is an extended version of git-commit-lookup.
+This is an extended version of GIT-COMMIT-LOOKUP.
 If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
   (let ((git-object (git-object-lookup oid :any :repository repository)))
