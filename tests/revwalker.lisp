@@ -22,60 +22,35 @@
 
 (in-suite :cl-git)
 
+
 (test create-random-commits
   "create a repository and add several random commits to it. then
 check that the commit messages match the expected messages."
-  (tempory-repository
-      (path)
-    (cl-git:with-repository (path)
-      (create-random-commits path 10))
-    (cl-git:with-repository (path)
-      (let* ((commit-list (create-random-commits path 10))
-             (tcommit (pop commit-list)))
-        (cl-git:with-git-revisions
-            (commit :sha (assoc-default 'commit-sha tcommit))
-          (is (equal (cl-git:git-message commit)
-                     (assoc-default 'commit-message tcommit)))
-          (let ((tauthor (assoc-default 'author tcommit))
-                (author (cl-git:git-author commit)))
-            (is (equal (getf author :name)
-                       (assoc-default 'name tauthor)))
-            (is (equal (getf author :email)
-                       (assoc-default 'email tauthor))))
-          (let ((tcommitter (assoc-default 'committer tcommit))
-                (committer (cl-git:git-committer commit)))
-            (is (equal (getf committer :name)
-                       (assoc-default 'name tcommitter)))
-            (is (equal (getf committer :email)
-                       (assoc-default 'email tcommitter))))
-          (setq tcommit (pop commit-list)))))))
+  (with-test-repository
+    (make-test-revisions 10)
+    (let* ((commit-list *test-repository-state*)
+           (tcommit (pop commit-list))
+           (count 0))
+      (with-git-revisions
+          (commit :sha (getf tcommit :sha))
+        (commit-equal tcommit commit)
+        (setf count (1+ count))
+        (setf tcommit (pop commit-list)))
+      (is (equal count 10)))))
 
 
 (test revision-walker-test
   "create a repository and add several random commits to it. then
 check that the commit messages match the expected messages."
-  (tempory-repository
-      (path)
-    (cl-git:with-repository (path)
-      (create-random-commits path 10))
-    (cl-git:with-repository (path)
-      (let* ((commit-list (create-random-commits path 10))
-             (tcommit (pop commit-list)))
-        (let ((walker (revision-walk (assoc-default 'commit-sha tcommit) :flags :sha)))
-          (do ((commit (git-next walker) (git-next walker)))
-              ((null commit))
-            (is (equal (cl-git:git-message commit)
-                       (assoc-default 'commit-message tcommit)))
-            (let ((tauthor (assoc-default 'author tcommit))
-                  (author (cl-git:git-author commit)))
-              (is (equal (getf author :name)
-                         (assoc-default 'name tauthor)))
-              (is (equal (getf author :email)
-                         (assoc-default 'email tauthor))))
-            (let ((tcommitter (assoc-default 'committer tcommit))
-                  (committer (cl-git:git-committer commit)))
-              (is (equal (getf committer :name)
-                         (assoc-default 'name tcommitter)))
-              (is (equal (getf committer :email)
-                         (assoc-default 'email tcommitter))))
-            (setq tcommit (pop commit-list))))))))
+  (with-test-repository
+    (make-test-revisions 10)
+    (let* ((commit-list *test-repository-state*)
+           (tcommit (pop commit-list))
+           (count 0))
+      (let ((walker (revision-walk (getf tcommit :sha) :flags :sha)))
+        (do ((commit (git-next walker) (git-next walker)))
+            ((null commit))
+          (commit-equal tcommit commit)
+          (setf count (1+ count))
+          (setq tcommit (pop commit-list)))
+        (is (equal count 10))))))

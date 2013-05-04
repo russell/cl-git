@@ -22,55 +22,55 @@
 
 (in-suite :cl-git)
 
-
-(defun write-string-to-file (repo-path filename content)
-  (let ((test-file (concatenate 'string repo-path "/" filename)))
-    (with-open-file (stream test-file :direction :output :if-exists :supersede)
-      (format stream content))))
-
-(defun make-commit1 (repo-path)
-  (cl-git:with-repository-index
-    (write-string-to-file repo-path "test1"
-                          "Some test data~%...~%line 3 still nothing..~%getting on~%")
-    (cl-git:git-add "test1")
-    (cl-git:git-write cl-git:*git-repository-index*)
-    (cl-git:make-commit
-     (cl-git:git-write-tree cl-git:*git-repository-index*)
-     "Committing test file test1"
-     :author (list :name "Joe Blogs"
-                   :email "test@example.com"
-                   :time (local-time:unix-to-timestamp 1338033679))
-     :committer (list :name "Jim Blogs"
-                      :email "test1@example.com"
-                      :time (local-time:unix-to-timestamp 1338044479)))))
-
 (test create-commit
   "create a repository and add a file to it."
-  (tempory-repository
-      (path)
-    (cl-git:with-repository (path)
-      (cl-git:with-git-revisions
-          (commit :sha (make-commit1 path))
-        ;; check the commit message
-        (is (equal (cl-git:git-message commit)
-                   (format-string "Committing test file test1")))
-        ;; check the author
-        (let ((author (cl-git:git-author commit)))
-          (is (equal (getf author :name)
-                     "Joe Blogs"))
-          (is (equal (getf author :email)
-                     "test@example.com"))
-          (is (equal (local-time:timestamp-to-unix (getf author :time))
-                     1338033679)))
-        ;; check the committer
-        (let ((committer (cl-git:git-committer commit)))
-          (is (equal (getf committer :name)
-                     "Jim Blogs"))
-          (is (equal (getf committer :email)
-                     "test1@example.com"))
-          (is (equal (local-time:timestamp-to-unix (getf committer :time))
-                     1338044479)))
-        ;; count the number of commit parents,
-        (is (equal (cl-git:git-parentcount commit)
-                   0))
-        (is (typep (cl-git:git-tree commit) 'cl-git::tree))))))
+  (with-test-repository
+    (make-test-revisions 1)  ;; set up a fixture
+    (let ((test-commit (next-test-commit)))  ;; get first commit
+      (with-git-revisions
+          (commit :sha (getf test-commit :sha))
+        (commit-equal test-commit commit)))))
+
+
+(test create-commit-custom-signature
+  "test if the time is an integer, and test when there is no email
+address specified."
+  (with-test-repository
+    (add-test-revision :author (list :name (random-string 50)
+                                     :email (random-string 50)
+                                     :time 1111111111)) ;; set up a fixture
+    (let ((test-commit (first *test-repository-state*))) ;; get first commit
+      (with-git-revisions
+          (commit :sha (getf test-commit :sha))
+        (commit-equal test-commit commit)))))
+
+
+(test create-commit-default-time
+  "Test to make sure that if there is no time in the signature then it
+will be added automatically."
+  (with-test-repository
+    (let ((test-pre-create (timestamp-to-unix (now))))
+      (add-test-revision :author (list :name (random-string 50)
+                                       :email (random-string 50))) ;; set up a fixture
+      (let ((test-post-create (timestamp-to-unix (now)))
+            (test-commit (first *test-repository-state*))) ;; get first commit
+        (with-git-revisions
+            (commit :sha (getf test-commit :sha))
+          (let ((created (getf (getf (commit-to-alist commit) :author) :time)))
+            (is (<= (timestamp-to-unix created) test-post-create))
+            (is (>= (timestamp-to-unix created) test-pre-create))
+            (setf (getf (getf test-commit :author) :time) created))
+          (commit-equal test-commit commit))))))
+
+
+(test create-commit-custom-signature
+  "test if the time is an integer, and test when there is no email
+address specified."
+  (with-test-repository
+    (add-test-revision :author (list :name (random-string 50)
+                                     :email (random-string 50)
+                                     :time 1111111111)) ;; set up a fixture
+    (let ((test-commit (first *test-repository-state*))) ;; get first commit
+      (with-git-revisions
+          (commit :sha (getf test-commit :sha))
+        (commit-equal test-commit commit)))))

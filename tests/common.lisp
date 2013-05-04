@@ -45,9 +45,17 @@
         :when (eq 1 (search (namestring *test-repository-path*) line))
           :collect (subseq line 1 (length line))))
 
-(defun gen-letter ()
-  (gen-character :code (gen-integer :min (char-code #\a)
-                                    :max (char-code #\z))))
+
+(defun alpha-or-whitespace-p (c)
+  (when (member (char-int c)
+                 `(,@(iota 25 :start 65)
+                   ,@(iota 25 :start 97)))
+    t))
+
+(defun gen-alpha-numeric ()
+  "return either a letter or number."
+  (gen-character :code-limit 126
+                 :alphanumericp #'alpha-or-whitespace-p))
 
 (defun gen-temp-path ()
   (concatenate 'string (namestring
@@ -55,15 +63,21 @@
                                          *test-repository-path*))
                (funcall
                 (gen-string :length (gen-integer :min 5 :max 10)
-                            :elements (gen-letter)))))
+                            :elements (gen-alpha-numeric)))))
 
 (defun random-number (min max)
   (funcall (gen-integer :min min :max max)))
 
+(defun random-time ()
+  (unix-to-timestamp
+   (funcall (gen-integer
+             :min 0
+             :max (timestamp-to-unix (now))))))
+
 (defun random-string (length)
   (funcall
    (gen-string :length (gen-integer :min length :max length)
-               :elements (gen-letter))))
+               :elements (gen-alpha-numeric))))
 
 (defun assoc-default (key alist)
   (cdr (assoc key alist)))
@@ -97,68 +111,160 @@ new repository to PATH. "
     (cl-git:git-write cl-git:*git-repository-index*)
     content))
 
-(defun add-new-random-file (repo-path)
-  "add a new random file to the index of the repo located at
-REPO-PATH."
-  (let ((filename (random-string 25)))
-    (cl-git:with-repository-index
-      (let ((content (add-random-file-modification repo-path filename)))
-        `((filename . ,filename)(content . ,content))))))
-
-(defun create-random-signature ()
-  "create a random commit signature and return both the commit and the
-signature to the commit"
-  (let ((name (random-string 25))
-        (email (random-string 25)))
-    (values `(:name ,name :email ,email)
-            `((name . ,name)
-              (email . ,email)))))
-
-(defun commit-random-file (repo-path &key (parents nil))
-  "create a new random file in the repository located at REPO-PATH
-then add and commit it to the repository. returns a list containing
-commit-message filename content."
-  (let ((commit-message (with-output-to-string (stream)
-                          (format
-                           stream "Random commit: ~A.~%"
-                           (random-string 100)))))
-    (cl-git:with-repository-index
-      (multiple-value-bind (author author-alist) (create-random-signature)
-        (multiple-value-bind (committer committer-alist) (create-random-signature)
-          (let* ((file (add-new-random-file repo-path))
-                 (commit-sha (cl-git:make-commit
-                              (cl-git:git-write-tree
-			       cl-git::*git-repository-index*)
-                              commit-message
-                              :author author
-                              :committer committer
-                              :parents parents)))
-
-	    `((commit-sha . ,commit-sha)
-	      (commit-message . ,commit-message)
-	      (committer . ,committer-alist)
-	      (author . ,author-alist))))))))
-
-
 (defun commit-random-file-modification (repo-path
                                         filename
                                         commit-message
                                         &key (parents nil))
   (cl-git:with-repository-index
     (add-random-file-modification repo-path filename)
-    (cl-git:make-commit
-     (cl-git:git-write-tree cl-git::*git-repository-index*)
+    (make-commit
+     (git-write-tree *git-repository-index*)
      commit-message
      :parents parents)))
 
 
-(defun create-random-commits (repo-path number)
+(defvar *repository-path* nil
+  "the path to the current test repository.")
+
+(defvar *test-repository-state* nil
+  "store the state of the current test repository.")
+
+(defvar *test-traverse-state* nil
+  "store the state of the current test repository traversal state, it
+will update to the new head when a new commit is added.")
+
+(defmacro with-test-repository (&body body)
+  "Create a new repository and bind the randomly generated path."
+  `(let ((*repository-path* (gen-temp-path))
+         *test-repository-state*
+         *test-traverse-state*)
+     (finishes
+       (unwind-protect
+            (progn
+              (git-init :repository *repository-path*)
+              (with-repository (*repository-path*)
+                ,@body)
+              (let ((open-files (open-test-files-p)))
+                (when open-files
+                  (fail "The following files were left open ~S" open-files))))
+         (progn
+           (delete-directory-and-files *repository-path*))))))
+
+(defun write-string-to-file (filename content
+                             &optional (repo-path *repository-path*))
+  (let ((test-file (concatenate 'string repo-path "/" filename)))
+    (with-open-file (stream test-file :direction :output
+                                      :if-exists :supersede)
+      (format stream content))))
+
+(defun make-test-file (&key filename text)
+  (write-string-to-file filename text)
+  (git-add filename))
+
+(defun make-test-commit (commit)
+  "Make a commit to the current repository and return the updated
+commit alist. The commit argument is an alist that should contain the
+keys :FILES :MESSAGE :AUTHOR :COMMITTER the returned alist will also
+contain the a :SHA containing the sha1 hash of the newly created
+commit."
+  (with-repository-index
+    (dolist (file (getf commit :files))
+      (apply #'make-test-file file))
+    (git-write *git-repository-index*)
+    (setf (getf commit :sha)
+          (make-commit
+           (git-write-tree *git-repository-index*)
+           (getf commit :message)
+           :parents (getf commit :parents)
+           :author (getf commit :author)
+           :committer (getf commit :committer))))
+  commit)
+
+(defun random-commit (&key
+                        (message (random-string 100))
+                        (author (list :name (random-string 50)
+                                      :email (random-string 50)
+                                      :time (random-time)))
+                        (committer (list :name (random-string 50)
+                                         :email (random-string 50)
+                                         :time (random-time)))
+                        parents
+                        (file-count 1))
+  (let ((parents (if (listp parents) parents (list parents))))
+    (list
+     :parents parents
+     :parentcount (length parents)
+     :message message
+     :files (loop :for count :upfrom 0
+                  :collect (list
+                            :filename (random-string 10)
+                            :text (random-string 100))
+                  :while (< count file-count))
+     :author author
+     :committer committer)))
+
+(defun add-test-revision (&rest rest)
+  (let ((args rest))
+    (setf (getf args :parents) (getf (car *test-repository-state*) :sha))
+    (push
+     (make-test-commit
+      (apply #'random-commit args))
+     *test-repository-state*)
+    (setf *test-traverse-state* *test-repository-state*)))
+
+(defun next-test-commit ()
+  "return the next commit from the traverser and move the traverser to
+it's parent."
+  (pop *test-traverse-state*))
+
+(defun make-test-revisions (depth)
   "create a number of random commits to random files."
-  (if (> 1 (1- number))
-      (let ((new-commit (commit-random-file repo-path)))
-        (cons new-commit nil))
-      (let* ((commit (create-random-commits repo-path (1- number)))
-             (new-commit (commit-random-file
-                          repo-path
-                          :parents (assoc-default 'commit-sha (car commit)))))
-        (cons new-commit commit))))
+  (loop :for count :upfrom 0
+        :while (< count depth)
+        :do (add-test-revision)))
+
+(defun commit-to-alist (commit)
+  "Convert a commit to an alist, that is the same format as the test
+commit alist."
+  (list
+   :parentcount (git-parentcount commit)
+   :message (git-message commit)
+   :committer (git-committer commit)
+   :author (git-author commit)))
+
+(defun time-to-unix (time)
+  (if (integerp time)
+      time
+      (timestamp-to-unix time)))
+
+(defun signature-equal (x y)
+  "Compare two signatures and make sure they are equal."
+  (is (equal (getf x :name)
+             (getf y :name)))
+  (is (equal (getf x :email)
+             (getf y :email)))
+  (is (equal (time-to-unix (getf x :time))
+             (time-to-unix (getf y :time)))))
+
+(defun commit-equal (x y)
+  "return true if the commits are equal."
+  (let ((x (if (typep x 'commit)
+               (progn
+                 (is (typep x 'commit))
+                 (is (typep (git-tree x) 'tree))
+                 (commit-to-alist x))
+               x))
+        (y (if (typep y 'commit)
+               (progn
+                 (is (typep x 'commit))
+                 (is (typep (git-tree x) 'tree))
+                 (commit-to-alist y))
+               y)))
+    (is (equal (getf x :message)
+               (getf y :message)))
+    (is (equal (getf x :parentcount)
+               (getf y :parentcount)))
+    (signature-equal (getf x :author)
+                     (getf y :author))
+    (signature-equal (getf x :committer)
+                     (getf y :committer))))
