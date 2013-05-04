@@ -22,40 +22,25 @@
 
 (in-suite :cl-git)
 
-(test create-commit
+(test commit
   "create a repository and add a file to it."
   (with-test-repository
-    (make-test-revisions 1)  ;; set up a fixture
-    (let ((test-commit (next-test-commit)))  ;; get first commit
-      (with-git-revisions
-          (commit :sha (getf test-commit :sha))
+    (let ((test-commit (make-test-revision)))  ;; get first commit
+      (bind-git-commits ((commit :sha (getf test-commit :sha)))
         (commit-equal test-commit commit)))))
 
 
-(test create-commit-custom-signature
-  "test if the time is an integer, and test when there is no email
-address specified."
-  (with-test-repository
-    (add-test-revision :author (list :name (random-string 50)
-                                     :email (random-string 50)
-                                     :time 1111111111)) ;; set up a fixture
-    (let ((test-commit (first *test-repository-state*))) ;; get first commit
-      (with-git-revisions
-          (commit :sha (getf test-commit :sha))
-        (commit-equal test-commit commit)))))
-
-
-(test create-commit-default-time
-  "Test to make sure that if there is no time in the signature then it
-will be added automatically."
+(test default-signature
+  "Test to make sure that if there is no time or email address in the
+signature then it will be added automatically."
   (with-test-repository
     (let ((test-pre-create (timestamp-to-unix (now))))
-      (add-test-revision :author (list :name (random-string 50)
-                                       :email (random-string 50))) ;; set up a fixture
       (let ((test-post-create (timestamp-to-unix (now)))
-            (test-commit (first *test-repository-state*))) ;; get first commit
-        (with-git-revisions
-            (commit :sha (getf test-commit :sha))
+            (test-commit (make-test-revision :author (list :name (random-string 50)))))
+        (bind-git-commits ((commit :sha (getf test-commit :sha)))
+          ;; set the email address the test data to the default.
+          (setf (getf (getf test-commit :author) :email) (cl-git::default-email))
+          ;; test that the time is correct
           (let ((created (getf (getf (commit-to-alist commit) :author) :time)))
             (is (<= (timestamp-to-unix created) test-post-create))
             (is (>= (timestamp-to-unix created) test-pre-create))
@@ -63,14 +48,12 @@ will be added automatically."
           (commit-equal test-commit commit))))))
 
 
-(test create-commit-custom-signature
-  "test if the time is an integer, and test when there is no email
-address specified."
+(test custom-signature-time
+  "test if the time is an integer then it will be parsed correctly."
   (with-test-repository
-    (add-test-revision :author (list :name (random-string 50)
-                                     :email (random-string 50)
-                                     :time 1111111111)) ;; set up a fixture
-    (let ((test-commit (first *test-repository-state*))) ;; get first commit
-      (with-git-revisions
-          (commit :sha (getf test-commit :sha))
+    (let ((test-commit (make-test-revision
+                        :author (list :name (random-string 50)
+                                      :email "test@localhost"
+                                      :time 1111111111))))
+      (bind-git-commits ((commit :sha (getf test-commit :sha)))
         (commit-equal test-commit commit)))))

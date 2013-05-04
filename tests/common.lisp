@@ -223,6 +223,11 @@ it's parent."
         :while (< count depth)
         :do (add-test-revision)))
 
+(defun make-test-revision (&rest rest)
+  "Create one test commit and return the test alist representation."
+  (apply #'add-test-revision rest)
+  (next-test-commit))
+
 (defun commit-to-alist (commit)
   "Convert a commit to an alist, that is the same format as the test
 commit alist."
@@ -249,16 +254,10 @@ commit alist."
 (defun commit-equal (x y)
   "return true if the commits are equal."
   (let ((x (if (typep x 'commit)
-               (progn
-                 (is (typep x 'commit))
-                 (is (typep (git-tree x) 'tree))
-                 (commit-to-alist x))
+               (commit-to-alist x)
                x))
         (y (if (typep y 'commit)
-               (progn
-                 (is (typep x 'commit))
-                 (is (typep (git-tree x) 'tree))
-                 (commit-to-alist y))
+               (commit-to-alist y)
                y)))
     (is (equal (getf x :message)
                (getf y :message)))
