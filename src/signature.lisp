@@ -82,9 +82,7 @@
 			   (:struct timeval))
         (let ((time-to-set (getf value :time (local-time:now))))
           (setf time time-to-set)
-          (setf offset (/ (local-time:timestamp-subtimezone
-                           time-to-set local-time:*default-timezone*)
-                          60)))))
+          (setf offset (timezone-offset time)))))
     signature))
 
 (defmethod translate-to-foreign ((value t) (type git-signature-type))
