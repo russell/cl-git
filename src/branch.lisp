@@ -51,6 +51,26 @@
   "Returns t is the current HEAD points to this branch.  
 This means that this is the branch that is checked out."
   (branch %reference))
+
+(defcfun ("git_branch_upstream" %git-branch-upstream)
+    %return-value
+  (out :pointer)
+  (branch %reference))
+
+(defcfun ("git_branch_upstream_name" %git-branch-upstream-name)
+    %return-value
+  (out :pointer)
+  (size size-t)
+  (repository %repository)
+  (branch-name :string))
+
+
+(defcfun ("git_branch_remote_name" %git-branch-remote-name)
+    %return-value
+  (out :pointer)
+  (size size-t)
+  (repository %repository)
+  (branch-name :string))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel interface.
@@ -107,4 +127,31 @@ call.
   (git-lookup class (car branch-name-and-type) 
 	      :repository repository 
 	      :type (cdr branch-name-and-type)))
+
+
+(defmethod git-upstream ((branch reference))
+  "Returns the reference for the remote tracking branch, corresponding to the local
+branch BRANCH."
+  (with-foreign-object (reference :pointer)
+    (%git-branch-upstream reference branch)
+    (make-instance 'reference
+		   :pointer (mem-ref reference :pointer)
+		   :facilitator (facilitator branch)
+		   :free-function #'%git-reference-free)))
+
+
+(defmethod git-upstream-name ((branch-name string) &key (repository *git-repository*))
+  (with-foreign-pointer-as-string ((out size) (%git-branch-upstream-name
+					       (null-pointer) 0 
+					       repository
+					       branch-name))
+        (%git-branch-upstream-name out size repository branch-name)))
+
+
+(defmethod git-remote-name ((branch-name string) &key (repository *git-repository*))
+  (with-foreign-pointer-as-string ((out size) (%git-branch-remote-name
+					       (null-pointer) 0 
+					       repository
+					       branch-name))
+        (%git-branch-remote-name out size repository branch-name)))
 

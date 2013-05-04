@@ -81,6 +81,21 @@
     git-reference-flags
   (reference %reference))
 
+(defcfun ("git_reference_is_branch" git-is-branch)
+    %bool
+  "Returns t if the reference is a local branch."
+  (reference %reference))
+
+(defcfun ("git_reference_is_remote" git-is-remote)
+    %bool
+  "Returens t if the reference lives in the refs/remotes namespace."
+  (reference %reference))
+
+(defcfun ("git_reference_has_log" git-has-log)
+    %bool
+  "Returns t if there exists a REFLOG for the reference."
+  (reference %reference))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface

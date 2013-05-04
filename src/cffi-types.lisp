@@ -74,6 +74,14 @@
   nil
   (:simple-parser %reference))
 
+(define-foreign-type git-reflog (git-object)
+  nil
+  (:simple-parser %reflog))
+
+(define-foreign-type git-reflog-entry (git-object)
+  nil
+  (:simple-parser %reflog-entry))
+
 (define-foreign-type git-repository (git-object)
   ()
   (:simple-parser %repository))
