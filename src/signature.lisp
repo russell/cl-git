@@ -57,6 +57,18 @@
   (translate-to-foreign
    (local-time:unix-to-timestamp value) type))
 
+(defgeneric timezone-offset (time)
+  (:documentation "Calculate the current timezone offset."))
+
+(defmethod timezone-offset ((time local-time:timestamp))
+  (/ (local-time:timestamp-subtimezone
+                           time local-time:*default-timezone*)
+                          60))
+
+(defmethod timezone-offset ((time integer))
+  (timezone-offset (local-time:unix-to-timestamp time)))
+
+
 ;; Signatures
 
 (defmethod translate-to-foreign ((value list) (type git-signature-type))
@@ -80,9 +92,27 @@
       (values value t)
       (error "Cannot convert type: ~A to git-signature struct" (type-of value))))
 
+(defun make-timezone (offset)
+  "Return a new timezone based on the number on minutes in the
+OFFSET."
+  (let ((offset (* 60 offset)))
+    (local-time::%make-simple-timezone
+     "Explicit Offset From Git"
+     (multiple-value-bind (offset-hours offset-secs)
+         (floor offset local-time:+seconds-per-hour+)
+       (format nil "~c~2,'0d~2,'0d"
+               (if (minusp offset-hours) #\- #\+)
+               (abs offset-hours)
+               (truncate (abs offset-secs)
+                         local-time:+seconds-per-minute+)))
+     offset)))
+
 (defmethod translate-from-foreign (value (type git-signature-type))
   (with-foreign-slots ((name email time) value (:struct git-signature))
-    (list :name name :email email :time (getf time 'time))))
+    (list :name name
+          :email email
+          :time (getf time 'time)
+          :timezone (make-timezone (getf time 'offset)))))
 
 (defmethod free-translated-object (pointer (type git-signature-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))
