@@ -23,23 +23,25 @@
 (in-suite :cl-git)
 
 (test repository-init
-  "create a repository and open it to make sure that works"
+  "Create a repository and open it."
   (for-all ((path 'gen-temp-path))
     (finishes
       (unwind-protect
            (progn
-             (cl-git:git-init :repository path :bare t)
-             (cl-git:git-open :repository path))
+             (git-init :repository path :bare t)
+             (is (typep (git-open :repository path) 'repository)))
         (progn
-          (cl-fad:delete-directory-and-files path))))))
+          (delete-directory-and-files path))))))
 
 
 (test with-repository
+  "Create a repository and test the with-repository macro."
   (for-all ((path 'gen-temp-path))
     (finishes
       (unwind-protect
-	   (progn 
-	     (cl-git:git-init :repository path :bare t)
-	     (with-repository (path)))
+	   (progn
+	     (git-init :repository path :bare t)
+	     (with-repository (path)
+           (is (typep *git-repository* 'repository))))
 	(progn
-	  (cl-fad:delete-directory-and-files path))))))
+	  (delete-directory-and-files path))))))
