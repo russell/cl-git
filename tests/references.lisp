@@ -39,3 +39,32 @@
        (equal
         (sort-strings (list (git-name ref-default) (git-name ref-symbolic) "refs/heads/master"))
         (sort-strings (git-list :reference :flags '(:oid :symbolic))))))))
+
+(test reference-accessors-oid
+  "Create oid reference and check accessors."
+  (with-test-repository
+    (let* ((test-commit (make-test-revision))
+           (ref-default (git-create :reference "refs/heads/oid"
+                                    :target (getf test-commit :sha))))
+      (is (equal
+           (git-type ref-default)
+           '(:OID)))
+      (is (equal
+           (git-name ref-default)
+           "refs/heads/oid")))))
+
+(test reference-accessors-symbolic
+  "Create symbolic reference and check it's name."
+  (with-test-repository
+    (let* ((test-commit (make-test-revision))
+           (ref-default (git-create :reference "refs/heads/oid"
+                                    :target (getf test-commit :sha)))
+           (ref-symbolic (git-create :reference "refs/heads/symbolic"
+                                     :target "refs/heads/oid"
+                                     :type :symbolic)))
+      (is (equal
+           (git-type ref-symbolic)
+           '(:SYMBOLIC)))
+      (is (equal
+           (git-name ref-symbolic)
+           "refs/heads/symbolic")))))
