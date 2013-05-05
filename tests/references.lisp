@@ -22,8 +22,7 @@
 
 (in-suite :cl-git)
 
-(test create-references
-  "Create reference and check it's name."
+(def-fixture reference ()
   (with-test-repository
     (let* ((test-commit (make-test-revision))
            (ref-default (git-create :reference "refs/heads/oid"
@@ -31,40 +30,46 @@
            (ref-symbolic (git-create :reference "refs/heads/symbolic"
                                      :target "refs/heads/oid"
                                      :type :symbolic)))
-      (is
-       (equal ;; test the git-list default args.
-        (sort-strings (list (git-name ref-default) "refs/heads/master"))
-        (sort-strings (git-list :reference))))
-      (is
-       (equal
-        (sort-strings (list (git-name ref-default) (git-name ref-symbolic) "refs/heads/master"))
-        (sort-strings (git-list :reference :flags '(:oid :symbolic))))))))
+      (declare (ignore ref-default))
+      (declare (ignore ref-symbolic))
+      (&body))))
 
-(test reference-accessors-oid
+(def-test references-list-oid (:fixture reference)
+  (is
+   (equal ;; test the git-list default args.
+    (sort-strings (list "refs/heads/oid" "refs/heads/master"))
+    (sort-strings (git-list :reference)))))
+
+(def-test references-list-symbolic (:fixture reference)
+  (is
+   (equal
+    (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master"))
+    (sort-strings (git-list :reference :flags '(:oid :symbolic))))))
+
+(def-test reference-lookup-oid (:fixture reference)
+  (is
+   (equal (git-name (git-lookup :reference "refs/heads/oid"))
+          "refs/heads/oid")))
+
+(def-test reference-lookup-symbolic (:fixture reference)
+  (is
+   (equal (git-name (git-lookup :reference "refs/heads/symbolic"))
+          "refs/heads/symbolic")))
+
+(def-test reference-accessors-oid (:fixture reference)
   "Create oid reference and check accessors."
-  (with-test-repository
-    (let* ((test-commit (make-test-revision))
-           (ref-default (git-create :reference "refs/heads/oid"
-                                    :target (getf test-commit :sha))))
-      (is (equal
-           (git-type ref-default)
-           '(:OID)))
-      (is (equal
-           (git-name ref-default)
-           "refs/heads/oid")))))
+  (is (equal
+       (git-type ref-default)
+       '(:OID)))
+  (is (equal
+       (git-name ref-default)
+       "refs/heads/oid")))
 
-(test reference-accessors-symbolic
+(def-test reference-accessors-symbolic (:fixture reference)
   "Create symbolic reference and check it's name."
-  (with-test-repository
-    (let* ((test-commit (make-test-revision))
-           (ref-default (git-create :reference "refs/heads/oid"
-                                    :target (getf test-commit :sha)))
-           (ref-symbolic (git-create :reference "refs/heads/symbolic"
-                                     :target "refs/heads/oid"
-                                     :type :symbolic)))
-      (is (equal
-           (git-type ref-symbolic)
-           '(:SYMBOLIC)))
-      (is (equal
-           (git-name ref-symbolic)
-           "refs/heads/symbolic")))))
+  (is (equal
+       (git-type ref-symbolic)
+       '(:SYMBOLIC)))
+  (is (equal
+       (git-name ref-symbolic)
+       "refs/heads/symbolic")))
