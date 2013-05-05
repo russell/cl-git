@@ -46,10 +46,6 @@
     %git-signature
   (reflog-entry %reflog-entry))
 
-(defcfun ("git_reflog_entry_committer" %git-reflog-entry-commiter)
-    %git-signature
-  (reflog-entry %reflog-entry))
-
 (defcfun ("git_reflog_entry_message" %git-reflog-entry-message)
     :string
   (reflog-entry %reflog-entry))
