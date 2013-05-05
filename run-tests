@@ -1,4 +1,4 @@
-#!/usr/bin/sbcl --script
+#!/usr/local/bin/sbcl --script
 ; -*- mode: Lisp;-*-
 
 (load (merge-pathnames (user-homedir-pathname) (make-pathname :name ".sbclrc")))

@@ -35,7 +35,7 @@
     (cl-git:git-add "test1")
     (cl-git:git-write cl-git:*git-repository-index*)
     (cl-git:make-commit
-     (cl-git:git-create-from-index cl-git:*git-repository-index*)
+     (cl-git:git-write-tree cl-git:*git-repository-index*)
      "Committing test file test1"
      :author (list :name "Joe Blogs"
                    :email "test@example.com"
@@ -53,7 +53,7 @@
           (commit :sha (make-commit1 path))
         ;; check the commit message
         (is (equal (cl-git:git-message commit)
-                   (format-string "Committing test file test1~%")))
+                   (format-string "Committing test file test1")))
         ;; check the author
         (let ((author (cl-git:git-author commit)))
           (is (equal (getf author :name)

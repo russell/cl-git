@@ -28,3 +28,7 @@
 /doc/latex/
 /doc/man/
 /doc/text/
+
+/bin/
+/lib/
+/include/

@@ -63,6 +63,25 @@
   (odb :pointer)
   (repository %repository))
 
+(defcfun ("git_repository_head" %git-repository-head)
+    %return-value
+  (out :pointer)
+  (repository %repository))
+
+(defcfun ("git_repository_head_detached" git-head-detached)
+    %bool
+  "Returns t if the HEAD in the repository is detached, in other words,
+the HEAD reference is not a symbolic reference to a branch, but a direct reference."
+  (repository %repository))
+
+(defcfun ("git_repository_path" %git-repository-path)
+    :string
+  (repository %repository))
+
+(defcfun ("git_repository_workdir" %git-repository-workdir)
+    :string
+  (repository %repository))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface
@@ -97,6 +116,14 @@ contains the object database."))
   (apply #'git-open class (namestring path) r))
 
 
+(defmethod git-path ((repository repository))
+  "Returns the path the the .git directory of the repository.
+Or for a bare repository to the repository itself."
+  (%git-repository-path repository))
+
+(defmethod git-workdir ((repository repository))
+  "Returns the working directory for the repository."
+  (%git-repository-workdir repository))
 
 (defmethod git-config ((repository repository))
   (with-foreign-object (config :pointer)
@@ -121,6 +148,15 @@ contains the object database."))
            :pointer (mem-ref odb :pointer)
            :facilitator repository
            :free-function #'%git-odb-free)))
+
+(defmethod git-head ((repository repository))
+  "Returns the resolved reference for HEAD."
+  (with-foreign-object (head :pointer)
+    (%git-repository-head head repository)
+    (make-instance 'reference
+		   :pointer (mem-ref head :pointer)
+		   :facilitator repository
+		   :free-function #'%git-reference-free)))
 
 (defmacro with-repository ((path) &body body)
   "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened

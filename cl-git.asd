@@ -26,6 +26,7 @@
                  (:file "repository")
                  (:file "signature")
                  (:file "references")
+		 (:file "reflog")
                  (:file "branch")
                  (:file "tree")
                  (:file "commit")

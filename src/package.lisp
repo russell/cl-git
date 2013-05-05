@@ -49,7 +49,6 @@
    #:git-add
    #:git-write
    #:git-clear
-   #:git-create-from-index
    #:git-config
    #:git-values
    #:git-raw-size
@@ -108,4 +107,21 @@
    #:git-url
    #:git-odb
    #:git-size
-   #:git-data))
+   #:git-data
+   #:git-download
+   #:git-fetchspec
+   #:git-pushspec
+   #:git-ls
+   #:git-is-head
+   #:git-write-tree
+   #:git-head
+   #:git-path
+   #:git-workdir
+   #:git-head-detached
+   #:git-has-log
+   #:git-is-remote
+   #:git-is-branch
+   #:git-upstream
+   #:git-remote-name
+   #:git-upstream-name
+   #:git-lookup-byname))

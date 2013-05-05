@@ -7,8 +7,16 @@ Remote
 
 .. cl:function:: git-url
 
-.. cl:function:: git-push-url
-
 .. cl:method:: git-list :remote
 
 .. cl:method:: git-name remote
+
+.. cl:method:: git-ls remote
+
+.. cl:method:: git-pushspec remote
+
+.. cl:method:: git-fetchspec remote
+
+.. cl:method:: git-connect remote
+
+.. cl:method:: git-download remote

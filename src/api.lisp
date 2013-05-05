@@ -141,6 +141,11 @@ REPOSITORY instance is returned."))
 
 (defgeneric git-load (class path/name &key &allow-other-keys))
 
+(defgeneric git-path (object)
+  (:documentation "Path to the object."))
+
+(defgeneric git-workdir (object))
+
 (defgeneric git-add (path &key &allow-other-keys)
   (:documentation
    "Adds the PATH to the current index *GIT-REPOSITORY-INDEX* or the
@@ -150,6 +155,10 @@ explicit keyword argument :INDEX"))
   (:documentation
    "Clears the content of OBJECT
 "))
+
+(defgeneric git-read (object)
+  (:documentation
+   "Reads the OBJECT from disk or object store."))
 
 (defgeneric git-write (object)
   (:documentation
@@ -186,7 +195,7 @@ Note that although REFERENCE is a subclass of OBJECT it will not
 return :REFERENCE, but the more specific type.
 "))
 
-(defgeneric git-target (object)
+(defgeneric git-target (object &key &allow-other-keys)
   (:documentation "Returns the target of OBJECT.
 
 - TAG -- only works for :OID tags.
@@ -207,9 +216,15 @@ This is to follow symbolic tag chains to find the object pointed to.
   (:documentation "Returns the element at position INDEX from the
 collection OBJECT."))
 
-(defgeneric git-entries (object)
+(defgeneric git-entries (object &key start end)
   (:documentation "Returns the elements of the collection OBJECT as a
-list."))
+list.  The start and end keyword arguments allow to retrieve a subset of all elements.
+All entries with index satisfying 
+  
+   start <= index < end
+
+are returned.  If end is not specified or nil, no end condition exists.
+start defaults to 0."))
 
 (defgeneric git-values (object)
   (:documentation "TODO"))
@@ -226,3 +241,33 @@ list."))
 (defgeneric git-next (walker)
   (:documentation "Returns the next object for the walker.  If no
 objects are available anymore return nil."))
+
+(defgeneric git-connect (object &key &allow-other-keys)
+  (:documentation "Connects the object if applicable.
+
+At the moment only supported for 
+- REMOTE"))
+
+(defgeneric git-disconnect (object)
+  (:documentation "Disconnects the object if applicable.
+
+At the moment only supported for 
+- REMOTE"))
+
+(defgeneric git-connected (object)
+  (:documentation "Returns if the object is connected.
+
+At the moment only supported for
+- REMOTE"))
+
+(defgeneric git-pushspec (remote))
+(defgeneric git-fetchspec (remote))
+
+(defgeneric git-download (remote))
+
+(defgeneric git-ls (remote))
+
+
+(defgeneric git-head (repository))
+
+(defgeneric git-upstream (branch))

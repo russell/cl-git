@@ -15,7 +15,10 @@ References
 
 .. cl:method:: git-list :reference
 
+.. cl:method:: git-target reference
+
 .. cl:function:: git-resolve
+
 
 Listing
 -------

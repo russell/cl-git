@@ -155,6 +155,9 @@ not a type of any real object, but only used for querying like in this function.
     :for index :from 0 :below (git-parentcount object)
     :collect (git-parent-oid object index)))
 
+(defmethod git-id ((object object))
+  (git-object-id object))
+
 
 (defmethod git-lookup ((class (eql :object))
                oid &key (repository *git-repository*))
@@ -163,11 +166,19 @@ not a type of any real object, but only used for querying like in this function.
 (defmethod git-type ((object object))
   (git-object-type object))
 
-(defmethod git-entries (object)
+(defmethod git-entries (object &key (start 0) end)
   "Return all entries of OBJECT as a list.
 
 Note that this is basically a wrapper around GIT-ENTRY-BY-INDEX,
-so the objects returned are the same as the ones returned by GIT-ENTRY-BY-INDEX."
-  (loop :repeat (git-entry-count object)
-        :for index :from 0
+so the objects returned are the same as the ones returned by GIT-ENTRY-BY-INDEX.
+
+The START and END keyword have their usual meaning, all entries whose index 
+satisfies
+
+     START <= INDEX < END
+
+are returned.  If END is not specified or nil, the check on END is omitted.
+Also START defauts to 0."
+  (loop 
+        :for index :from start :below (or end (git-entry-count object))
         :collect (git-entry-by-index object index)))

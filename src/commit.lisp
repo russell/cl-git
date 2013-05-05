@@ -40,11 +40,6 @@
   (parent-count :int)
   (parents :pointer))
 
-(defcfun ("git_commit_id" git-commit-id)
-    %oid
-  "Returns the oid of the commit `commit'."
-  (commit %commit))
-
 (defcfun ("git_commit_message" git-commit-message)
     :string
   "Return a string containing the commit message."
@@ -65,7 +60,7 @@
   "Returns the number of parent commits of the argument."
   (commit %commit))
 
-(defcfun ("git_commit_parent_oid" git-commit-parent-oid)
+(defcfun ("git_commit_parent_id" git-commit-parent-oid)
     %oid
   "Returns the oid of the parent with index `parent-index' in the list
 of parents of the commit `commit'."
@@ -144,9 +139,6 @@ optional instance of a GIT-SIGNATURE the details the committer.
 (defmethod git-lookup ((class (eql :commit))
                oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
-
-(defmethod git-id ((commit commit))
-  (git-commit-id commit))
 
 (defmethod git-name ((commit commit))
   (with-foreign-pointer-as-string (str 41 :encoding :ascii)
