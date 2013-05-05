@@ -131,7 +131,7 @@ special call to stop iteration."
 ;;  (warn "with-git-revisions is depricated, please use revision-walk instead.")
   `(let ((oids (lookup-oids :repository ,repository ,@rest)))
      (let ((revwalker (git-revwalk oids :repository ,repository)))
-       (with-foreign-object (oid 'git-oid)
+       (with-foreign-object (oid '(:struct git-oid))
          (block nil
            (labels ((revision-walker ()
                       (progn
