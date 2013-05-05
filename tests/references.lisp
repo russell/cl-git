@@ -73,3 +73,10 @@
   (is (equal
        (git-name ref-symbolic)
        "refs/heads/symbolic")))
+
+(def-test reference-target (:fixture reference)
+  "Check that the returned commit id matches the id from the reference
+fixture"
+  (is (equal
+       (git-id (git-target ref-default))
+       (getf test-commit :sha))))
