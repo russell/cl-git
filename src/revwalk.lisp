@@ -46,8 +46,8 @@
   (revwalk %revwalker))
 
 (defcfun ("git_revwalk_next" %git-revwalk-next)
-    :int
-  (oid :pointer)
+    %return-value
+  (oid (:pointer (:struct git-oid)))
   (revwalk %revwalker))
 
 (defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
@@ -84,7 +84,7 @@
 
 (defmethod git-next ((walker revision-walker))
   "return a git-commit or nil if there are no more commits"
-  (with-foreign-object (oid 'git-oid)
+  (with-foreign-object (oid '(:struct git-oid))
     (when (= 0 (%git-revwalk-next oid walker))
       (git-commit-from-oid oid :repository (facilitator walker)))))
 
@@ -131,7 +131,7 @@ special call to stop iteration."
 ;;  (warn "with-git-revisions is depricated, please use revision-walk instead.")
   `(let ((oids (lookup-oids :repository ,repository ,@rest)))
      (let ((revwalker (git-revwalk oids :repository ,repository)))
-       (with-foreign-object (oid 'git-oid)
+       (with-foreign-object (oid '(:struct git-oid))
          (block nil
            (labels ((revision-walker ()
                       (progn

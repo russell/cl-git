@@ -46,7 +46,7 @@
 	(list klass message))))
 
 (defmethod translate-from-foreign (return-value (type return-value-type))
-  (if (or (not return-value) (< return-value 0))
+  (if (or (not return-value) (and (< return-value 0) (> return-value -30)))
       (let ((last-error (giterr-last)))
 	(error 'git-error
 	       :code return-value
@@ -79,6 +79,6 @@
     :documentation "The error code/class returned by git_lasterr."))
   (:report (lambda (condition stream)
              (format stream "git error ~D/~D: ~A"
-                     (git-error-code condition) 
+                     (git-error-code condition)
 		     (git-error-class condition)
 		     (git-error-message condition)))))
