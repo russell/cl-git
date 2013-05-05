@@ -23,13 +23,19 @@
 (in-suite :cl-git)
 
 (test create-references
-  "Create a repository and add a file to it and a commit, then create
-a reference from the commit."
+  "Create reference and check it's name."
   (with-test-repository
     (let* ((test-commit (make-test-revision))
-           (reference (git-create :reference "refs/heads/test"
-                                  :target (getf test-commit :sha))))
+           (ref-default (git-create :reference "refs/heads/oid"
+                                    :target (getf test-commit :sha)))
+           (ref-symbolic (git-create :reference "refs/heads/symbolic"
+                                     :target "refs/heads/oid"
+                                     :type :symbolic)))
+      (is
+       (equal ;; test the git-list default args.
+        (sort-strings (list (git-name ref-default) "refs/heads/master"))
+        (sort-strings (git-list :reference))))
       (is
        (equal
-        (sort-strings (list (git-name reference) "refs/heads/master"))
-        (sort-strings (git-list :reference)))))))
+        (sort-strings (list (git-name ref-default) (git-name ref-symbolic) "refs/heads/master"))
+        (sort-strings (git-list :reference :flags '(:oid :symbolic))))))))

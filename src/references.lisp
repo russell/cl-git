@@ -133,7 +133,7 @@ symbolic reference."
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
-  (with-foreign-object (string-array 'git-strings)
+  (with-foreign-object (string-array '(:pointer (:struct git-strings)))
     (%git-reference-list string-array repository flags)
     (prog1
 	(convert-from-foreign string-array '%git-strings)
@@ -207,7 +207,7 @@ are :SHA, :HEAD or :BOTH"
   (%git-reference-name object))
 
 (defmethod git-target ((reference reference) &key (type :object))
-  "Returns the Object that this reference points to. 
+  "Returns the Object that this reference points to.
 
 The optional keyword argument :type controls inwhich form the target is returned.
 
@@ -215,14 +215,14 @@ The optional keyword argument :type controls inwhich form the target is returned
 - if :type id :oid it will return the OID of the target.
 
 This call is only valid for direct references, this call will not
-work for symbolic references.  
+work for symbolic references.
 
 To get the target of a symbolic, first call (git-resolve reference)
 which will return a direct reference.  Than call this method."
   (let ((oid (%git-reference-target reference)))
     (case type
       (:oid oid)
-      (:object 
+      (:object
        (git-lookup :object oid
 		   :repository (facilitator reference)))
       (t (error "Unknown type, type should be either :oid or :object but got: ~A" type)))))
