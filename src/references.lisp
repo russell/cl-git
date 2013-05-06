@@ -96,6 +96,8 @@
   "Returns t if there exists a REFLOG for the reference."
   (reference %reference))
 
+(define-condition unresolved-reference-error (error) ())
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface
@@ -200,7 +202,8 @@ are :SHA, :HEAD or :BOTH"
             :collect (find-oid name :flags flags :repository repository))))
 
 (defmethod git-type ((object reference))
-  "TODO"
+  "Return a list containing the type of the reference, either :OID
+or :SYMBOLIC"
   (git-reference-type object))
 
 (defmethod git-name ((object reference))
@@ -209,20 +212,24 @@ are :SHA, :HEAD or :BOTH"
 (defmethod git-target ((reference reference) &key (type :object))
   "Returns the Object that this reference points to.
 
-The optional keyword argument :type controls inwhich form the target is returned.
+The optional keyword argument :TYPE controls in which form the target
+is returned.
 
-- if :type is :object it will return the git object.
-- if :type id :oid it will return the OID of the target.
+- if TYPE is :OBJECT it will return the git object.
+- if TYPE id :OID it will return the OID of the target.
 
 This call is only valid for direct references, this call will not
 work for symbolic references.
 
-To get the target of a symbolic, first call (git-resolve reference)
+To get the target of a symbolic, first call (GIT-RESOLVE reference)
 which will return a direct reference.  Than call this method."
-  (let ((oid (%git-reference-target reference)))
+  (let ((oid (%git-reference-target reference))
+        (ref-type (git-type reference)))
+    (when (member :symbolic ref-type)
+      (error 'unresolved-reference-error))
     (case type
       (:oid oid)
       (:object
        (git-lookup :object oid
 		   :repository (facilitator reference)))
-      (t (error "Unknown type, type should be either :oid or :object but got: ~A" type)))))
+      (t (error "Unknown type, type should be either :OID or :OBJECT but got: ~A" type)))))

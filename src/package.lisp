@@ -76,6 +76,9 @@
    #:git-init
    #:git-free
 
+   ;; errors
+   #:unresolved-reference-error
+
    ;; Bigger functions
    #:make-commit
 

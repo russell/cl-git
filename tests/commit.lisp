@@ -24,7 +24,7 @@
 
 (test commit
   "create a repository and add a file to it."
-  (with-test-repository
+  (with-test-repository ()
     (let ((test-commit (make-test-revision)))  ;; get first commit
       (bind-git-commits ((commit :sha (getf test-commit :sha)))
         (commit-equal test-commit commit)))))
@@ -33,7 +33,7 @@
 (test default-signature
   "Test to make sure that if there is no time or email address in the
 signature then it will be added automatically."
-  (with-test-repository
+  (with-test-repository ()
     (let ((test-pre-create (timestamp-to-unix (now))))
       (let ((test-post-create (timestamp-to-unix (now)))
             (test-commit (make-test-revision :author (list :name (random-string 50)))))
@@ -50,7 +50,7 @@ signature then it will be added automatically."
 
 (test custom-signature-time
   "test if the time is an integer then it will be parsed correctly."
-  (with-test-repository
+  (with-test-repository ()
     (let ((test-commit (make-test-revision
                         :author (list :name (random-string 50)
                                       :email "test@localhost"

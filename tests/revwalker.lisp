@@ -26,7 +26,7 @@
 (test create-random-commits
   "create a repository and add several random commits to it. then
 check that the commit messages match the expected messages."
-  (with-test-repository
+  (with-test-repository ()
     (make-test-revisions 10)
     (let* ((commit-list *test-repository-state*)
            (tcommit (pop commit-list))
@@ -42,7 +42,7 @@ check that the commit messages match the expected messages."
 (test revision-walker-test
   "create a repository and add several random commits to it. then
 check that the commit messages match the expected messages."
-  (with-test-repository
+  (with-test-repository ()
     (make-test-revisions 10)
     (let* ((commit-list *test-repository-state*)
            (tcommit (pop commit-list))

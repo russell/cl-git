@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git an Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2012 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2013 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -58,12 +58,12 @@
                  :alphanumericp #'alpha-or-whitespace-p))
 
 (defun gen-temp-path ()
-  (concatenate 'string (namestring
-                        (merge-pathnames "cl-git.test-"
-                                         *test-repository-path*))
-               (funcall
-                (gen-string :length (gen-integer :min 5 :max 10)
-                            :elements (gen-alpha-numeric)))))
+  (merge-pathnames (concatenate 'string  "cl-git.test-"
+                                (funcall
+                                 (gen-string :length (gen-integer :min 5 :max 10)
+                                             :elements (gen-alpha-numeric)))
+                                "/")
+                   *test-repository-path*))
 
 (defun random-number (min max)
   (funcall (gen-integer :min min :max max)))
@@ -85,44 +85,6 @@
 (defun sort-strings (strings)
   (sort strings #'string-lessp))
 
-(defmacro tempory-repository ((path) &body body)
-  "Create a new repository and bind the randomly generated path of the
-new repository to PATH. "
-  `(let ((,path (gen-temp-path)))
-     (finishes
-       (unwind-protect
-            (progn
-              (cl-git:git-init :repository ,path)
-              ,@body
-              (let ((open-files (open-test-files-p)))
-                (when open-files
-                  (fail "The following files were left open ~S" open-files))))
-         (progn
-           (cl-fad:delete-directory-and-files ,path))))))
-
-(defun add-random-file-modification (repo-path filename)
-  "randomly modify the file in the repo at repo-path."
-  (let ((test-file (concatenate 'string repo-path "/" filename))
-        (content (with-output-to-string (stream)
-                   (format stream "Random text: ~A.~%" (random-string 100)))))
-    (with-open-file (stream test-file :direction :output :if-exists :supersede)
-      content)
-    (cl-git:git-add filename)
-    (cl-git:git-write cl-git:*git-repository-index*)
-    content))
-
-(defun commit-random-file-modification (repo-path
-                                        filename
-                                        commit-message
-                                        &key (parents nil))
-  (cl-git:with-repository-index
-    (add-random-file-modification repo-path filename)
-    (make-commit
-     (git-write-tree *git-repository-index*)
-     commit-message
-     :parents parents)))
-
-
 (defvar *repository-path* nil
   "the path to the current test repository.")
 
@@ -133,7 +95,7 @@ new repository to PATH. "
   "store the state of the current test repository traversal state, it
 will update to the new head when a new commit is added.")
 
-(defmacro with-test-repository (&body body)
+(defmacro with-test-repository ((&key bare) &body body)
   "Create a new repository and bind the randomly generated path."
   `(let ((*repository-path* (gen-temp-path))
          *test-repository-state*
@@ -141,7 +103,7 @@ will update to the new head when a new commit is added.")
      (finishes
        (unwind-protect
             (progn
-              (git-init :repository *repository-path*)
+              (git-init :repository *repository-path* :bare ,bare)
               (with-repository (*repository-path*)
                 ,@body)
               (let ((open-files (open-test-files-p)))
@@ -152,7 +114,7 @@ will update to the new head when a new commit is added.")
 
 (defun write-string-to-file (filename content
                              &optional (repo-path *repository-path*))
-  (let ((test-file (concatenate 'string repo-path "/" filename)))
+  (let ((test-file (namestring (merge-pathnames (make-pathname :name filename) repo-path))))
     (with-open-file (stream test-file :direction :output
                                       :if-exists :supersede)
       (format stream content))))
