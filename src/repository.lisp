@@ -170,5 +170,4 @@ repositony at path."
   `(let ((*git-repository* (git-open :repository ,path)))
      (unwind-protect
       (progn
-        ,@body)
-       (git-free *git-repository*))))
+        ,@body))))
