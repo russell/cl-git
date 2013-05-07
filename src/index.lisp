@@ -68,10 +68,10 @@
 
 (defmethod translate-from-foreign (value (type index-entry-type))
   (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path) value (:struct git-index-entry))
-    (list :c-time ctime 
-	  :m-time mtime 
-	  :file-size file-size 
-	  :oid oid 
+    (list :c-time ctime
+	  :m-time mtime
+	  :file-size file-size
+	  :oid oid
 	  :flags flags
 	  :flags-extended flags-extended
 	  :path path)))
@@ -134,7 +134,10 @@
   (%git-index-add-by-path index path stage))
 
 (defmethod git-add ((path pathname) &key (index *git-repository-index*) (stage 0))
-  (git-add (namestring path) :index index :stage stage))
+  (let ((path (if (pathname-relative-p path)
+                   path
+                   (enough-namestring path (git-workdir (slot-value index 'facilitator))))))
+    (git-add (namestring path) :index index :stage stage)))
 
 (defmethod git-clear ((index index))
   (%git-index-clear index))

@@ -8,6 +8,8 @@
   (:import-from #:trivial-garbage
                 #:make-weak-pointer
                 #:finalize)
+  (:import-from #:cl-fad
+                #:pathname-relative-p)
   (:import-from #:cffi
                 #:define-parse-method
                 #:define-foreign-type
