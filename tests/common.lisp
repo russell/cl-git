@@ -114,14 +114,15 @@ will update to the new head when a new commit is added.")
 
 (defun write-string-to-file (filename content
                              &optional (repo-path *repository-path*))
-  (let ((test-file (namestring (merge-pathnames (make-pathname :name filename) repo-path))))
+  (let* ((filename (merge-pathnames
+                    (if (pathnamep filename)
+                        filename
+                        (make-pathname :name filename))
+                    repo-path))
+         (test-file (namestring filename)))
     (with-open-file (stream test-file :direction :output
                                       :if-exists :supersede)
       (format stream content))))
-
-(defun make-test-file (&key filename text)
-  (write-string-to-file filename text)
-  (git-add filename))
 
 (defun make-test-commit (commit)
   "Make a commit to the current repository and return the updated
@@ -129,17 +130,17 @@ commit alist. The commit argument is an alist that should contain the
 keys :FILES :MESSAGE :AUTHOR :COMMITTER the returned alist will also
 contain the a :SHA containing the sha1 hash of the newly created
 commit."
-  (with-repository-index
-    (dolist (file (getf commit :files))
-      (apply #'make-test-file file))
-    (git-write *git-repository-index*)
-    (setf (getf commit :sha)
-          (make-commit
-           (git-write-tree *git-repository-index*)
-           (getf commit :message)
-           :parents (getf commit :parents)
-           :author (getf commit :author)
-           :committer (getf commit :committer))))
+  (dolist (file (getf commit :files))
+    (apply #'write-string-to-file file)
+    (git-add file))
+  (git-write *git-repository-index*)
+  (setf (getf commit :sha)
+        (make-commit
+         (git-write-tree *git-repository-index*)
+         (getf commit :message)
+         :parents (getf commit :parents)
+         :author (getf commit :author)
+         :committer (getf commit :committer)))
   commit)
 
 (defun random-commit (&key
@@ -150,29 +151,31 @@ commit."
                         (committer (list :name (random-string 50)
                                          :email (random-string 50)
                                          :time (random-time)))
-                        parents
-                        (file-count 1))
+                        (file-count 1)
+                        (files (loop :for count :upfrom 0
+                                     :collect (list
+                                               :filename (random-string 10)
+                                               :text (random-string 100))
+                                     :while (< count file-count)))
+                        parents)
   (let ((parents (if (listp parents) parents (list parents))))
     (list
      :parents parents
      :parentcount (length parents)
      :message message
-     :files (loop :for count :upfrom 0
-                  :collect (list
-                            :filename (random-string 10)
-                            :text (random-string 100))
-                  :while (< count file-count))
+     :files files
      :author author
      :committer committer)))
 
 (defun add-test-revision (&rest rest)
-  (let ((args rest))
-    (setf (getf args :parents) (getf (car *test-repository-state*) :sha))
-    (push
-     (make-test-commit
-      (apply #'random-commit args))
-     *test-repository-state*)
-    (setf *test-traverse-state* *test-repository-state*)))
+  (with-repository-index
+    (let ((args rest))
+      (setf (getf args :parents) (getf (car *test-repository-state*) :sha))
+      (push
+       (make-test-commit
+        (apply #'random-commit args))
+       *test-repository-state*)
+      (setf *test-traverse-state* *test-repository-state*))))
 
 (defun next-test-commit ()
   "return the next commit from the traverser and move the traverser to

@@ -18,3 +18,38 @@
 ;; <http://www.gnu.org/licenses/>.
 
 (in-package #:cl-git-tests)
+
+(in-suite :cl-git)
+
+(def-fixture index-with-file (filename filetext)
+  (with-test-repository ()
+    (with-repository-index
+      (write-string-to-file filename filetext)
+      (&body))))
+
+#+nil (def-test index-add-pathname (:fixture (index-with-file #P"test-file" "foo blah."))
+  (git-add filename)
+  (git-write *git-repository-index*)
+  (is
+   (equal
+    (git-entries *git-repository-index*)
+    t)))
+
+#+nil (def-test index-add-string (:fixture (index-with-file "test-file" "foo blah."))
+  (git-add filename)
+  (git-write *git-repository-index*)
+  (is
+   (equal
+    (git-entries *git-repository-index*)
+    t)))
+
+#+nil (def-test index-add-abspathname (:fixture (index-with-file
+                                           (merge-pathnames (make-pathname :name "test-file")
+                                                            *repository-path*)
+                                           "foo blah."))
+  (write-string-to-file filename text)
+  (git-add filename)
+  (is
+   (equal
+    (git-entries *git-repository-index*)
+    t)))

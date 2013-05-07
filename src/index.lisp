@@ -30,7 +30,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #+nil (defbitfield (index-entry-flag :unsigned-short)
-  :update
+  (:update #. (ash 1 0))
   :remove
   :uptodate
   :added
@@ -114,10 +114,17 @@
     :unsigned-int
   (index %index))
 
-(defcfun ("git_index_get" git-index-get)
+(defcfun ("git_index_get_byindex" git-index-get-by-index)
     %index-entry
   (index %index)
   (position :unsigned-int))
+
+(defcfun ("git_index_get_bypath" git-index-get-by-path)
+    %index-entry
+  (index %index)
+  (path :string)
+  (stage :int))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -162,9 +169,17 @@ index."
   (git-index-entry-count index))
 
 (defmethod git-entry-by-index ((index index) position)
-  (git-index-get index position))
+  (git-index-get-by-index index position))
+
+(defmethod git-entry-by-path ((index index) (path string))
+  (git-index-get-by-path index path 1))
 
 (defmethod git-write-tree ((index index))
+  (with-foreign-object (oid-pointer '(:struct git-oid))
+    (%git-index-write-tree oid-pointer index)
+    (convert-from-foreign oid-pointer '%oid)))
+
+(defmethod git-entry ((index index))
   (with-foreign-object (oid-pointer '(:struct git-oid))
     (%git-index-write-tree oid-pointer index)
     (convert-from-foreign oid-pointer '%oid)))
