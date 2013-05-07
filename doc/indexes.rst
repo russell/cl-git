@@ -23,3 +23,6 @@ Index
 
 .. cl:generic:: git-write-tree
 
+.. cl:method:: git-entry-by-path index string
+
+.. cl:method:: git-entry-by-index index t
