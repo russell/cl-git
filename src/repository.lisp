@@ -71,7 +71,13 @@
 (defcfun ("git_repository_head_detached" git-head-detached)
     %bool
   "Returns t if the HEAD in the repository is detached, in other words,
-the HEAD reference is not a symbolic reference to a branch, but a direct reference."
+the HEAD reference is not a symbolic reference to a branch, but a
+direct commit."
+  (repository %repository))
+
+(defcfun ("git_repository_head_orphan" git-head-orphaned)
+    %bool
+  "Returns t if the HEAD points to a commit that doesn't exist."
   (repository %repository))
 
 (defcfun ("git_repository_path" %git-repository-path)

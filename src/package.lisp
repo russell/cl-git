@@ -119,9 +119,10 @@
    #:git-is-head
    #:git-write-tree
    #:git-head
+   #:git-head-orphaned
+   #:git-head-detached
    #:git-path
    #:git-workdir
-   #:git-head-detached
    #:git-has-log
    #:git-is-remote
    #:git-is-branch
