@@ -172,13 +172,13 @@ not a type of any real object, but only used for querying like in this function.
 Note that this is basically a wrapper around GIT-ENTRY-BY-INDEX,
 so the objects returned are the same as the ones returned by GIT-ENTRY-BY-INDEX.
 
-The START and END keyword have their usual meaning, all entries whose index 
+The START and END keyword have their usual meaning, all entries whose index
 satisfies
 
      START <= INDEX < END
 
 are returned.  If END is not specified or nil, the check on END is omitted.
 Also START defauts to 0."
-  (loop 
+  (loop
         :for index :from start :below (or end (git-entry-count object))
         :collect (git-entry-by-index object index)))
