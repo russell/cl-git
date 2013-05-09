@@ -164,11 +164,20 @@ Or for a bare repository to the repository itself."
 		   :facilitator repository
 		   :free-function #'%git-reference-free)))
 
-(defmacro with-repository ((path) &body body)
-  "Evaluates the body with *GIT-REPOSITORY* bound to a newly opened
-repositony at path."
-  `(let ((*git-repository* (git-open :repository ,path)))
-     (unwind-protect
-      (progn
-        ,@body)
-       (git-free *git-repository*))))
+
+(defmacro with-repository ((var &optional pathname-or-string) &body body)
+  "Evaluates the body with VAR bound to a newly opened located
+repository at PATHNAME-OR-STRING.  Repository is freed upon exit of
+this scope so any objects that leave this scope will no longer be able
+to access the repository."
+  (if pathname-or-string
+      `(let ((,var (git-open :repository ,pathname-or-string)))
+         (unwind-protect
+              (progn
+                ,@body)
+           (git-free ,var)))
+      `(let ((*git-repository* (git-open :repository ,var)))
+         (unwind-protect
+              (progn
+                ,@body)
+           (git-free *git-repository*)))))
