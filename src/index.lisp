@@ -105,6 +105,10 @@
     %return-value
   (index %index))
 
+(defcfun ("git_index_has_conflicts" git-has-conflicts)
+    %bool
+  (index %index))
+
 (defcfun ("git_index_write_tree" %git-index-write-tree)
     %return-value
   (oid :pointer)

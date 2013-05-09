@@ -70,3 +70,11 @@
                                            "foo blah."))
   (let ((filename (enough-namestring filename *repository-path*)))
     (index-path-test filename filetext)))
+
+(def-test index-has-conflicts (:fixture repository)
+  (let ((filename "test-file"))
+    (with-index (index *git-repository*)
+      (write-string-to-file filename "foo")
+      (git-add filename :index index)
+      (is (eq (git-has-conflicts index)
+              nil)))))
