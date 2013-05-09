@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git an Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2012 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2013 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -45,10 +45,6 @@
 	(progn
 	  (delete-directory-and-files path))))))
 
-
-(def-fixture repository (&key bare)
-  (with-test-repository (:bare bare)
-    (&body)))
 
 (def-test repository-path (:fixture (repository :bare t))
   (is
