@@ -23,33 +23,50 @@
 
 (def-fixture index-with-file (filename filetext)
   (with-test-repository ()
-    (with-repository-index
-      (write-string-to-file filename filetext)
-      (&body))))
+    (let ((filename (if (functionp filename)
+                        (funcall filename)
+                        filename)))
+      (with-repository-index
+        (write-string-to-file filename filetext)
+        (&body)))))
 
-#+nil (def-test index-add-pathname (:fixture (index-with-file #P"test-file" "foo blah."))
+
+(defun plist-equal (a b)
+  "Compare an plist, if the plist contains a function then use that as
+  a predicate."
+  (loop :for (key value) :on b :by #'cddr
+        :if (functionp value)
+          :do (is (funcall value (getf a key)))
+        :else
+          :do (is (equal (getf a key) value))))
+
+(defun approximately-now-p (a)
+  (< (timestamp-difference a (now)) 5))
+
+(defun index-path-test (filename filetext)
   (git-add filename)
   (git-write *git-repository-index*)
-  (is
-   (equal
-    (git-entries *git-repository-index*)
-    t)))
+  (mapcar #'plist-equal
+          (git-entries *git-repository-index*)
+          `((:C-TIME ,#'approximately-now-p
+             :M-TIME ,#'approximately-now-p
+             :FILE-SIZE ,(length filetext)
+             :OID 475587057170892494251873940086020553338329808131
+             :FLAGS ,(length (namestring filename))
+             :FLAGS-EXTENDED 0
+             :PATH ,(namestring filename))))  )
 
-#+nil (def-test index-add-string (:fixture (index-with-file "test-file" "foo blah."))
-  (git-add filename)
-  (git-write *git-repository-index*)
-  (is
-   (equal
-    (git-entries *git-repository-index*)
-    t)))
+(def-test index-add-pathname (:fixture (index-with-file #P"test-file" "foo blah."))
+  (index-path-test filename filetext))
 
-#+nil (def-test index-add-abspathname (:fixture (index-with-file
-                                           (merge-pathnames (make-pathname :name "test-file")
-                                                            *repository-path*)
+
+(def-test index-add-string (:fixture (index-with-file "test-file" "foo blah."))
+  (index-path-test filename filetext))
+
+(def-test index-add-abspathname (:fixture (index-with-file
+                                           (lambda ()
+                                             (merge-pathnames (make-pathname :name "test-file")
+                                                              *repository-path*))
                                            "foo blah."))
-  (write-string-to-file filename text)
-  (git-add filename)
-  (is
-   (equal
-    (git-entries *git-repository-index*)
-    t)))
+  (let ((filename (enough-namestring filename *repository-path*)))
+    (index-path-test filename filetext)))

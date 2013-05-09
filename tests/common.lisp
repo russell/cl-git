@@ -131,8 +131,8 @@ keys :FILES :MESSAGE :AUTHOR :COMMITTER the returned alist will also
 contain the a :SHA containing the sha1 hash of the newly created
 commit."
   (dolist (file (getf commit :files))
-    (apply #'write-string-to-file file)
-    (git-add file))
+    (funcall #'write-string-to-file (getf file :filename) (getf file :text))
+    (git-add (getf file :filename)))
   (git-write *git-repository-index*)
   (setf (getf commit :sha)
         (make-commit

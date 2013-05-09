@@ -176,6 +176,7 @@ to access the repository."
               (progn
                 ,@body)
            (git-free ,var)))
+      ;; XXX Backwards compatible version of the macro
       `(let ((*git-repository* (git-open :repository ,var)))
          (unwind-protect
               (progn

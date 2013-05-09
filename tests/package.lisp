@@ -27,4 +27,5 @@
   (:import-from #:local-time
                 #:unix-to-timestamp
                 #:timestamp-to-unix
+                #:timestamp-difference
                 #:now))
