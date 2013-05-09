@@ -113,7 +113,7 @@
     %return-value
   (index %index))
 
-(defcfun ("git_index_has_conflicts" git-has-conflicts)
+(defcfun ("git_index_has_conflicts" git-index-has-conflicts)
     %bool
   (index %index))
 

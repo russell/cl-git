@@ -112,7 +112,7 @@
    #:git-version
    #:git-peel
    #:git-index
-   #:git-has-conflicts
+   #:git-index-has-conflicts
    #:git-load
    #:git-read
    #:git-push-url

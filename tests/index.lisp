@@ -76,5 +76,5 @@
     (with-index (index *git-repository*)
       (write-string-to-file filename "foo")
       (git-add filename :index index)
-      (is (eq (git-has-conflicts index)
+      (is (eq (git-index-has-conflicts index)
               nil)))))
