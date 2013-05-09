@@ -82,6 +82,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defcfun ("git_index_new" git-index-new)
+    %return-value
+  (index %index))
+
+(defcfun ("git_index_open" %git-index-open)
+    %return-value
+  (index %index)
+  (path :string))
 
 (defcfun ("git_index_add_bypath" %git-index-add-by-path)
     %return-value
@@ -179,6 +187,26 @@ index."
       (progn ,@body)
        (git-free *git-repository-index*))))
 
+(defun git-index-new ()
+  "Create a new in-memory index that can be used to perform in memory
+operations that may not be written back to the disk."
+  (with-foreign-object (index :pointer)
+    (%git-index-new index)
+    (make-instance 'index
+           :pointer (mem-ref index :pointer)
+           :free-function #'%git-index-free)))
+
+(defmethod git-index ((path string))
+  "Open a new index in a file."
+  (with-foreign-object (index :pointer)
+    (%git-index-open index path)
+    (make-instance 'index
+           :pointer (mem-ref index :pointer)
+           :free-function #'%git-index-free)))
+
+(defmethod git-index ((path pathname))
+  "Open a new index in a file."
+  (git-index (namestring path)))
 
 (defmethod git-entry-count ((index index))
   (git-index-entry-count index))
