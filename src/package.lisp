@@ -87,6 +87,7 @@
    ;; Macros
    #:with-repository
    #:with-repository-index
+   #:with-index
    #:with-git-revisions
    #:bind-git-commits
 

@@ -155,6 +155,17 @@
 (defmethod git-write ((index index))
   (%git-index-write index))
 
+(defmacro with-index ((var &optional repository-or-path) &body body)
+  "Load a repository index uses the current *GIT-REPOSITORY* as the
+current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
+index."
+  `(let ((,var ,(if repository-or-path
+                    `(git-index ,repository-or-path)
+                    `(git-index-new))))
+     (unwind-protect
+          (progn ,@body)
+       (git-free ,var))))
+
 (defmacro with-repository-index (&body body)
   "Load a repository index uses the current *GIT-REPOSITORY* as the
 current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
