@@ -101,8 +101,11 @@
    #:index
    #:tag
    #:repository
+
+   ;; variables
    #:*git-repository-index*
    #:*git-repository*
+
    #:git-capabilities
    #:git-tracking
    #:git-version
