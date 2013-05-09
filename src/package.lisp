@@ -114,6 +114,7 @@
    #:git-index
    #:git-has-conflicts
    #:git-load
+   #:git-read
    #:git-push-url
    #:git-url
    #:git-odb

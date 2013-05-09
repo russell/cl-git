@@ -21,13 +21,17 @@ Index
 
    :param path: the relative path of a file to be added to the repository.
 
-.. cl:generic:: git-clear
+.. cl:method:: git-index common-lisp:pathname
 
-.. cl:generic:: git-write
+.. cl:method:: git-index common-lisp:string
 
-.. cl:generic:: git-read
+.. cl:method:: git-read index
+
+.. cl:method:: git-write index
 
 .. cl:generic:: git-write-tree
+
+.. cl:generic:: git-clear
 
 .. cl:method:: git-entry-by-path index string
 

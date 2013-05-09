@@ -17,6 +17,8 @@ Generic Function Interface
 
 .. cl:generic:: git-load
 
+.. cl:generic:: git-index
+
 .. cl:generic:: git-values
 
 .. cl:generic:: git-author

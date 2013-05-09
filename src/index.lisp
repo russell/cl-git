@@ -159,12 +159,16 @@
     (git-add (namestring path) :index index :stage stage)))
 
 (defmethod git-clear ((index index))
+  "Clear contents of the index removing all entries.  Changes need to
+be written back to disk to take effect."
   (%git-index-clear index))
 
 (defmethod git-read ((index index))
+  "Update the index with objects read from disk."
   (%git-index-read index))
 
 (defmethod git-write ((index index))
+  "Write the git index back to the file system."
   (%git-index-write index))
 
 (defmacro with-index ((var &optional repository-or-path) &body body)
