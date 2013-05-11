@@ -73,6 +73,14 @@
   (let ((filename (enough-namestring filename *repository-path*)))
     (index-path-test filename filetext)))
 
+(def-test index-clear (:fixture (index-with-file #P"test-file" "foo blah."))
+  (is (eq (git-entry-count *git-repository-index*) 0))
+  (git-add filename)
+  (is (eq (git-entry-count *git-repository-index*) 1))
+  (git-clear *git-repository-index*)
+  (is (eq (git-entry-count *git-repository-index*) 0)))
+
+
 (def-test index-has-conflicts (:fixture repository)
   (let ((filename "test-file"))
     (with-index (index *git-repository*)
