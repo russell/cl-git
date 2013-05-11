@@ -104,3 +104,15 @@
                             (git-entry-by-index index-file 0))))
         (when (file-exists-p index-file-path)
           (delete-file index-file-path))))))
+
+(def-test index-new (:fixture repository)
+  (let ((filename "test-file"))
+    (with-index (index *git-repository*)
+      (write-string-to-file filename "foo")
+      (git-add filename :index index)
+      (with-index (index-file)
+        (let ((entry (git-entry-by-index index 0)))
+          ;; Add the entry from the other git index.
+          (git-add entry :index index-file)
+          (plist-equal entry
+                       (git-entry-by-index index-file 0)))))))
