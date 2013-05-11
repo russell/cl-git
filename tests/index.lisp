@@ -22,6 +22,7 @@
 (in-suite :cl-git)
 
 (def-fixture index-with-file (filename filetext)
+  #+sbcl (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
   (with-test-repository ()
     (let ((filename (if (functionp filename)
                         (funcall filename)
