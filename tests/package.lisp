@@ -23,6 +23,7 @@
   (:import-from #:alexandria
                 #:iota)
   (:import-from #:cl-fad
+                #:file-exists-p
                 #:delete-directory-and-files)
   (:import-from #:local-time
                 #:unix-to-timestamp

@@ -49,7 +49,8 @@
   (seconds %time)
   (nanoseconds :unsigned-int))
 
-(defctype struct-index-time (:struct git-index-time))
+(defctype struct-index-time
+    (:struct git-index-time))
 
 (defcstruct git-index-entry
   (ctime (:struct git-index-time))
@@ -67,14 +68,60 @@
 
 
 (defmethod translate-from-foreign (value (type index-entry-type))
-  (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path) value (:struct git-index-entry))
+  (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path)
+                       value
+                       (:struct git-index-entry))
     (list :c-time ctime
-	  :m-time mtime
-	  :file-size file-size
-	  :oid oid
-	  :flags flags
-	  :flags-extended flags-extended
-	  :path path)))
+          :m-time mtime
+          :file-size file-size
+          :oid oid
+          :flags flags
+          :flags-extended flags-extended
+          :path path)))
+
+(defmethod translate-to-foreign (value (type index-entry-type))
+  (let ((index-entry (foreign-alloc '(:struct git-index-entry))))
+    (with-foreign-slots ((file-size flags flags-extended path)
+                         index-entry
+                         (:struct git-index-entry))
+      (with-foreign-slots ((seconds nanoseconds)
+                           (foreign-slot-pointer index-entry '(:struct git-index-entry) 'ctime)
+                           (:struct git-index-time))
+        (let ((time-to-set (getf value :c-time (local-time:now))))
+          (setf seconds time-to-set)
+          (setf nanoseconds (local-time:nsec-of time-to-set))))
+
+      (with-foreign-slots ((seconds nanoseconds)
+                           (foreign-slot-pointer index-entry '(:struct git-index-entry) 'mtime)
+                           (:struct git-index-time))
+        (let ((time-to-set (getf value :m-time (local-time:now))))
+          (setf seconds time-to-set)
+          (setf nanoseconds (local-time:nsec-of time-to-set))))
+
+      (setf file-size (getf value :file-size 0))
+      (setf flags (getf value :flags 0))
+      (oid-to-foreign (getf value :oid 0)
+                      (foreign-slot-pointer
+                       (foreign-slot-pointer
+                        index-entry
+                        '(:struct git-index-entry) 'oid)
+                       '(:struct git-oid) 'id))
+      (setf path (foreign-string-alloc (getf value :path "")))
+      index-entry)))
+
+(defmethod translate-to-foreign ((value list) (type git-signature-type))
+  (declare (ignore type))
+  (let ((signature (foreign-alloc '(:struct git-signature))))
+    (with-foreign-slots ((name email) signature (:struct git-signature))
+      (setf name (getf value :name (getenv "USER")))
+      (setf email (getf value :email (default-email)))
+      (with-foreign-slots ((time offset)
+			   (foreign-slot-pointer signature '(:struct git-signature) 'time)
+			   (:struct timeval))
+        (let ((time-to-set (getf value :time (local-time:now))))
+          (setf time time-to-set)
+          (setf offset (timezone-offset time)))))
+    signature))
 
 (defmethod translate-from-foreign (value (type index-time-struct-type))
   (with-foreign-slots ((seconds nanoseconds) value (:struct git-index-time))
@@ -82,7 +129,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcfun ("git_index_new" git-index-new)
+(defcfun ("git_index_new" %git-index-new)
     %return-value
   (index %index))
 
@@ -90,6 +137,11 @@
     %return-value
   (index %index)
   (path :string))
+
+(defcfun ("git_index_add" %git-index-add)
+    %return-value
+  (index %index)
+  (entry %index-entry))
 
 (defcfun ("git_index_add_bypath" %git-index-add-by-path)
     %return-value
@@ -157,6 +209,9 @@
                    path
                    (enough-namestring path (git-workdir (slot-value index 'facilitator))))))
     (git-add (namestring path) :index index :stage stage)))
+
+(defmethod git-add ((entry list) &key (index *git-repository-index*))
+  (%git-index-add index entry))
 
 (defmethod git-clear ((index index))
   "Clear contents of the index removing all entries.  Changes need to

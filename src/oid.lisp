@@ -48,17 +48,18 @@ the input buffer should be equal to git oid hex size + 1."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun oid-to-foreign (oid foreign)
+  (loop
+    :for c-index :from 0 :below *git-oid-size*
+    :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+    :do
+       (setf (mem-aref foreign :unsigned-char c-index)
+             (ldb (byte 8 byte-index) oid))))
 
 (defmethod translate-to-foreign ((value number) (type oid-type))
   (declare (ignore type))
   (let ((c-oid (foreign-alloc '(:struct git-oid))))
-    (loop
-      :for c-index :from 0 :below *git-oid-size*
-      :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
-      :do
-       (setf (mem-aref (foreign-slot-pointer c-oid '(:struct git-oid) 'id)
-                         :unsigned-char c-index)
-               (ldb (byte 8 byte-index) value)))
+    (oid-to-foreign value (foreign-slot-pointer c-oid '(:struct git-oid) 'id))
     c-oid))
 
 (defmethod translate-to-foreign ((value string) (type oid-type))
@@ -69,6 +70,17 @@ the input buffer should be equal to git oid hex size + 1."
       (values value t)
       (error "Cannot convert type: ~A to git-oid struct" (type-of value))))
 
+(defun oid-from-foreign (value)
+  (let ((lisp-oid 0))
+        (loop
+          :for c-index :from 0 :below *git-oid-size*
+          :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+          :do
+             (setf (ldb (byte 8 byte-index) lisp-oid)
+                   (mem-aref value
+                             :unsigned-char c-index)))
+        lisp-oid))
+
 (defmethod translate-from-foreign (value (type oid-type))
   "Translates a pointer to a libgit2 oid structure to an integer, the lisp
 version of the oid.  If the pointer is a C null pointer return nil.
@@ -77,15 +89,8 @@ reference is symbolic."
   (declare (ignore type))
   (if (null-pointer-p value)
       nil
-      (let ((lisp-oid 0))
-        (loop
-          :for c-index :from 0 :below *git-oid-size*
-          :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
-          :do
-             (setf (ldb (byte 8 byte-index) lisp-oid)
-                   (mem-aref (foreign-slot-pointer value '(:struct git-oid) 'id)
-                             :unsigned-char c-index)))
-        lisp-oid)))
+      (let ((ptr (oid-from-foreign (foreign-slot-pointer value '(:struct git-oid) 'id))))
+        ptr)))
 
 (defmethod translate-from-foreign (value (type oid-struct-type))
   "No clue why this all works, seems dodgy to me.  But I think it does."

@@ -58,12 +58,23 @@
                  :alphanumericp #'alpha-or-whitespace-p))
 
 (defun gen-temp-path ()
-  (merge-pathnames (concatenate 'string  "cl-git.test-"
-                                (funcall
-                                 (gen-string :length (gen-integer :min 5 :max 10)
-                                             :elements (gen-alpha-numeric)))
-                                "/")
-                   *test-repository-path*))
+  (merge-pathnames
+   (make-pathname
+    :directory `(:relative
+                ,(concatenate 'string  "cl-git-test-"
+                             (funcall
+                              (gen-string :length (gen-integer :min 5 :max 10)
+                                          :elements (gen-alpha-numeric))))))
+   *test-repository-path*))
+
+(defun gen-temp-file-path ()
+  (merge-pathnames
+   *test-repository-path*
+   (make-pathname
+    :name (concatenate 'string  "cl-git-test-"
+                       (funcall
+                        (gen-string :length (gen-integer :min 5 :max 10)
+                                    :elements (gen-alpha-numeric)))))))
 
 (defun random-number (min max)
   (funcall (gen-integer :min min :max max)))

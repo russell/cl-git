@@ -35,10 +35,12 @@
   "Compare an plist, if the plist contains a function then use that as
   a predicate."
   (loop :for (key value) :on b :by #'cddr
-        :if (functionp value)
-          :do (is (funcall value (getf a key)))
-        :else
-          :do (is (equal (getf a key) value))))
+        :do (cond
+              ((functionp value)
+               (is (funcall value (getf a key))))
+              ((eql (type-of value) 'local-time:timestamp)
+               (is (local-time:timestamp= (getf a key) value)))
+              (t (is (equal (getf a key) value))))))
 
 (defun approximately-now-p (a)
   (< (timestamp-difference a (now)) 5))
@@ -78,3 +80,19 @@
       (git-add filename :index index)
       (is (eq (git-index-has-conflicts index)
               nil)))))
+
+(def-test index-open (:fixture repository)
+  (let ((filename "test-file")
+        (index-file-path (gen-temp-path)))
+    (with-index (index *git-repository*)
+      (write-string-to-file filename "foo")
+      (git-add filename :index index)
+      (unwind-protect
+           (with-index (index-file index-file-path)
+             (let ((entry (git-entry-by-index index 0)))
+               ;; Add the entry from the other git index.
+               (git-add entry :index index-file)
+               (plist-equal entry
+                            (git-entry-by-index index-file 0))))
+        (when (file-exists-p index-file-path)
+          (delete-file index-file-path))))))

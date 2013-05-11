@@ -27,6 +27,7 @@
                 #:with-foreign-pointer-as-string
                 #:foreign-slot-pointer
                 #:foreign-alloc
+                #:foreign-string-alloc
                 #:null-pointer
                 #:null-pointer-p
                 #:pointerp
