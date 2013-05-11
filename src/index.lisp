@@ -146,8 +146,7 @@
 (defcfun ("git_index_add_bypath" %git-index-add-by-path)
     %return-value
   (index %index)
-  (path :string)
-  (stage :int)) ; an int from 0 to 4
+  (path :string))
 
 (defcfun ("git_index_clear" %git-index-clear)
     :void
@@ -201,14 +200,14 @@
   (:documentation "A git index"))
 
 
-(defmethod git-add ((path string) &key (index *git-repository-index*) (stage 0))
-  (%git-index-add-by-path index path stage))
+(defmethod git-add ((path string) &key (index *git-repository-index*))
+  (%git-index-add-by-path index path))
 
-(defmethod git-add ((path pathname) &key (index *git-repository-index*) (stage 0))
+(defmethod git-add ((path pathname) &key (index *git-repository-index*))
   (let ((path (if (pathname-relative-p path)
                    path
                    (enough-namestring path (git-workdir (slot-value index 'facilitator))))))
-    (git-add (namestring path) :index index :stage stage)))
+    (git-add (namestring path) :index index)))
 
 (defmethod git-add ((entry list) &key (index *git-repository-index*))
   (%git-index-add index entry))
