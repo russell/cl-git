@@ -115,7 +115,7 @@ optional instance of a GIT-SIGNATURE the details the committer.
                           parents))
 
     (with-foreign-objects ((%parents :pointer (length parents))
-                           (newoid 'git-oid))
+                           (newoid '(:struct git-oid)))
       (with-foreign-strings ((%message message)
                              (%message-encoding "UTF-8")
                              (%update-ref update-ref))
