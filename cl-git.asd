@@ -10,13 +10,12 @@
   :licence "Lisp-LGPL"
   :components ((:static-file "cl-git.asd")
                (:module "src"
-                :serial t
                 :components
                 ((:file "package")
-                 (:file "api" :depends-on ("package"))
-                 (:file "cffi-types" :depends-on ("package"))
-                 (:file "git-pointer" :depends-on ("package"))
                  (:file "cl-git" :depends-on ("package"))
+                 (:file "api" :depends-on ("package"))
+                 (:file "cffi-types" :depends-on ("package" "cl-git"))
+                 (:file "git-pointer" :depends-on ("package"))
                  (:file "utils" :depends-on ("package"))
                  (:file "error" :depends-on ("package"))
                  (:file "libgit2" :depends-on ("package"))
