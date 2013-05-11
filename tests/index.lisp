@@ -56,7 +56,8 @@
              :OID 475587057170892494251873940086020553338329808131
              :FLAGS ,(length (namestring filename))
              :FLAGS-EXTENDED 0
-             :PATH ,(namestring filename))))  )
+             :PATH ,(namestring filename)
+             :STAGE 0))))
 
 (def-test index-add-pathname (:fixture (index-with-file #P"test-file" "foo blah."))
   (index-path-test filename filetext))
