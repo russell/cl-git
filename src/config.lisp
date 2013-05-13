@@ -87,10 +87,12 @@ GIT-REPOSITORY-CONFIG."
                          (null-pointer))
     *config-values*))
 
-(defmethod git-config-open-level ((config config) level)
+(defmethod git-config ((config config) &key level)
   "Returns the key value pairs in the config as an association list."
-  (with-foreign-object (%config :pointer)
-    (%git-config-open-level %config config level)
-    (make-instance-object :pointer (mem-aref %config :pointer)
-                          :facilitator (facilitator config)
-                          :type :config)))
+  (if level
+      (with-foreign-object (%config :pointer)
+        (%git-config-open-level %config config level)
+        (make-instance-object :pointer (mem-aref %config :pointer)
+                              :facilitator (facilitator config)
+                              :type :config))
+      config))

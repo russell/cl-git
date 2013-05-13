@@ -131,13 +131,17 @@ Or for a bare repository to the repository itself."
   "Returns the working directory for the repository."
   (%git-repository-workdir repository))
 
-(defmethod git-config ((repository repository))
-  (with-foreign-object (config :pointer)
-    (%git-repository-config config repository)
-    (make-instance 'config
-           :pointer (mem-ref config :pointer)
-           :facilitator repository
-           :free-function #'git-config-free)))
+(defmethod git-config ((repository repository) &key level)
+  (let ((config
+          (with-foreign-object (config :pointer)
+            (%git-repository-config config repository)
+            (make-instance 'config
+                           :pointer (mem-ref config :pointer)
+                           :facilitator repository
+                           :free-function #'git-config-free))))
+    (if level
+        (git-config config :level level)
+        config)))
 
 (defmethod git-index ((repository repository))
   (with-foreign-object (index :pointer)
