@@ -26,10 +26,22 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defcenum git-config-level
+  (:system 1)
+  (:xdg 2)
+  (:global 3)
+  (:local 4)
+  (:highest-level -1))
+
+(defcstruct git-config-entry
+  (name :string)
+  (value :string)
+  (level git-config-level))
 
 (defcfun ("git_config_free" git-config-free)
     :void
-  "Free the git configuration object that is acquired with GIT-REPOSITORY-CONFIG."
+  "Free the git configuration object that is acquired with
+GIT-REPOSITORY-CONFIG."
   (config %config))
 
 (defcfun ("git_config_foreach" %git-config-foreach)
@@ -37,6 +49,13 @@
   (config %config)
   (callback :pointer)
   (payload :pointer))
+
+(defcfun ("git_config_open_level" %git-config-open-level)
+    %return-value
+  "Limit return a new git config object that is limited to the level specified."
+  (config :pointer)
+  (parent %config)
+  (level git-config-level))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -46,8 +65,9 @@
 
 (defparameter *config-values* nil)
 
-(defcallback collect-config-values :int ((key :string) (value :string))
-  (push (cons key value) *config-values*)
+(defcallback collect-config-values :int ((entry git-config-entry) (data :pointer))
+  (with-foreign-slots ((name value level) entry (:struct git-config-entry))
+    (push (list :name name :value value :level level) *config-values*))
   0);;; replace with success
 
 
@@ -57,7 +77,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass config (git-pointer) ())
+(defclass config (object) ())
 
 (defmethod git-values ((config config))
   "Returns the key value pairs in the config as an association list."
@@ -66,3 +86,11 @@
                          (callback collect-config-values)
                          (null-pointer))
     *config-values*))
+
+(defmethod git-config-open-level ((config config) level)
+  "Returns the key value pairs in the config as an association list."
+  (with-foreign-object (%config :pointer)
+    (%git-config-open-level %config config level)
+    (make-instance-object :pointer (mem-aref %config :pointer)
+                          :facilitator (facilitator config)
+                          :type :config)))

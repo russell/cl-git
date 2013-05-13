@@ -9,6 +9,7 @@
                  (:file "commit" :depends-on ("common"))
                  (:file "index" :depends-on ("common" "fixtures"))
                  (:file "repository" :depends-on ("common" "fixtures"))
+                 (:file "config" :depends-on ("common" "fixtures"))
                  (:file "references" :depends-on ("common"))
                  (:file "revwalker" :depends-on ("common")))))
   :in-order-to ((compile-op (load-op :cl-git))))

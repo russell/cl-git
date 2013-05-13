@@ -53,6 +53,7 @@
    #:git-write
    #:git-clear
    #:git-config
+   #:git-config-open-level
    #:git-values
    #:git-raw-size
    #:git-raw-content

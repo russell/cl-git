@@ -100,6 +100,7 @@ wrap git pointers to repositories, config, index etc."
             (:tag 'tag)
             (:tree 'tree)
             (:blob 'blob)
+            (:config 'config)
             (t 'object))))
 
     (make-instance obj-type

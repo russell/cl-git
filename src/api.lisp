@@ -239,6 +239,11 @@ start defaults to 0."))
 
 (defgeneric git-config (object))
 
+(defgeneric git-config-open-level (object level)
+  (:documentation "Limit the git config to a specific level.  Possible
+levels are :HIGHEST-LEVEL :SYSTEM :XDG :GLOBAL or :LOCAL"))
+
+
 (defgeneric git-index (object)
   (:documentation "Returns an index object for OBJECT (a repository)"))
 
