@@ -72,6 +72,14 @@
 			    :name name)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defcfun ("git_remote_create" %git-remote-create)
+    %return-value
+  (remote :pointer)
+  (repository %repository)
+  (name :string)
+  (url :string))
+
 (defcfun ("git_remote_list" %git-remote-list)
     %return-value
   (strings :pointer)
@@ -131,11 +139,11 @@
   (bytes :pointer)
   (stats :pointer))
 
-(defcallback collect-remote-ls-values :int ((remote-head 
-					     (:pointer (:struct git-remote-head))) 
+(defcallback collect-remote-ls-values :int ((remote-head
+					     (:pointer (:struct git-remote-head)))
 					    (payload :pointer))
   (declare (ignore payload))
-  (push (convert-from-foreign remote-head '(:struct git-remote-head)) 
+  (push (convert-from-foreign remote-head '(:struct git-remote-head))
 	*remote-ls-values*)
   0)
 
@@ -145,14 +153,28 @@
   (callback :pointer)
   (payload :pointer))
 
+(defcfun ("git_remote_free" %git-remote-free)
+    :void
+  (remote %remote))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defclass remote (git-pointer) ())
+
+
+(defmethod git-create ((class (eql :remote)) name
+                       &key url (repository *git-repository*))
+  (with-foreign-object (remote :pointer)
+    (%git-remote-create remote repository name url)
+    (make-instance 'remote
+           :pointer (mem-ref remote :pointer)
+           :facilitator repository
+           :free-function #'%git-remote-free)))
 
 (defmethod git-list ((class (eql :remote))
              &key (repository *git-repository*))
   (with-foreign-object (string-array '(:struct git-strings))
     (%git-remote-list string-array repository)
-    (prog1 
+    (prog1
 	(convert-from-foreign string-array '%git-strings)
       (free-translated-object string-array '%git-strings t))))
 
@@ -170,10 +192,10 @@
   (%git-remote-name remote))
 
 (defmethod git-connect ((remote remote) &key (direction :fetch))
-  "Opens the remote connection.  
+  "Opens the remote connection.
 The url used for the connection can be queried by `git-url'.
 
-The opened connection is one way, either data is retrieved from the remote, 
+The opened connection is one way, either data is retrieved from the remote,
 or data is send to the remote.  The direction is specified with the :direction argument,
 :fetch is for retrieving data, :push is for sending data."
   (%git-remote-connect remote direction))

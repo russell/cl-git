@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git an Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2013 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2012-2013 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -17,18 +17,26 @@
 ;; License along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
 
-
 (in-package #:cl-git-tests)
+
 
 (in-suite :cl-git)
 
+(def-test list-remotes (:fixture repository-with-commits)
+  "Create a new repository and check it's remotes."
+  (is
+   (eq
+    (git-list :remote)
+    nil)))
 
-(def-fixture repository (&key bare)
-  (with-test-repository (:bare bare)
-    (&body)))
-
-
-(def-fixture repository-with-commits ()
-  (with-test-repository ()
-    (make-test-revisions 10)
-    (&body)))
+(def-test create-remote (:fixture repository-with-commits)
+  "Create a remote and check it's details."
+  (git-create :remote "origin" :url "/dev/null" :repository *git-repository*)
+  (is
+   (equal
+    (git-list :remote)
+    '("origin")))
+  (is
+   (equal
+    (git-url (git-load :remote "origin"))
+    "/dev/null")))
