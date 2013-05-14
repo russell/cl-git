@@ -222,8 +222,8 @@ collection OBJECT."))
 
 (defgeneric git-entries (object &key start end)
   (:documentation "Returns the elements of the collection OBJECT as a
-list.  The start and end keyword arguments allow to retrieve a subset of all elements.
-All entries with index satisfying
+list.  The start and end keyword arguments allow to retrieve a subset
+of all elements.  All entries with index satisfying
 
    start <= index < end
 

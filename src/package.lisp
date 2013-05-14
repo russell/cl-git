@@ -54,6 +54,7 @@
    #:git-clear
    #:git-config
    #:git-config-open-level
+   #:git-connect
    #:git-values
    #:git-raw-size
    #:git-raw-content

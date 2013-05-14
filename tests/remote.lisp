@@ -40,3 +40,19 @@
    (equal
     (git-url (git-load :remote "origin"))
     "/dev/null")))
+
+
+(def-test fetch-remotes (:fixture repository-with-commits)
+  "Create a new repository and check it's remotes."
+  (let ((remote-repo-path (gen-temp-path)))
+    (unwind-protect
+	     (git-init :repository remote-repo-path)
+         (with-repository (remote-repo remote-repo-path)
+           (git-create :remote "origin"
+                       :url (concatenate 'string "file://" (namestring *repository-path*))
+                       :repository remote-repo)
+           (let ((remote (git-load :remote "origin" :repository remote-repo)))
+             (git-connect remote)
+             (git-download remote)))
+      (progn
+        (delete-directory-and-files remote-repo-path)))))
