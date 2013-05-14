@@ -69,6 +69,10 @@ Status
 
 .. cl:function:: git-head-detached
 
+.. cl:function:: git-repository-is-bare
+                                  
+.. cl:function:: git-repository-is-empty
+
 .. cl:method:: git-path repository
 
 .. cl:method:: git-workdir repository

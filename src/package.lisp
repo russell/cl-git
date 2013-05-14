@@ -131,6 +131,8 @@
    #:git-head
    #:git-head-orphaned
    #:git-head-detached
+   #:git-repository-is-empty
+   #:git-repository-is-bare
    #:git-path
    #:git-workdir
    #:git-has-log

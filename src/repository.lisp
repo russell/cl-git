@@ -68,9 +68,19 @@
   (out :pointer)
   (repository %repository))
 
+(defcfun ("git_repository_is_empty" git-repository-is-empty)
+    %bool
+  "Return T if the repository is empty and contains no references."
+  (repository %repository))
+
+(defcfun ("git_repository_is_bare" git-repository-is-bare)
+    %bool
+  "Return T if the repository is bare."
+  (repository %repository))
+
 (defcfun ("git_repository_head_detached" git-head-detached)
     %bool
-  "Returns t if the HEAD in the repository is detached, in other words,
+  "Returns T if the HEAD in the repository is detached, in other words,
 the HEAD reference is not a symbolic reference to a branch, but a
 direct commit."
   (repository %repository))
@@ -108,6 +118,7 @@ contains the object database."))
            :free-function #'git-repository-free)))
 
 (defmethod git-init ((class (eql :repository)) (path pathname) &rest r)
+  "Open an existing repository located at PATH."
   (apply #'git-init class (namestring path) r))
 
 (defmethod git-open ((class (eql :repository)) (path string) &key &allow-other-keys)
@@ -144,6 +155,7 @@ Or for a bare repository to the repository itself."
         config)))
 
 (defmethod git-index ((repository repository))
+  "Return the index of the repository."
   (with-foreign-object (index :pointer)
     (%git-repository-index index repository)
     (make-instance 'index

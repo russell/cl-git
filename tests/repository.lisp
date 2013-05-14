@@ -80,6 +80,19 @@
        (git-head-detached *git-repository*)
        nil)))
 
+(def-test is-repository-empty (:fixture (repository))
+  "Check that the repository is empty."
+  (is (eq (git-repository-is-empty *git-repository*) t))
+  (make-test-revision)
+  (is (eq (git-repository-is-empty *git-repository*) nil)))
+
+(def-test is-repository-bare (:fixture (repository :bare t))
+  "Check that the repository is bare."
+  (is
+   (eq
+    (git-repository-is-bare *git-repository*)
+    t)))
+
 (def-test repository-head-orphaned (:fixture (repository))
   "Confirm that the current head is orphaned then check that not."
   ;; confirm head is orphaned
