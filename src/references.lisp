@@ -63,7 +63,7 @@
   (repository %repository)
   (name :string)
   (oid %oid)
-  (force %bool))
+  (force :boolean))
 
 (defcfun ("git_reference_symbolic_create" %git-reference-symbolic-create)
     %return-value
@@ -71,7 +71,7 @@
   (repository %repository)
   (name :string)
   (target :string)
-  (force %bool))
+  (force :boolean))
 
 (defcfun ("git_reference_free" %git-reference-free)
     :void
@@ -82,17 +82,17 @@
   (reference %reference))
 
 (defcfun ("git_reference_is_branch" git-is-branch)
-    %bool
+    :boolean
   "Returns t if the reference is a local branch."
   (reference %reference))
 
 (defcfun ("git_reference_is_remote" git-is-remote)
-    %bool
+    :boolean
   "Returns t if the reference lives in the refs/remotes namespace."
   (reference %reference))
 
 (defcfun ("git_reference_has_log" git-has-log)
-    %bool
+    :boolean
   "Returns t if there exists a REFLOG for the reference."
   (reference %reference))
 

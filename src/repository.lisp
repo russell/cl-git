@@ -69,24 +69,24 @@
   (repository %repository))
 
 (defcfun ("git_repository_is_empty" git-repository-is-empty)
-    %bool
+    :boolean
   "Return T if the repository is empty and contains no references."
   (repository %repository))
 
 (defcfun ("git_repository_is_bare" git-repository-is-bare)
-    %bool
+    :boolean
   "Return T if the repository is bare."
   (repository %repository))
 
 (defcfun ("git_repository_head_detached" git-head-detached)
-    %bool
+    :boolean
   "Returns T if the HEAD in the repository is detached, in other words,
 the HEAD reference is not a symbolic reference to a branch, but a
 direct commit."
   (repository %repository))
 
 (defcfun ("git_repository_head_orphan" git-head-orphaned)
-    %bool
+    :boolean
   "Returns t if the HEAD points to a commit that doesn't exist."
   (repository %repository))
 

@@ -47,8 +47,8 @@
   0)
 
 (defcfun ("git_branch_is_head" git-is-head)
-    %bool
-  "Returns t is the current HEAD points to this branch.  
+    :boolean
+  "Returns t is the current HEAD points to this branch.
 This means that this is the branch that is checked out."
   (branch %reference))
 

@@ -106,7 +106,7 @@
   (index %index))
 
 (defcfun ("git_index_has_conflicts" git-index-has-conflicts)
-    %bool
+    :boolean
   (index %index))
 
 (defcfun ("git_index_write_tree" %git-index-write-tree)

@@ -59,7 +59,7 @@
 			    :total total)))
 
 (defcstruct (git-remote-head :class remote-head-struct-type)
-  (local %bool)
+  (local :boolean)
   (oid (:struct git-oid))
   (loid (:struct git-oid))
   (name :string))
@@ -108,7 +108,7 @@
   (remote %remote))
 
 (defcfun ("git_remote_connected" %git-remote-connected)
-  %bool
+  :boolean
   (remote %remote))
 
 (defcenum %direction

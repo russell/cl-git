@@ -23,16 +23,6 @@
 (defctype size-t :unsigned-int)
 (defctype off-t :uint64)
 
-(define-foreign-type bool-type ()
-  nil
-  (:actual-type :int)
-  (:simple-parser %bool))
-
-(defmethod translate-to-foreign (value (type bool-type))
-  (if value 1 0))
-
-(defmethod translate-from-foreign (value (type bool-type))
-  (if (= value 0) nil t))
 
 (define-foreign-type git-object ()
   ()
