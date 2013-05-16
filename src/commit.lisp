@@ -89,9 +89,9 @@ Commits that have more then one parent are considered to be merges."))
 
 (defun make-commit (oid message &key
                                   (update-ref "HEAD")
-                                  (author nil)
-                                  (committer nil)
-                                  (parents nil)
+                                  author
+                                  committer
+                                  parents
                                   (repository *git-repository*))
   "Create a new commit from the tree with the OID specified and
 MESSAGE.  Optional :UPDATE-REF is the name of the reference that will
@@ -134,7 +134,8 @@ optional instance of a GIT-SIGNATURE the details the committer.
          tree
          (length parents)
          %parents))
-      (convert-from-foreign newoid '%oid))))
+      (git-lookup :commit (convert-from-foreign newoid '%oid)
+                  :repository repository))))
 
 (defmethod git-lookup ((class (eql :commit))
                oid &key (repository *git-repository*))

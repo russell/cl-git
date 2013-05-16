@@ -146,12 +146,13 @@ commit."
     (git-add (getf file :filename)))
   (git-write *git-repository-index*)
   (setf (getf commit :sha)
-        (make-commit
-         (git-write-tree *git-repository-index*)
-         (getf commit :message)
-         :parents (getf commit :parents)
-         :author (getf commit :author)
-         :committer (getf commit :committer)))
+        (git-id
+         (make-commit
+          (git-write-tree *git-repository-index*)
+          (getf commit :message)
+          :parents (getf commit :parents)
+          :author (getf commit :author)
+          :committer (getf commit :committer))))
   commit)
 
 (defun random-commit (&key
