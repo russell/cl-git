@@ -37,6 +37,16 @@
   (callback :pointer)
   (payload :pointer))
 
+(defcfun ("git_tag_create" %git-tag-create)
+    %return-value
+  (oid %oid)
+  (repo %repository)
+  (tag-name :string)
+  (target %object)
+  (tagger %git-signature)
+  (message :string)
+  (force :boolean))
+
 (defcfun ("git_tag_type" git-tag-type)
     git-object-type
   (tag %tag))
@@ -80,18 +90,31 @@
 (defclass tag (object)
   ())
 
+
+(defun make-tag (name message &key
+                                repository
+                                target
+                                tagger
+                                force)
+  ;; TODO should catch exists error and offer a continue
+  (with-foreign-object (newoid '(:struct git-oid))
+    (with-foreign-strings ((%name name)
+                           (%message message))
+      (%git-tag-create newoid repository %name target tagger %message force))
+    (git-lookup :tag (convert-from-foreign newoid '%oid) :repository repository)))
+
 (defmethod git-list ((class (eql :tag))
 		     &key (repository *git-repository*))
-  "Returns a list of tag names for the repository.  
+  "Returns a list of tag names for the repository.
 
 Important Note:  This is the list of tag names as the user thinks of tags.
-Tag objects in libgit2 and cl-git are however a different thing.  
+Tag objects in libgit2 and cl-git are however a different thing.
 
 Also the list of these values are the strings the user see, but not the
 strings they are identified with.  So this call is rather useless."
   (with-foreign-object (string-array '(:struct git-strings))
     (%git-tag-list string-array repository)
-    (prog1 
+    (prog1
 	(convert-from-foreign string-array '%git-strings)
       (free-translated-object string-array '%git-strings t))))
 
@@ -114,7 +137,7 @@ strings they are identified with.  So this call is rather useless."
                oid &key (repository *git-repository*))
   (git-object-lookup oid class :repository repository))
 
-(defmethod git-lookup-byname ((class (eql :tag)) (name string) 
+(defmethod git-lookup-byname ((class (eql :tag)) (name string)
 			      &key (repository *git-repository*))
   (with-foreign-object (reference :pointer)
     (%git-tag-lookup-byname reference repository name)
@@ -136,11 +159,12 @@ strings they are identified with.  So this call is rather useless."
   (git-tag-message tag))
 
 (defmethod git-target ((tag tag) &key (type :object))
-  "Returns the target of a tag.  
-The optional :type keyword arguments specifies in which form the target is returned:
+  "Returns the target of a tag.
+The optional :TYPE keyword arguments specifies in which form the
+target is returned:
 
-- if :type is :object it will return a git object.
-- if :type is :oid, it will return an OID for the target object."
+- if :TYPE is :OBJECT it will return a git object.
+- if :TYPE is :OID, it will return an OID for the target object."
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
     (case type

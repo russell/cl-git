@@ -84,8 +84,9 @@
    ;; errors
    #:unresolved-reference-error
 
-   ;; Bigger functions
+   ;; new objects
    #:make-commit
+   #:make-tag
 
    ;; Macros
    #:with-repository
