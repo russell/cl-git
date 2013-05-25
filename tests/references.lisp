@@ -46,14 +46,14 @@
 (def-test references-list-oid (:fixture reference)
   (is
    (equal ;; test the git-list default args.
-    (sort-strings (list "refs/heads/oid" "refs/heads/master"))
-    (sort-strings (git-list :reference)))))
+    (sort-strings (git-list :reference))
+    (sort-strings (list "refs/heads/oid" "refs/heads/master")))))
 
 (def-test references-list-symbolic (:fixture reference)
   (is
    (equal
-    (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master"))
-    (sort-strings (git-list :reference :flags '(:oid :symbolic))))))
+    (sort-strings (git-list :reference :flags '(:oid :symbolic)))
+    (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master")))))
 
 (def-test reference-lookup-oid (:fixture reference)
   (is
