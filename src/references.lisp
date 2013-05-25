@@ -106,8 +106,24 @@
 
 (defclass reference (git-pointer) ())
 
+;;; XXX (RS) should probably look at using the groveller to get these
+;;; values.
+(defvar reference-dir "refs/")
+(defvar reference-heads-dir (concatenate 'string reference-dir "heads/"))
+(defvar reference-tags-dir (concatenate 'string  reference-dir "tags/"))
+(defvar reference-remotes-dir (concatenate 'string reference-dir "remotes/"))
+
+
 (defun symbolic-p (reference)
   (when (member :symbolic (git-reference-type reference))
+    t))
+
+(defun remote-p (reference)
+  (when (eq 0 (search reference-remotes-dir (git-name reference)))
+    t))
+
+(defun branch-p (reference)
+  (when (eq 0 (search reference-heads-dir (git-name reference)))
     t))
 
 (defmethod %git-lookup-by-name ((class (eql 'reference)) name repository)
@@ -138,6 +154,12 @@ symbolic reference."
            :free-function #'%git-reference-free)))
 
 
+(defun make-reference-from-name (name repository)
+  "Make a weak reference by name that can be looked-up later."
+  (make-instance 'reference :name name
+                            :facilitator repository
+                            :free-function #'%git-reference-free))
+
 (defmethod git-list ((class (eql :reference))
              &key (repository *git-repository*) (flags '(:oid)))
   "List all the refs, filter by FLAGS.  The flag options
@@ -151,12 +173,11 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
 
 
-(defmethod git-create ((class (eql :reference)) name
-               &key
-             (repository *git-repository*)
-             (type :oid)
-             force
-             target)
+(defmethod git-create ((class (eql 'reference)) name repository
+                       &key
+                         (type :oid)
+                         force
+                         target)
   "Create a reference to TARGET.
 The type of reference depends on TYPE.  If TYPE is :OID the value of
 TARGET should be an OID and a direct reference is created.  If TYPE
@@ -215,7 +236,9 @@ or :SYMBOLIC"
   (git-reference-type object))
 
 (defmethod git-name ((object reference))
-  (%git-reference-name object))
+  (if (slot-value object 'libgit2-name)
+      (slot-value object 'libgit2-name)
+      (%git-reference-name object)))
 
 (defmethod git-target ((reference reference) &key (type :object))
   "Returns the Object that this reference points to.

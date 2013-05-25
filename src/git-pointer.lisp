@@ -36,14 +36,43 @@
 ;;;
 
 (defclass git-pointer ()
-  ((libgit2-pointer :reader pointer :initarg :pointer :initform (null-pointer)
+  ((libgit2-pointer :initarg :pointer
+                    :initform (null-pointer)
                     :documentation "A CFFI pointer from libgit2.
 This is the git object that is wrapped by the instance of this class.")
+   (libgit2-oid :initarg :oid :initform nil)
+   (libgit2-name :initarg :name :initform nil)
+   (libgit2-disposed :initform nil)
    (free-function :reader free-function :initarg :free-function :initform nil)
    (facilitator :accessor facilitator :initarg :facilitator :initform nil)
    (finalizer-data :accessor finalizer-data :initform (cons t nil)))
   (:documentation "Class wrapping a pointer, handles finalization and freeing of the underlying object"))
 
+(defvar object-type-mapping (list 'commit :commit 'tree :tree 'blob :blob 'tag :tag))
+
+(defmethod pointer ((object git-pointer))
+  "Try and resolve the pointer if it isn't set."
+  (when (and (null-pointer-p (slot-value object 'libgit2-pointer))
+             (not (slot-value object 'libgit2-disposed)))
+    (cond
+      ;; Resolve by oid
+      ((slot-value object 'libgit2-oid)
+       (setf (slot-value object 'libgit2-pointer)
+             (git-object-lookup-ptr (slot-value object 'libgit2-oid)
+                                    (getf object-type-mapping (type-of object))
+                                    (facilitator object)))
+       (enable-garbage-collection object)
+       (setf (slot-value object 'libgit2-oid) nil))
+      ;; Resolve by name
+      ((slot-value object 'libgit2-name)
+       (setf (slot-value object 'libgit2-pointer)
+             (%git-lookup-by-name (type-of object)
+                                  (slot-value object 'libgit2-name)
+                                  (facilitator object)))
+       (enable-garbage-collection object)
+       (setf (slot-value object 'libgit2-name) nil))
+      (t (error "Unable to lookup object in git repository."))))
+  (slot-value object 'libgit2-pointer))
 
 
 (defun mapc-weak (function list)
@@ -80,32 +109,41 @@ pointer to null-pointer as well."
       (internal-dispose (finalizer-data object)
             (pointer object)
             (free-function object))
-      (setf (slot-value object 'libgit2-pointer) nil))))
+      (setf (slot-value object 'libgit2-pointer) nil)
+      (setf (slot-value object 'libgit2-disposed) t))))
 
 (defmethod print-object ((object git-pointer) stream)
   (print-unreadable-object (object stream :type t :identity t)
-    (if (pointer object)
-        (format stream "~X" (pointer-address (pointer object)))
-        (princ "(disposed)" stream))))
+    (cond
+      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
+       (format stream "~X" (pointer-address (pointer object))))
+      ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
+       (princ "(weak)" stream))
+      ((slot-value object 'libgit2-disposed)
+       (princ "(disposed)" stream)))))
 
 (defmethod git-free ((object git-pointer))
   (dispose object)
   nil)
 
+(defmethod enable-garbage-collection ((instance git-pointer))
+  (when (slot-value instance 'libgit2-pointer)
+    (let ((finalizer-data (finalizer-data instance))
+          (pointer (slot-value instance 'libgit2-pointer))
+          (free-function (free-function instance)))
+
+      (unless finalizer-data (error "No Finalizer data"))
+      (unless free-function (error "No Free function"))
+
+      (when (facilitator instance)
+        (push (make-weak-pointer instance)
+              (cdr (finalizer-data (facilitator instance)))))
+
+      (finalize instance
+                (lambda ()
+                  (internal-dispose finalizer-data pointer free-function))))))
+
 (defmethod initialize-instance :after ((instance git-pointer) &rest r)
   "Setup the finalizer to call internal-dispose with the right arguments."
-  (declare (ignore r))
-  (let ((finalizer-data (finalizer-data instance))
-        (pointer (pointer instance))
-        (free-function (free-function instance)))
-
-    (unless finalizer-data (error "No Finalizer data"))
-    (unless free-function (error "No Free function"))
-
-    (when (facilitator instance)
-      (push (make-weak-pointer instance)
-            (cdr (finalizer-data (facilitator instance)))))
-
-    (finalize instance
-              (lambda ()
-                (internal-dispose finalizer-data pointer free-function)))))
+  (when (getf r :pointer)
+    (enable-garbage-collection instance)))
