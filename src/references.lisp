@@ -105,6 +105,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass reference (git-pointer) ())
+(defclass symbolic-reference (reference) ())
+
+(defun git-reference-oid-p (reference)
+  (when (member :oid (git-reference-type reference))
+    t))
 
 (defmethod git-lookup ((class (eql :reference)) name
                &key (repository *git-repository*))
@@ -114,7 +119,9 @@ We need to figure this out by using the type argument to do dispatch."
   (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (reference :pointer)
     (%git-reference-lookup reference repository name)
-    (make-instance 'reference
+    (make-instance (if (git-reference-oid-p (mem-ref reference :pointer))
+                       'reference
+                       'symbolic-reference)
            :pointer (mem-ref reference :pointer)
            :facilitator repository
            :free-function #'%git-reference-free)))

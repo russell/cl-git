@@ -56,14 +56,22 @@
     (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master")))))
 
 (def-test reference-lookup-oid (:fixture reference)
-  (is
-   (equal (git-name (git-lookup :reference "refs/heads/oid"))
-          "refs/heads/oid")))
+  (let ((ref (git-lookup :reference "refs/heads/oid")))
+      (is
+       (equal (git-name ref)
+              "refs/heads/oid"))
+    (is
+     (equal (type-of ref)
+            'reference))))
 
 (def-test reference-lookup-symbolic (:fixture reference)
-  (is
-   (equal (git-name (git-lookup :reference "refs/heads/symbolic"))
-          "refs/heads/symbolic")))
+  (let ((ref (git-lookup :reference "refs/heads/symbolic")))
+    (is
+     (equal (git-name ref)
+            "refs/heads/symbolic"))
+    (is
+     (equal (type-of ref)
+            'symbolic-reference))))
 
 (def-test reference-accessors-oid (:fixture reference-with-context)
   "Create oid reference and check accessors."
