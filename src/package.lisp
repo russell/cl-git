@@ -1,6 +1,7 @@
 ;;;; package.lisp
 
 (defpackage #:cl-git
+  (:nicknames :git)
   (:use #:cl)
   (:import-from #:anaphora
                 #:acond
