@@ -98,6 +98,7 @@
    ;; Classes.
    #:blob
    #:reference
+   #:symbolic-reference
    #:commit
    #:tree
    #:remote
