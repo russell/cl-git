@@ -37,7 +37,7 @@
 
 (defclass git-pointer ()
   ((libgit2-pointer :reader pointer :initarg :pointer :initform (null-pointer)
-            :documentation "A CFFI pointer from libgit2.
+                    :documentation "A CFFI pointer from libgit2.
 This is the git object that is wrapped by the instance of this class.")
    (free-function :reader free-function :initarg :free-function :initform nil)
    (facilitator :accessor facilitator :initarg :facilitator :initform nil)
@@ -64,9 +64,9 @@ This function implements most of the disposing/freeing logic, but
 because it is called from the finalize method it cannot access the relevant
 object directly."
   (when (car finalizer-data)
-    (setf (car finalizer-data) nil)             ;; mark as disposed
-    (mapc-weak #'dispose (cdr finalizer-data))  ;; dispose dependends
-    (funcall free-function pointer)))           ;; free git object
+    (setf (car finalizer-data) nil)            ;; mark as disposed
+    (mapc-weak #'dispose (cdr finalizer-data)) ;; dispose dependends
+    (funcall free-function pointer)))          ;; free git object
 
 
 (defgeneric dispose (object)
@@ -85,8 +85,8 @@ pointer to null-pointer as well."
 (defmethod print-object ((object git-pointer) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (if (pointer object)
-    (format stream "~X" (pointer-address (pointer object)))
-    (princ "(disposed)" stream))))
+        (format stream "~X" (pointer-address (pointer object)))
+        (princ "(disposed)" stream))))
 
 (defmethod git-free ((object git-pointer))
   (dispose object)
@@ -96,16 +96,16 @@ pointer to null-pointer as well."
   "Setup the finalizer to call internal-dispose with the right arguments."
   (declare (ignore r))
   (let ((finalizer-data (finalizer-data instance))
-    (pointer (pointer instance))
-    (free-function (free-function instance)))
+        (pointer (pointer instance))
+        (free-function (free-function instance)))
 
     (unless finalizer-data (error "No Finalizer data"))
     (unless free-function (error "No Free function"))
 
     (when (facilitator instance)
       (push (make-weak-pointer instance)
-        (cdr (finalizer-data (facilitator instance)))))
+            (cdr (finalizer-data (facilitator instance)))))
 
     (finalize instance
-          (lambda ()
-        (internal-dispose finalizer-data pointer free-function)))))
+              (lambda ()
+                (internal-dispose finalizer-data pointer free-function)))))

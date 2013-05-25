@@ -172,9 +172,9 @@ error if that is the case."
       (:symbolic
        (%git-reference-symbolic-create reference repository name target force)))
     (make-instance 'reference
-           :pointer (mem-ref reference :pointer)
-           :facilitator repository
-           :free-function #'%git-reference-free)))
+                   :pointer (mem-ref reference :pointer)
+                   :facilitator repository
+                   :free-function #'%git-reference-free)))
 
 
 

@@ -184,6 +184,7 @@ directory return stage 0.  Files with stages 1-3 are in conflict."
   (with-foreign-slots ((seconds nanoseconds) value (:struct git-index-time))
     (local-time:timestamp+ seconds nanoseconds :nsec)))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel Interface

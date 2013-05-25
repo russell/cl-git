@@ -130,8 +130,8 @@ call.
 
 
 (defmethod git-upstream ((branch reference))
-  "Returns the reference for the remote tracking branch, corresponding to the local
-branch BRANCH."
+  "Returns the reference for the remote tracking branch, corresponding
+to the local branch BRANCH."
   (with-foreign-object (reference :pointer)
     (%git-branch-upstream reference branch)
     (make-instance 'reference

@@ -180,7 +180,6 @@ Or for a bare repository to the repository itself."
 		   :facilitator repository
 		   :free-function #'%git-reference-free)))
 
-
 (defmacro with-repository ((var &optional pathname-or-string) &body body)
   "Evaluates the body with VAR bound to a newly opened located
 repository at PATHNAME-OR-STRING.  Repository is freed upon exit of
