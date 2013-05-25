@@ -105,26 +105,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass reference (git-pointer) ())
-(defclass symbolic-reference (reference) ())
 
-(defun git-reference-oid-p (reference)
-  (when (member :oid (git-reference-type reference))
+(defun symbolic-p (reference)
+  (when (member :symbolic (git-reference-type reference))
     t))
 
-(defmethod git-lookup ((class (eql :reference)) name
-               &key (repository *git-repository*))
-  "Find a reference by its full name e.g.: ref/heads/master
-Note that this function name clashes with the generic lookup function.
-We need to figure this out by using the type argument to do dispatch."
+(defmethod %git-lookup-by-name ((class (eql 'reference)) name repository)
+  "Lookup a reference by name and return a pointer to it.  This
+pointer will need to be freed manually."
   (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (reference :pointer)
     (%git-reference-lookup reference repository name)
-    (make-instance (if (git-reference-oid-p (mem-ref reference :pointer))
-                       'reference
-                       'symbolic-reference)
-           :pointer (mem-ref reference :pointer)
-           :facilitator repository
-           :free-function #'%git-reference-free)))
+    (mem-ref reference :pointer)))
+
+(defmethod git-lookup ((class (eql :reference)) name repository &key)
+  "Find a reference by its full name e.g.: ref/heads/master
+Note that this function name clashes with the generic lookup function.
+We need to figure this out by using the type argument to do dispatch."
+  (make-instance 'reference
+                 :pointer (%git-lookup-by-name 'reference name repository)
+                 :facilitator repository
+                 :free-function #'%git-reference-free))
 
 (defun git-resolve (reference)
   "If the reference is symbolic, follow the it until it finds a non
