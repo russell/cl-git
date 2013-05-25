@@ -139,18 +139,10 @@ branch BRANCH."
 		   :facilitator (facilitator branch)
 		   :free-function #'%git-reference-free)))
 
-
-(defmethod git-upstream-name ((branch-name string) &key (repository *git-repository*))
-  (with-foreign-pointer-as-string ((out size) (%git-branch-upstream-name
-					       (null-pointer) 0
-					       repository
-					       branch-name))
-        (%git-branch-upstream-name out size repository branch-name)))
-
-
-(defmethod git-remote-name ((branch-name string) &key (repository *git-repository*))
-  (with-foreign-pointer-as-string ((out size) (%git-branch-remote-name
-					       (null-pointer) 0
-					       repository
-					       branch-name))
-        (%git-branch-remote-name out size repository branch-name)))
+(defmethod git-remote-name ((branch reference))
+  (with-foreign-pointer-as-string ((out size)
+                                   (%git-branch-remote-name
+                                    (null-pointer) 0
+                                    (facilitator branch)
+                                    (git-name branch)))
+    (%git-branch-remote-name out size (facilitator branch) (git-name branch))))

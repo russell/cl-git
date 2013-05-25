@@ -144,5 +144,4 @@
    #:git-is-branch
    #:git-upstream
    #:git-remote-name
-   #:git-upstream-name
    #:git-lookup-byname))
