@@ -80,12 +80,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defclass object (git-pointer)
-  ((type :accessor object-type :initarg :object-type :initform 'object
-     :documentation "A symbol indicating which libgit2 type this is.
-This slot is probably uselss in the sense that we do not necessarily know
-on creation time and if we do not know exactly what is the point?
-So this is mainly used for printing"))
+(defclass object (git-pointer) ()
   (:documentation "Object encapsulating git objects from libgit2"))
 
 (defun make-instance-object (&key pointer facilitator type)
@@ -107,7 +102,6 @@ wrap git pointers to repositories, config, index etc."
     (make-instance obj-type
                    :pointer pointer
                    :facilitator facilitator
-                   :object-type obj-type
                    :free-function #'git-object-free)))
 
 (defmethod dispose ((object object))
