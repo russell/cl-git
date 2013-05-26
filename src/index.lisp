@@ -225,6 +225,7 @@ be written back to disk to take effect."
   "Load an index from a repository, path or if none is specified then
 an in-memory index is used.  The newly opened index is bound to the
 variable VAR."
+  ;;TODO add gensym
   `(let ((,var ,(if repository-or-path
                     `(git-index ,repository-or-path)
                     `(git-index-new))))

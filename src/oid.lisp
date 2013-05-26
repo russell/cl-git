@@ -134,10 +134,10 @@ TODO, this function is a bit messy, need to think about cleaning this up."
   (cond
     (head (let* ((original-ref (git-lookup 'reference head repository))
                  (resolved-ref (git-resolve original-ref)))
-        (prog1
-        (git-target resolved-ref :type :oid)
-          (git-free original-ref)
-          (git-free resolved-ref))))
+            (prog1
+                (git-target resolved-ref :type :oid)
+              (git-free original-ref)
+              (git-free resolved-ref))))
     (sha (oid-from-string-or-number sha))))
 
 (defun lookup-oids (&key sha head repository)

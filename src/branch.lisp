@@ -98,5 +98,5 @@ to the local branch BRANCH."
                                    (%git-branch-remote-name
                                     (null-pointer) 0
                                     (facilitator branch)
-                                    (git-name branch)))
-    (%git-branch-remote-name out size (facilitator branch) (git-name branch))))
+                                    (full-name branch)))
+    (%git-branch-remote-name out size (facilitator branch) (full-name branch))))
