@@ -134,7 +134,10 @@ strings they are identified with.  So this call is rather useless."
 (defmethod git-lookup ((class (eql 'tag)) oid repository &key)
   (git-object-lookup oid class repository))
 
-(defmethod git-name ((tag tag))
+(defmethod full-name ((tag tag))
+  (concatenate 'string reference-tags-dir (short-name tag)))
+
+(defmethod short-name ((tag tag))
   (git-tag-name tag))
 
 (defmethod git-tagger ((tag tag))

@@ -126,7 +126,7 @@
 
 (defmethod remote-p ((reference reference))
   "Return T if the reference is within the git remotes namespace."
-  (remote-p (git-name reference)))
+  (remote-p (full-name reference)))
 
 (defmethod branch-p  ((reference string))
   "Return T if the reference is within the git heads namespace."
@@ -135,7 +135,7 @@
 
 (defmethod branch-p  ((reference reference))
   "Return T if the reference is within the git heads namespace."
-  (branch-p (git-name reference)))
+  (branch-p (full-name reference)))
 
 (defmethod %git-lookup-by-name ((class (eql 'reference)) name repository)
   "Lookup a reference by name and return a pointer to it.  This
@@ -248,10 +248,19 @@ are :SHA, :HEAD or :BOTH"
 or :SYMBOLIC"
   (git-reference-type object))
 
-(defmethod git-name ((object reference))
+(defmethod full-name ((object reference))
   (if (slot-value object 'libgit2-name)
       (slot-value object 'libgit2-name)
       (%git-reference-name object)))
+
+(defmethod short-name ((object reference))
+  (let ((name (full-name object)))
+    (cond
+      ((remote-p name)
+       (subseq name (length reference-remotes-dir)))
+      ((branch-p name)
+       (subseq name (length reference-heads-dir)))
+      (t name))))
 
 (defmethod git-target ((reference reference) &key (type :object))
   "Returns the Object that this reference points to.

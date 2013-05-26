@@ -141,10 +141,6 @@ optional instance of a GIT-SIGNATURE the details the committer.
 (defmethod git-lookup ((class (eql 'commit)) oid repository &key)
   (git-object-lookup oid class repository))
 
-(defmethod git-name ((commit commit))
-  (with-foreign-pointer-as-string (str 41 :encoding :ascii)
-    (git-oid-tostr str 41 (git-id commit))))
-
 (defmethod git-message ((commit commit))
   "Return a string containing the commit message."
   (git-commit-message commit))

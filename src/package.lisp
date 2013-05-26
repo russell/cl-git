@@ -70,7 +70,8 @@
    #:git-tree
    #:git-lookup
    #:git-list
-   #:git-name
+   #:full-name
+   #:short-name
    #:git-next
    #:git-tagger
    #:git-type

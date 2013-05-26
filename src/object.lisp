@@ -171,6 +171,11 @@ not a type of any real object, but only used for querying like in this function.
 (defmethod git-id ((object object))
   (git-object-id object))
 
+(defmethod full-name ((object object))
+  (format nil "~x" (git-id object)))
+
+(defmethod short-name ((object object))
+  (subseq (format nil "~x" (git-id object)) 0 7))
 
 (defmethod git-lookup ((class (eql 'object)) oid repository &key)
   (git-object-lookup oid :any repository))

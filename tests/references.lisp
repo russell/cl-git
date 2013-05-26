@@ -62,7 +62,7 @@
 (def-test reference-lookup-oid (:fixture reference)
   (let ((ref (git-lookup 'reference "refs/heads/oid" *test-repository*)))
       (is
-       (equal (git-name ref)
+       (equal (full-name ref)
               "refs/heads/oid"))
     (is
      (equal (type-of ref)
@@ -71,7 +71,7 @@
 (def-test reference-lookup-symbolic (:fixture reference)
   (let ((ref (git-lookup 'reference "refs/heads/symbolic" *test-repository*)))
     (is
-     (equal (git-name ref)
+     (equal (full-name ref)
             "refs/heads/symbolic"))
     (is
      (equal (type-of ref)
@@ -83,8 +83,11 @@
        (git-type ref-default)
        '(:OID)))
   (is (equal
-       (git-name ref-default)
-       "refs/heads/oid")))
+       (full-name ref-default)
+       "refs/heads/oid"))
+  (is (equal
+       (short-name ref-default)
+       "oid")))
 
 (def-test reference-accessors-symbolic (:fixture reference-with-context)
   "Create symbolic reference and check it's name."
@@ -92,8 +95,11 @@
        (git-type ref-symbolic)
        '(:SYMBOLIC)))
   (is (equal
-       (git-name ref-symbolic)
-       "refs/heads/symbolic")))
+       (full-name ref-symbolic)
+       "refs/heads/symbolic"))
+  (is (equal
+       (short-name ref-symbolic)
+       "symbolic")))
 
 (def-test reference-target-oid (:fixture reference-with-context)
   "Check that the returned commit id matches the id from the reference

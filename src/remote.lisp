@@ -186,7 +186,7 @@
            :facilitator repository
            :free-function #'%git-remote-free)))
 
-(defmethod git-name ((remote remote))
+(defmethod full-name ((remote remote))
   "The name of the remote.  Is the opposite of git-load for a remote."
   (%git-remote-name remote))
 

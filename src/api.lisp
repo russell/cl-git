@@ -158,12 +158,21 @@ explicit keyword argument :INDEX"))
    "Writes the OBJECT to its store.
 "))
 
-(defgeneric git-name (object)
+(defgeneric full-name (object)
   (:documentation "Returns the name of OBJECT, as a string.
 
 What exactly the name is depends on the type of the object.
 
 - REFERENCE -- The name of the of the reference, e.g.: \"refs/heads/master\"
+- TAG       -- The name of the tag, e.g.: \"refs/tags/v0.17\"
+"))
+
+(defgeneric short-name (object)
+  (:documentation "Returns the short name of OBJECT, as a string.
+
+What exactly the name is depends on the type of the object.
+
+- REFERENCE -- The name of the of the reference, e.g.: \"master\"
 - TAG       -- The name of the tag, e.g.: \"v0.17\"
 "))
 
