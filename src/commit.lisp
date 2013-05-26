@@ -105,7 +105,7 @@ optional instance of a GIT-SIGNATURE the details the committer.
   (assert (not (null-or-nullpointer repository)))
 
   (let ((tree (git-lookup 'object oid repository :type :tree))
-        (parents (if (listp parents) parents (list parents))))
+        (parents (ensure-list parents)))
 
     ;; lookup all the git commits
     (setq parents (mapcar #'(lambda (c)

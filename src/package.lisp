@@ -11,6 +11,8 @@
                 #:finalize)
   (:import-from #:cl-fad
                 #:pathname-relative-p)
+  (:import-from #:alexandria
+                #:ensure-list)
   (:import-from #:cffi
                 #:define-parse-method
                 #:define-foreign-type
