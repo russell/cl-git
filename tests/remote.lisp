@@ -51,8 +51,14 @@
         (git-create 'remote "origin"
                     remote-repo
                     :url (concatenate 'string "file://" (namestring *repository-path*)))
-           (let ((remote (git-load 'remote "origin" remote-repo)))
-             (git-connect remote)
-             (git-download remote)))
+        (let ((remote (git-load 'remote "origin" remote-repo)))
+          (remote-connect remote)
+          (remote-download remote)
+          (is
+           (equal
+            (remote-fetchspec remote)
+            '((:src "refs/heads/*"
+               :dst "refs/remotes/origin/*"
+               :flags (:force :pattern)))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))

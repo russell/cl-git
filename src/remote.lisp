@@ -186,10 +186,28 @@
            :free-function #'%git-remote-free)))
 
 (defmethod full-name ((remote remote))
-  "The name of the remote.  Is the opposite of git-load for a remote."
-  (%git-remote-name remote))
+  "The name of the remote."
+  (if (slot-value remote 'libgit2-name)
+      (slot-value remote 'libgit2-name)
+      (%git-remote-name remote)))
 
-(defmethod git-connect ((remote remote) &key (direction :fetch))
+(defmethod short-name ((remote remote))
+  "The name of the remote."
+  (if (slot-value remote 'libgit2-name)
+      (slot-value remote 'libgit2-name)
+      (%git-remote-name remote)))
+
+(defmethod print-object ((object remote) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (cond
+      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
+       (format stream "~a" (full-name object)))
+      ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
+       (format stream "~a (weak)" (full-name object)))
+      ((slot-value object 'libgit2-disposed)
+       (princ "(disposed)" stream)))))
+
+(defmethod remote-connect ((remote remote) &key (direction :fetch))
   "Opens the remote connection.
 The url used for the connection can be queried by GIT-URL.
 
@@ -199,15 +217,15 @@ with the DIRECTION argument, :FETCH is for retrieving data, :PUSH is
 for sending data."
   (%git-remote-connect remote direction))
 
-(defmethod git-connected ((remote remote))
+(defmethod remote-connected-p ((remote remote))
   "Returns t if the connection is open, nil otherwise."
   (%git-remote-connected remote))
 
-(defmethod git-disconnect ((remote remote))
+(defmethod remote-disconnect ((remote remote))
   "Disconnects an opened connection."
   (%git-remote-disconnect remote))
 
-(defmethod git-pushspec ((remote remote))
+(defmethod remote-pushspec ((remote remote))
   "Returns a list of push specifications of the remote.
 Each specification is property list with the following keys:
 
@@ -216,14 +234,14 @@ Each specification is property list with the following keys:
 - FLAGS, a combination of the following flags :FORCE, :PATTERN, :MATCHING."
   (%git-remote-pushspec remote))
 
-(defmethod git-fetchspec ((remote remote))
+(defmethod remote-fetchspec ((remote remote))
   "Returns a list of fetch specifications for the remote.
 Each specification is propety list with the keys: SRC, DST and FLAGS.
 
 See also git-pushspec."
   (%git-remote-fetchspec remote))
 
-(defmethod git-download ((remote remote))
+(defmethod remote-download ((remote remote))
   (%git-remote-download remote (cffi-sys:null-pointer) (cffi-sys:null-pointer)))
 
 (defmethod git-ls ((remote remote))

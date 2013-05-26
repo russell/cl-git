@@ -132,9 +132,12 @@
    #:git-odb
    #:git-size
    #:git-data
-   #:git-download
-   #:git-fetchspec
-   #:git-pushspec
+   #:remote-download
+   #:remote-fetchspec
+   #:remote-pushspec
+   #:remote-connect
+   #:remote-disconnect
+   #:remote-connected-p
    #:git-ls
    #:git-is-head
    #:git-write-tree
