@@ -97,6 +97,7 @@
    #:bind-git-commits
 
    ;; Classes.
+   #:odb-object
    #:blob
    #:reference
    #:symbolic-reference

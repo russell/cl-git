@@ -132,7 +132,7 @@ repository that does not have a local checkout, it's normally
 appropriate for the basename of the path to end in '.git'.  A
 REPOSITORY instance is returned."))
 
-(defgeneric git-load (class path/name &key &allow-other-keys))
+(defgeneric git-load (class path/name repository))
 
 (defgeneric git-path (object)
   (:documentation "Path to the object."))

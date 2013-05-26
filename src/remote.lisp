@@ -176,8 +176,7 @@
         (convert-from-foreign string-array '%git-strings)
       (free-translated-object string-array '%git-strings t))))
 
-(defmethod git-load ((class (eql 'remote))
-                     name &key repository)
+(defmethod git-load ((class (eql 'remote)) name repository)
   (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (remote-out :pointer)
     (%git-remote-load remote-out repository name)

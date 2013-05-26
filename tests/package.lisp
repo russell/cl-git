@@ -25,6 +25,8 @@
   (:import-from #:cl-fad
                 #:file-exists-p
                 #:delete-directory-and-files)
+  (:import-from #:flexi-streams
+                #:octets-to-string)
   (:import-from #:local-time
                 #:unix-to-timestamp
                 #:timestamp-to-unix
