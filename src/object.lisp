@@ -171,6 +171,16 @@ not a type of any real object, but only used for querying like in this function.
 (defmethod short-name ((object object))
   (subseq (format nil "~x" (git-id object)) 0 7))
 
+(defmethod print-object ((object object) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (cond
+      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
+       (format stream "~a" (full-name object)))
+      ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
+       (format stream "~a (weak)" (full-name object)))
+      ((slot-value object 'libgit2-disposed)
+       (princ "(disposed)" stream)))))
+
 (defmethod git-lookup ((class (eql 'object)) oid repository &key)
   (git-object-lookup oid :any repository))
 

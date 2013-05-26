@@ -259,6 +259,16 @@ or :SYMBOLIC"
        (subseq name (length reference-heads-dir)))
       (t name))))
 
+(defmethod print-object ((object reference) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (cond
+      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
+       (format stream "~a" (full-name object)))
+      ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
+       (format stream "~a (weak)" (full-name object)))
+      ((slot-value object 'libgit2-disposed)
+       (princ "(disposed)" stream)))))
+
 (defmethod git-target ((reference reference) &key (type :object))
   "Returns the Object that this reference points to.
 
