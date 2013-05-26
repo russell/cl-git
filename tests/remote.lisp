@@ -38,7 +38,7 @@
     '("origin")))
   (is
    (equal
-    (git-url (git-load 'remote "origin" :repository *test-repository*))
+    (git-url (git-load 'remote "origin" *test-repository*))
     "/dev/null")))
 
 
@@ -51,7 +51,7 @@
         (git-create 'remote "origin"
                     remote-repo
                     :url (concatenate 'string "file://" (namestring *repository-path*)))
-           (let ((remote (git-load 'remote "origin" :repository remote-repo)))
+           (let ((remote (git-load 'remote "origin" remote-repo)))
              (git-connect remote)
              (git-download remote)))
       (progn
