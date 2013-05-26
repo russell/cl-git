@@ -109,10 +109,7 @@ optional instance of a GIT-SIGNATURE the details the committer.
 
     ;; lookup all the git commits
     (setq parents (mapcar #'(lambda (c)
-                              (git-lookup 'object
-                                          (lookup-oid :sha c
-                                                      :repository repository)
-                                          repository))
+                              (git-lookup 'commit c repository))
                           parents))
 
     (with-foreign-objects ((%parents :pointer (length parents))
