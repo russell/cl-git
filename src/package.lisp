@@ -111,6 +111,11 @@
    #:tag
    #:repository
 
+   ;; predicates
+   #:branch-p
+   #:remote-p
+   #:symbolic-p
+
    ;; variables
    #:*git-repository-index*
 
