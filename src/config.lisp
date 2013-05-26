@@ -44,7 +44,7 @@
 GIT-REPOSITORY-CONFIG."
   (config %config))
 
-(defcfun ("git_config_foreach" %git-config-foreach)
+(defcfun ("git_config_foreach" %git-config-for-each)
     %return-value
   (config %config)
   (callback :pointer)
@@ -82,7 +82,7 @@ GIT-REPOSITORY-CONFIG."
 (defmethod git-values ((config config))
   "Returns the key value pairs in the config as an association list."
   (let ((*config-values* (list)))
-    (%git-config-foreach config
+    (%git-config-for-each config
                          (callback collect-config-values)
                          (null-pointer))
     *config-values*))
