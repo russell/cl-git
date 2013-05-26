@@ -116,7 +116,7 @@
 
 (defmethod symbolic-p ((reference reference))
   "Return T if the reference is symbolic."
-  (when (member :symbolic (git-reference-type reference))
+  (when (member :symbolic (git-type reference))
     t))
 
 (defmethod remote-p ((reference string))
