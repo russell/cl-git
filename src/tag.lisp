@@ -53,7 +53,7 @@
 
 (defcfun ("git_tag_target" %git-tag-target)
     %return-value
-  (reference :pointer)
+  (target-out :pointer)
   (tag %tag))
 
 (defcfun ("git_tag_target" %git-tag-peel)
@@ -89,6 +89,15 @@
 
 (defclass tag (object)
   ())
+
+(defmethod tag-p ((tag string))
+  "Return T if the reference is within the git tag namespace."
+  (when (eq 0 (search reference-tags-dir tag))
+    t))
+
+(defmethod tag-p ((tag tag))
+  "Return T if the reference is within the git tag namespace."
+  (tag-p (full-name tag)))
 
 
 (defun make-tag (name message &key
@@ -140,21 +149,13 @@
 (defmethod git-message ((tag tag))
   (git-tag-message tag))
 
-(defmethod git-target ((tag tag) &key (type :object))
-  "Returns the target of a tag.
-The optional :TYPE keyword arguments specifies in which form the
-target is returned:
-
-- if :TYPE is :OBJECT it will return a git object.
-- if :TYPE is :OID, it will return an OID for the target object."
+(defmethod git-target ((tag tag))
+  "Returns the target of a tag."
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
-    (case type
-      (:object
-       (make-instance-object :pointer (mem-ref %object :pointer)
-			     :facilitator (facilitator tag)))
-      (:oid (git-object-id (mem-ref %object :pointer)))
-      (t (error "Unknown type, type should be either :oid or :object but got: ~A" type)))))
+    (make-instance-object :pointer (mem-ref %object :pointer)
+                          :type :any
+                          :facilitator (facilitator tag))))
 
 (defmethod git-peel ((tag tag))
   "Peels layers of the tag until the resulting object is not a tag anymore.
@@ -163,4 +164,5 @@ repeat the process."
   (with-foreign-object (%object :pointer)
     (%git-tag-peel %object tag)
     (make-instance-object :pointer (mem-ref %object :pointer)
-              :facilitator (facilitator tag))))
+                          :type :any
+                          :facilitator (facilitator tag))))

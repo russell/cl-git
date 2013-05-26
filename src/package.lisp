@@ -115,6 +115,7 @@
    #:branch-p
    #:remote-p
    #:symbolic-p
+   #:tag-p
 
    ;; variables
    #:*git-repository-index*

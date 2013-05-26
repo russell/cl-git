@@ -73,6 +73,10 @@
   (target :string)
   (force :boolean))
 
+(defcfun ("git_reference_symbolic_target" %git-reference-symbolic-target)
+    :string
+  (reference %reference))
+
 (defcfun ("git_reference_free" %git-reference-free)
     :void
   (reference %reference))
@@ -275,26 +279,33 @@ or :SYMBOLIC"
       ((slot-value object 'libgit2-disposed)
        (princ "(disposed)" stream)))))
 
-(defmethod git-target ((reference reference) &key (type :object))
-  "Returns the Object that this reference points to.
+(defmethod git-id ((reference reference))
+  "Returns the oid that this reference points to.  If this reference
+is a symbolic reference then it will be resolved to a real reference
+first."
+  (if (symbolic-p reference)
+      (git-id (git-target (git-resolve reference)))
+      (git-id (git-target reference))))
 
-The optional keyword argument :TYPE controls in which form the target
-is returned.
+(defmethod git-target ((reference reference))
+  "Returns the Object that this reference points to.  If the reference
+is symbolic then the reference it points to will be returned."
+  (if (symbolic-p reference)
+      (git-lookup 'reference
+                  (%git-reference-symbolic-target reference)
+                  (facilitator reference))
+      (git-lookup 'object
+                  (%git-reference-target reference)
+                  (facilitator reference))))
 
-- if TYPE is :OBJECT it will return the git object.
-- if TYPE id :OID it will return the OID of the target.
-
-This call is only valid for direct references, this call will not
-work for symbolic references.
-
-To get the target of a symbolic, first call (GIT-RESOLVE reference)
-which will return a direct reference.  Than call this method."
-  (let ((oid (%git-reference-target reference))
-        (ref-type (git-type reference)))
-    (when (member :symbolic ref-type)
-      (error 'unresolved-reference-error))
-    (case type
-      (:oid oid)
-      (:object
-       (git-lookup 'object oid (facilitator reference)))
-      (t (error "Unknown type, type should be either :OID or :OBJECT but got: ~A" type)))))
+(defmethod git-peel ((reference reference))
+  "Peels layers of the tag until the resulting object is not a tag or
+reference anymore.  Basically calls GIT-TARGET until the returned
+object is neither a TAG or a REFERENCE."
+  (let ((references
+          (do ((refs (cons (git-target reference) nil)
+                     (cons (git-target (car refs)) refs)))
+              ((not (or (eql (type-of (car refs)) 'reference)
+                        (eql (type-of (car refs)) 'tag)))
+               refs))))
+    (values (car references) (cdr references))))
