@@ -210,9 +210,7 @@ error if that is the case."
                    :free-function #'%git-reference-free)))
 
 
-
-(defun find-oid (name &key (flags :both)
-                        repository)
+(defun find-oid (name repository &key (flags :both))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
   (assert (not (null-or-nullpointer repository)))
@@ -233,15 +231,14 @@ are :SHA, :HEAD or :BOTH"
      (lookup-oid :sha name :repository repository))
     (t (error "Invalid reference named ~A." name)))))
 
-(defun find-oids (name-or-names &key (flags :both)
-                                  repository)
+(defun find-oids (name-or-names repository &key (flags :both))
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
   (assert (not (null-or-nullpointer repository)))
   (if (stringp name-or-names)
-      (find-oid name-or-names :flags flags :repository repository)
+      (find-oid name-or-names repository :flags flags)
       (loop :for name :in name-or-names
-            :collect (find-oid name :flags flags :repository repository))))
+            :collect (find-oid name repository :flags flags))))
 
 (defmethod git-type ((object reference))
   "Return a list containing the type of the reference, either :OID

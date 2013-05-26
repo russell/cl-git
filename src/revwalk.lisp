@@ -155,5 +155,5 @@ WALKER-NEXT."
   (let* ((names (if (listp name-or-names)
                     name-or-names
                     (list name-or-names)))
-         (oids (find-oids names :flags flags :repository repository)))
+         (oids (find-oids names repository :flags flags)))
     (git-revwalk oids :repository repository)))
