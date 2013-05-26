@@ -251,28 +251,19 @@ git config to a specific level.  Possible levels are :HIGHEST-LEVEL
   (:documentation "Returns the next object for the walker.  If no
 objects are available anymore return nil."))
 
-(defgeneric git-connect (object &key &allow-other-keys)
-  (:documentation "Connects the object if applicable.
+(defgeneric remote-connect (object &key direction)
+  (:documentation "Connects the object if applicable."))
 
-At the moment only supported for
-- REMOTE"))
+(defgeneric remote-disconnect (object)
+  (:documentation "Disconnects the object if applicable."))
 
-(defgeneric git-disconnect (object)
-  (:documentation "Disconnects the object if applicable.
+(defgeneric remote-connected-p (object)
+  (:documentation "Returns if the object is connected."))
 
-At the moment only supported for
-- REMOTE"))
+(defgeneric remote-pushspec (remote))
+(defgeneric remote-fetchspec (remote))
 
-(defgeneric git-connected (object)
-  (:documentation "Returns if the object is connected.
-
-At the moment only supported for
-- REMOTE"))
-
-(defgeneric git-pushspec (remote))
-(defgeneric git-fetchspec (remote))
-
-(defgeneric git-download (remote))
+(defgeneric remote-download (remote))
 
 (defgeneric git-ls (remote))
 
