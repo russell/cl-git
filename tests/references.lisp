@@ -49,14 +49,14 @@
 
 (def-test references-list-oid (:fixture reference)
   (is
-   (equal ;; test the git-list default args.
-    (sort-strings (git-list 'reference *test-repository*))
+   (equal
+    (sort-strings (mapcar #'full-name (list-objects 'reference *test-repository* :test-not #'symbolic-p)))
     (sort-strings (list "refs/heads/oid" "refs/heads/master")))))
 
 (def-test references-list-symbolic (:fixture reference)
   (is
-   (equal
-    (sort-strings (git-list 'reference *test-repository* :flags '(:oid :symbolic)))
+   (equal ;; test the list-objects default args.
+    (sort-strings (mapcar #'full-name (list-objects 'reference *test-repository*)))
     (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master")))))
 
 (def-test reference-lookup-oid (:fixture reference)

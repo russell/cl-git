@@ -26,7 +26,7 @@
   "Create a new repository and check it's remotes."
   (is
    (eq
-    (git-list 'remote *test-repository*)
+    (list-objects 'remote *test-repository*)
     nil)))
 
 (def-test create-remote (:fixture repository-with-commits)
@@ -34,7 +34,7 @@
   (git-create 'remote "origin" *test-repository* :url "/dev/null" )
   (is
    (equal
-    (git-list 'remote *test-repository*)
+    (list-objects 'remote *test-repository*)
     '("origin")))
   (is
    (equal

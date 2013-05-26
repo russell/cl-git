@@ -71,7 +71,7 @@
    #:git-parent-oids
    #:git-tree
    #:git-lookup
-   #:git-list
+   #:list-objects
    #:full-name
    #:short-name
    #:git-next

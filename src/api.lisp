@@ -119,7 +119,7 @@ returned node will be a child node of the tree.
 
 (defgeneric git-lookup (class id/name repository &key &allow-other-keys)) ;; Documentation is copied in.
 
-(defgeneric git-list (class repository &key &allow-other-keys))
+(defgeneric list-objects (class repository &key test test-not))
 
 (defgeneric git-open (class path/name &key &allow-other-keys))
 

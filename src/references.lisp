@@ -171,17 +171,23 @@ symbolic reference."
                             :facilitator repository
                             :free-function #'%git-reference-free))
 
-(defmethod git-list ((class (eql 'reference)) repository
-                     &key (flags '(:oid)))
-  "List all the refs, filter by FLAGS.  The flag options
-are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
+(defmethod list-objects ((class (eql 'reference)) repository &key test test-not)
+  "List all the refs the returned list can be filtered using a PREDICATE."
   (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (string-array '(:pointer (:struct git-strings)))
-    (%git-reference-list string-array repository flags)
-    (prog1
-	(convert-from-foreign string-array '%git-strings)
-      (free-translated-object string-array '%git-strings t))))
-
+    (%git-reference-list string-array repository '(:oid :symbolic :packed))
+    (let ((refs
+            (mapcar (lambda (ref-name)
+                      (make-reference-from-name ref-name repository))
+             (prog1
+                 (convert-from-foreign string-array '%git-strings)
+               (free-translated-object string-array '%git-strings t)))))
+      (cond (test
+             (remove-if-not test refs))
+            (test-not
+             (remove-if test-not refs))
+            (t
+             refs)))))
 
 
 (defmethod git-create ((class (eql 'reference)) name repository
@@ -219,7 +225,7 @@ are :SHA, :HEAD or :BOTH"
   (acond
     ((and (and-both flags :head)
           (remove-if-not (lambda (ref) (equal ref name))
-             (git-list 'reference repository)))
+             (list-objects 'reference repository)))
      (lookup-oid :head (car it) :repository repository))
     ((numberp name)
      (lookup-oid :sha name :repository repository))

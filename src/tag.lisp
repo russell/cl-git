@@ -103,33 +103,24 @@
       (%git-tag-create newoid repository %name target tagger %message force))
     (git-lookup 'tag (convert-from-foreign newoid '%oid) repository)))
 
-(defmethod git-list ((class (eql 'tag)) repository &key)
-  "Returns a list of tag names for the repository.
-
-Important Note:  This is the list of tag names as the user thinks of tags.
-Tag objects in libgit2 and cl-git are however a different thing.
-
-Also the list of these values are the strings the user see, but not the
-strings they are identified with.  So this call is rather useless."
+(defmethod list-objects ((class (eql 'tag)) repository &key test test-not)
+  "Returns a list of tag for the repository."
   (with-foreign-object (string-array '(:struct git-strings))
     (%git-tag-list string-array repository)
-    (prog1
-	(convert-from-foreign string-array '%git-strings)
-      (free-translated-object string-array '%git-strings t))))
-
-#|
-(defcallback collect-tag-values :int ((tag-name :string) (oid %oid) (payload :pointer))
-  (declare (ignore payload))
-  (push (cons tag-name oid) *tag-values*)
-  0)
-
-(defmethod git-list ((class (eql 'tag)) repository)
-  (let ((*tag-values* nil))
-    (%git-tag-foreach repository
-		      (callback collect-tag-values)
-		      (null-pointer))
-    *tag-values*))
-|#
+    (let ((refs
+            (mapcar (lambda (ref-name)
+                      (git-target (make-reference-from-name
+                                   (concatenate 'string reference-tags-dir ref-name)
+                                   repository)))
+                    (prog1
+                        (convert-from-foreign string-array '%git-strings)
+                      (free-translated-object string-array '%git-strings t)))))
+      (cond (test
+             (remove-if-not test refs))
+            (test-not
+             (remove-if test-not refs))
+            (t
+             refs)))))
 
 (defmethod git-lookup ((class (eql 'tag)) oid repository &key)
   (git-object-lookup oid class repository))

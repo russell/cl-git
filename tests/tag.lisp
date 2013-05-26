@@ -23,7 +23,7 @@
 
 
 (def-test list-tags (:fixture repository)
-  (is (equal (git-list 'tag *test-repository*)
+  (is (equal (list-objects 'tag *test-repository*)
              nil))
   (let ((tag-name (random-string 50))
         (tag-message (random-string 500))
@@ -40,5 +40,5 @@
                    (concatenate 'string "refs/tags/" tag-name)))
         (is (equal (short-name tag)
                    tag-name))))
-    (is (equal (git-list 'tag *test-repository*)
+    (is (equal (mapcar #'short-name (list-objects 'tag *test-repository*))
                (list tag-name)))))

@@ -169,12 +169,35 @@
                      :facilitator repository
                      :free-function #'%git-remote-free))))
 
-(defmethod git-list ((class (eql 'remote)) repository &key)
+(defmethod %git-lookup-by-name ((class (eql 'remote)) name repository)
+  "Lookup a reference by name and return a pointer to it.  This
+pointer will need to be freed manually."
+  (assert (not (null-or-nullpointer repository)))
+  (with-foreign-object (remote :pointer)
+    (%git-remote-load remote repository name)
+    (mem-ref remote :pointer)))
+
+(defun make-remote-from-name (name repository)
+  "Make a weak reference by name that can be looked-up later."
+  (make-instance 'remote :name name
+                         :facilitator repository
+                         :free-function #'%git-remote-free))
+
+(defmethod list-objects ((class (eql 'remote)) repository &key test test-not)
   (with-foreign-object (string-array '(:struct git-strings))
     (%git-remote-list string-array repository)
-    (prog1
-        (convert-from-foreign string-array '%git-strings)
-      (free-translated-object string-array '%git-strings t))))
+    (let ((remotes
+           (mapcar (lambda (remote-name)
+                     (make-remote-from-name remote-name repository))
+                   (prog1
+                       (convert-from-foreign string-array '%git-strings)
+                     (free-translated-object string-array '%git-strings t)))))
+      (cond (test
+             (remove-if-not test remotes))
+            (test-not
+             (remove-if test-not remotes))
+            (t
+             remotes)))))
 
 (defmethod git-load ((class (eql 'remote)) name repository)
   (assert (not (null-or-nullpointer repository)))
