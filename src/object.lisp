@@ -93,21 +93,22 @@ So this is mainly used for printing"))
 OBJECT-PTR needs to point to one of the git storage types, such as:
 :commit :tag :tree or :blob.  This function is not suitable to
 wrap git pointers to repositories, config, index etc."
-
-  (let ((obj-type (case (or (unless (eq type :any) type)
-                (git-object-type pointer))
-            (:commit 'commit)
-            (:tag 'tag)
-            (:tree 'tree)
-            (:blob 'blob)
-            (:config 'config)
-            (t 'object))))
+  (let ((obj-type
+          (if (eq type :any)
+              (case (git-object-type pointer)
+                (:commit 'commit)
+                (:tag 'tag)
+                (:tree 'tree)
+                (:blob 'blob)
+                (:config 'config)
+                (t type))
+              type)))
 
     (make-instance obj-type
-           :pointer pointer
-           :facilitator facilitator
-           :object-type obj-type
-           :free-function #'git-object-free)))
+                   :pointer pointer
+                   :facilitator facilitator
+                   :object-type obj-type
+                   :free-function #'git-object-free)))
 
 (defmethod dispose ((object object))
   "Do the normal free and dispose children, but also clear reference to facilitator."
@@ -117,11 +118,19 @@ wrap git pointers to repositories, config, index etc."
 
 (defun git-object-lookup-ptr (oid type repository)
   (assert (not (null-or-nullpointer repository)))
-  (with-foreign-object (obj-ptr :pointer)
-    (%git-object-lookup obj-ptr repository oid type)
-    (mem-ref obj-ptr :pointer)))
+  (let ((type
+          (case type
+            (commit :commit)
+            (tag :tag)
+            (tree :tree)
+            (blob :blob)
+            (config :config)
+            (t type))))
+    (with-foreign-object (obj-ptr :pointer)
+      (%git-object-lookup obj-ptr repository oid type)
+      (mem-ref obj-ptr :pointer))))
 
-(defun git-object-lookup (oid type &key repository)
+(defun git-object-lookup (oid type repository)
   "Returns a git object which is identified by the OID.
 The type argument specifies which type is expected.  If the found
 object is not of the right type, an error will be signaled.  The type
@@ -163,8 +172,8 @@ not a type of any real object, but only used for querying like in this function.
   (git-object-id object))
 
 
-(defmethod git-lookup ((class (eql :object)) oid repository &key)
-  (git-object-lookup oid :any :repository repository))
+(defmethod git-lookup ((class (eql 'object)) oid repository &key)
+  (git-object-lookup oid :any repository))
 
 (defmethod git-type ((object object))
   (git-object-type object))

@@ -47,8 +47,8 @@
   ()
   (:documentation "A git blob."))
 
-(defmethod git-lookup ((class (eql :blob)) oid repository &key)
-  (git-object-lookup oid class :repository repository))
+(defmethod git-lookup ((class (eql 'blob)) oid repository &key)
+  (git-object-lookup oid class repository))
 
 (defun git-raw-content (blob)
   "Returns the content of the blob BLOB as an array of UNSIGNED-BYTE's"

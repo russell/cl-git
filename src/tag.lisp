@@ -96,14 +96,14 @@
                                 target
                                 tagger
                                 force)
-  ;; TODO should catch exists error and offer a continue
+  ;; TODO (RS) should catch exists error and offer a continue
   (with-foreign-object (newoid '(:struct git-oid))
     (with-foreign-strings ((%name name)
                            (%message message))
       (%git-tag-create newoid repository %name target tagger %message force))
-    (git-lookup :tag (convert-from-foreign newoid '%oid) repository)))
+    (git-lookup 'tag (convert-from-foreign newoid '%oid) repository)))
 
-(defmethod git-list ((class (eql :tag)) repository &key)
+(defmethod git-list ((class (eql 'tag)) repository &key)
   "Returns a list of tag names for the repository.
 
 Important Note:  This is the list of tag names as the user thinks of tags.
@@ -123,8 +123,7 @@ strings they are identified with.  So this call is rather useless."
   (push (cons tag-name oid) *tag-values*)
   0)
 
-(defmethod git-list ((class (eql :tag))
-                     &key repository)
+(defmethod git-list ((class (eql 'tag)) repository)
   (let ((*tag-values* nil))
     (%git-tag-foreach repository
 		      (callback collect-tag-values)
@@ -132,8 +131,8 @@ strings they are identified with.  So this call is rather useless."
     *tag-values*))
 |#
 
-(defmethod git-lookup ((class (eql :tag)) oid repository &key)
-  (git-object-lookup oid class :repository repository))
+(defmethod git-lookup ((class (eql 'tag)) oid repository &key)
+  (git-object-lookup oid class repository))
 
 (defmethod git-name ((tag tag))
   (git-tag-name tag))

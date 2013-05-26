@@ -23,7 +23,7 @@
 
 
 (def-test list-tags (:fixture repository)
-  (is (equal (git-list :tag *test-repository*)
+  (is (equal (git-list 'tag *test-repository*)
              nil))
   (let ((tag-name (random-string 50))
         (tag-message (random-string 500))
@@ -38,5 +38,5 @@
                                       :time (random-time)))))
         (is (equal (git-name tag)
                    tag-name))))
-    (is (equal (git-list :tag *test-repository*)
+    (is (equal (git-list 'tag *test-repository*)
                (list tag-name)))))

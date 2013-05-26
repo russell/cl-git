@@ -104,12 +104,12 @@ optional instance of a GIT-SIGNATURE the details the committer.
 
   (assert (not (null-or-nullpointer repository)))
 
-  (let ((tree (git-lookup :object oid repository :type :tree))
+  (let ((tree (git-lookup 'object oid repository :type :tree))
         (parents (if (listp parents) parents (list parents))))
 
     ;; lookup all the git commits
     (setq parents (mapcar #'(lambda (c)
-                              (git-lookup :object
+                              (git-lookup 'object
                                           (lookup-oid :sha c
                                                       :repository repository)
                                           repository))
@@ -135,11 +135,11 @@ optional instance of a GIT-SIGNATURE the details the committer.
          tree
          (length parents)
          %parents))
-      (git-lookup :commit (convert-from-foreign newoid '%oid)
+      (git-lookup 'commit (convert-from-foreign newoid '%oid)
                   repository))))
 
-(defmethod git-lookup ((class (eql :commit)) oid repository &key)
-  (git-object-lookup oid class :repository repository))
+(defmethod git-lookup ((class (eql 'commit)) oid repository &key)
+  (git-object-lookup oid class repository))
 
 (defmethod git-name ((commit commit))
   (with-foreign-pointer-as-string (str 41 :encoding :ascii)
@@ -171,7 +171,7 @@ parents of the commit COMMIT."
                 (%git-commit-tree %tree commit)
                 (make-instance-object :pointer (mem-aref %tree :pointer)
                                       :facilitator (facilitator commit)
-                                      :type :tree))))
+                                      :type 'tree))))
     (if path
         (git-tree tree :path path :repository repository)
         tree)))
@@ -181,7 +181,7 @@ parents of the commit COMMIT."
 This is an extended version of GIT-COMMIT-LOOKUP.
 If the oid refers to a tag, this function will return the git-commit
 pointed to by the tag.  The call git-commit-lookup will fail."
-  (let ((git-object (git-object-lookup oid :any :repository repository)))
+  (let ((git-object (git-object-lookup oid :any repository)))
     (ecase (git-object-type git-object)
       (:tag (git-target git-object))
       (:commit git-object))))

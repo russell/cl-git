@@ -114,17 +114,28 @@
 (defvar reference-remotes-dir (concatenate 'string reference-dir "remotes/"))
 
 
-(defun symbolic-p (reference)
+(defmethod symbolic-p ((reference reference))
+  "Return T if the reference is symbolic."
   (when (member :symbolic (git-reference-type reference))
     t))
 
-(defun remote-p (reference)
-  (when (eq 0 (search reference-remotes-dir (git-name reference)))
+(defmethod remote-p ((reference string))
+  "Return T if the reference is within the git remotes namespace."
+  (when (eq 0 (search reference-remotes-dir reference))
     t))
 
-(defun branch-p (reference)
-  (when (eq 0 (search reference-heads-dir (git-name reference)))
+(defmethod remote-p ((reference reference))
+  "Return T if the reference is within the git remotes namespace."
+  (remote-p (git-name reference)))
+
+(defmethod branch-p  ((reference string))
+  "Return T if the reference is within the git heads namespace."
+  (when (eq 0 (search reference-heads-dir reference))
     t))
+
+(defmethod branch-p  ((reference reference))
+  "Return T if the reference is within the git heads namespace."
+  (branch-p (git-name reference)))
 
 (defmethod %git-lookup-by-name ((class (eql 'reference)) name repository)
   "Lookup a reference by name and return a pointer to it.  This
@@ -134,7 +145,7 @@ pointer will need to be freed manually."
     (%git-reference-lookup reference repository name)
     (mem-ref reference :pointer)))
 
-(defmethod git-lookup ((class (eql :reference)) name repository &key)
+(defmethod git-lookup ((class (eql 'reference)) name repository &key)
   "Find a reference by its full name e.g.: ref/heads/master
 Note that this function name clashes with the generic lookup function.
 We need to figure this out by using the type argument to do dispatch."
@@ -160,7 +171,7 @@ symbolic reference."
                             :facilitator repository
                             :free-function #'%git-reference-free))
 
-(defmethod git-list ((class (eql :reference)) repository
+(defmethod git-list ((class (eql 'reference)) repository
                      &key (flags '(:oid)))
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
@@ -173,7 +184,7 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
 
 
-(defmethod git-create ((class (eql :reference)) name repository
+(defmethod git-create ((class (eql 'reference)) name repository
                        &key
                          (type :oid)
                          force
@@ -210,7 +221,7 @@ are :SHA, :HEAD or :BOTH"
   (acond
     ((and (and-both flags :head)
           (remove-if-not (lambda (ref) (equal ref name))
-             (git-list :reference repository)))
+             (git-list 'reference repository)))
      (lookup-oid :head (car it) :repository repository))
     ((numberp name)
      (lookup-oid :sha name :repository repository))
@@ -263,6 +274,5 @@ which will return a direct reference.  Than call this method."
     (case type
       (:oid oid)
       (:object
-       (git-lookup :object oid
-		   (facilitator reference)))
+       (git-lookup 'object oid (facilitator reference)))
       (t (error "Unknown type, type should be either :OID or :OBJECT but got: ~A" type)))))

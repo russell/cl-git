@@ -112,7 +112,7 @@ contains the object database."))
   (when (not (pointerp value))
       (assert (not (null-or-nullpointer (pointer value))))))
 
-(defmethod git-init ((class (eql :repository)) (path string)
+(defmethod git-init ((class (eql 'repository)) (path string)
              &key bare &allow-other-keys)
   (with-foreign-object (repository-ref :pointer)
     (%git-repository-init repository-ref path bare)
@@ -120,11 +120,11 @@ contains the object database."))
            :pointer (mem-ref repository-ref :pointer)
            :free-function #'git-repository-free)))
 
-(defmethod git-init ((class (eql :repository)) (path pathname) &rest r)
+(defmethod git-init ((class (eql 'repository)) (path pathname) &rest r)
   "Open an existing repository located at PATH."
   (apply #'git-init class (namestring path) r))
 
-(defmethod git-open ((class (eql :repository)) (path string) &key &allow-other-keys)
+(defmethod git-open ((class (eql 'repository)) (path string) &key &allow-other-keys)
   "Open an existing repository located at PATH."
   (with-foreign-object (repository-ref :pointer)
     (%git-repository-open repository-ref path)
@@ -132,7 +132,7 @@ contains the object database."))
            :pointer (mem-ref repository-ref :pointer)
            :free-function #'git-repository-free)))
 
-(defmethod git-open ((class (eql :repository)) (path pathname) &rest r)
+(defmethod git-open ((class (eql 'repository)) (path pathname) &rest r)
   (apply #'git-open class (namestring path) r))
 
 

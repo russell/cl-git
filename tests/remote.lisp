@@ -26,19 +26,19 @@
   "Create a new repository and check it's remotes."
   (is
    (eq
-    (git-list :remote *test-repository*)
+    (git-list 'remote *test-repository*)
     nil)))
 
 (def-test create-remote (:fixture repository-with-commits)
   "Create a remote and check it's details."
-  (git-create :remote "origin" *test-repository* :url "/dev/null" )
+  (git-create 'remote "origin" *test-repository* :url "/dev/null" )
   (is
    (equal
-    (git-list :remote *test-repository*)
+    (git-list 'remote *test-repository*)
     '("origin")))
   (is
    (equal
-    (git-url (git-load :remote "origin" :repository *test-repository*))
+    (git-url (git-load 'remote "origin" :repository *test-repository*))
     "/dev/null")))
 
 
@@ -46,12 +46,12 @@
   "Create a new repository and check it's remotes."
   (let ((remote-repo-path (gen-temp-path)))
     (unwind-protect
-	     (git-init :repository remote-repo-path)
-      (let ((remote-repo (git-open :repository remote-repo-path)))
-        (git-create :remote "origin"
+	     (git-init 'repository remote-repo-path)
+      (let ((remote-repo (git-open 'repository remote-repo-path)))
+        (git-create 'remote "origin"
                     remote-repo
                     :url (concatenate 'string "file://" (namestring *repository-path*)))
-           (let ((remote (git-load :remote "origin" :repository remote-repo)))
+           (let ((remote (git-load 'remote "origin" :repository remote-repo)))
              (git-connect remote)
              (git-download remote)))
       (progn

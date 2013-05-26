@@ -94,5 +94,5 @@ GIT-REPOSITORY-CONFIG."
         (%git-config-open-level %config config level)
         (make-instance-object :pointer (mem-aref %config :pointer)
                               :facilitator (facilitator config)
-                              :type :config))
+                              :type 'config))
       config))

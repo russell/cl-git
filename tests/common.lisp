@@ -117,8 +117,8 @@ will update to the new head when a new commit is added.")
      (finishes
        (unwind-protect
             (progn
-              (git-init :repository *repository-path* :bare ,bare)
-              (let ((*test-repository* (git-open :repository *repository-path*)))
+              (git-init 'repository *repository-path* :bare ,bare)
+              (let ((*test-repository* (git-open 'repository *repository-path*)))
                 ,@body)
               (let ((open-files (open-test-files-p)))
                 (when open-files
