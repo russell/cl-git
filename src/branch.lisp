@@ -46,7 +46,7 @@
   (push (cons branch-name type) *branch-values*)
   0)
 
-(defcfun ("git_branch_is_head" git-is-head)
+(defcfun ("git_branch_is_head" %git-branch-is-head)
     :boolean
   "Returns t is the current HEAD points to this branch.
 This means that this is the branch that is checked out."
@@ -82,6 +82,11 @@ This means that this is the branch that is checked out."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(defun head-p (branch)
+  "Returns t is the current HEAD points to this branch.
+This means that this is the branch that is checked out."
+  (assert (eql (type-of branch) 'reference))
+  (%git-branch-is-head branch))
 
 (defmethod git-upstream ((branch reference))
   "Returns the reference for the remote tracking branch, corresponding
