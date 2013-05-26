@@ -232,16 +232,6 @@ variable VAR."
           (progn ,@body)
        (git-free ,var))))
 
-(defmacro with-repository-index ((repository) &body body)
-  "Load a repository index uses the current *GIT-REPOSITORY* as the
-current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
-index."
-  ;;TODO add gensym
-  `(let ((*git-repository-index* (git-index ,repository)))
-     (unwind-protect
-      (progn ,@body)
-       (git-free *git-repository-index*))))
-
 (defun git-index-new ()
   "Create a new in-memory index that can be used to perform in memory
 operations that may not be written back to the disk."

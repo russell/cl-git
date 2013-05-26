@@ -184,7 +184,7 @@ commit."
      :committer committer)))
 
 (defun add-test-revision (&rest rest)
-  (with-repository-index (*test-repository*)
+  (with-index (*git-repository-index* *test-repository*)
     (let ((args rest))
       (setf (getf args :parents) (getf (car *test-repository-state*) :sha))
       (push

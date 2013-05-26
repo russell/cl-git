@@ -27,7 +27,7 @@
     (let ((filename (if (functionp filename)
                         (funcall filename)
                         filename)))
-      (with-repository-index (*test-repository*)
+      (with-index (*git-repository-index* *test-repository*)
         (write-string-to-file filename filetext)
         (&body)))))
 

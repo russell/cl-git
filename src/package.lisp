@@ -91,7 +91,6 @@
    #:make-tag
 
    ;; Macros
-   #:with-repository-index
    #:with-index
    #:with-git-revisions
    #:bind-git-commits
