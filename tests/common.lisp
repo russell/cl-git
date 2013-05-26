@@ -99,6 +99,9 @@
 (defvar *repository-path* nil
   "the path to the current test repository.")
 
+(defvar *test-repository* nil
+  "store the state of the current test repository.")
+
 (defvar *test-repository-state* nil
   "store the state of the current test repository.")
 
@@ -115,7 +118,7 @@ will update to the new head when a new commit is added.")
        (unwind-protect
             (progn
               (git-init :repository *repository-path* :bare ,bare)
-              (with-repository (*repository-path*)
+              (let ((*test-repository* (git-open :repository *repository-path*)))
                 ,@body)
               (let ((open-files (open-test-files-p)))
                 (when open-files
@@ -150,6 +153,7 @@ commit."
          (make-commit
           (git-write-tree *git-repository-index*)
           (getf commit :message)
+          :repository *test-repository*
           :parents (getf commit :parents)
           :author (getf commit :author)
           :committer (getf commit :committer))))
@@ -180,7 +184,7 @@ commit."
      :committer committer)))
 
 (defun add-test-revision (&rest rest)
-  (with-repository-index
+  (with-repository-index (*test-repository*)
     (let ((args rest))
       (setf (getf args :parents) (getf (car *test-repository-state*) :sha))
       (push

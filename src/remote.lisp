@@ -154,11 +154,12 @@
   (payload :pointer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defclass remote (git-pointer) ())
 
 
-(defmethod git-create ((class (eql :remote)) name
-                       &key url (repository *git-repository*))
+(defmethod git-create ((class (eql :remote)) name repository
+                       &key url)
   "Create a new remote."
   (let ((url (if (pathnamep url) (namestring url) url)))
     (with-foreign-object (remote :pointer)
@@ -168,16 +169,16 @@
                      :facilitator repository
                      :free-function #'%git-remote-free))))
 
-(defmethod git-list ((class (eql :remote))
-             &key (repository *git-repository*))
+(defmethod git-list ((class (eql :remote)) repository &key)
   (with-foreign-object (string-array '(:struct git-strings))
     (%git-remote-list string-array repository)
     (prog1
-	(convert-from-foreign string-array '%git-strings)
+        (convert-from-foreign string-array '%git-strings)
       (free-translated-object string-array '%git-strings t))))
 
 (defmethod git-load ((class (eql :remote))
-             name &key (repository *git-repository*))
+                     name &key repository)
+  (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (remote-out :pointer)
     (%git-remote-load remote-out repository name)
     (make-instance 'remote

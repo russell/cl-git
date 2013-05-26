@@ -86,10 +86,10 @@
   "return a git-commit or nil if there are no more commits"
   (with-foreign-object (oid '(:struct git-oid))
     (when (= 0 (%git-revwalk-next oid walker))
-      (git-commit-from-oid oid :repository (facilitator walker)))))
+      (git-commit-from-oid oid (facilitator walker)))))
 
 
-(defun git-revwalk-new (&key (repository *git-repository*))
+(defun git-revwalk-new (&key repository)
   "Create a new, empty, revwalker"
   (assert (not (null-or-nullpointer repository)))
 
@@ -99,8 +99,8 @@
                  :repository repository)))
 
 (defun git-revwalk (oid-or-oids &key
-                  (ordering :time)
-                  (repository *git-repository*))
+                                  (ordering :time)
+                                  repository)
   "Walk all the revisions from a specified OID, or OIDs.
 OID can be a single object id, or a list of object ids.
 The OIDs can be anything that can be resolved by commit-oid-from-oid.
@@ -108,21 +108,21 @@ In general this means, commits and tags."
   (let ((revwalker (git-revwalk-new :repository repository)))
     (%git-revwalk-sorting revwalker ordering)
     (loop
-       :for oid
-       :in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids)
-       :do (%git-revwalk-push revwalker
-                  (commit-oid-from-oid oid :repository repository)))
+      :for oid
+      :in (if (atom oid-or-oids) (list oid-or-oids) oid-or-oids)
+      :do (%git-revwalk-push revwalker
+                             (commit-oid-from-oid oid repository)))
     revwalker))
 
 
-(defun make-instance-revwalker (&key object-ptr (repository *git-repository*))
+(defun make-instance-revwalker (&key object-ptr repository)
   (make-instance 'revision-walker
          :pointer object-ptr
          :facilitator repository
          :free-function #'%git-revwalk-free))
 
 
-(defmacro with-git-revisions ((commit &rest rest &key sha head (repository '*git-repository*)) &body body)
+(defmacro with-git-revisions ((commit &rest rest &key sha head repository) &body body)
   "Iterate aver all the revisions, the symbol specified by COMMIT will
 be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
@@ -137,7 +137,7 @@ special call to stop iteration."
                       (progn
                         (if (= (%git-revwalk-next oid revwalker) 0)
                             (progn
-                              (let ((,commit (git-commit-from-oid oid :repository ,repository)))
+                              (let ((,commit (git-commit-from-oid oid ,repository)))
                                 ,@body)
                               (revision-walker))))))
              (unwind-protect
@@ -145,8 +145,7 @@ special call to stop iteration."
                (git-free revwalker))))))))
 
 
-(defun revision-walk (name-or-names &key (flags :both)
-                      (repository *git-repository*))
+(defun revision-walk (name-or-names repository &key (flags :both))
   "Create a revision walker starts iteration from the commits listed
 in NAME-OR-NAMES.  A head or sha that matches can be filterd using the
 flags :SHA, :HEAD or :BOTH.
@@ -154,7 +153,7 @@ flags :SHA, :HEAD or :BOTH.
 Once created iteration over commits can be done with the method
 WALKER-NEXT."
   (let* ((names (if (listp name-or-names)
-                     name-or-names
-                     (list name-or-names)))
+                    name-or-names
+                    (list name-or-names)))
          (oids (find-oids names :flags flags :repository repository)))
     (git-revwalk oids :repository repository)))

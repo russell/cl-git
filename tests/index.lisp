@@ -27,7 +27,7 @@
     (let ((filename (if (functionp filename)
                         (funcall filename)
                         filename)))
-      (with-repository-index
+      (with-repository-index (*test-repository*)
         (write-string-to-file filename filetext)
         (&body)))))
 
@@ -85,7 +85,7 @@
 
 (def-test index-has-conflicts (:fixture repository)
   (let ((filename "test-file"))
-    (with-index (index *git-repository*)
+    (with-index (index *test-repository*)
       (write-string-to-file filename "foo")
       (git-add filename :index index)
       (is (eq (git-index-has-conflicts index)
@@ -94,7 +94,7 @@
 (def-test index-open (:fixture repository)
   (let ((filename "test-file")
         (index-file-path (gen-temp-path)))
-    (with-index (index *git-repository*)
+    (with-index (index *test-repository*)
       (write-string-to-file filename "foo")
       (git-add filename :index index)
       (unwind-protect
@@ -109,12 +109,21 @@
 
 (def-test index-new (:fixture repository)
   (let ((filename "test-file"))
-    (with-index (index *git-repository*)
+    (with-index (index *test-repository*)
       (write-string-to-file filename "foo")
       (git-add filename :index index)
-      (with-index (index-file)
+      (with-index (index-in-memory)
+        (git-write index)
         (let ((entry (git-entry-by-index index 0)))
           ;; Add the entry from the other git index.
-          (git-add entry :index index-file)
+          (git-add entry :index index-in-memory)
+          ;; TODO (RS) there is an intermittent failure which results
+          ;; from the index-in-memory index having a different set of
+          ;; FLAGS-EXTENDED to the disk index.  Adding a sleep seems
+          ;; to make the test behave consistently.  But the proper fix
+          ;; should be removing the check since the FLAGS-EXTENDED
+          ;; just stores internal details about the state of the
+          ;; index.
+          (sleep 1)
           (plist-equal entry
-                       (git-entry-by-index index-file 0)))))))
+                       (git-entry-by-index index-in-memory 0)))))))

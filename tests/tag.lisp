@@ -23,20 +23,20 @@
 
 
 (def-test list-tags (:fixture repository)
-  (is (equal (git-list :tag)
+  (is (equal (git-list :tag *test-repository*)
              nil))
   (let ((tag-name (random-string 50))
         (tag-message (random-string 500))
         (test-commit (make-test-revision :author (list :name (random-string 50)))))
-    (bind-git-commits ((commit :sha (getf test-commit :sha)))
+    (bind-git-commits (((commit :sha (getf test-commit :sha))) *test-repository*)
       (let ((tag
               (make-tag tag-name tag-message
-                        :repository *git-repository*
+                        :repository *test-repository*
                         :target commit
                         :tagger (list :name (random-string 50)
                                       :email (random-string 50)
                                       :time (random-time)))))
         (is (equal (git-name tag)
                    tag-name))))
-    (is (equal (git-list :tag)
+    (is (equal (git-list :tag *test-repository*)
                (list tag-name)))))

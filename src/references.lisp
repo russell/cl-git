@@ -160,11 +160,11 @@ symbolic reference."
                             :facilitator repository
                             :free-function #'%git-reference-free))
 
-(defmethod git-list ((class (eql :reference))
-             &key (repository *git-repository*) (flags '(:oid)))
+(defmethod git-list ((class (eql :reference)) repository
+                     &key (flags '(:oid)))
   "List all the refs, filter by FLAGS.  The flag options
 are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
-
+  (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (string-array '(:pointer (:struct git-strings)))
     (%git-reference-list string-array repository flags)
     (prog1
@@ -173,7 +173,7 @@ are :INVALID, :OID, :SYMBOLIC, :PACKED or :HAS-PEEL"
 
 
 
-(defmethod git-create ((class (eql 'reference)) name repository
+(defmethod git-create ((class (eql :reference)) name repository
                        &key
                          (type :oid)
                          force
@@ -201,15 +201,16 @@ error if that is the case."
 
 
 (defun find-oid (name &key (flags :both)
-            (repository *git-repository*))
+                        repository)
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
+  (assert (not (null-or-nullpointer repository)))
   (flet ((and-both (flag other-flag)
            (find flag (list :both other-flag))))
   (acond
     ((and (and-both flags :head)
           (remove-if-not (lambda (ref) (equal ref name))
-             (git-list :reference :repository repository)))
+             (git-list :reference repository)))
      (lookup-oid :head (car it) :repository repository))
     ((numberp name)
      (lookup-oid :sha name :repository repository))
@@ -222,9 +223,10 @@ are :SHA, :HEAD or :BOTH"
     (t (error "Invalid reference named ~A." name)))))
 
 (defun find-oids (name-or-names &key (flags :both)
-                  (repository *git-repository*))
+                                  repository)
   "Find a head or sha that matches the NAME. Possible flags
 are :SHA, :HEAD or :BOTH"
+  (assert (not (null-or-nullpointer repository)))
   (if (stringp name-or-names)
       (find-oid name-or-names :flags flags :repository repository)
       (loop :for name :in name-or-names
@@ -262,5 +264,5 @@ which will return a direct reference.  Than call this method."
       (:oid oid)
       (:object
        (git-lookup :object oid
-		   :repository (facilitator reference)))
+		   (facilitator reference)))
       (t (error "Unknown type, type should be either :OID or :OBJECT but got: ~A" type)))))

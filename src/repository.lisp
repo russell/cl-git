@@ -108,6 +108,9 @@ direct commit."
   (:documentation "Repository is the root type, it
 contains the object database."))
 
+(defmethod translate-to-foreign :before (value (type repository))
+  (when (not (pointerp value))
+      (assert (not (null-or-nullpointer (pointer value))))))
 
 (defmethod git-init ((class (eql :repository)) (path string)
              &key bare &allow-other-keys)
@@ -179,21 +182,3 @@ Or for a bare repository to the repository itself."
 		   :pointer (mem-ref head :pointer)
 		   :facilitator repository
 		   :free-function #'%git-reference-free)))
-
-(defmacro with-repository ((var &optional pathname-or-string) &body body)
-  "Evaluates the body with VAR bound to a newly opened located
-repository at PATHNAME-OR-STRING.  Repository is freed upon exit of
-this scope so any objects that leave this scope will no longer be able
-to access the repository."
-  (if pathname-or-string
-      `(let ((,var (git-open :repository ,pathname-or-string)))
-         (unwind-protect
-              (progn
-                ,@body)
-           (git-free ,var)))
-      ;; XXX Backwards compatible version of the macro
-      `(let ((*git-repository* (git-open :repository ,var)))
-         (unwind-protect
-              (progn
-                ,@body)
-           (git-free *git-repository*)))))

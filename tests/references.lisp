@@ -26,8 +26,10 @@
   (with-test-repository ()
     (let* ((test-commit (make-test-revision))
            (ref-default (git-create :reference "refs/heads/oid"
+                                    *test-repository*
                                     :target (getf test-commit :sha)))
            (ref-symbolic (git-create :reference "refs/heads/symbolic"
+                                     *test-repository*
                                      :target "refs/heads/oid"
                                      :type :symbolic)))
       (declare (ignorable ref-symbolic) (ignorable ref-default))
@@ -37,8 +39,10 @@
   (with-test-repository ()
       (let ((test-commit (make-test-revision)))
         (git-create :reference "refs/heads/oid"
+                    *test-repository*
                     :target (getf test-commit :sha)))
     (git-create :reference "refs/heads/symbolic"
+                *test-repository*
                 :target "refs/heads/oid"
                 :type :symbolic)
     (&body)))
@@ -46,17 +50,17 @@
 (def-test references-list-oid (:fixture reference)
   (is
    (equal ;; test the git-list default args.
-    (sort-strings (git-list :reference))
+    (sort-strings (git-list :reference *test-repository*))
     (sort-strings (list "refs/heads/oid" "refs/heads/master")))))
 
 (def-test references-list-symbolic (:fixture reference)
   (is
    (equal
-    (sort-strings (git-list :reference :flags '(:oid :symbolic)))
+    (sort-strings (git-list :reference *test-repository* :flags '(:oid :symbolic)))
     (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master")))))
 
 (def-test reference-lookup-oid (:fixture reference)
-  (let ((ref (git-lookup :reference "refs/heads/oid")))
+  (let ((ref (git-lookup :reference "refs/heads/oid" *test-repository*)))
       (is
        (equal (git-name ref)
               "refs/heads/oid"))
@@ -65,13 +69,13 @@
             'reference))))
 
 (def-test reference-lookup-symbolic (:fixture reference)
-  (let ((ref (git-lookup :reference "refs/heads/symbolic")))
+  (let ((ref (git-lookup :reference "refs/heads/symbolic" *test-repository*)))
     (is
      (equal (git-name ref)
             "refs/heads/symbolic"))
     (is
      (equal (type-of ref)
-            'symbolic-reference))))
+            'reference))))
 
 (def-test reference-accessors-oid (:fixture reference-with-context)
   "Create oid reference and check accessors."
@@ -114,13 +118,13 @@ fixture"
 (def-test reference-is-branch (:fixture reference)
   "Check that the ref is a branch."
   (is (equal
-       (git-is-branch (git-lookup :reference "refs/heads/oid"))
+       (git-is-branch (git-lookup :reference "refs/heads/oid" *test-repository*))
        t)))
 
 (def-test reference-is-not-remote (:fixture reference)
   "Check that the ref is a branch."
   (is (equal
-       (git-is-remote (git-lookup :reference "refs/heads/oid"))
+       (git-is-remote (git-lookup :reference "refs/heads/oid" *test-repository*))
        nil)))
 
 ;; TODO add test for the positive case

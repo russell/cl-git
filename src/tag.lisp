@@ -101,10 +101,9 @@
     (with-foreign-strings ((%name name)
                            (%message message))
       (%git-tag-create newoid repository %name target tagger %message force))
-    (git-lookup :tag (convert-from-foreign newoid '%oid) :repository repository)))
+    (git-lookup :tag (convert-from-foreign newoid '%oid) repository)))
 
-(defmethod git-list ((class (eql :tag))
-		     &key (repository *git-repository*))
+(defmethod git-list ((class (eql :tag)) repository &key)
   "Returns a list of tag names for the repository.
 
 Important Note:  This is the list of tag names as the user thinks of tags.
@@ -125,7 +124,7 @@ strings they are identified with.  So this call is rather useless."
   0)
 
 (defmethod git-list ((class (eql :tag))
-		     &key (repository *git-repository*))
+                     &key repository)
   (let ((*tag-values* nil))
     (%git-tag-foreach repository
 		      (callback collect-tag-values)
@@ -133,18 +132,8 @@ strings they are identified with.  So this call is rather useless."
     *tag-values*))
 |#
 
-(defmethod git-lookup ((class (eql :tag))
-               oid &key (repository *git-repository*))
+(defmethod git-lookup ((class (eql :tag)) oid repository &key)
   (git-object-lookup oid class :repository repository))
-
-(defmethod git-lookup-byname ((class (eql :tag)) (name string)
-			      &key (repository *git-repository*))
-  (with-foreign-object (reference :pointer)
-    (%git-tag-lookup-byname reference repository name)
-    (make-instance 'reference
-		   :pointer (mem-ref reference :pointer)
-		   :facilitator repository
-		   :free-function #'%git-reference-free)))
 
 (defmethod git-name ((tag tag))
   (git-tag-name tag))

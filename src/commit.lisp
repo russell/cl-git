@@ -92,7 +92,7 @@ Commits that have more then one parent are considered to be merges."))
                                   author
                                   committer
                                   parents
-                                  (repository *git-repository*))
+                                  repository)
   "Create a new commit from the tree with the OID specified and
 MESSAGE.  Optional :UPDATE-REF is the name of the reference that will
 be updated to point to this commit.  The default value \"HEAD\" will
@@ -104,14 +104,15 @@ optional instance of a GIT-SIGNATURE the details the committer.
 
   (assert (not (null-or-nullpointer repository)))
 
-  (let ((tree (git-lookup :object oid :type :tree :repository repository))
+  (let ((tree (git-lookup :object oid repository :type :tree))
         (parents (if (listp parents) parents (list parents))))
 
     ;; lookup all the git commits
     (setq parents (mapcar #'(lambda (c)
                               (git-lookup :object
-                                          (lookup-oid :sha c)
-                                          :repository repository))
+                                          (lookup-oid :sha c
+                                                      :repository repository)
+                                          repository))
                           parents))
 
     (with-foreign-objects ((%parents :pointer (length parents))
@@ -135,10 +136,9 @@ optional instance of a GIT-SIGNATURE the details the committer.
          (length parents)
          %parents))
       (git-lookup :commit (convert-from-foreign newoid '%oid)
-                  :repository repository))))
+                  repository))))
 
-(defmethod git-lookup ((class (eql :commit))
-               oid &key (repository *git-repository*))
+(defmethod git-lookup ((class (eql :commit)) oid repository &key)
   (git-object-lookup oid class :repository repository))
 
 (defmethod git-name ((commit commit))
@@ -165,7 +165,7 @@ optional instance of a GIT-SIGNATURE the details the committer.
 parents of the commit COMMIT."
   (git-commit-parent-oid commit index))
 
-(defmethod git-tree ((commit commit) &key path (repository *git-repository*))
+(defmethod git-tree ((commit commit) &key path repository)
   "Returns the TREE object of the commit."
   (let ((tree (with-foreign-object (%tree :pointer)
                 (%git-commit-tree %tree commit)
@@ -176,7 +176,7 @@ parents of the commit COMMIT."
         (git-tree tree :path path :repository repository)
         tree)))
 
-(defun git-commit-from-oid (oid &key (repository *git-repository*))
+(defun git-commit-from-oid (oid repository)
   "Returns a git-commit object identified by the `oid'.
 This is an extended version of GIT-COMMIT-LOOKUP.
 If the oid refers to a tag, this function will return the git-commit
@@ -186,15 +186,15 @@ pointed to by the tag.  The call git-commit-lookup will fail."
       (:tag (git-target git-object))
       (:commit git-object))))
 
-(defun commit-oid-from-oid (oid &key (repository *git-repository*))
+(defun commit-oid-from-oid (oid repository)
   "Returns the oid of a commit referenced by `oid'.
 If the `oid' refers to a commit the function is basically a
 no-op.  However if `oid' refers to a tag, it will return
 the oid of the target of the tag."
-  (let ((commit (git-commit-from-oid oid :repository repository)))
+  (let ((commit (git-commit-from-oid oid repository)))
     (git-object-id commit)))
 
-(defmacro bind-git-commits (bindings &body body)
+(defmacro bind-git-commits ((bindings repository-or-odb) &body body)
   "Lookup commits specified in the bindings.  The bindings syntax is
 similar to the LET syntax except instead of needing to specify an
 initial form key arguments are used.  Atleast one key arguments SHA or
@@ -209,6 +209,7 @@ ref path."
                #'(lambda (s)
                    `(setf ,(car s)
                           (git-commit-from-oid
-                           (lookup-oid ,@(cdr s)))))
+                           (lookup-oid ,@(cdr s) :repository ,repository-or-odb)
+                           ,repository-or-odb)))
                bindings)
             ,@body))))

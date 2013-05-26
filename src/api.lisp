@@ -22,13 +22,6 @@
 (in-package #:cl-git)
 
 
-(defparameter *git-repository* nil
-  "A global that stores the current Git repository.
-
-The value is used as a default argument to functions requiring a
-repository.  It is bound by (WITH-REPOSITORY ...), but can also be
-bound by the user.")
-
 (defparameter *git-repository-index* nil
   "A global that stores the current Git index.
 
@@ -122,11 +115,11 @@ to the content of the commit.  If PATH is specified then the tree
 returned node will be a child node of the tree.
 "))
 
-(defgeneric git-create (class id/name &key repository &allow-other-keys))
+(defgeneric git-create (class id/name repository &key &allow-other-keys))
 
-(defgeneric git-lookup (class id/name &key repository &allow-other-keys)) ;; Documentation is copied in.
+(defgeneric git-lookup (class id/name repository &key &allow-other-keys)) ;; Documentation is copied in.
 
-(defgeneric git-list (class &key repository &allow-other-keys))
+(defgeneric git-list (class repository &key &allow-other-keys))
 
 (defgeneric git-open (class path/name &key &allow-other-keys))
 

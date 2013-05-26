@@ -65,20 +65,21 @@
 (defclass odb (git-pointer) ())
 (defclass odb-object (git-pointer) ())
 
-(defmethod git-list ((class (eql :oid)) &key
-                  (repository *git-repository*)
-                  odb)
-  (let ((odb (or odb (git-odb repository)))
-    (*oid-values* (list)))
+(defmethod git-list ((class (eql :oid)) (repository odb) &key)
+  (let ((*oid-values* (list)))
     (%git-odb-for-each odb
                (callback collect-oid-values)
                (null-pointer))
     *oid-values*))
 
+(defmethod git-list ((class (eql :oid)) (repository repository) &key)
+  (git-list :oid (git-odb repository)))
+
 (defmethod git-load ((class (eql :odb-object))
              oid
              &key odb
-               (repository *git-repository*))
+               repository)
+  (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (out :pointer)
     (%git-odb-read out (or odb (git-odb repository)) oid)
     (make-instance 'odb-object

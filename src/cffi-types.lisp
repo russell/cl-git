@@ -20,7 +20,7 @@
 (in-package #:cl-git)
 
 (defctype size :unsigned-long)
-(defctype size-t :unsigned-int)
+(defctype size-t :unsigned-long)
 (defctype off-t :uint64)
 
 

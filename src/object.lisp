@@ -114,7 +114,14 @@ wrap git pointers to repositories, config, index etc."
   (call-next-method object)
   (setf (facilitator object) nil))
 
-(defun git-object-lookup (oid type &key (repository *git-repository*))
+
+(defun git-object-lookup-ptr (oid type repository)
+  (assert (not (null-or-nullpointer repository)))
+  (with-foreign-object (obj-ptr :pointer)
+    (%git-object-lookup obj-ptr repository oid type)
+    (mem-ref obj-ptr :pointer)))
+
+(defun git-object-lookup (oid type &key repository)
   "Returns a git object which is identified by the OID.
 The type argument specifies which type is expected.  If the found
 object is not of the right type, an error will be signaled.  The type
@@ -123,14 +130,10 @@ is one of :ANY, :BAD, :COMMIT :TREE :BLOB :TAG :OFS-DELTA :REFS-DELTA.
 :ANY means return the object found, regardless of type.  Also :ANY is
 not a type of any real object, but only used for querying like in this function.
 :BAD should never occur, it indicates an error in the data store."
-
   (assert (not (null-or-nullpointer repository)))
-
-  (with-foreign-object (obj-ptr :pointer)
-    (%git-object-lookup obj-ptr repository oid type)
-    (make-instance-object :pointer (mem-ref obj-ptr :pointer)
-              :facilitator repository
-              :type type)))
+  (make-instance-object :pointer (git-object-lookup-ptr oid type repository)
+                        :facilitator repository
+                        :type type))
 
 
 
@@ -160,8 +163,7 @@ not a type of any real object, but only used for querying like in this function.
   (git-object-id object))
 
 
-(defmethod git-lookup ((class (eql :object))
-               oid &key (repository *git-repository*))
+(defmethod git-lookup ((class (eql :object)) oid repository &key)
   (git-object-lookup oid :any :repository repository))
 
 (defmethod git-type ((object object))

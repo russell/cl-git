@@ -32,7 +32,7 @@ check that the commit messages match the expected messages."
            (tcommit (pop commit-list))
            (count 0))
       (with-git-revisions
-          (commit :sha (getf tcommit :sha))
+          (commit :sha (getf tcommit :sha) :repository *test-repository*)
         (commit-equal tcommit commit)
         (setf count (1+ count))
         (setf tcommit (pop commit-list)))
@@ -47,7 +47,7 @@ check that the commit messages match the expected messages."
     (let* ((commit-list *test-repository-state*)
            (tcommit (pop commit-list))
            (count 0))
-      (let ((walker (revision-walk (getf tcommit :sha) :flags :sha)))
+      (let ((walker (revision-walk (getf tcommit :sha) *test-repository* :flags :sha)))
         (do ((commit (git-next walker) (git-next walker)))
             ((null commit))
           (commit-equal tcommit commit)

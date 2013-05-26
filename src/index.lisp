@@ -222,9 +222,9 @@ be written back to disk to take effect."
   (%git-index-write index))
 
 (defmacro with-index ((var &optional repository-or-path) &body body)
-  "Load a repository index uses the current *GIT-REPOSITORY* as the
-current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
-index."
+  "Load an index from a repository, path or if none is specified then
+an in-memory index is used.  The newly opened index is bound to the
+variable VAR."
   `(let ((,var ,(if repository-or-path
                     `(git-index ,repository-or-path)
                     `(git-index-new))))
@@ -232,11 +232,12 @@ index."
           (progn ,@body)
        (git-free ,var))))
 
-(defmacro with-repository-index (&body body)
+(defmacro with-repository-index ((repository) &body body)
   "Load a repository index uses the current *GIT-REPOSITORY* as the
 current repository and sets *GIT-REPOSITORY-INDEX* as the newly opened
 index."
-  `(let ((*git-repository-index* (git-index *git-repository*)))
+  ;;TODO add gensym
+  `(let ((*git-repository-index* (git-index ,repository)))
      (unwind-protect
       (progn ,@body)
        (git-free *git-repository-index*))))

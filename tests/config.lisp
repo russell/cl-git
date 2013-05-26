@@ -24,7 +24,7 @@
 
 (def-test repository-config (:fixture (repository))
   (is (equal
-       (git-values (git-config *git-repository* :level :local))
+       (git-values (git-config *test-repository* :level :local))
        '((:name "core.filemode" :value "true" :level :local)
          (:name "core.logallrefupdates" :value "true" :level :local)
          (:name "core.bare" :value "false" :level :local)

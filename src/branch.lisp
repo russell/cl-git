@@ -71,16 +71,18 @@ This means that this is the branch that is checked out."
   (size size-t)
   (repository %repository)
   (branch-name :string))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel interface.
 ;;;
-;;; Branches are just a sort of reference and are returned as instances of references.
+;;; Branches are just a sort of reference and are returned as
+;;; instances of references.
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defmethod git-list ((class (eql :branch))
-             &key (repository *git-repository*)
-               (type '(:local :remote)))
+
+(defmethod git-list ((class (eql :branch)) repository
+                     &key (type '(:local :remote)))
   "Returns a list of all branche names in the repository.  Each
 branch is represented as cons pair (branch-name . type-flags)
 
@@ -97,11 +99,10 @@ specifying :LOCAL or :REMOTE as argument to the :TYPE parameter.
               (null-pointer))
     *branch-values*))
 
-
-(defmethod git-lookup ((class (eql :branch))
-               (name string)
-               &key (repository *git-repository*)
-             (type :local))
+;;; TODO this returns references, so it should be able to me done with
+;;; (git-lookup :reference)
+(defmethod git-lookup ((class (eql :branch)) (name string) repository
+                       &key (type :local))
   "Converts a branch name to a git REFERENCE.  The optional :type argument
 specifies if the branch name names a local branch or a remote branch."
   (with-foreign-object (reference :pointer)
@@ -111,9 +112,7 @@ specifies if the branch name names a local branch or a remote branch."
            :facilitator repository
            :free-function #'%git-reference-free)))
 
-(defmethod git-lookup ((class (eql :branch))
-		       (branch-name-and-type cons)
-		       &key (repository *git-repository*))
+(defmethod git-lookup ((class (eql :branch)) (branch-name-and-type cons) repository &key)
   "Converts a branch/type combination to a git REFERENCE.
 The branch-name-and-type should be a cons pair like
 \(branch-name branch-type\).

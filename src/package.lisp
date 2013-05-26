@@ -90,7 +90,6 @@
    #:make-tag
 
    ;; Macros
-   #:with-repository
    #:with-repository-index
    #:with-index
    #:with-git-revisions
@@ -111,7 +110,6 @@
 
    ;; variables
    #:*git-repository-index*
-   #:*git-repository*
 
    #:git-capabilities
    #:git-tracking
@@ -143,5 +141,4 @@
    #:git-is-remote
    #:git-is-branch
    #:git-upstream
-   #:git-remote-name
-   #:git-lookup-byname))
+   #:git-remote-name))
