@@ -91,7 +91,7 @@
 (defmethod git-load ((class (eql 'odb-object)) oid (repository repository))
   (git-load class oid (open-odb repository)))
 
-(defmethod git-id ((object odb-object))
+(defmethod oid ((object odb-object))
   (git-odb-object-id object))
 
 (defmethod git-type ((object odb-object))

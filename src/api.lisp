@@ -29,7 +29,7 @@ This value is used as the default index for all index related
 functions.  It is set bound by (WITH-REPOSITORY-INDEX ..)  But can
 also be set by user code.")
 
-(defgeneric git-id (object)
+(defgeneric oid (object)
   (:documentation "Return the identifier of OBJECT.
 The identifier is typically the SHA-1 checksum or hash code.
 
@@ -37,11 +37,11 @@ Note that this is an integer, and not the string you typically see reported by g
 
 To get the string representation use format like this:
 
-    (format nil \"~40,'0X\" (git-id object))
+    (format nil \"~40,'0X\" (oid object))
 
 or if you want lowercase hexadecimal digits:
 
-    (format nil \"~(~40,'0X~)\" (git-id object))
+    (format nil \"~(~40,'0X~)\" (oid object))
 
 "))
 

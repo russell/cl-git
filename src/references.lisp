@@ -279,13 +279,13 @@ or :SYMBOLIC"
       ((slot-value object 'libgit2-disposed)
        (princ "(disposed)" stream)))))
 
-(defmethod git-id ((reference reference))
+(defmethod oid ((reference reference))
   "Returns the oid that this reference points to.  If this reference
 is a symbolic reference then it will be resolved to a real reference
 first."
   (if (symbolic-p reference)
-      (git-id (git-target (git-resolve reference)))
-      (git-id (git-target reference))))
+      (oid (git-target (git-resolve reference)))
+      (oid (git-target reference))))
 
 (defmethod git-target ((reference reference))
   "Returns the Object that this reference points to.  If the reference

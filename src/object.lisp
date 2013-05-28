@@ -162,14 +162,14 @@ not a type of any real object, but only used for querying like in this function.
     :for index :from 0 :below (git-parentcount object)
     :collect (git-parent-oid object index)))
 
-(defmethod git-id ((object object))
+(defmethod oid ((object object))
   (git-object-id object))
 
 (defmethod full-name ((object object))
-  (format nil "~x" (git-id object)))
+  (format nil "~x" (oid object)))
 
 (defmethod short-name ((object object))
-  (subseq (format nil "~x" (git-id object)) 0 7))
+  (subseq (format nil "~x" (oid object)) 0 7))
 
 (defmethod print-object ((object object) stream)
   (print-unreadable-object (object stream :type t :identity t)

@@ -149,7 +149,7 @@ commit."
     (git-add (getf file :filename)))
   (git-write *git-repository-index*)
   (setf (getf commit :sha)
-        (git-id
+        (oid
          (make-commit
           (git-write-tree *git-repository-index*)
           (getf commit :message)
