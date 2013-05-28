@@ -53,7 +53,7 @@ list return values are :THREADS and :HTTPS.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defun git-version ()
+(defun libgit2-version ()
   "Returns the libgit2 C-library version number as a list of three integers,
 \(major minor revision\)."
   (with-foreign-objects

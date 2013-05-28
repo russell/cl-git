@@ -121,7 +121,7 @@
    #:*git-repository-index*
 
    #:git-capabilities
-   #:git-version
+   #:libgit2-version
    #:git-peel
    #:git-index
    #:git-index-has-conflicts
