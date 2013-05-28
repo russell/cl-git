@@ -139,17 +139,6 @@ not a type of any real object, but only used for querying like in this function.
                         :type type))
 
 
-
-;; Copy the documentation to the generic function so
-;; we do not have to write it twice.
-#|
-(setf (documentation #'git-lookup 'function)
-      (documentation #'git-object-lookup 'function))
-
-(setf (documentation #'git-type 'function)
-      (documentation #'git-object-type 'function))
-
-|#
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Some generic functions
