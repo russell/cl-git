@@ -62,7 +62,7 @@
 
 
 
-(defun git-status (repository)
+(defun repository-status (repository)
   "Return the current status values for each of the object in the
 repository.  For each element of the list the FIRST is the name of the
 file and the CDR is a list of keywords that containing the current

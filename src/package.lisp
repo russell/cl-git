@@ -61,7 +61,7 @@
    #:git-values
    #:git-raw-size
    #:git-raw-content
-   #:git-status
+   #:repository-status
    #:oid
    #:git-message
    #:git-author
