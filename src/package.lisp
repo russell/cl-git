@@ -70,7 +70,7 @@
    #:parent-count
    #:parents
    #:git-tree
-   #:git-lookup
+   #:get-object
    #:list-objects
    #:full-name
    #:short-name

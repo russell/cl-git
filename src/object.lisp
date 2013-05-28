@@ -175,7 +175,7 @@ not a type of any real object, but only used for querying like in this function.
       ((slot-value object 'libgit2-disposed)
        (princ "(disposed)" stream)))))
 
-(defmethod git-lookup ((class (eql 'object)) oid repository &key)
+(defmethod get-object ((class (eql 'object)) oid repository)
   (git-object-lookup oid :any repository))
 
 (defmethod git-type ((object object))

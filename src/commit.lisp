@@ -104,12 +104,12 @@ optional instance of a GIT-SIGNATURE the details the committer.
 
   (assert (not (null-or-nullpointer repository)))
 
-  (let ((tree (git-lookup 'object oid repository :type :tree))
+  (let ((tree (get-object 'tree oid repository))
         (parents (ensure-list parents)))
 
     ;; lookup all the git commits
     (setq parents (mapcar #'(lambda (c)
-                              (git-lookup 'commit c repository))
+                              (get-object 'commit c repository))
                           parents))
 
     (with-foreign-objects ((%parents :pointer (length parents))
@@ -132,7 +132,7 @@ optional instance of a GIT-SIGNATURE the details the committer.
          tree
          (length parents)
          %parents))
-      (git-lookup 'commit (convert-from-foreign newoid '%oid)
+      (get-object 'commit (convert-from-foreign newoid '%oid)
                   repository))))
 
 (defun make-commit-from-oid (oid repository)
@@ -142,7 +142,7 @@ optional instance of a GIT-SIGNATURE the details the committer.
                          :free-function #'git-object-free))
 
 
-(defmethod git-lookup ((class (eql 'commit)) oid repository &key)
+(defmethod get-object ((class (eql 'commit)) oid repository)
   (git-object-lookup oid class repository))
 
 (defmethod git-message ((commit commit))

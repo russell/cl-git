@@ -102,7 +102,10 @@ returned node will be a child node of the tree.
 
 (defgeneric make-object (class id/name repository &key &allow-other-keys))
 
-(defgeneric git-lookup (class id/name repository &key &allow-other-keys)) ;; Documentation is copied in.
+(defgeneric get-object (class id/name repository)
+  (:documentation
+   "Return an object of type CLASS from the object database.  The
+lookup will use either an oid or a name to find the object."))
 
 (defgeneric list-objects (class repository &key test test-not))
 

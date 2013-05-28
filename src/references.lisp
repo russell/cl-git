@@ -155,7 +155,7 @@ pointer will need to be freed manually."
     (%git-reference-lookup reference repository name)
     (mem-ref reference :pointer)))
 
-(defmethod git-lookup ((class (eql 'reference)) name repository &key)
+(defmethod get-object ((class (eql 'reference)) name repository)
   "Find a reference by its full name e.g.: ref/heads/master
 Note that this function name clashes with the generic lookup function.
 We need to figure this out by using the type argument to do dispatch."
@@ -297,10 +297,10 @@ first."
   "Returns the Object that this reference points to.  If the reference
 is symbolic then the reference it points to will be returned."
   (if (symbolic-p reference)
-      (git-lookup 'reference
+      (get-object 'reference
                   (%git-reference-symbolic-target reference)
                   (facilitator reference))
-      (git-lookup 'object
+      (get-object 'object
                   (%git-reference-target reference)
                   (facilitator reference))))
 

@@ -60,7 +60,7 @@
     (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master")))))
 
 (def-test reference-lookup-oid (:fixture reference)
-  (let ((ref (git-lookup 'reference "refs/heads/oid" *test-repository*)))
+  (let ((ref (get-object 'reference "refs/heads/oid" *test-repository*)))
       (is
        (equal (full-name ref)
               "refs/heads/oid"))
@@ -69,7 +69,7 @@
             'reference))))
 
 (def-test reference-lookup-symbolic (:fixture reference)
-  (let ((ref (git-lookup 'reference "refs/heads/symbolic" *test-repository*)))
+  (let ((ref (get-object 'reference "refs/heads/symbolic" *test-repository*)))
     (is
      (equal (full-name ref)
             "refs/heads/symbolic"))
@@ -124,13 +124,13 @@ fixture"
 (def-test reference-is-branch (:fixture reference)
   "Check that the ref is a branch."
   (is (equal
-       (git-is-branch (git-lookup 'reference "refs/heads/oid" *test-repository*))
+       (git-is-branch (get-object 'reference "refs/heads/oid" *test-repository*))
        t)))
 
 (def-test reference-is-not-remote (:fixture reference)
   "Check that the ref is a branch."
   (is (equal
-       (git-is-remote (git-lookup 'reference "refs/heads/oid" *test-repository*))
+       (git-is-remote (get-object 'reference "refs/heads/oid" *test-repository*))
        nil)))
 
 ;; TODO add test for the positive case

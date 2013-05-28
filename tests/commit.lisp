@@ -61,11 +61,11 @@ signature then it will be added automatically."
 (def-test commit-parents (:fixture repository-with-commits)
   (let ((test-commit (next-test-commit)))
     (is (equal
-         (oid (car (parents (git-lookup 'commit (getf test-commit :sha)
+         (oid (car (parents (get-object 'commit (getf test-commit :sha)
                                         *test-repository*))))
          (getf (next-test-commit) :sha)))
     (is (equal
-         (length (parents (git-lookup 'commit (getf test-commit :sha)
+         (length (parents (get-object 'commit (getf test-commit :sha)
                                       *test-repository*)))
          1))
     ;; XXX (RS) this is a very low level test to make sure that the
@@ -76,12 +76,12 @@ signature then it will be added automatically."
       (cl-git::pointer
        (car
         (parents
-         (git-lookup 'commit (getf test-commit :sha)
+         (get-object 'commit (getf test-commit :sha)
                      *test-repository*))))))))
 
 (def-test commit-parent-count (:fixture repository-with-commits)
   (let ((test-commit (next-test-commit)))
     (is (equal
-         (parent-count (git-lookup 'commit (getf test-commit :sha)
+         (parent-count (get-object 'commit (getf test-commit :sha)
                               *test-repository*))
          1))))

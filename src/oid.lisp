@@ -132,7 +132,7 @@ as base 16 numbers and returns a number straight through."
 TODO, this function is a bit messy, need to think about cleaning this up."
   (assert (not (null-or-nullpointer repository)))
   (cond
-    (head (let* ((original-ref (git-lookup 'reference head repository))
+    (head (let* ((original-ref (get-object 'reference head repository))
                  (resolved-ref (git-resolve original-ref)))
             (prog1
                 (target resolved-ref :type :oid)

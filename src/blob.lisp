@@ -50,7 +50,7 @@
   ()
   (:documentation "A git blob."))
 
-(defmethod git-lookup ((class (eql 'blob)) oid repository &key)
+(defmethod get-object ((class (eql 'blob)) oid repository &key)
   (git-object-lookup oid class repository))
 
 (defmethod blob-size ((blob blob))

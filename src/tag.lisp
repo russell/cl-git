@@ -110,7 +110,7 @@
     (with-foreign-strings ((%name name)
                            (%message message))
       (%git-tag-create newoid repository %name target tagger %message force))
-    (git-lookup 'tag (convert-from-foreign newoid '%oid) repository)))
+    (get-object 'tag (convert-from-foreign newoid '%oid) repository)))
 
 (defmethod list-objects ((class (eql 'tag)) repository &key test test-not)
   "Returns a list of tag for the repository."
@@ -131,7 +131,7 @@
             (t
              refs)))))
 
-(defmethod git-lookup ((class (eql 'tag)) oid repository &key)
+(defmethod get-object ((class (eql 'tag)) oid repository)
   (git-object-lookup oid class repository))
 
 (defmethod full-name ((tag tag))
