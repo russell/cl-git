@@ -64,7 +64,7 @@
   (make-test-revision)
   ;; TODO add negative test
   (is (equal
-       (git-head-detached *test-repository*)
+       (head-detached-p *test-repository*)
        nil)))
 
 (def-test is-repository-empty (:fixture (repository))

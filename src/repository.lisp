@@ -78,11 +78,8 @@
   "Return T if the repository is bare."
   (repository %repository))
 
-(defcfun ("git_repository_head_detached" git-head-detached)
+(defcfun ("git_repository_head_detached" %git-repository-head-detached)
     :boolean
-  "Returns T if the HEAD in the repository is detached, in other words,
-the HEAD reference is not a symbolic reference to a branch, but a
-direct commit."
   (repository %repository))
 
 (defcfun ("git_repository_head_orphan" git-head-orphaned)
@@ -181,3 +178,10 @@ Or for a bare repository to the repository itself."
 		   :pointer (mem-ref head :pointer)
 		   :facilitator repository
 		   :free-function #'%git-reference-free)))
+
+(defun head-detached-p (repository)
+  "Returns T if the HEAD in the repository is detached, in other words,
+the HEAD reference is not a symbolic reference to a branch, but a
+direct commit."
+  (assert (eql (type-of repository) 'repository))
+  (%git-repository-head-detached repository))

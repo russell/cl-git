@@ -145,7 +145,7 @@
    #:git-write-tree
    #:repository-head
    #:git-head-orphaned
-   #:git-head-detached
+   #:head-detached-p
    #:git-repository-is-empty
    #:git-repository-is-bare
    #:repository-path
