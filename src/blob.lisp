@@ -31,11 +31,14 @@
     :pointer
   (blob %blob))
 
-(defcfun ("git_blob_rawsize" git-raw-size)
+(defcfun ("git_blob_rawsize" %git-blob-raw-size)
     size
   "The number of content bytes in the blob."
   (blob %blob))
 
+(defcfun ("git_blob_is_binary" %git-blob-is-binary)
+    :boolean
+  (blob %blob))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -50,7 +53,10 @@
 (defmethod git-lookup ((class (eql 'blob)) oid repository &key)
   (git-object-lookup oid class repository))
 
-(defun git-raw-content (blob)
+(defmethod blob-size ((blob blob))
+  (%git-blob-raw-size blob))
+
+(defmethod blob-content ((blob blob))
   "Returns the content of the blob BLOB as an array of UNSIGNED-BYTE's"
   (let ((result (make-array (git-raw-size blob)
                             :element-type '(unsigned-byte 8)
@@ -61,3 +67,7 @@
           :do (setf (aref result index)
                     (mem-aref content :unsigned-char index)))
     result))
+
+(defmethod binary-p ((blob blob))
+  "Return T if the contents of the blob is binary."
+  (%git-blob-is-binary blob))

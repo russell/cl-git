@@ -59,8 +59,9 @@
    #:git-config
    #:git-config-open-level
    #:git-values
-   #:git-raw-size
-   #:git-raw-content
+   #:blob-size
+   #:blob-content
+   #:binary-p
    #:repository-status
    #:oid
    #:git-message
