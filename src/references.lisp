@@ -284,10 +284,10 @@ or :SYMBOLIC"
 is a symbolic reference then it will be resolved to a real reference
 first."
   (if (symbolic-p reference)
-      (oid (git-target (git-resolve reference)))
-      (oid (git-target reference))))
+      (oid (target (git-resolve reference)))
+      (oid (target reference))))
 
-(defmethod git-target ((reference reference))
+(defmethod target ((reference reference))
   "Returns the Object that this reference points to.  If the reference
 is symbolic then the reference it points to will be returned."
   (if (symbolic-p reference)
@@ -303,8 +303,8 @@ is symbolic then the reference it points to will be returned."
 tag or reference anymore.  Basically calls GIT-TARGET until the
 returned object is neither a TAG or a REFERENCE."
   (let ((references
-          (do ((refs (cons (git-target reference) nil)
-                     (cons (git-target (car refs)) refs)))
+          (do ((refs (cons (target reference) nil)
+                     (cons (target (car refs)) refs)))
               ((not (or (eql (type-of (car refs)) 'reference)
                         (eql (type-of (car refs)) 'tag)))
                refs))))

@@ -56,7 +56,7 @@
   (let ((test-commit (make-test-revision)))
     (is
      (commit-equal
-      (git-target (repository-head *test-repository*))
+      (target (repository-head *test-repository*))
       test-commit))))
 
 (def-test repository-head-detached (:fixture (repository))

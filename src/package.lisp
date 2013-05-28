@@ -76,7 +76,7 @@
    #:git-next
    #:git-tagger
    #:git-type
-   #:git-target
+   #:target
    #:git-entry-count
    #:git-entry-by-index
    #:git-entries

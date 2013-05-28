@@ -118,14 +118,14 @@
     (%git-tag-list string-array repository)
     (let ((refs
             (mapcar (lambda (ref-name)
-                      (git-target (make-reference-from-name
-                                   (concatenate 'string reference-tags-dir ref-name)
-                                   repository)))
+                      (target (make-reference-from-name
+                               (concatenate 'string reference-tags-dir ref-name)
+                               repository)))
                     (prog1
                         (convert-from-foreign string-array '%git-strings)
                       (free-translated-object string-array '%git-strings t)))))
       (cond (test
-             (remove-if-not test refs))
+                (remove-if-not test refs))
             (test-not
              (remove-if test-not refs))
             (t
@@ -149,7 +149,7 @@
 (defmethod git-message ((tag tag))
   (git-tag-message tag))
 
-(defmethod git-target ((tag tag))
+(defmethod target ((tag tag))
   "Returns the target of a tag."
   (with-foreign-object (%object :pointer)
     (%git-tag-target %object tag)
