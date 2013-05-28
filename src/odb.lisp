@@ -89,7 +89,7 @@
                    :free-function #'%git-odb-object-free)))
 
 (defmethod git-load ((class (eql 'odb-object)) oid (repository repository))
-  (git-load class oid (git-odb repository)))
+  (git-load class oid (open-odb repository)))
 
 (defmethod git-id ((object odb-object))
   (git-odb-object-id object))

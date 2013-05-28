@@ -166,7 +166,7 @@ Or for a bare repository to the repository itself."
            :facilitator repository
            :free-function #'%git-index-free)))
 
-(defmethod git-odb ((repository repository))
+(defmethod open-odb ((repository repository))
   (with-foreign-object (odb :pointer)
     (%git-repository-odb odb repository)
     (make-instance 'odb
