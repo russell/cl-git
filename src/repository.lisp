@@ -135,12 +135,12 @@ contains the object database."))
   (open-repository (namestring path)))
 
 
-(defmethod git-path ((repository repository))
+(defmethod repository-path ((repository repository))
   "Returns the path the the .git directory of the repository.
 Or for a bare repository to the repository itself."
   (%git-repository-path repository))
 
-(defmethod git-workdir ((repository repository))
+(defmethod repository-workdir ((repository repository))
   "Returns the working directory for the repository."
   (%git-repository-workdir repository))
 

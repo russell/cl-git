@@ -36,20 +36,20 @@
 (def-test repository-path (:fixture (repository :bare t))
   (is
    (equal
-    (git-path *test-repository*)
+    (repository-path *test-repository*)
     (namestring *repository-path*))))
 
 
 (def-test repository-path-workdir-bare (:fixture (repository :bare t))
   (is
    (equal
-    (git-workdir *test-repository*)
+    (repository-workdir *test-repository*)
     nil)))
 
 (def-test repository-path-workdir (:fixture (repository))
   (is
    (equal
-    (git-workdir *test-repository*)
+    (repository-workdir *test-repository*)
     (namestring *repository-path*))))
 
 (def-test repository-head (:fixture (repository))

@@ -134,10 +134,10 @@ REPOSITORY instance is returned."))
 
 (defgeneric git-load (class path/name repository))
 
-(defgeneric git-path (object)
+(defgeneric repository-path (object)
   (:documentation "Path to the object."))
 
-(defgeneric git-workdir (object))
+(defgeneric repository-workdir (object))
 
 (defgeneric git-add (path &key &allow-other-keys)
   (:documentation

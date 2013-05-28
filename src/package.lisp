@@ -148,8 +148,8 @@
    #:git-head-detached
    #:git-repository-is-empty
    #:git-repository-is-bare
-   #:git-path
-   #:git-workdir
+   #:repository-path
+   #:repository-workdir
    #:git-has-log
    #:git-is-remote
    #:git-is-branch
