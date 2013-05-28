@@ -265,7 +265,7 @@ objects are available anymore return nil."))
 (defgeneric git-ls (remote))
 
 
-(defgeneric git-head (repository))
+(defgeneric repository-head (repository))
 
 (defgeneric git-upstream (branch))
 

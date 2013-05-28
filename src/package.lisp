@@ -143,7 +143,7 @@
    #:git-ls
    #:git-is-head
    #:git-write-tree
-   #:git-head
+   #:repository-head
    #:git-head-orphaned
    #:git-head-detached
    #:git-repository-is-empty

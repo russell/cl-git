@@ -173,7 +173,7 @@ Or for a bare repository to the repository itself."
            :facilitator repository
            :free-function #'%git-odb-free)))
 
-(defmethod git-head ((repository repository))
+(defmethod repository-head ((repository repository))
   "Returns the resolved reference for HEAD."
   (with-foreign-object (head :pointer)
     (%git-repository-head head repository)
