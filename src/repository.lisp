@@ -176,24 +176,20 @@ Or for a bare repository to the repository itself."
 		   :facilitator repository
 		   :free-function #'%git-reference-free)))
 
-(defun head-detached-p (repository)
+(defmethod head-detached-p ((repository repository))
   "Returns T if the HEAD in the repository is detached, in other words,
 the HEAD reference is not a symbolic reference to a branch, but a
 direct commit."
-  (assert (eql (type-of repository) 'repository))
   (%git-repository-head-detached repository))
 
-(defun head-orphaned-p (repository)
+(defmethod head-orphaned-p ((repository repository))
   "Returns t if the HEAD points to a commit that doesn't exist."
-  (assert (eql (type-of repository) 'repository))
   (%git-repository-head-orphaned repository))
 
-(defun bare-p (repository)
-    "Return T if the repository is bare."
-  (assert (eql (type-of repository) 'repository))
+(defmethod bare-p ((repository repository))
+  "Return T if the repository is bare."
   (%git-repository-is-bare repository))
 
 (defmethod empty-p ((repository repository))
   "Return T if the repository is empty and contains no references."
-  (assert (eql (type-of repository) 'repository))
   (%git-repository-is-empty repository))
