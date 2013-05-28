@@ -77,7 +77,7 @@
   "Check that the repository is bare."
   (is
    (eq
-    (git-repository-is-bare *test-repository*)
+    (bare-p *test-repository*)
     t)))
 
 (def-test repository-head-orphaned (:fixture (repository))

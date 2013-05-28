@@ -73,9 +73,8 @@
   "Return T if the repository is empty and contains no references."
   (repository %repository))
 
-(defcfun ("git_repository_is_bare" git-repository-is-bare)
+(defcfun ("git_repository_is_bare" %git-repository-is-bare)
     :boolean
-  "Return T if the repository is bare."
   (repository %repository))
 
 (defcfun ("git_repository_head_detached" %git-repository-head-detached)
@@ -189,3 +188,8 @@ direct commit."
   "Returns t if the HEAD points to a commit that doesn't exist."
   (assert (eql (type-of repository) 'repository))
   (%git-repository-head-orphaned repository))
+
+(defun bare-p (repository)
+    "Return T if the repository is bare."
+  (assert (eql (type-of repository) 'repository))
+  (%git-repository-is-bare repository))

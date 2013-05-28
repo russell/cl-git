@@ -147,7 +147,7 @@
    #:head-orphaned-p
    #:head-detached-p
    #:git-repository-is-empty
-   #:git-repository-is-bare
+   #:bare-p
    #:repository-path
    #:repository-workdir
    #:git-has-log
