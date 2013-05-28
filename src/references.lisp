@@ -323,6 +323,9 @@ is symbolic then the reference it points to will be returned."
   "Peels layers of the reference until the resulting object is not a
 tag or reference anymore.  Basically calls GIT-TARGET until the
 returned object is neither a TAG or a REFERENCE."
+  ;; XXX (RS) there is a libgit2 function called
+  ;; git_resolve_reference, this will resolve a symbolic reference to
+  ;; an oid one.  Should this be used instead?
   (let ((references
           (do ((refs (cons (target reference) nil)
                      (cons (target (car refs)) refs)))
