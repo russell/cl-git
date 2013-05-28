@@ -139,3 +139,15 @@ fixture"
   (is (equal
        (git-has-log ref-default)
        nil)))
+
+(def-test reference-set-target (:fixture reference-with-context)
+  "Check that the returned commit id matches the id from the reference
+fixture"
+  (let ((test-commit1 (make-test-revision)))
+    (is (equal
+         (oid (target ref-default))
+         (getf test-commit :sha)))
+    (setf (target ref-default) (getf test-commit1 :sha))
+    (is (equal
+         (oid (target ref-default))
+         (getf test-commit1 :sha)))))

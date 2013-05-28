@@ -73,6 +73,12 @@
   (target :string)
   (force :boolean))
 
+(defcfun ("git_reference_set_target" %git-reference-set-target)
+    %return-value
+  (new-reference :pointer)
+  (reference %reference)
+  (oid %oid))
+
 (defcfun ("git_reference_symbolic_target" %git-reference-symbolic-target)
     :string
   (reference %reference))
@@ -297,6 +303,21 @@ is symbolic then the reference it points to will be returned."
       (git-lookup 'object
                   (%git-reference-target reference)
                   (facilitator reference))))
+
+(defun (setf target) (val reference)
+  (with-foreign-object (new-reference :pointer)
+    (%git-reference-set-target
+     new-reference
+     reference
+     (if (numberp val) val (oid val)))
+    (let ((old-pointer (pointer reference)))
+      ;; XXX (RS) Swap out the old pointer with a new one.  This
+      ;; should be extracted out to a function.
+      (setf (slot-value reference 'libgit2-pointer)
+            (mem-ref new-reference :pointer))
+      (cancel-finalization reference)
+      (enable-garbage-collection reference)
+      (%git-reference-free old-pointer))))
 
 (defmethod git-peel ((reference reference))
   "Peels layers of the reference until the resulting object is not a

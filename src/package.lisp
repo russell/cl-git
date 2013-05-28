@@ -8,6 +8,7 @@
                 #:it)
   (:import-from #:trivial-garbage
                 #:make-weak-pointer
+                #:cancel-finalization
                 #:finalize)
   (:import-from #:cl-fad
                 #:pathname-relative-p)
