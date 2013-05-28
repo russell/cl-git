@@ -127,8 +127,6 @@
    #:git-index-has-conflicts
    #:git-load
    #:git-read
-   #:git-push-url
-   #:git-url
    #:open-odb
    #:git-size
    #:git-data
@@ -138,6 +136,8 @@
    #:remote-connect
    #:remote-disconnect
    #:remote-connected-p
+   #:remote-push-url
+   #:remote-url
    #:git-ls
    #:git-is-head
    #:git-write-tree

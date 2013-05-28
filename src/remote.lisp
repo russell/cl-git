@@ -95,11 +95,11 @@
     :void
   (remote %remote))
 
-(defcfun ("git_remote_pushurl" git-push-url)
+(defcfun ("git_remote_pushurl" %git-remote-push-url)
     :string
   (remote %remote))
 
-(defcfun ("git_remote_url" git-url)
+(defcfun ("git_remote_url" %git-remote-url)
     :string
   (remote %remote))
 
@@ -271,3 +271,9 @@ See also git-pushspec."
   (let ((*remote-ls-values* (list)))
     (%git-remote-ls remote (callback collect-remote-ls-values) (null-pointer))
     *remote-ls-values*))
+
+(defmethod remote-push-url ((remote remote))
+  (%git-remote-push-url remote))
+
+(defmethod remote-url ((remote remote))
+  (%git-remote-url remote))
