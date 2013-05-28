@@ -53,6 +53,17 @@
                      :url (concatenate 'string "file://" (namestring *repository-path*)))
         (let ((remote (git-load 'remote "origin" remote-repo)))
           (remote-connect remote)
+          (is
+           (equal
+            (git-ls remote)
+            '((:local nil
+               :oid 43288015056091865078009701174658094042158513796
+               :loid 0
+               :name "refs/heads/master")
+              (:local nil
+               :oid 43288015056091865078009701174658094042158513796
+               :loid 0
+               :name "HEAD"))))
           (remote-download remote)
           (is
            (equal
