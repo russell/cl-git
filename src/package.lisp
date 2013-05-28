@@ -66,9 +66,8 @@
    #:git-message
    #:git-author
    #:git-committer
-   #:git-parentcount
-   #:git-parent-oid
-   #:git-parent-oids
+   #:parent-count
+   #:parents
    #:git-tree
    #:git-lookup
    #:list-objects

@@ -80,7 +80,7 @@ timestamp.
 "))
 
 
-(defgeneric git-parentcount (object)
+(defgeneric parent-count (object)
   (:documentation "Returns the number of parents of OBJECT.
 
 For Commits this indicate the number of parent commits.  So it is 1
@@ -88,21 +88,6 @@ for normal commits, > 1 for merges and 0 for initial commits.
 
 "))
 
-(defgeneric git-parent-oid (object index)
-  (:documentation
-  "Returns the oid of the parent with index INDEX in the list of
-parents of the object OBJECT.
-
-The index is zero based and has to be less than (GIT-PARENTCOUNT OBJECT).
-"))
-
-(defgeneric git-parent-oids (object)
-  (:documentation "Returns a list of oids identifying the parent commits of OBJECT.
-
-This method is a wrapper that collects all oids returned by GIT-PARENT-OID.
-So as such the meaning and applicability of this method is the same a s
-GIT-PARENT-OID
-"))
 
 (defgeneric git-tree (object &key path repository)
   (:documentation

@@ -156,12 +156,6 @@ not a type of any real object, but only used for querying like in this function.
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod git-parent-oids (object)
-  "Returns a list of oids identifying the parents of OBJECT."
-  (loop
-    :for index :from 0 :below (git-parentcount object)
-    :collect (git-parent-oid object index)))
-
 (defmethod oid ((object object))
   (git-object-id object))
 

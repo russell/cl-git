@@ -135,6 +135,13 @@ optional instance of a GIT-SIGNATURE the details the committer.
       (git-lookup 'commit (convert-from-foreign newoid '%oid)
                   repository))))
 
+(defun make-commit-from-oid (oid repository)
+  "Make a weak commit by oid that can be looked-up later."
+  (make-instance 'commit :oid oid
+                         :facilitator repository
+                         :free-function #'git-object-free))
+
+
 (defmethod git-lookup ((class (eql 'commit)) oid repository &key)
   (git-object-lookup oid class repository))
 
@@ -149,14 +156,17 @@ optional instance of a GIT-SIGNATURE the details the committer.
 (defmethod git-committer ((commit commit))
   (git-commit-committer commit))
 
-(defmethod git-parentcount ((commit commit))
+(defmethod parent-count ((commit commit))
   "Returns the number of parent commits of the argument COMMIT."
   (git-commit-parentcount commit))
 
-(defmethod git-parent-oid ((commit commit) index)
-  "Returns the oid of the parent with index INDEX in the list of
-parents of the commit COMMIT."
-  (git-commit-parent-oid commit index))
+(defmethod parents ((commit commit))
+  "Returns a list of oids identifying the parents of OBJECT."
+  (loop
+    :for index :from 0 :below (parent-count commit)
+    :collect (make-commit-from-oid
+              (git-commit-parent-oid commit index)
+              (facilitator commit))))
 
 (defmethod git-tree ((commit commit) &key path repository)
   "Returns the TREE object of the commit."

@@ -31,4 +31,6 @@
                 #:unix-to-timestamp
                 #:timestamp-to-unix
                 #:timestamp-difference
-                #:now))
+                #:now)
+  (:import-from #:cffi
+                #:pointerp))

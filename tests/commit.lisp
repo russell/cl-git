@@ -57,3 +57,31 @@ signature then it will be added automatically."
                                       :time 1111111111))))
       (bind-git-commits (((commit :sha (getf test-commit :sha))) *test-repository*)
         (commit-equal test-commit commit)))))
+
+(def-test commit-parents (:fixture repository-with-commits)
+  (let ((test-commit (next-test-commit)))
+    (is (equal
+         (oid (car (parents (git-lookup 'commit (getf test-commit :sha)
+                                        *test-repository*))))
+         (getf (next-test-commit) :sha)))
+    (is (equal
+         (length (parents (git-lookup 'commit (getf test-commit :sha)
+                                      *test-repository*)))
+         1))
+    ;; XXX (RS) this is a very low level test to make sure that the
+    ;; lazy oid loading is working.  It should probably be covered in
+    ;; a higher level test once one is written.
+    (is
+     (pointerp
+      (cl-git::pointer
+       (car
+        (parents
+         (git-lookup 'commit (getf test-commit :sha)
+                     *test-repository*))))))))
+
+(def-test commit-parent-count (:fixture repository-with-commits)
+  (let ((test-commit (next-test-commit)))
+    (is (equal
+         (parent-count (git-lookup 'commit (getf test-commit :sha)
+                              *test-repository*))
+         1))))
