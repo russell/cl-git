@@ -131,7 +131,7 @@
    #:git-read
    #:git-push-url
    #:git-url
-   #:git-odb
+   #:open-odb
    #:git-size
    #:git-data
    #:remote-download
