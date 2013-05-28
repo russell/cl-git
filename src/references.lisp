@@ -299,9 +299,9 @@ is symbolic then the reference it points to will be returned."
                   (facilitator reference))))
 
 (defmethod git-peel ((reference reference))
-  "Peels layers of the tag until the resulting object is not a tag or
-reference anymore.  Basically calls GIT-TARGET until the returned
-object is neither a TAG or a REFERENCE."
+  "Peels layers of the reference until the resulting object is not a
+tag or reference anymore.  Basically calls GIT-TARGET until the
+returned object is neither a TAG or a REFERENCE."
   (let ((references
           (do ((refs (cons (git-target reference) nil)
                      (cons (git-target (car refs)) refs)))
