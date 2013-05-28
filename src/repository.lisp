@@ -68,9 +68,8 @@
   (out :pointer)
   (repository %repository))
 
-(defcfun ("git_repository_is_empty" git-repository-is-empty)
+(defcfun ("git_repository_is_empty" %git-repository-is-empty)
     :boolean
-  "Return T if the repository is empty and contains no references."
   (repository %repository))
 
 (defcfun ("git_repository_is_bare" %git-repository-is-bare)
@@ -193,3 +192,8 @@ direct commit."
     "Return T if the repository is bare."
   (assert (eql (type-of repository) 'repository))
   (%git-repository-is-bare repository))
+
+(defmethod empty-p ((repository repository))
+  "Return T if the repository is empty and contains no references."
+  (assert (eql (type-of repository) 'repository))
+  (%git-repository-is-empty repository))

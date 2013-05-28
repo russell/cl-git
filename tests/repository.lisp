@@ -69,9 +69,9 @@
 
 (def-test is-repository-empty (:fixture (repository))
   "Check that the repository is empty."
-  (is (eq (git-repository-is-empty *test-repository*) t))
+  (is (eq (empty-p *test-repository*) t))
   (make-test-revision)
-  (is (eq (git-repository-is-empty *test-repository*) nil)))
+  (is (eq (empty-p *test-repository*) nil)))
 
 (def-test is-repository-bare (:fixture (repository :bare t))
   "Check that the repository is bare."
