@@ -50,7 +50,7 @@
    #:revision-walk
    #:walker-next
 
-   #:git-create
+   #:make-object
    #:git-resolve
    #:git-add
    #:git-write

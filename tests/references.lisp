@@ -25,26 +25,26 @@
 (def-fixture reference-with-context ()
   (with-test-repository ()
     (let* ((test-commit (make-test-revision))
-           (ref-default (git-create 'reference "refs/heads/oid"
-                                    *test-repository*
-                                    :target (getf test-commit :sha)))
-           (ref-symbolic (git-create 'reference "refs/heads/symbolic"
+           (ref-default (make-object 'reference "refs/heads/oid"
                                      *test-repository*
-                                     :target "refs/heads/oid"
-                                     :type :symbolic)))
+                                     :target (getf test-commit :sha)))
+           (ref-symbolic (make-object 'reference "refs/heads/symbolic"
+                                      *test-repository*
+                                      :target "refs/heads/oid"
+                                      :type :symbolic)))
       (declare (ignorable ref-symbolic) (ignorable ref-default))
       (&body))))
 
 (def-fixture reference ()
   (with-test-repository ()
-      (let ((test-commit (make-test-revision)))
-        (git-create 'reference "refs/heads/oid"
-                    *test-repository*
-                    :target (getf test-commit :sha)))
-    (git-create 'reference "refs/heads/symbolic"
-                *test-repository*
-                :target "refs/heads/oid"
-                :type :symbolic)
+    (let ((test-commit (make-test-revision)))
+      (make-object 'reference "refs/heads/oid"
+                   *test-repository*
+                   :target (getf test-commit :sha)))
+    (make-object 'reference "refs/heads/symbolic"
+                 *test-repository*
+                 :target "refs/heads/oid"
+                 :type :symbolic)
     (&body)))
 
 (def-test references-list-oid (:fixture reference)

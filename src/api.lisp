@@ -115,7 +115,7 @@ to the content of the commit.  If PATH is specified then the tree
 returned node will be a child node of the tree.
 "))
 
-(defgeneric git-create (class id/name repository &key &allow-other-keys))
+(defgeneric make-object (class id/name repository &key &allow-other-keys))
 
 (defgeneric git-lookup (class id/name repository &key &allow-other-keys)) ;; Documentation is copied in.
 

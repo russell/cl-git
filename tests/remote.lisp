@@ -31,7 +31,7 @@
 
 (def-test create-remote (:fixture repository-with-commits)
   "Create a remote and check it's details."
-  (git-create 'remote "origin" *test-repository* :url "/dev/null" )
+  (make-object 'remote "origin" *test-repository* :url "/dev/null" )
   (is
    (equal
     (list-objects 'remote *test-repository*)
@@ -48,9 +48,9 @@
     (unwind-protect
 	     (git-init 'repository remote-repo-path)
       (let ((remote-repo (git-open 'repository remote-repo-path)))
-        (git-create 'remote "origin"
-                    remote-repo
-                    :url (concatenate 'string "file://" (namestring *repository-path*)))
+        (make-object 'remote "origin"
+                     remote-repo
+                     :url (concatenate 'string "file://" (namestring *repository-path*)))
         (let ((remote (git-load 'remote "origin" remote-repo)))
           (remote-connect remote)
           (remote-download remote)

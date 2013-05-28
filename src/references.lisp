@@ -194,7 +194,7 @@ symbolic reference."
              refs)))))
 
 
-(defmethod git-create ((class (eql 'reference)) name repository
+(defmethod make-object ((class (eql 'reference)) name repository
                        &key
                          (type :oid)
                          force
