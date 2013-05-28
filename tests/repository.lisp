@@ -84,10 +84,10 @@
   "Confirm that the current head is orphaned then check that not."
   ;; confirm head is orphaned
   (is (equal
-       (git-head-orphaned *test-repository*)
+       (head-orphaned-p *test-repository*)
        t))
   (make-test-revision)
   ;; confirm head no longer orphaned
   (is (equal
-       (git-head-orphaned *test-repository*)
+       (head-orphaned-p *test-repository*)
        nil)))

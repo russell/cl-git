@@ -82,9 +82,8 @@
     :boolean
   (repository %repository))
 
-(defcfun ("git_repository_head_orphan" git-head-orphaned)
+(defcfun ("git_repository_head_orphan" %git-repository-head-orphaned)
     :boolean
-  "Returns t if the HEAD points to a commit that doesn't exist."
   (repository %repository))
 
 (defcfun ("git_repository_path" %git-repository-path)
@@ -185,3 +184,8 @@ the HEAD reference is not a symbolic reference to a branch, but a
 direct commit."
   (assert (eql (type-of repository) 'repository))
   (%git-repository-head-detached repository))
+
+(defun head-orphaned-p (repository)
+  "Returns t if the HEAD points to a commit that doesn't exist."
+  (assert (eql (type-of repository) 'repository))
+  (%git-repository-head-orphaned repository))
