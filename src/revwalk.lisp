@@ -128,7 +128,6 @@ be bound to each commit during each iteration.  This uses a return
 special call to stop iteration."
   (declare (ignore sha))
   (declare (ignore head))
-;;  (warn "with-git-revisions is depricated, please use revision-walk instead.")
   `(let ((oids (lookup-oids :repository ,repository ,@rest)))
      (let ((revwalker (git-revwalk oids :repository ,repository)))
        (with-foreign-object (oid '(:struct git-oid))

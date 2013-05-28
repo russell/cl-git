@@ -200,7 +200,6 @@ pointer will need to be freed manually."
              remotes)))))
 
 (defmethod git-load ((class (eql 'remote)) name repository)
-  (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (remote-out :pointer)
     (%git-remote-load remote-out repository name)
     (make-instance 'remote
