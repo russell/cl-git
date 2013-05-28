@@ -121,9 +121,9 @@ returned node will be a child node of the tree.
 
 (defgeneric list-objects (class repository &key test test-not))
 
-(defgeneric git-open (class path/name &key &allow-other-keys))
+(defgeneric open-repository (path/name))
 
-(defgeneric git-init (class path/name &key &allow-other-keys)
+(defgeneric init-repository (path/name &key bare)
   (:documentation
    "Create a new Git repository.  CLASS should be the
 keyword :REPOSITORY.  PATH/NAME can be either an instance of a STRING

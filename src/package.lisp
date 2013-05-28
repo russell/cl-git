@@ -81,8 +81,8 @@
    #:git-entry-count
    #:git-entry-by-index
    #:git-entries
-   #:git-open
-   #:git-init
+   #:open-repository
+   #:init-repository
    #:git-free
 
    ;; errors

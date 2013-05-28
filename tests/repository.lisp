@@ -28,8 +28,8 @@
     (finishes
       (unwind-protect
            (progn
-             (git-init 'repository path :bare t)
-             (is (typep (git-open 'repository path) 'repository)))
+             (init-repository path :bare t)
+             (is (typep (open-repository path) 'repository)))
         (progn
           (delete-directory-and-files path))))))
 

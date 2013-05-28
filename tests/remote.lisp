@@ -46,8 +46,8 @@
   "Create a new repository and check it's remotes."
   (let ((remote-repo-path (gen-temp-path)))
     (unwind-protect
-	     (git-init 'repository remote-repo-path)
-      (let ((remote-repo (git-open 'repository remote-repo-path)))
+	     (init-repository remote-repo-path)
+      (let ((remote-repo (open-repository remote-repo-path)))
         (make-object 'remote "origin"
                      remote-repo
                      :url (concatenate 'string "file://" (namestring *repository-path*)))
