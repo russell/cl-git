@@ -131,6 +131,7 @@
    #:open-odb
    #:git-size
    #:git-data
+   #:tree-directory
    #:remote-download
    #:remote-fetchspec
    #:remote-pushspec

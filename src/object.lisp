@@ -118,6 +118,8 @@ wrap git pointers to repositories, config, index etc."
             (tag :tag)
             (tree :tree)
             (blob :blob)
+            (tree-tree :tree)
+            (tree-blob :blob)
             (config :config)
             (t type))))
     (with-foreign-object (obj-ptr :pointer)
