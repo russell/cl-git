@@ -4,6 +4,7 @@
   (:nicknames :git)
   (:use #:cl)
   (:import-from #:anaphora
+                #:awhen
                 #:acond
                 #:it)
   (:import-from #:trivial-garbage

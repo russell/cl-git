@@ -136,7 +136,8 @@ Or for a bare repository to the repository itself."
 
 (defmethod repository-workdir ((repository repository))
   "Returns the working directory for the repository."
-  (pathname (%git-repository-workdir repository)))
+  (awhen (%git-repository-workdir repository)
+      (pathname it)))
 
 (defmethod git-config ((repository repository) &key level)
   (let ((config
