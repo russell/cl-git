@@ -32,4 +32,12 @@
                (tree-directory (git-tree object))))
       (sort-strings
        (mapcar (lambda (e) (getf e :filename))
-               (getf commit :files)))))))
+               (getf commit :files)))))
+    (is
+     (equal
+      (mapcar (compose #'octets-to-string #'blob-content)
+       (sort (tree-directory (git-tree object)) #'string-lessp
+             :key (compose #'namestring #'filename)))
+      (mapcar (lambda (e) (getf e :text))
+       (sort (getf commit :files) #'string-lessp
+             :key (lambda (e) (getf e :filename))))))))
