@@ -21,7 +21,6 @@
 
 (def-suite :cl-git)
 
-(defparameter *test-repository-path* #P"/tmp/")
 
 (defun getpid ()
   #+clisp (os:process-id)
@@ -38,11 +37,11 @@
   `(with-output-to-string (stream)
      (format stream ,control-string ,@format-arguments)))
 
-(defun open-test-files-p ()
+(defun open-test-files-p (repository-path)
   "check if there were any files left open from a test."
   (loop :for line
         :in (cdr (inferior-shell:run/lines (format-string "lsof -Fn -p ~S" (getpid))))
-        :when (eq 1 (search (namestring *test-repository-path*) line))
+        :when (eq 1 (search (namestring repository-path) line))
           :collect (subseq line 1 (length line))))
 
 
@@ -119,8 +118,9 @@ will update to the new head when a new commit is added.")
             (progn
               (init-repository *repository-path* :bare ,bare)
               (let ((*test-repository* (open-repository *repository-path*)))
-                ,@body)
-              (let ((open-files (open-test-files-p)))
+                ,@body
+                (git-free *test-repository*))
+              (let ((open-files (open-test-files-p *repository-path*)))
                 (when open-files
                   (fail "The following files were left open ~S" open-files))))
          (progn
