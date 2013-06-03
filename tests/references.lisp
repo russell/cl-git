@@ -106,18 +106,13 @@
 fixture"
   (is (equal
        (oid (target ref-default))
-       (getf test-commit :sha)))
-  (is (equal
-       (target ref-default :type :oid)
        (getf test-commit :sha))))
 
 (def-test reference-target-symbolic (:fixture reference-with-context)
   "Check that the returned commit id matches the id from the reference
 fixture"
-  (signals unresolved-reference-error
-    (oid (target ref-symbolic)))
   (is (equal
-       (oid (target (git-resolve ref-symbolic)))
+       (oid (target ref-symbolic))
        (getf test-commit :sha))))
 
 
