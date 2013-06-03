@@ -12,6 +12,7 @@
                  (:file "repository" :depends-on ("common" "fixtures"))
                  (:file "remote" :depends-on ("common" "fixtures"))
                  (:file "tag" :depends-on ("common" "fixtures"))
+                 (:file "tree" :depends-on ("common" "fixtures"))
                  (:file "config" :depends-on ("common" "fixtures"))
                  (:file "references" :depends-on ("common"))
                  (:file "revwalker" :depends-on ("common")))))
