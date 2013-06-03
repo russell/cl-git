@@ -132,11 +132,11 @@ contains the object database."))
 (defmethod repository-path ((repository repository))
   "Returns the path the the .git directory of the repository.
 Or for a bare repository to the repository itself."
-  (%git-repository-path repository))
+  (pathname (%git-repository-path repository)))
 
 (defmethod repository-workdir ((repository repository))
   "Returns the working directory for the repository."
-  (%git-repository-workdir repository))
+  (pathname (%git-repository-workdir repository)))
 
 (defmethod git-config ((repository repository) &key level)
   (let ((config

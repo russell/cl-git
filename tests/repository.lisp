@@ -37,7 +37,7 @@
   (is
    (equal
     (repository-path *test-repository*)
-    (namestring *repository-path*))))
+    *repository-path*)))
 
 
 (def-test repository-path-workdir-bare (:fixture (repository :bare t))
@@ -50,7 +50,7 @@
   (is
    (equal
     (repository-workdir *test-repository*)
-    (namestring *repository-path*))))
+    *repository-path*)))
 
 (def-test repository-head (:fixture (repository))
   (let ((test-commit (make-test-revision)))
