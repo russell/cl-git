@@ -34,11 +34,11 @@
   (make-object 'remote "origin" *test-repository* :url "/dev/null" )
   (is
    (equal
-    (list-objects 'remote *test-repository*)
+    (mapcar #'full-name (list-objects 'remote *test-repository*))
     '("origin")))
   (is
    (equal
-    (git-url (git-load 'remote "origin" *test-repository*))
+    (remote-url (git-load 'remote "origin" *test-repository*))
     "/dev/null")))
 
 

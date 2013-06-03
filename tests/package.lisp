@@ -21,6 +21,7 @@
 (defpackage #:cl-git-tests
   (:use #:common-lisp #:cl-git #:it.bese.FiveAM)
   (:import-from #:alexandria
+                #:compose
                 #:iota)
   (:import-from #:cl-fad
                 #:file-exists-p
