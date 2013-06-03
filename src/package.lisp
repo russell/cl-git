@@ -51,7 +51,6 @@
    #:revision-walk
    #:walker-next
 
-   #:make-object
    #:git-resolve
    #:git-add
    #:git-write
@@ -91,6 +90,7 @@
    ;; new objects
    #:make-commit
    #:make-tag
+   #:make-object
 
    ;; Macros
    #:with-index
