@@ -147,12 +147,10 @@ This does count the number of direct children, not recursively."
 (setf (getf object-type-mapping 'tree-tree) :tree)
 (setf (getf object-type-mapping 'tree-blob) :blob)
 
-(defmethod tree-directory ((object tree) &optional pathname)
-  "List objects from a tree.  Optional argument pathname a wild
-pathname that the entries must match."
+(defun tree-entries (tree pathname)
   (loop
-    :for index :from 0 :below (git-entry-count object)
-    :for entry = (git-entry-by-index object index)
+    :for index :from 0 :below (git-entry-count tree)
+    :for entry = (git-entry-by-index tree index)
     :when (if pathname (pathname-match-p (getf entry :filename) pathname) t)
     :collect
     (destructuring-bind (&key type filename filemode oid)
@@ -164,10 +162,50 @@ pathname that the entries must match."
                   (:tree 'tree-tree)
                   (:blob 'tree-blob))))
           (make-tree-entry type
-                           (merge-pathnames filename (filename object))
+                           (merge-pathnames filename (filename tree))
                            filemode
                            oid
-                           (facilitator object))))))
+                           (facilitator tree))))))
+
+(defun chomp-pathname (pathname index)
+  "Split a path by out into segments by index."
+  (let ((name (pathname-name pathname))
+        (type (pathname-type pathname))
+        (size index))
+    (cond ((> (length (pathname-directory pathname)) size)
+            (let ((chomped-directory (nth size (pathname-directory pathname))))
+              (make-pathname :directory `(:relative ,chomped-directory))))
+          (t
+           (make-pathname
+            :name name
+            :type type)))))
+
+(defun tree-recurse (object paths)
+  (let ((path (car paths)))
+    (if (> (length paths) 1)
+        (loop :for subtree :in (tree-entries object path)
+              :do (tree-recurse subtree (cdr paths)))
+        (tree-entries object path))))
+
+
+(defmethod tree-directory ((object tree) &optional pathname)
+  "List objects from a tree.  Optional argument pathname a wild
+pathname that the entries must match."
+  (if pathname
+      (let* ((pathname (if (pathnamep pathname) pathname (pathname pathname)))
+             (paths (loop :for index :from 1 :upto (length (pathname-directory pathname))
+                          :collect (chomp-pathname pathname index)))
+             (path (car paths)))
+        (if (> (length paths) 1)
+            (let ((objects))
+              (loop :for subtree :in (tree-entries object path)
+                    :when (eq (type-of subtree) 'tree-tree)
+                      :do (setf objects
+                                (concatenate 'list objects
+                                             (tree-recurse subtree (cdr paths)))))
+              objects)
+            (tree-entries object path)))
+      (tree-entries object pathname)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
