@@ -88,7 +88,7 @@ This means that this is the branch that is checked out."
   (assert (eql (type-of branch) 'reference))
   (%git-branch-is-head branch))
 
-(defmethod git-upstream ((branch reference))
+(defmethod upstream ((branch reference))
   "Returns the reference for the remote tracking branch, corresponding
 to the local branch BRANCH."
   (with-foreign-object (reference :pointer)
@@ -98,7 +98,7 @@ to the local branch BRANCH."
 		   :facilitator (facilitator branch)
 		   :free-function #'%git-reference-free)))
 
-(defmethod git-remote-name ((branch reference))
+(defmethod remote-name ((branch reference))
   (with-foreign-pointer-as-string ((out size)
                                    (%git-branch-remote-name
                                     (null-pointer) 0

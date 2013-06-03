@@ -159,5 +159,5 @@
    #:git-has-log
    #:git-is-remote
    #:git-is-branch
-   #:git-upstream
-   #:git-remote-name))
+   #:upstream
+   #:remote-name))

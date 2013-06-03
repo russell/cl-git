@@ -255,8 +255,6 @@ objects are available anymore return nil."))
 
 (defgeneric repository-head (repository))
 
-(defgeneric git-upstream (branch))
-
 (defgeneric odb-open (path-or-repository)
   (:documentation "Open the ODB at the specified path or
 repository."))
