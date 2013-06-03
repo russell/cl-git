@@ -97,11 +97,11 @@
 (defmethod git-type ((object odb-object))
   (%git-odb-object-type object))
 
-(defmethod git-size ((object odb-object))
+(defmethod odb-size ((object odb-object))
   (%git-odb-object-size object))
 
-(defmethod git-data ((object odb-object))
-  (let ((result (make-array (git-size object)
+(defmethod odb-data ((object odb-object))
+  (let ((result (make-array (odb-size object)
                             :element-type '(unsigned-byte 8)
                             :initial-element 0))
         (content (%git-odb-object-data object)))

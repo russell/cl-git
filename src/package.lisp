@@ -128,10 +128,15 @@
    #:git-index-has-conflicts
    #:git-load
    #:git-read
-   #:open-odb
-   #:git-size
    #:git-data
    #:tree-directory
+
+   ;; odb
+   #:open-odb
+   #:odb-data
+   #:odb-size
+
+   ;; remote
    #:remote-download
    #:remote-fetchspec
    #:remote-pushspec
