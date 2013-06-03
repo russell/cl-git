@@ -144,19 +144,20 @@ commit alist. The commit argument is an alist that should contain the
 keys :FILES :MESSAGE :AUTHOR :COMMITTER the returned alist will also
 contain the a :SHA containing the sha1 hash of the newly created
 commit."
-  (dolist (file (getf commit :files))
-    (funcall #'write-string-to-file (getf file :filename) (getf file :text))
-    (git-add (getf file :filename)))
-  (git-write *git-repository-index*)
-  (setf (getf commit :sha)
-        (oid
-         (make-commit
-          (git-write-tree *git-repository-index*)
-          (getf commit :message)
-          :repository *test-repository*
-          :parents (getf commit :parents)
-          :author (getf commit :author)
-          :committer (getf commit :committer))))
+  (with-index (*git-repository-index* *test-repository*)
+    (dolist (file (getf commit :files))
+      (funcall #'write-string-to-file (getf file :filename) (getf file :text))
+      (git-add (getf file :filename) :index *git-repository-index*))
+    (git-write *git-repository-index*)
+    (setf (getf commit :sha)
+          (oid
+           (make-commit
+            (git-write-tree *git-repository-index*)
+            (getf commit :message)
+            :repository *test-repository*
+            :parents (getf commit :parents)
+            :author (getf commit :author)
+            :committer (getf commit :committer)))))
   commit)
 
 (defun random-commit (&key
@@ -184,14 +185,13 @@ commit."
      :committer committer)))
 
 (defun add-test-revision (&rest rest)
-  (with-index (*git-repository-index* *test-repository*)
-    (let ((args rest))
-      (setf (getf args :parents) (getf (car *test-repository-state*) :sha))
-      (push
-       (make-test-commit
-        (apply #'random-commit args))
-       *test-repository-state*)
-      (setf *test-traverse-state* *test-repository-state*))))
+  (let ((args rest))
+    (setf (getf args :parents) (getf (car *test-repository-state*) :sha))
+    (push
+     (make-test-commit
+      (apply #'random-commit args))
+     *test-repository-state*)
+    (setf *test-traverse-state* *test-repository-state*)))
 
 (defun next-test-commit ()
   "return the next commit from the traverser and move the traverser to
