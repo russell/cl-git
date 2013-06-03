@@ -78,10 +78,3 @@ signature then it will be added automatically."
         (parents
          (get-object 'commit (getf test-commit :sha)
                      *test-repository*))))))))
-
-(def-test commit-parent-count (:fixture repository-with-commits)
-  (let ((test-commit (next-test-commit)))
-    (is (equal
-         (parent-count (get-object 'commit (getf test-commit :sha)
-                              *test-repository*))
-         1))))

@@ -179,7 +179,6 @@ commit."
   (let ((parents (if (listp parents) parents (list parents))))
     (list
      :parents parents
-     :parentcount (length parents)
      :message message
      :files files
      :author author
@@ -214,7 +213,6 @@ it's parent."
   "Convert a commit to an alist, that is the same format as the test
 commit alist."
   (list
-   :parentcount (git-parentcount commit)
    :message (git-message commit)
    :committer (git-committer commit)
    :author (git-author commit)))
@@ -243,8 +241,7 @@ commit alist."
                y)))
     (is (equal (getf x :message)
                (getf y :message)))
-    (is (equal (getf x :parentcount)
-               (getf y :parentcount)))
+    ;; TODO test parents
     (signature-equal (getf x :author)
                      (getf y :author))
     (signature-equal (getf x :committer)
