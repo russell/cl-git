@@ -21,6 +21,7 @@
 
 (def-suite :cl-git)
 
+(defparameter *test-repository-path* #P"/tmp/")
 
 (defun getpid ()
   #+clisp (os:process-id)
