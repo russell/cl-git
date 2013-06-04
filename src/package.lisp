@@ -67,10 +67,10 @@
    #:binary-p
    #:repository-status
    #:oid
-   #:git-message
-   #:git-author
-   #:git-committer
    #:parent-count
+   #:message
+   #:author
+   #:committer
    #:parents
    #:git-tree
    #:get-object
@@ -78,7 +78,7 @@
    #:full-name
    #:short-name
    #:git-next
-   #:git-tagger
+   #:tagger
    #:git-type
    #:target
    #:git-entry-count

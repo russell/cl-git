@@ -78,8 +78,8 @@
 		 :facilitator reflog
 		 :free-function #'identity))
 
-(defmethod git-committer ((reflog-entry reflog-entry))
+(defmethod committer ((reflog-entry reflog-entry))
   (%git-reflog-entry-commiter reflog-entry))
 
-(defmethod git-message ((reflog-entry reflog-entry))
+(defmethod message ((reflog-entry reflog-entry))
   (%git-reflog-entry-message reflog-entry))

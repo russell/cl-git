@@ -140,13 +140,13 @@
 (defmethod short-name ((tag tag))
   (git-tag-name tag))
 
-(defmethod git-tagger ((tag tag))
+(defmethod tagger ((tag tag))
   (git-tag-tagger tag))
 
 (defmethod git-type ((tag tag))
   (git-tag-type tag))
 
-(defmethod git-message ((tag tag))
+(defmethod message ((tag tag))
   (git-tag-message tag))
 
 (defmethod target ((tag tag))

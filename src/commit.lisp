@@ -145,15 +145,15 @@ optional instance of a GIT-SIGNATURE the details the committer.
 (defmethod get-object ((class (eql 'commit)) oid repository)
   (git-object-lookup oid class repository))
 
-(defmethod git-message ((commit commit))
+(defmethod message ((commit commit))
   "Return a string containing the commit message."
   (git-commit-message commit))
 
-(defmethod git-author ((commit commit))
+(defmethod author ((commit commit))
   "Given a commit return the commit author's signature."
   (git-commit-author commit))
 
-(defmethod git-committer ((commit commit))
+(defmethod committer ((commit commit))
   (git-commit-committer commit))
 
 (defmethod parent-count ((commit commit))

@@ -213,9 +213,9 @@ it's parent."
   "Convert a commit to an alist, that is the same format as the test
 commit alist."
   (list
-   :message (git-message commit)
-   :committer (git-committer commit)
-   :author (git-author commit)))
+   :message (message commit)
+   :committer (committer commit)
+   :author (author commit)))
 
 (defun time-to-unix (time)
   (if (integerp time)

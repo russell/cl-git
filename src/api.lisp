@@ -45,7 +45,7 @@ or if you want lowercase hexadecimal digits:
 
 "))
 
-(defgeneric git-message (object)
+(defgeneric message (object)
   (:documentation "Return the message associated with OBJECT.
 
 For example for commits this will return the commit message and for
@@ -53,7 +53,7 @@ tags the message associated with the tag.
 
 "))
 
-(defgeneric git-author (object)
+(defgeneric author (object)
   (:documentation "Returns the author's signature of OBJECT.
 
 A signature is a list with the keys :NAME :EMAIL and :TIME.  The :NAME
@@ -67,16 +67,21 @@ Example
     (:NAME \"Willem Rein Oudshoorn\"
      :EMAIL \"woudshoo+github@xs4all.nl\"
      :TIME  @2012-05-06T18:46:35.000000+02:00)
-
 "))
 
-(defgeneric git-committer (object)
+(defgeneric committer (object)
   (:documentation "Returns the committer's signature of OBJECT.
 
 A signature is a list with the keys :NAME :EMAIL and :TIME.  The :NAME
 and :EMAIL values are strings, and the :TIME value is LOCAL-TIME
 timestamp.
+"))
 
+(defgeneric tagger (object)
+  (:documentation "Returns the signature of the tagger of OBJECT.
+
+The return value is a signature (a property list with
+keys :NAME, :EMAIL and :TIME
 "))
 
 
@@ -162,14 +167,6 @@ What exactly the name is depends on the type of the object.
 - REFERENCE -- The name of the of the reference, e.g.: \"master\"
 - TAG       -- The name of the tag, e.g.: \"v0.17\"
 "))
-
-(defgeneric git-tagger (object)
-  (:documentation "Returns the signature of the tagger of OBJECT.
-
-The return value is a signature (a property list with
-keys :NAME, :EMAIL and :TIME
-"))
-
 
 (defgeneric git-type (object)
   (:documentation "Returns the type of OBJECT.
