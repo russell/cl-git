@@ -66,6 +66,7 @@ GIT-REPOSITORY-CONFIG."
 (defparameter *config-values* nil)
 
 (defcallback collect-config-values :int ((entry git-config-entry) (data :pointer))
+  (declare (ignore data))
   (with-foreign-slots ((name value level) entry (:struct git-config-entry))
     (push (list :name name :value value :level level) *config-values*))
   0);;; replace with success
