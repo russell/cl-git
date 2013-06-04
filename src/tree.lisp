@@ -180,32 +180,31 @@ This does count the number of direct children, not recursively."
             :name name
             :type type)))))
 
-(defun tree-recurse (object paths)
-  (let ((path (car paths)))
-    (if (> (length paths) 1)
-        (loop :for subtree :in (tree-entries object path)
-              :do (tree-recurse subtree (cdr paths)))
-        (tree-entries object path))))
-
 
 (defmethod tree-directory ((object tree) &optional pathname)
   "List objects from a tree.  Optional argument pathname a wild
 pathname that the entries must match."
-  (if pathname
-      (let* ((pathname (if (pathnamep pathname) pathname (pathname pathname)))
-             (paths (loop :for index :from 1 :upto (length (pathname-directory pathname))
-                          :collect (chomp-pathname pathname index)))
-             (path (car paths)))
-        (if (> (length paths) 1)
-            (let ((objects))
-              (loop :for subtree :in (tree-entries object path)
-                    :when (eq (type-of subtree) 'tree-tree)
-                      :do (setf objects
-                                (concatenate 'list objects
-                                             (tree-recurse subtree (cdr paths)))))
-              objects)
-            (tree-entries object path)))
-      (tree-entries object pathname)))
+  (labels ((tree-recurse (object paths)
+             (let ((path (car paths)))
+               (if (> (length paths) 1)
+                   (loop :for subtree :in (tree-entries object path)
+                         :do (tree-recurse subtree (cdr paths)))
+                   (tree-entries object path)))))
+    (if pathname
+        (let* ((pathname (if (pathnamep pathname) pathname (pathname pathname)))
+               (paths (loop :for index :from 1 :upto (length (pathname-directory pathname))
+                            :collect (chomp-pathname pathname index)))
+               (path (car paths)))
+          (if (> (length paths) 1)
+              (let ((objects))
+                (loop :for subtree :in (tree-entries object path)
+                      :when (eq (type-of subtree) 'tree-tree)
+                        :do (setf objects
+                                  (concatenate 'list objects
+                                               (tree-recurse subtree (cdr paths)))))
+                objects)
+              (tree-entries object path)))
+        (tree-entries object pathname))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
