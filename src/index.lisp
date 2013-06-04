@@ -105,7 +105,7 @@
     %return-value
   (index %index))
 
-(defcfun ("git_index_has_conflicts" git-index-has-conflicts)
+(defcfun ("git_index_has_conflicts" %git-index-has-conflicts)
     :boolean
   (index %index))
 
@@ -253,6 +253,9 @@ operations that may not be written back to the disk."
 (defmethod git-index ((path pathname))
   "Open a new index in a file."
   (git-index (namestring path)))
+
+(defmethod index-has-conflicts ((index index))
+  (%git-index-has-conflicts index))
 
 (defmethod git-entry-count ((index index))
   (git-index-entry-count index))

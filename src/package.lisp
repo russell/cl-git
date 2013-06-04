@@ -127,9 +127,9 @@
 
    #:git-peel
    #:git-index
-   #:git-index-has-conflicts
    #:git-load
    #:git-read
+   #:index-conflicts-p
    #:git-data
    #:tree-directory
 

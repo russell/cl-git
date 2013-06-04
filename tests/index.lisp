@@ -88,7 +88,7 @@
     (with-index (index *test-repository*)
       (write-string-to-file filename "foo")
       (git-add filename :index index)
-      (is (eq (git-index-has-conflicts index)
+      (is (eq (index-conflicts-p index)
               nil)))))
 
 (def-test index-open (:fixture repository)
