@@ -60,7 +60,7 @@
 (defclass reflog (git-pointer) ())
 (defclass reflog-entry (git-pointer) ())
 
-(defmethod git-read ((reference reference))
+(defmethod reflog ((reference reference))
   (with-foreign-object (reflog :pointer)
     (%git-reflog-read reflog reference)
     (make-instance 'reflog

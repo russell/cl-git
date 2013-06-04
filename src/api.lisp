@@ -136,14 +136,9 @@ REPOSITORY instance is returned."))
    "Adds the PATH to the current index *GIT-REPOSITORY-INDEX* or the
 explicit keyword argument :INDEX"))
 
-(defgeneric git-clear (object)
+(defgeneric index-clear (object)
   (:documentation
-   "Clears the content of OBJECT
-"))
-
-(defgeneric git-read (object)
-  (:documentation
-   "Reads the OBJECT from disk or object store."))
+   "Clears the content of the index."))
 
 (defgeneric git-write (object)
   (:documentation

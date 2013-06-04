@@ -213,8 +213,8 @@ directory return stage 0.  Files with stages 1-3 are in conflict."
 be written back to disk to take effect."
   (%git-index-clear index))
 
-(defmethod git-read ((index index))
-  "Update the index with objects read from disk."
+(defmethod index-refresh ((index index))
+  "Refresh the state of the index with objects read from disk."
   (%git-index-read index))
 
 (defmethod git-write ((index index))

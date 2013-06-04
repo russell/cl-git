@@ -110,6 +110,7 @@
    #:tree
    #:remote
    #:config
+   #:reflog
    #:object
    #:index
    #:tag
@@ -127,7 +128,7 @@
 
    #:git-peel
    #:git-index
-   #:git-read
+   #:index-refresh
    #:index-conflicts-p
    #:git-data
    #:tree-directory
