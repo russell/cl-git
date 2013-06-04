@@ -127,7 +127,6 @@
 
    #:git-peel
    #:git-index
-   #:git-load
    #:git-read
    #:index-conflicts-p
    #:git-data

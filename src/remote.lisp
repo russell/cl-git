@@ -199,7 +199,7 @@ pointer will need to be freed manually."
             (t
              remotes)))))
 
-(defmethod git-load ((class (eql 'remote)) name repository)
+(defmethod get-object ((class (eql 'remote)) name repository)
   (with-foreign-object (remote-out :pointer)
     (%git-remote-load remote-out repository name)
     (make-instance 'remote
