@@ -49,6 +49,9 @@
                 #:pointer-address
                 #:defcenum)
   (:export
+   #:capabilities
+   #:libgit2-version
+
    #:revision-walk
    #:walker-next
 
@@ -122,8 +125,6 @@
    ;; variables
    #:*git-repository-index*
 
-   #:git-capabilities
-   #:libgit2-version
    #:git-peel
    #:git-index
    #:git-index-has-conflicts
