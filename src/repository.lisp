@@ -194,3 +194,14 @@ direct commit."
 (defmethod empty-p ((repository repository))
   "Return T if the repository is empty and contains no references."
   (%git-repository-is-empty repository))
+
+(defmacro with-repository ((var pathname-or-string) &body body)
+  "Evaluates the body with VAR bound to a newly opened located
+repository at PATHNAME-OR-STRING.  Repository is freed upon exit of
+this scope so any objects that leave this scope will no longer be able
+to access the repository."
+  `(let ((,var (open-repository :repository ,pathname-or-string)))
+     (unwind-protect
+          (progn
+            ,@body)
+       (free ,var))))
