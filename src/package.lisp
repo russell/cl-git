@@ -49,120 +49,119 @@
                 #:pointer-address
                 #:defcenum)
   (:export
+   ;; LibGit2 Library
    #:capabilities
    #:libgit2-version
 
-   #:revision-walk
-   #:walker-next
 
-   #:git-resolve
-   #:git-add
-   #:git-write
+   ;; Config
+   #:config
    #:git-config
    #:git-config-open-level
    #:git-values
-   #:blob-size
-   #:blob-content
-   #:binary-p
-   #:repository-status
-   #:oid
-   #:message
-   #:author
-   #:committer
-   #:parents
-   #:git-tree
-   #:get-object
-   #:list-objects
+
+   ;; Git Objects
+   #:free
    #:full-name
-   #:short-name
-   #:git-next
-   #:tagger
-   #:git-type
-   #:target
+   #:get-object
+   #:git-entries
    #:git-entry-count
    #:git-entry-by-index
-   #:git-entries
-   #:open-repository
-   #:init-repository
-   #:free
-
-   ;; errors
-   #:unresolved-reference-error
-
-   ;; new objects
-   #:make-commit
-   #:make-tag
+   #:git-type
+   #:list-objects
    #:make-object
-
-   ;; Macros
-   #:with-index
-   #:with-git-revisions
-   #:bind-git-commits
+   #:oid
+   #:reflog
+   #:short-name
 
    ;; Classes.
-   #:odb-object
-   #:blob
-   #:reference
-   #:symbolic-reference
-   #:commit
-   #:tree
-   #:remote
-   #:config
-   #:reflog
    #:object
-   #:index
-   #:tag
-   #:repository
 
-   ;; predicates
+   ;; Tags
+   #:make-tag
+   #:tag
+   #:tagger
+
+   ;; Commits
+   #:author
+   #:bind-git-commits
+   #:commit
+   #:committer
+   #:git-next
+   #:make-commit
+   #:message
+   #:parents
+   #:revision-walk
+   #:with-git-revisions
+
+   ;; Blobs
+   #:binary-p
+   #:blob
+   #:blob-content
+   #:blob-size
+
+   ;; References
    #:branch-p
+   #:git-peel
+   #:git-resolve
+   #:head-p
+   #:reference
    #:remote-p
    #:symbolic-p
    #:tag-p
-   #:head-p
+   #:target
+   #:unresolved-reference-error
+   #:upstream
 
-   ;; variables
+   ;; Index
    #:*git-repository-index*
-
-   #:git-peel
+   #:git-add
+   #:git-write
+   #:git-write-tree
+   #:index
    #:index-clear
-   #:index-refresh
    #:index-conflicts-p
-   #:git-data
+   #:index-refresh
+   #:with-index
 
-   ;; tree
+   ;; Tree
+   #:git-tree
+   #:tree
    #:tree-directory
 
-   ;; tree-entries
-   #:filename
+   ;; Tree-Entries (sub-classes of blob, commit, tree or tag)
    #:filemode
+   #:filename
 
-   ;; odb
-   #:open-odb
+   ;; Odb
    #:odb-data
+   #:odb-object
    #:odb-size
+   #:open-odb
 
-   ;; remote
+   ;; Remote
+   #:git-is-head
+   #:git-ls
+   #:remote
+   #:remote-connect
+   #:remote-connected-p
+   #:remote-disconnect
    #:remote-download
    #:remote-fetchspec
-   #:remote-pushspec
-   #:remote-connect
-   #:remote-disconnect
-   #:remote-connected-p
    #:remote-push-url
+   #:remote-pushspec
    #:remote-url
-   #:git-ls
-   #:git-is-head
-   #:git-write-tree
-   #:repository-head
-   #:head-orphaned-p
-   #:head-detached-p
-   #:empty-p
+
+   ;; Repository
    #:bare-p
-   #:repository-path
-   #:repository-workdir
+   #:empty-p
    #:git-has-log
-   #:git-is-remote
-   #:git-is-branch
-   #:upstream
-   #:remote-name))
+   #:head-detached-p
+   #:head-orphaned-p
+   #:init-repository
+   #:open-repository
+   #:repository
+   #:repository-head
+   #:repository-path
+   #:repository-status
+   #:repository-workdir))
