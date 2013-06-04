@@ -66,7 +66,6 @@
    #:binary-p
    #:repository-status
    #:oid
-   #:parent-count
    #:message
    #:author
    #:committer
