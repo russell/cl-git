@@ -208,7 +208,7 @@ directory return stage 0.  Files with stages 1-3 are in conflict."
 (defmethod git-add ((entry list) &key (index *git-repository-index*))
   (%git-index-add index entry))
 
-(defmethod git-clear ((index index))
+(defmethod index-clear ((index index))
   "Clear contents of the index removing all entries.  Changes need to
 be written back to disk to take effect."
   (%git-index-clear index))

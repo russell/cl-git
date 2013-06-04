@@ -58,7 +58,6 @@
    #:git-resolve
    #:git-add
    #:git-write
-   #:git-clear
    #:git-config
    #:git-config-open-level
    #:git-values
@@ -128,6 +127,7 @@
 
    #:git-peel
    #:git-index
+   #:index-clear
    #:index-refresh
    #:index-conflicts-p
    #:git-data

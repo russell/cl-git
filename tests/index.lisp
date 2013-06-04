@@ -79,7 +79,7 @@
   (is (eq (git-entry-count *git-repository-index*) 0))
   (git-add filename)
   (is (eq (git-entry-count *git-repository-index*) 1))
-  (git-clear *git-repository-index*)
+  (index-clear *git-repository-index*)
   (is (eq (git-entry-count *git-repository-index*) 0)))
 
 
