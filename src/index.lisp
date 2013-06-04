@@ -254,7 +254,7 @@ operations that may not be written back to the disk."
   "Open a new index in a file."
   (git-index (namestring path)))
 
-(defmethod index-has-conflicts ((index index))
+(defmethod index-conflicts-p ((index index))
   (%git-index-has-conflicts index))
 
 (defmethod git-entry-count ((index index))
