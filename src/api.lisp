@@ -220,7 +220,7 @@ start defaults to 0."))
 git config to a specific level.  Possible levels are :HIGHEST-LEVEL
 :SYSTEM :XDG :GLOBAL or :LOCAL"))
 
-(defgeneric git-index (object)
+(defgeneric index (object)
   (:documentation "Returns an index object for OBJECT (a repository)"))
 
 (defgeneric git-next (walker)

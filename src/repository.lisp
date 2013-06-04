@@ -151,7 +151,7 @@ Or for a bare repository to the repository itself."
         (git-config config :level level)
         config)))
 
-(defmethod git-index ((repository repository))
+(defmethod index ((repository repository))
   "Return the index of the repository."
   (with-foreign-object (index :pointer)
     (%git-repository-index index repository)

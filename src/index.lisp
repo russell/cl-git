@@ -227,13 +227,13 @@ an in-memory index is used.  The newly opened index is bound to the
 variable VAR."
   ;;TODO add gensym
   `(let ((,var ,(if repository-or-path
-                    `(git-index ,repository-or-path)
-                    `(git-index-new))))
+                    `(index ,repository-or-path)
+                    `(index-new))))
      (unwind-protect
           (progn ,@body)
        (free ,var))))
 
-(defun git-index-new ()
+(defun index-new ()
   "Create a new in-memory index that can be used to perform in memory
 operations that may not be written back to the disk."
   (with-foreign-object (index :pointer)
@@ -242,7 +242,7 @@ operations that may not be written back to the disk."
            :pointer (mem-ref index :pointer)
            :free-function #'%git-index-free)))
 
-(defmethod git-index ((path string))
+(defmethod index ((path string))
   "Open a new index in a file."
   (with-foreign-object (index :pointer)
     (%git-index-open index path)
@@ -250,9 +250,9 @@ operations that may not be written back to the disk."
            :pointer (mem-ref index :pointer)
            :free-function #'%git-index-free)))
 
-(defmethod git-index ((path pathname))
+(defmethod index ((path pathname))
   "Open a new index in a file."
-  (git-index (namestring path)))
+  (index (namestring path)))
 
 (defmethod index-conflicts-p ((index index))
   (%git-index-has-conflicts index))

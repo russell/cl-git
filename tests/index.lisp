@@ -85,21 +85,21 @@
 
 (def-test index-has-conflicts (:fixture repository)
   (let ((filename "test-file"))
-    (with-index (index *test-repository*)
+    (with-index (test-index *test-repository*)
       (write-string-to-file filename "foo")
-      (git-add filename :index index)
-      (is (eq (index-conflicts-p index)
+      (git-add filename :index test-index)
+      (is (eq (index-conflicts-p test-index)
               nil)))))
 
 (def-test index-open (:fixture repository)
   (let ((filename "test-file")
         (index-file-path (gen-temp-path)))
-    (with-index (index *test-repository*)
+    (with-index (test-index *test-repository*)
       (write-string-to-file filename "foo")
-      (git-add filename :index index)
+      (git-add filename :index test-index)
       (unwind-protect
            (with-index (index-file index-file-path)
-             (let ((entry (git-entry-by-index index 0)))
+             (let ((entry (git-entry-by-index test-index 0)))
                ;; Add the entry from the other git index.
                (git-add entry :index index-file)
                (plist-equal entry
@@ -109,12 +109,12 @@
 
 (def-test index-new (:fixture repository)
   (let ((filename "test-file"))
-    (with-index (index *test-repository*)
+    (with-index (test-index *test-repository*)
       (write-string-to-file filename "foo")
-      (git-add filename :index index)
+      (git-add filename :index test-index)
       (with-index (index-in-memory)
-        (git-write index)
-        (let ((entry (git-entry-by-index index 0)))
+        (git-write test-index)
+        (let ((entry (git-entry-by-index test-index 0)))
           ;; Add the entry from the other git index.
           (git-add entry :index index-in-memory)
           ;; TODO (RS) there is an intermittent failure which results

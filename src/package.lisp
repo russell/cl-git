@@ -125,7 +125,6 @@
    #:*git-repository-index*
 
    #:git-peel
-   #:git-index
    #:index-clear
    #:index-refresh
    #:index-conflicts-p
