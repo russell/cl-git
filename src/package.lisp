@@ -130,7 +130,13 @@
    #:index-refresh
    #:index-conflicts-p
    #:git-data
+
+   ;; tree
    #:tree-directory
+
+   ;; tree-entries
+   #:filename
+   #:filemode
 
    ;; odb
    #:open-odb
