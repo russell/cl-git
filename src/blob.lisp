@@ -50,7 +50,7 @@
   ()
   (:documentation "A git blob."))
 
-(defmethod get-object ((class (eql 'blob)) oid repository &key)
+(defmethod get-object ((class (eql 'blob)) oid repository)
   (git-object-lookup oid class repository))
 
 (defmethod blob-size ((blob blob))
@@ -58,7 +58,7 @@
 
 (defmethod blob-content ((blob blob))
   "Returns the content of the blob BLOB as an array of UNSIGNED-BYTE's"
-  (let ((result (make-array (git-raw-size blob)
+  (let ((result (make-array (blob-size blob)
                             :element-type '(unsigned-byte 8)
                             :initial-element 0))
         (content (%git-blob-raw-content blob)))

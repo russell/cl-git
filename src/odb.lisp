@@ -78,7 +78,7 @@
     *oid-values*))
 
 (defmethod list-objects ((class (eql :oid)) (repository repository) &key test test-not)
-  (list-objects class (git-odb repository) :test test :test-not test-not))
+  (list-objects class (odb-open repository) :test test :test-not test-not))
 
 (defmethod get-object ((class (eql 'odb-object)) oid (odb odb))
   (with-foreign-object (out :pointer)
@@ -89,7 +89,7 @@
                    :free-function #'%git-odb-object-free)))
 
 (defmethod get-object ((class (eql 'odb-object)) oid (repository repository))
-  (git-load class oid (open-odb repository)))
+  (get-object class oid (open-odb repository)))
 
 (defmethod oid ((object odb-object))
   (git-odb-object-id object))

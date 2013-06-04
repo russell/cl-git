@@ -135,7 +135,7 @@ TODO, this function is a bit messy, need to think about cleaning this up."
     (head (let* ((original-ref (get-object 'reference head repository))
                  (resolved-ref (git-resolve original-ref)))
             (prog1
-                (target resolved-ref :type :oid)
+                (target resolved-ref)
               (free original-ref)
               (free resolved-ref))))
     (sha (oid-from-string-or-number sha))))

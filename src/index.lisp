@@ -202,7 +202,7 @@ directory return stage 0.  Files with stages 1-3 are in conflict."
 (defmethod git-add ((path pathname) &key (index *git-repository-index*))
   (let ((path (if (pathname-relative-p path)
                    path
-                   (enough-namestring path (git-workdir (slot-value index 'facilitator))))))
+                   (enough-namestring path (repository-workdir (slot-value index 'facilitator))))))
     (git-add (namestring path) :index index)))
 
 (defmethod git-add ((entry list) &key (index *git-repository-index*))
