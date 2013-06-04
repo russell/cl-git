@@ -47,10 +47,6 @@
   (message :string)
   (force :boolean))
 
-(defcfun ("git_tag_type" git-tag-type)
-    git-object-type
-  (tag %tag))
-
 (defcfun ("git_tag_target" %git-tag-target)
     %return-value
   (target-out :pointer)
@@ -74,12 +70,6 @@
     :string
   "Returns the message of the tag"
   (tag %tag))
-
-(defcfun ("git_tag_lookup_byname" %git-tag-lookup-byname)
-    %return-value
-  (out :pointer)
-  (repository %repository)
-  (name :string))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -142,9 +132,6 @@
 
 (defmethod tagger ((tag tag))
   (git-tag-tagger tag))
-
-(defmethod git-type ((tag tag))
-  (git-tag-type tag))
 
 (defmethod message ((tag tag))
   (git-tag-message tag))
