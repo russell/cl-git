@@ -231,7 +231,7 @@ variable VAR."
                     `(git-index-new))))
      (unwind-protect
           (progn ,@body)
-       (git-free ,var))))
+       (free ,var))))
 
 (defun git-index-new ()
   "Create a new in-memory index that can be used to perform in memory

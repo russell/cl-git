@@ -220,7 +220,7 @@ start defaults to 0."))
 (defgeneric git-values (object)
   (:documentation "TODO"))
 
-(defgeneric git-free (object)
+(defgeneric free (object)
   (:documentation "TODO"))
 
 

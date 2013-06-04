@@ -141,7 +141,7 @@ special call to stop iteration."
                               (revision-walker))))))
              (unwind-protect
                   (revision-walker)
-               (git-free revwalker))))))))
+               (free revwalker))))))))
 
 
 (defun revision-walk (name-or-names repository &key (flags :both))

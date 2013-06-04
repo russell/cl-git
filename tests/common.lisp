@@ -120,7 +120,7 @@ will update to the new head when a new commit is added.")
               (init-repository *repository-path* :bare ,bare)
               (let ((*test-repository* (open-repository *repository-path*)))
                 ,@body
-                (git-free *test-repository*))
+                (free *test-repository*))
               (let ((open-files (open-test-files-p *repository-path*)))
                 (when open-files
                   (fail "The following files were left open ~S" open-files))))

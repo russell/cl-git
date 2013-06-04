@@ -122,7 +122,7 @@ pointer to null-pointer as well."
       ((slot-value object 'libgit2-disposed)
        (princ "(disposed)" stream)))))
 
-(defmethod git-free ((object git-pointer))
+(defmethod free ((object git-pointer))
   (dispose object)
   nil)
 

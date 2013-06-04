@@ -86,7 +86,7 @@
    #:git-entries
    #:open-repository
    #:init-repository
-   #:git-free
+   #:free
 
    ;; errors
    #:unresolved-reference-error
