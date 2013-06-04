@@ -91,12 +91,12 @@
     git-reference-flags
   (reference %reference))
 
-(defcfun ("git_reference_is_branch" git-is-branch)
+(defcfun ("git_reference_is_branch" %git-is-branch)
     :boolean
   "Returns t if the reference is a local branch."
   (reference %reference))
 
-(defcfun ("git_reference_is_remote" git-is-remote)
+(defcfun ("git_reference_is_remote" %git-is-remote)
     :boolean
   "Returns t if the reference lives in the refs/remotes namespace."
   (reference %reference))
