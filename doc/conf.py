@@ -31,7 +31,8 @@ from os.path import dirname, realpath, join, expandvars
 # ones.
 extensions = ['sphinx.ext.intersphinx',
               'sphinxcontrib.cldomain',
-              'sphinxcontrib.hyperspec']
+              'sphinxcontrib.hyperspec',
+              'sphinxcontrib.googleanalytics']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -48,6 +49,12 @@ master_doc = 'index'
 # General information about the project.
 project = u'cl-git'
 copyright = u'2012, Russell Sim'
+
+googleanalytics_id = "UA-28069739-2"
+if os.environ.get("GOOGLE_ANALYTICS"):
+    googleanalytics_enabled = True
+else:
+    googleanalytics_enabled = False
 
 cl_packages = {"cl-git": join(dirname(realpath(__file__)), "../")}
 
@@ -111,29 +118,54 @@ pygments_style = 'emacs'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-html_theme = 'sphinx-bootstrap'
+import sphinx_bootstrap_theme
+html_theme = 'bootstrap'
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
 html_theme_options = {
-    'github_user': 'russell',
-    'github_repo': 'cl-git',
-    'home_url': 'http://cl-git.russellsim.org/',
-}
+    # Navigation bar title. (Default: ``project`` value)
+    # 'navbar_title': "Demo",
 
-googleanalytics_id = "UA-28069739-2"
-if os.environ.get("GOOGLE_ANALYTICS"):
-    html_theme_options['analytics_code'] = 'UA-28069739-2'
+    # Global TOC depth for "site" navbar tab. (Default: 1)
+    # Switching to -1 shows all levels.
+    # 'globaltoc_depth': 2,
+
+    # Include hidden TOCs in Site navbar?
+    #
+    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
+    # non-hidden ``toctree`` directives in the same page, or else the build
+    # will break.
+    #
+    # Values: "true" (default) or "false"
+    # 'globaltoc_includehidden': "true",
+
+    # HTML navbar class (Default: "navbar") to attach to <div> element.
+    # For black navbar, do "navbar navbar-inverse"
+    # 'navbar_class': "navbar navbar-inverse",
+
+    # Fix navigation bar to top of page?
+    # Values: "true" (default) or "false"
+    # 'navbar_fixed_top': "true",
+
+    # Location of link to source.
+    # Options are "nav" (default), "footer" or anything else to exclude.
+    # 'source_link_position': "nav",
+
+    # Bootswatch (http://bootswatch.com/) theme.
+    #
+    # Options are nothing with "" (default) or the name of a valid theme
+    # such as "amelia" or "cosmo".
+    #
+    # Note that this is served off CDN, so won't be available offline.
+    'bootswatch_theme': "spacelab",
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ["_themes/"]
+# html_theme_path = ["_themes/"]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
