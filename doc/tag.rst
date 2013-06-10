@@ -5,14 +5,28 @@ Tag
 
 .. cl:type:: tag
 
-.. cl:method:: git-name tag
+.. cl:method:: full-name tag
 
-.. cl:method:: git-lookup :tag common-lisp:t
+.. cl:method:: short-name tag
 
-.. cl:method:: git-tagger tag
+.. cl:method:: list-objects 'tag common-lisp:t
 
-.. cl:method:: git-message tag
+   .. code-block:: common-lisp-repl
 
-.. cl:method:: git-target tag
+      GIT> (list-objects 'tag (open-repository #p"/home/russell/projects/ecl/"))
+
+      (#<TAG refs/tags/ECL.8.12.0 {1006621153}>
+       #<REFERENCE refs/tags/ECL.9.8.3 {1006B277C3}>
+       #<REFERENCE refs/tags/ECL.9.8.4 {1006B279C3}>
+       #<REFERENCE refs/tags/ECL.9.8.2 {1006B27BC3}>
+       #<REFERENCE refs/tags/ECLS.0.4 {1006B27DC3}>
+       #<REFERENCE refs/tags/ECL.13.5.1 {1006B27FD3}>
+       ...)
+
+.. cl:method:: tagger tag
+
+.. cl:method:: message tag
+
+.. cl:method:: target tag
 
 .. cl:method:: git-peel tag

@@ -102,19 +102,22 @@
       (%git-tag-create newoid repository %name target tagger %message force))
     (get-object 'tag (convert-from-foreign newoid '%oid) repository)))
 
+
 (defmethod list-objects ((class (eql 'tag)) repository &key test test-not)
-  "Returns a list of tag for the repository."
+  "Returns a list of tag for the repository.  If the tag is an
+annotated tag then a TAG object will be returned, otherwise it will be
+a ref with the in the tag namespace."
   (with-foreign-object (string-array '(:struct git-strings))
     (%git-tag-list string-array repository)
     (let ((refs
             (mapcar (lambda (ref-name)
-                      ;; XXX (RS) could use the target-type function
-                      ;; to determine if we should be resolving to the
-                      ;; tag object in the case where there are real
-                      ;; tag objects not lightweight tags.
-                      (make-reference-from-name
-                       (concatenate 'string reference-tags-dir ref-name)
-                       repository))
+                      (let* ((ref (make-reference-from-name
+                                   (concatenate 'string reference-tags-dir ref-name)
+                                   repository))
+                             (target (target ref)))
+                        (case (type-of target)
+                          ('tag target)
+                          (t ref))))
                     (prog1
                         (convert-from-foreign string-array '%git-strings)
                       (free-translated-object string-array '%git-strings t)))))
@@ -136,6 +139,9 @@
 
 (defmethod tagger ((tag tag))
   (git-tag-tagger tag))
+
+(defmethod tagger ((tag reference))
+  nil)
 
 (defmethod message ((tag tag))
   (git-tag-message tag))
