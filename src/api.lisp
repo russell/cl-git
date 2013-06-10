@@ -131,9 +131,12 @@ REPOSITORY instance is returned."))
 
 
 (defgeneric repository-path (object)
-  (:documentation "Path to the object."))
+  (:documentation "Return the path to the repository.  In the case
+where the repository isn't bare then it will be the location of the
+.git directory."))
 
-(defgeneric repository-workdir (object))
+(defgeneric repository-workdir (object)
+  (:documentation "Return the path to the root of the repository."))
 
 (defgeneric git-add (path &key &allow-other-keys)
   (:documentation
@@ -247,8 +250,6 @@ objects are available anymore return nil."))
 
 (defgeneric git-ls (remote))
 
-
-(defgeneric repository-head (repository))
 
 (defgeneric odb-open (path-or-repository)
   (:documentation "Open the ODB at the specified path or
