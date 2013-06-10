@@ -82,11 +82,12 @@ This means that this is the branch that is checked out."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defun head-p (branch)
-  "Returns t is the current HEAD points to this branch.
-This means that this is the branch that is checked out."
-  (assert (eql (type-of branch) 'reference))
-  (%git-branch-is-head branch))
+(defgeneric head-p (branch)
+  (:documentation
+   "Returns t is the current HEAD points to this branch.
+This means that this is the branch that is checked out.")
+  (:method ((branch reference))
+    (%git-branch-is-head branch)))
 
 (defmethod upstream ((branch reference))
   "Returns the reference for the remote tracking branch, corresponding

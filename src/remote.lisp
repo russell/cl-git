@@ -264,6 +264,8 @@ See also git-pushspec."
   (%git-remote-fetchspec remote))
 
 (defmethod remote-download ((remote remote))
+  "Download the required packfile from the remote to bring the
+repository into sync."
   (%git-remote-download remote (cffi-sys:null-pointer) (cffi-sys:null-pointer)))
 
 (defmethod git-ls ((remote remote))
@@ -275,4 +277,5 @@ See also git-pushspec."
   (%git-remote-push-url remote))
 
 (defmethod remote-url ((remote remote))
+  "Return the url to the remote."
   (%git-remote-url remote))

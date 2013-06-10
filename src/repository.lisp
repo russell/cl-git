@@ -118,7 +118,6 @@ contains the object database."))
   (init-repository (namestring path) :bare bare))
 
 (defmethod open-repository ((path string))
-  "Open an existing repository located at PATH."
   (with-foreign-object (repository-ref :pointer)
     (%git-repository-open repository-ref path)
     (make-instance 'repository
@@ -127,7 +126,6 @@ contains the object database."))
 
 (defmethod open-repository ((path pathname))
   (open-repository (namestring path)))
-
 
 (defmethod repository-path ((repository repository))
   "Returns the path the the .git directory of the repository.
@@ -168,32 +166,40 @@ Or for a bare repository to the repository itself."
            :facilitator repository
            :free-function #'%git-odb-free)))
 
-(defmethod repository-head ((repository repository))
-  "Returns the resolved reference for HEAD."
-  (with-foreign-object (head :pointer)
-    (%git-repository-head head repository)
-    (make-instance 'reference
-		   :pointer (mem-ref head :pointer)
-		   :facilitator repository
-		   :free-function #'%git-reference-free)))
+(defgeneric repository-head (repository)
+  (:documentation "Returns the resolved reference for HEAD.")
+  (:method ((repository repository))
+    (with-foreign-object (head :pointer)
+      (%git-repository-head head repository)
+      (make-instance 'reference
+                     :pointer (mem-ref head :pointer)
+                     :facilitator repository
+                     :free-function #'%git-reference-free))))
 
-(defmethod head-detached-p ((repository repository))
-  "Returns T if the HEAD in the repository is detached, in other words,
+(defgeneric head-detached-p (repository)
+  (:documentation
+   "Returns T if the HEAD in the repository is detached, in other words,
 the HEAD reference is not a symbolic reference to a branch, but a
-direct commit."
-  (%git-repository-head-detached repository))
+direct commit.")
+  (:method ((repository repository))
+    (%git-repository-head-detached repository)))
 
-(defmethod head-orphaned-p ((repository repository))
-  "Returns t if the HEAD points to a commit that doesn't exist."
-  (%git-repository-head-orphaned repository))
+(defgeneric head-orphaned-p (repository)
+    (:documentation "Returns t if the HEAD points to a commit that
+doesn't exist.")
+  (:method ((repository repository))
+    (%git-repository-head-orphaned repository)))
 
-(defmethod bare-p ((repository repository))
-  "Return T if the repository is bare."
-  (%git-repository-is-bare repository))
+(defgeneric bare-p (repository)
+    (:documentation "Return T if the repository is bare.")
+  (:method ((repository repository))
+    (%git-repository-is-bare repository)))
 
-(defmethod empty-p ((repository repository))
-  "Return T if the repository is empty and contains no references."
-  (%git-repository-is-empty repository))
+(defgeneric empty-p (repository)
+  (:documentation "Return T if the repository is empty and contains no
+references.")
+  (:method ((repository repository))
+    (%git-repository-is-empty repository)))
 
 (defmacro with-repository ((var pathname-or-string) &body body)
   "Evaluates the body with VAR bound to a newly opened located

@@ -53,9 +53,7 @@ Usage
 .. toctree::
    :maxdepth: 4
 
-   git
    repositories
-   branch
    references
    tag
    tree
@@ -65,16 +63,8 @@ Usage
    remote
    commits
    config
-
-
-General Information
--------------------
-
-.. toctree::
-   :maxdepth: 4
-
+   internals
    generic
-   memory
 
 
 Contributing

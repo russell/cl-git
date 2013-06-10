@@ -124,28 +124,30 @@
 (defvar reference-remotes-dir (concatenate 'string reference-dir "remotes/"))
 
 
-(defmethod symbolic-p ((reference reference))
-  "Return T if the reference is symbolic."
-  (when (member :symbolic (git-type reference))
-    t))
+(defgeneric symbolic-p (reference)
+  (:documentation
+   "Return T if the reference is symbolic.")
+  (:method ((reference reference))
+      (when (member :symbolic (git-type reference))
+        t)))
 
-(defmethod remote-p ((reference string))
-  "Return T if the reference is within the git remotes namespace."
-  (when (eq 0 (search reference-remotes-dir reference))
-    t))
+(defgeneric remote-p (reference)
+  (:documentation
+   "Return T if the reference is within the git remotes namespace.")
+  (:method ((reference string))
+    (when (eq 0 (search reference-remotes-dir reference))
+      t))
+  (:method ((reference reference))
+      (remote-p (full-name reference))))
 
-(defmethod remote-p ((reference reference))
-  "Return T if the reference is within the git remotes namespace."
-  (remote-p (full-name reference)))
-
-(defmethod branch-p  ((reference string))
-  "Return T if the reference is within the git heads namespace."
-  (when (eq 0 (search reference-heads-dir reference))
-    t))
-
-(defmethod branch-p  ((reference reference))
-  "Return T if the reference is within the git heads namespace."
-  (branch-p (full-name reference)))
+(defgeneric branch-p (reference)
+  (:documentation
+   "Return T if the reference is within the git heads namespace.")
+  (:method ((reference string))
+    (when (eq 0 (search reference-heads-dir reference))
+      t))
+  (:method ((reference reference))
+    (branch-p (full-name reference))))
 
 (defmethod %git-lookup-by-name ((class (eql 'reference)) name repository)
   "Lookup a reference by name and return a pointer to it.  This

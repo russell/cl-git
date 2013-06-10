@@ -3,52 +3,52 @@ Generic Function Interface
 
 .. cl:package:: cl-git
 
-.. cl:generic:: git-id
+.. cl:generic:: oid
 
-.. cl:generic:: git-name
+.. cl:generic:: full-name
 
-.. cl:generic:: git-create
+.. cl:generic:: short-name
 
-.. cl:generic:: git-list
-
-.. cl:generic:: git-lookup
-
-.. cl:generic:: git-next 
-
-.. cl:generic:: git-load
-
-.. cl:generic:: git-index
-
-.. cl:generic:: git-values
-
-.. cl:generic:: git-author
-
-.. cl:generic:: git-committer
-
-.. cl:generic:: git-message
-
-.. cl:generic:: git-tagger
+.. cl:generic:: get-object
 
 .. cl:generic:: git-entries
 
+.. cl:generic:: get-entry-count
+
+.. cl:generic:: get-entry-by-index
+
+.. cl:generic:: list-objects
+
+.. cl:generic:: git-next 
+
+.. cl:generic:: index
+
+.. cl:generic:: git-values
+
+.. cl:generic:: author
+
+.. cl:generic:: committer
+
+.. cl:generic:: message
+
+.. cl:generic:: tagger
+
 .. cl:generic:: git-config
 
-.. cl:generic:: git-tracking
+.. cl:generic:: parents
 
-.. cl:generic:: git-parentcount
+.. cl:generic:: open-odb
 
-.. cl:generic:: git-parent-oids
-
-.. cl:generic:: git-parent-oid
-
-.. cl:generic:: git-odb
-
-.. cl:generic:: git-data
+.. cl:generic:: odb-data
 
 .. cl:generic:: git-peel
 
-.. cl:generic:: git-size
+.. cl:generic:: blob-size
 
-.. cl:generic:: git-target
+.. cl:generic:: odb-size
+
+.. cl:generic:: target
 
 .. cl:generic:: git-type
+
+.. cl:generic:: free

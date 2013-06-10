@@ -7,10 +7,6 @@ Index
 
 .. cl:variable:: *git-repository-index*
 
-.. cl:macro:: with-repository-index
-
-   :param body: the body of the macro.
-
 .. cl:macro:: with-index
 
    :param var: the symbol the opened index will be bound to.
@@ -21,9 +17,9 @@ Index
 
    :param path: the relative path of a file to be added to the repository.
 
-.. cl:method:: git-index common-lisp:pathname
+.. cl:method:: index common-lisp:pathname
 
-.. cl:method:: git-index common-lisp:string
+.. cl:method:: index common-lisp:string
 
 .. cl:method:: git-read index
 
@@ -31,10 +27,12 @@ Index
 
 .. cl:generic:: git-write-tree
 
-.. cl:generic:: git-clear
+.. cl:generic:: index-clear
 
 .. cl:method:: git-entry-by-path index string
 
 .. cl:method:: git-entry-by-index index t
 
-.. cl:function:: git-has-conflicts
+.. cl:generic:: index-conflicts-p
+
+.. cl:generic:: index-refresh

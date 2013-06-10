@@ -5,18 +5,27 @@ Remote
 
 .. cl:type:: remote
 
-.. cl:function:: git-url
+.. cl:method:: get-object remote
 
-.. cl:method:: git-list :remote
+.. cl:method:: full-name remote
 
-.. cl:method:: git-name remote
+.. cl:method:: short-name remote
 
 .. cl:method:: git-ls remote
 
-.. cl:method:: git-pushspec remote
+.. cl:generic:: remote-pushspec
 
-.. cl:method:: git-fetchspec remote
+.. cl:generic:: remote-push-url
 
-.. cl:method:: git-connect remote
+.. cl:generic:: remote-fetchspec
 
-.. cl:method:: git-download remote
+.. cl:generic:: remote-connect
+
+.. cl:generic:: remote-connected-p
+
+.. cl:generic:: remote-disconnect
+
+.. cl:generic:: remote-download
+
+.. cl:generic:: remote-url
+

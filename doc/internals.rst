@@ -1,8 +1,18 @@
-Memory Management
-=================
-
+Internals
+=========
 
 .. cl:package:: cl-git
+
+Libgit2
+-------
+
+.. cl:function:: libgit2-capabilities
+
+.. cl:function:: libgit2-version
+
+
+Memory Management
+-----------------
 
 Because C has manual memory management and Lisp automatic memory
 management there is the question on how these two systems integrate.
@@ -30,7 +40,7 @@ are a few reasons you might want to do it anyway:
 .. cl:generic:: git-free
 
 Dependant Objects
------------------
+~~~~~~~~~~~~~~~~~
 
 Some objects, such as commits, are only valid as long as another
 object is valid, like a repository. This means that as soon as a

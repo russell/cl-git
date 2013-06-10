@@ -5,12 +5,6 @@ Repositories
 
 .. cl:type:: repository
 
-.. cl:variable:: *git-repository*
-
-.. cl:method:: index repository
-
-.. cl:method:: open-odb repository
-
 Creating
 --------
 
@@ -20,6 +14,35 @@ Creating
 
       GIT> (init-repository #p"/tmp/test-repo/")
       #<REPOSITORY 7FFFE8006800 {1005F3CE43}>
+
+
+.. cl:generic:: empty-p repository
+
+   .. code-block:: common-lisp-repl
+
+      GIT> (empty-p (open-repository #p"/tmp/test-repo/"))
+      T
+       
+Bare
+~~~~
+
+Bare repositories can be created by passing a truthful value to the
+key argument BARE when initialising a repository.
+
+.. code-block:: common-lisp-repl
+
+   GIT> (init-repository #p"/tmp/test-bare/" :bare t)
+   #<REPOSITORY 7FFFE8008CD0 {10062DE723}>
+
+Whether an existing repository is bare can be determined using the
+bare-p method.
+
+.. cl:generic:: bare-p repository
+                                  
+   .. code-block:: common-lisp-repl
+
+      GIT> (bare-p (open-repository #p"/tmp/test-bare/"))
+      T
 
 Using
 -----
@@ -48,8 +71,36 @@ Using
                 nil)
       #<REPOSITORY 7FFFE8003E00 {1003880DA3}>
       NIL
-          
 
+
+Head
+----
+
+.. cl:generic:: repository-head repository
+
+.. cl:generic:: head-detached-p repository
+
+.. cl:generic:: head-orphaned-p repository
+
+
+Path
+----
+
+.. cl:generic:: repository-path repository
+
+.. cl:generic:: repository-workdir repository
+
+
+Index
+-----
+
+.. cl:method:: index repository
+
+
+ODB
+---
+
+.. cl:method:: open-odb repository
 
 Status
 ------
@@ -69,19 +120,9 @@ Status
     ("doc/cl-git.html" :CURRENT :WORKTREE-NEW)
     ("doc/.installed.cfg" :CURRENT :IGNORED))
 
-.. cl:method:: repository-head repository
 
-.. cl:method:: head-detached-p repository
-
-.. cl:method:: head-orphaned-p repository
-
-.. cl:method:: bare-p repository
-                                  
-.. cl:method:: empty-p repository
-
-.. cl:method:: repository-path repository
-
-.. cl:method:: repository-workdir repository
+Configuration
+-------------
 
 .. cl:method:: git-config repository
 

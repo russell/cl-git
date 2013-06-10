@@ -100,7 +100,7 @@ This does count the number of direct children, not recursively."
 
 (defclass tree-link (tree-mixin)
   ()
-  (:documentation "A git tree commit."))
+  (:documentation "A git tree symlink."))
 
 (defun make-tree-entry (type filename mode oid repository)
   "Make a weak reference by name that can be looked-up later."
