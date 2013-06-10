@@ -5,23 +5,38 @@ References
 
 .. cl:type:: reference
 
+Details
+-------
+
 .. cl:method:: full-name reference
 
 .. cl:method:: short-name reference
-
-.. cl:method:: make-object reference common-lisp:t common-lisp:t
-
-.. cl:method:: get-object reference common-lisp:t
-
-.. cl:method:: git-list :reference
 
 .. cl:method:: target reference
 
 .. cl:function:: git-resolve
 
 
+Creating
+--------
+
+.. cl:method:: make-object reference common-lisp:t common-lisp:t
+
+
+Accessing
+---------
+
+To access a single reference get object can be used, but the fully
+qualified name of the reference must be specified.
+
+.. cl:method:: get-object reference common-lisp:t common-lisp:t
+
 Listing
--------
+~~~~~~~
+
+To list references LIST-OBJECTS is used.
+
+.. cl:method:: list-objects reference common-lisp:t
 
 
 Lets start simple, we are going to list all the references present in
@@ -46,31 +61,15 @@ the generic list command and tell it you want references.
     #<REFERENCE refs/heads/master (weak) {1004A67943}>
     #<REFERENCE refs/heads/0.18.0 (weak) {1004A67C23}>)
 
-If you require filtering there are several filters that are available
-to limit the results: :cl:generic:`~branch-p`.
-
-.. code-block:: common-lisp-repl
-
-   GIT> (list-objects 'reference repo :test #'branch-p)
-   (#<REFERENCE refs/heads/master (weak) {10051CF843}>
-    #<REFERENCE refs/heads/0.18.0 (weak) {10051CF9B3}>)
 
 Filtering Results
 ~~~~~~~~~~~~~~~~~
 
 .. cl:generic:: branch-p reference
-   :nospecializers:
-
-   .. cl:method:: branch-p reference
-      :nospecializers:
-
-   .. cl:method:: branch-p common-list:string
-      :nospecializers:
 
 .. cl:generic:: symbolic-p reference
 
 .. cl:generic:: remote-p reference
-
 
 .. cl:generic:: head-p
 
@@ -78,16 +77,16 @@ Filtering Results
 Branches
 --------
 
-In libgit2 and in cl-git, branches are represented as references.
-Which means that, as soon as you retrieve a branch with for example
+In libgit2 and in cl-git, branches references but in a different
+namespace.  Which means that, the same function used to list
+references is used to list branches.  To limit the references to
+branches only use :cl:symbol:`~BRANCH-P`.
 
 .. code-block:: common-lisp-repl
 
-   > (cl-git:git-lookup :branch "origin/master" :repository *repo-cl-git* :type :remote)
-
-   #<CL-GIT:REFERENCE 500CF0 {10094B4DB3}>
-
-you see you get an instance of the reference class.
+   GIT> (list-objects 'reference repo :test #'branch-p)
+   (#<REFERENCE refs/heads/master (weak) {10051CF843}>
+    #<REFERENCE refs/heads/0.18.0 (weak) {10051CF9B3}>)
 
 So a branch is a special kind of reference.  In git there are a few
 differences between branches and references:
@@ -97,45 +96,14 @@ differences between branches and references:
 
 For a user of the git repository, this small difference between
 branches and normal references makes a huge difference.  You
-commit on branches and merge different branches.  But typically 
+commit on branches and merge different branches.  But typically
 you will not deal with non branch references.
 
-Because for actual usage of a git repository branches are special, there
-are a few functions which helps listing all the branches, as 
+Listing remote branches can be done with.
 
 .. code-block:: common-lisp-repl
 
-  > (cl-git:git-list :branch :repository *repo-cl-git*)
-  
-  (("origin/OID-translation" :REMOTE) ("origin/HEAD" :REMOTE)
-   ("gh-pages" :LOCAL) ("convert-to-classes" :LOCAL) ("origin/verrazano" :REMOTE)
-   ("origin/master" :REMOTE))
-
-
-The results of this call are almost the same as the following
-
-.. code-block:: common-lisp-repl
-
-  > (cl-git:git-list :reference :repository *repo-cl-git*)
-
-  ("refs/heads/convert-to-classes" "refs/heads/gh-pages" 
-   ...
-   "refs/remotes/origin/OID-translation" "refs/tags/0.1")
-
-There are two obvious differences:
-
-- The :reference call returns strings, the names of the references.
-  The :branch call returns pairs, of which the first element is a name
-  and the second indicates if it is a remote or a local branch
-
-- The names are different.  The :reference call returns longer names.
-  The :branch call returns branch names, which are shorted reference names.
-  (The prefix identifying them as a branch has been removed).
-  This is also the name that the user expects.
-
-
-
-
-
-
-
+   GIT> (list-objects 'reference (open-repository #p"/home/russell/projects/ecl/")
+                      :test #'remote-p)
+   (#<REFERENCE refs/remotes/origin/master (weak) {1007A39EA3}>
+    #<REFERENCE refs/remotes/origin/HEAD (weak) {1007A3A2F3}>)
