@@ -80,15 +80,14 @@
 (defclass tag (object)
   ())
 
-(defmethod tag-p ((tag string))
-  "Return T if the reference is within the git tag namespace."
-  (when (eq 0 (search reference-tags-dir tag))
-    t))
-
-(defmethod tag-p ((tag tag))
-  "Return T if the reference is within the git tag namespace."
-  (tag-p (full-name tag)))
-
+(defgeneric tag-p (tag)
+  (:documentation
+   "Return T if the reference is within the git tag namespace.")
+  (:method ((tag string))
+    (when (eq 0 (search reference-tags-dir tag))
+      t))
+  (:method ((tag tag))
+    (tag-p (full-name tag))))
 
 (defun make-tag (name message &key
                                 repository
@@ -137,11 +136,16 @@ a ref with the in the tag namespace."
 (defmethod short-name ((tag tag))
   (git-tag-name tag))
 
-(defmethod tagger ((tag tag))
-  (git-tag-tagger tag))
+(defgeneric tagger (object)
+  (:documentation "Returns the signature of the tagger of OBJECT.
 
-(defmethod tagger ((tag reference))
-  nil)
+The return value is a signature (a property list with
+keys :NAME, :EMAIL and :TIME.  If the tag is not annotated then nil
+will be returned.")
+  (:method ((tag tag))
+    (git-tag-tagger tag))
+  (:method tagger ((tag reference))
+    nil))
 
 (defmethod message ((tag tag))
   (git-tag-message tag))
