@@ -77,13 +77,6 @@ and :EMAIL values are strings, and the :TIME value is LOCAL-TIME
 timestamp.
 "))
 
-(defgeneric tagger (object)
-  (:documentation "Returns the signature of the tagger of OBJECT.
-
-The return value is a signature (a property list with
-keys :NAME, :EMAIL and :TIME
-"))
-
 
 (defgeneric parent-count (object)
   (:documentation "Returns the number of parents of OBJECT.
