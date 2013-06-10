@@ -200,7 +200,7 @@ direct commit."
 repository at PATHNAME-OR-STRING.  Repository is freed upon exit of
 this scope so any objects that leave this scope will no longer be able
 to access the repository."
-  `(let ((,var (open-repository :repository ,pathname-or-string)))
+  `(let ((,var (open-repository ,pathname-or-string)))
      (unwind-protect
           (progn
             ,@body)

@@ -53,7 +53,6 @@
    #:capabilities
    #:libgit2-version
 
-
    ;; Config
    #:config
    #:git-config
@@ -140,7 +139,6 @@
    #:open-odb
 
    ;; Remote
-   #:git-is-head
    #:git-ls
    #:remote
    #:remote-connect
@@ -160,6 +158,7 @@
    #:head-orphaned-p
    #:init-repository
    #:open-repository
+   #:with-repository
    #:repository
    #:repository-head
    #:repository-path
