@@ -52,7 +52,7 @@
   (target-out :pointer)
   (tag %tag))
 
-(defcfun ("git_tag_target" %git-tag-peel)
+(defcfun ("git_tag_peel" %git-tag-peel)
     %return-value
   (reference :pointer)
   (tag %tag))
