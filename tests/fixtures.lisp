@@ -32,3 +32,8 @@
   (with-test-repository ()
     (make-test-revisions 10)
     (&body)))
+
+(def-fixture repository-with-commit ()
+  (with-test-repository ()
+    (make-test-revisions 1)
+    (&body)))
