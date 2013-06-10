@@ -78,7 +78,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass tag (object)
-  ())
+  ()
+  (:documentation "Tags are used to identify interesting points in the
+repositories history."))
 
 (defgeneric tag-p (tag)
   (:documentation
@@ -87,14 +89,28 @@
     (when (eq 0 (search reference-tags-dir tag))
       t))
   (:method ((tag tag))
-    (tag-p (full-name tag))))
+    (tag-p (full-name tag)))
+  (:method (tag)
+    nil))
 
 (defun make-tag (name message &key
                                 repository
                                 target
                                 tagger
                                 force)
-  ;; TODO (RS) should catch exists error and offer a continue
+  "Create a tag that points to target.
+
+NAME is the name of the tag.  MESSAGE will set the message body of the
+tag.
+
+REPOSITORY is the repository that the tag will be added to.  TARGET is
+the object that the tag will point to.  TAGGER should be a signature
+plist.
+
+If FORCE is t the tag will be created, even if a tag with the same
+name already exists.  If FORCE is nil, it will return an error if that
+is the case."
+  ;; TODO (RS) should catch exists error and offer a continue.
   (with-foreign-object (newoid '(:struct git-oid))
     (with-foreign-strings ((%name name)
                            (%message message))
@@ -110,13 +126,9 @@ a ref with the in the tag namespace."
     (%git-tag-list string-array repository)
     (let ((refs
             (mapcar (lambda (ref-name)
-                      (let* ((ref (make-reference-from-name
-                                   (concatenate 'string reference-tags-dir ref-name)
-                                   repository))
-                             (target (target ref)))
-                        (case (type-of target)
-                          ('tag target)
-                          (t ref))))
+                      (get-object 'tag
+                                  (concatenate 'string reference-tags-dir ref-name)
+                                  repository))
                     (prog1
                         (convert-from-foreign string-array '%git-strings)
                       (free-translated-object string-array '%git-strings t)))))
@@ -127,8 +139,14 @@ a ref with the in the tag namespace."
             (t
              refs)))))
 
-(defmethod get-object ((class (eql 'tag)) oid repository)
-  (git-object-lookup oid class repository))
+(defmethod get-object ((class (eql 'tag)) name-or-oid repository)
+  (if (tag-p name-or-oid)
+      (let* ((ref (get-object 'reference name-or-oid repository))
+             (target (target ref)))
+        (case (type-of target)
+          ('tag target)
+          (t ref)))
+      (git-object-lookup name-or-oid class repository)))
 
 (defmethod full-name ((tag tag))
   (concatenate 'string reference-tags-dir (short-name tag)))
