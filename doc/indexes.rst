@@ -7,6 +7,8 @@ Index
 
 .. cl:variable:: *git-repository-index*
 
+.. cl:generic:: index
+
 .. cl:macro:: with-index
 
    :param var: the symbol the opened index will be bound to.

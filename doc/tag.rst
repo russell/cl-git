@@ -35,7 +35,7 @@ Target
 
 .. cl:method:: target tag
 
-.. cl:method:: git-peel tag
+.. cl:generic:: git-peel
 
 
 Creating

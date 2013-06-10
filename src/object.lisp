@@ -169,7 +169,7 @@ not a type of any real object, but only used for querying like in this function.
 (defmethod get-object ((class (eql 'object)) oid repository)
   (git-object-lookup oid :any repository))
 
-(defmethod git-type ((object object))
+(defmethod object-type ((object object))
   (git-object-type object))
 
 (defmethod git-entries (object &key (start 0) end)

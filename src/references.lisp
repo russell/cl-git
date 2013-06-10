@@ -128,8 +128,11 @@
   (:documentation
    "Return T if the reference is symbolic.")
   (:method ((reference reference))
-      (when (member :symbolic (git-type reference))
-        t)))
+    (let ((type (git-reference-type reference)))
+      (assert (eql 1 (length type)))
+      (ecase (car type)
+        (:symbolic t)
+        (:oid nil)))))
 
 (defgeneric remote-p (reference)
   (:documentation
@@ -257,11 +260,6 @@ are :SHA, :HEAD or :BOTH"
       (find-oid name-or-names repository :flags flags)
       (loop :for name :in name-or-names
             :collect (find-oid name repository :flags flags))))
-
-(defmethod git-type ((object reference))
-  "Return a list containing the type of the reference, either :OID
-or :SYMBOLIC"
-  (git-reference-type object))
 
 (defmethod full-name ((object reference))
   (if (slot-value object 'libgit2-name)

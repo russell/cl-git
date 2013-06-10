@@ -7,7 +7,7 @@ Blob
 
 .. cl:function:: git-raw-content
 
-.. cl:function:: git-raw-size
+.. cl:generic:: blob-size
 
 Content
 -------

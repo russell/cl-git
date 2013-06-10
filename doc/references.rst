@@ -12,7 +12,9 @@ Details
 
 .. cl:method:: short-name reference
 
-.. cl:method:: target reference
+.. cl:generic:: target
+
+   .. cl:method:: target reference
 
 .. cl:function:: git-resolve
 

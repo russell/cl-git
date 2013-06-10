@@ -163,19 +163,6 @@ What exactly the name is depends on the type of the object.
 - TAG       -- The name of the tag, e.g.: \"v0.17\"
 "))
 
-(defgeneric git-type (object)
-  (:documentation "Returns the type of OBJECT.
-
-What exactly is returned depends on the class of OBJECT.
-
-- REFERENCE -- returns either :SYMBOLIC or :OID
-- TAG -- ???
-- OBJECT (and subclasses) -- Type e.g. :COMMIT, :TREE, :REFERENCE
-
-Note that although REFERENCE is a subclass of OBJECT it will not
-return :REFERENCE, but the more specific type.
-"))
-
 (defgeneric target (object)
   (:documentation "Returns the target of OBJECT."))
 

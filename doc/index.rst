@@ -54,16 +54,17 @@ Usage
    :maxdepth: 4
 
    repositories
+   objects
    references
    tag
+   commits
    tree
    blob
-   objects
    indexes
    remote
-   commits
    config
    internals
+   odb
    generic
 
 

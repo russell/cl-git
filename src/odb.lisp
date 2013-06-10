@@ -94,7 +94,7 @@
 (defmethod oid ((object odb-object))
   (git-odb-object-id object))
 
-(defmethod git-type ((object odb-object))
+(defmethod odb-type ((object odb-object))
   (%git-odb-object-type object))
 
 (defmethod odb-size ((object odb-object))

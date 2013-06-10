@@ -9,24 +9,20 @@ Commits
 
 .. cl:macro:: bind-git-commits
 
-.. cl:method:: git-parentcount commit
+.. cl:generic:: author
 
-.. cl:method:: git-message commit
+.. cl:generic:: committer
 
-.. cl:method:: git-author commit
+.. cl:generic:: message
 
-.. cl:method:: git-committer commit
-
-.. cl:method:: git-parent-oid commit common-lisp:t
-
-.. cl:method:: git-lookup :commit common-lisp:t
+.. cl:generic:: parents commit
 
 Creating
 --------
 
 
-Finding
--------
+Accessing
+---------
 
 There are a few ways to find commits in the repository, the easiest is
 to find a commit when we know the SHA-1 has. In that case the process
@@ -34,50 +30,26 @@ is as follows:
 
 .. code-block:: common-lisp-repl
 
-   > (setf *repo* (cl-git:git-open :repository
-                     "/Users/woudshoo/Development/Source/Lisp/cl-git/"))
-   
-   #<CL-GIT:REPOSITORY 94676D0 {10081A6903}>
+   GIT> (get-object 'commit "d8274ef1fe9d70f73cb5490576981d2ee562d68f"
+                    (open-repository #p"/home/russell/projects/lisp/cl-git/"))
+   #<COMMIT D8274EF1FE9D70F73CB5490576981D2EE562D68F {100603E723}>
 
-   > (setf *commit* (cl-git:git-lookup :object
-                       "6a9840f959df6301cba1acbc560b960a6a2787d6"
-                       :repository *repo*))
-   #<CL-GIT:COMMIT 7915080 {1008732463}>
-
-Note that although we are looking up a commit we specify as class
-:object. The advantage of specifying :object instead of :commit is
-that you do not need to know that the SHA refers to a commit. If the
-SHA refers to a tag a tag will be returned.
-
-However if we do not know the SHA-1 but we do know a reference, such
-as a branch name or tag. We can get to the commit in a slightly more
-cumbersome way. (A list of references is easy to get, see the previous
-section.)
+To get access to a single reference.
 
 .. code-block:: common-lisp-repl
 
-   > (cl-git:git-lookup :reference "refs/heads/master" :repository *repo*)
-   #<CL-GIT:REFERENCE 9468390 {1008AB5263}>
+   GIT> (get-object 'reference "refs/heads/master" 
+                    (open-repository "/home/russell/projects/ecl/"))
+   #<REFERENCE refs/heads/master {1006F13CB3}>
 
-However to get from a reference to a commit is a bit of work. First of
-all there are two basic kind of references. Symbolic references and
-OID references. Symbolic references hold a string naming another
-reference. OID references hold an OID (not an object!). So to
-correctly get to an object (not necessarily a commit) in the git
-repository you have to first follow the chain of symbolic references
-until you get to a OID reference. Secondly, take the OID from the
-reference and thirdly look up the reference.
-
-The whole process is like this:
+However to get from a reference to a commit is easy using the
+:cl:symbol:`TARGET` method.
 
 .. code-block:: common-lisp-repl
 
-   > (cl-git:git-resolve *)
-   #<CL-GIT:REFERENCE 812C070 {1008B926D3}>
-   > (cl-git:git-reference-oid *)
-   1449567594127912097590291965092159144580443086963
-   > (cl-git:git-lookup :object * :repository *repo*)
-   #<CL-GIT:COMMIT 812C500 {1008D5D1D3}>
+   GIT> (target (get-object 'reference "refs/heads/master" 
+                            (open-repository "/home/russell/projects/ecl/")))
+   #<COMMIT E92F8C418F626A5041FC242C0FB1CEB1BEC4D61B {10071DE5B3}>
 
 In this case we ended up with a commit, however a reference can refer
 to any object in the git database, so tags, blobs and trees are also
@@ -88,21 +60,18 @@ frequently, but references to tags are more common.
 
 So in normal code you have to check for that and act accordingly.
 
-NOTE: Need to write convenience functions so it follows the chain to
-commits etc.
-
-Walking
--------
+Iterating
+~~~~~~~~~
 
 .. cl:function:: revision-walk
 
 .. cl:macro:: with-git-revisions
 
-   .. code-block:: common-lisp
+   .. code-block:: common-lisp-repl
 
-      CL-GIT> (with-git-repository (#p"/home/russell/projects/cl-git/")
-                (with-git-revisions (commit :sha "69fec1d5938a0c1c8c14a3a120936aa8937af163")
-                  (princ (git-commit-message commit))))
+      GIT> (with-git-repository (#p"/home/russell/projects/cl-git/")
+              (with-git-revisions (commit :sha "69fec1d5938a0c1c8c14a3a120936aa8937af163")
+                (princ (git-commit-message commit))))
       added git str to oid
       added some lowlevel methods for revtree walking
       added error condition strings

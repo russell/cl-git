@@ -80,8 +80,8 @@
 (def-test reference-accessors-oid (:fixture reference-with-context)
   "Create oid reference and check accessors."
   (is (equal
-       (git-type ref-default)
-       '(:OID)))
+       (symbolic-p ref-default)
+       nil))
   (is (equal
        (full-name ref-default)
        "refs/heads/oid"))
@@ -92,8 +92,8 @@
 (def-test reference-accessors-symbolic (:fixture reference-with-context)
   "Create symbolic reference and check it's name."
   (is (equal
-       (git-type ref-symbolic)
-       '(:SYMBOLIC)))
+       (symbolic-p ref-symbolic)
+       t))
   (is (equal
        (full-name ref-symbolic)
        "refs/heads/symbolic"))

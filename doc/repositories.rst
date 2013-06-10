@@ -124,5 +124,8 @@ Status
 Configuration
 -------------
 
+:doc:`Configuration </config>` details of a particular repository can be done with
+the :cl:symbol:`~GIT-CONFIG` method.
+
 .. cl:method:: git-config repository
 

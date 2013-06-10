@@ -66,15 +66,13 @@
    #:git-entries
    #:git-entry-count
    #:git-entry-by-index
-   #:git-type
    #:list-objects
    #:make-object
+   #:object
+   #:object-type
    #:oid
    #:reflog
    #:short-name
-
-   ;; Classes.
-   #:object
 
    ;; Tags
    #:make-tag
@@ -133,9 +131,11 @@
    #:filename
 
    ;; Odb
+   #:odb
    #:odb-data
    #:odb-object
    #:odb-size
+   #:odb-type
    #:open-odb
 
    ;; Remote
