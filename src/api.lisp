@@ -114,7 +114,11 @@ lookup will use either an oid or a name to find the object."))
 
 (defgeneric list-objects (class repository &key test test-not))
 
-(defgeneric open-repository (path/name))
+(defgeneric open-repository (path/name)
+  (:documentation
+   "Open an existing repository located at PATH/NAME. The repository
+object will be garbage collected.  If it's freed explicitly then all
+related objects will have undefined behaviour."))
 
 (defgeneric init-repository (path/name &key bare)
   (:documentation
