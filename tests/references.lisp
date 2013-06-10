@@ -119,13 +119,13 @@ fixture"
 (def-test reference-is-branch (:fixture reference)
   "Check that the ref is a branch."
   (is (equal
-       (git-is-branch (get-object 'reference "refs/heads/oid" *test-repository*))
+       (branch-p (get-object 'reference "refs/heads/oid" *test-repository*))
        t)))
 
 (def-test reference-is-not-remote (:fixture reference)
   "Check that the ref is a branch."
   (is (equal
-       (git-is-remote (get-object 'reference "refs/heads/oid" *test-repository*))
+       (remote-p (get-object 'reference "refs/heads/oid" *test-repository*))
        nil)))
 
 ;; TODO add test for the positive case

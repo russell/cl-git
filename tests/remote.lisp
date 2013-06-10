@@ -46,30 +46,31 @@
   "Create a new repository and check it's remotes."
   (let ((remote-repo-path (gen-temp-path)))
     (unwind-protect
-	     (init-repository remote-repo-path)
-      (let ((remote-repo (open-repository remote-repo-path)))
-        (make-object 'remote "origin"
-                     remote-repo
-                     :url (concatenate 'string "file://" (namestring *repository-path*)))
-        (let ((remote (get-object 'remote "origin" remote-repo)))
-          (remote-connect remote)
-          (is
-           (equal
-            (git-ls remote)
-            '((:local nil
-               :oid 43288015056091865078009701174658094042158513796
-               :loid 0
-               :name "refs/heads/master")
-              (:local nil
-               :oid 43288015056091865078009701174658094042158513796
-               :loid 0
-               :name "HEAD"))))
-          (remote-download remote)
-          (is
-           (equal
-            (remote-fetchspec remote)
-            '((:src "refs/heads/*"
-               :dst "refs/remotes/origin/*"
-               :flags (:force :pattern)))))))
+         (progn
+           (init-repository remote-repo-path)
+           (let ((remote-repo (open-repository remote-repo-path)))
+             (make-object 'remote "origin"
+                          remote-repo
+                          :url (concatenate 'string "file://" (namestring *repository-path*)))
+             (let ((remote (get-object 'remote "origin" remote-repo)))
+               (remote-connect remote)
+               (is
+                (equal
+                 (git-ls remote)
+                 `((:local nil
+                    :oid ,(oid (repository-head *test-repository*))
+                    :loid 0
+                    :name "refs/heads/master")
+                   (:local nil
+                    :oid ,(oid (repository-head *test-repository*))
+                    :loid 0
+                    :name "HEAD"))))
+               (remote-download remote)
+               (is
+                (equal
+                 (remote-fetchspec remote)
+                 '((:src "refs/heads/*"
+                    :dst "refs/remotes/origin/*"
+                    :flags (:force :pattern))))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))
