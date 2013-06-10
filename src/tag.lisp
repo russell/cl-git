@@ -108,9 +108,13 @@
     (%git-tag-list string-array repository)
     (let ((refs
             (mapcar (lambda (ref-name)
-                      (target (make-reference-from-name
-                               (concatenate 'string reference-tags-dir ref-name)
-                               repository)))
+                      ;; XXX (RS) could use the target-type function
+                      ;; to determine if we should be resolving to the
+                      ;; tag object in the case where there are real
+                      ;; tag objects not lightweight tags.
+                      (make-reference-from-name
+                       (concatenate 'string reference-tags-dir ref-name)
+                       repository))
                     (prog1
                         (convert-from-foreign string-array '%git-strings)
                       (free-translated-object string-array '%git-strings t)))))
