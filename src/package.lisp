@@ -50,7 +50,7 @@
                 #:defcenum)
   (:export
    ;; LibGit2 Library
-   #:capabilities
+   #:libgit2-capabilities
    #:libgit2-version
 
    ;; Config

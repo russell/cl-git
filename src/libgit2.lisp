@@ -25,7 +25,7 @@
   (:threads 1)
   (:https 2))
 
-(defcfun ("git_libgit2_capabilities" capabilities)
+(defcfun ("git_libgit2_capabilities" libgit2-capabilities)
   git-capabilities
   "Return a list of the libgit2 capabilities, possible values in the
 list return values are :THREADS and :HTTPS.")
