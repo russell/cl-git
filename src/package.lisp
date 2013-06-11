@@ -122,8 +122,7 @@
    #:with-index
 
    ;; Tree
-   #:git-tree
-   #:tree
+   #:get-tree
    #:tree-directory
 
    ;; Tree-Entries (sub-classes of blob, commit, tree or tag)
