@@ -5,6 +5,10 @@ Tree
 
 .. cl:type:: tree
 
+.. cl:method:: get-object tree common-lisp:t common-lisp:t
+
+.. cl:method:: list-objects tree common-lisp:t
+
 .. cl:generic:: open-tree
 
    .. code-block:: common-lisp-repl

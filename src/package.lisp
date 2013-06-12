@@ -121,6 +121,7 @@
    #:with-index
 
    ;; Tree
+   #:tree
    #:get-tree
    #:tree-directory
 

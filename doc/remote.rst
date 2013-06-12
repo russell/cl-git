@@ -5,11 +5,13 @@ Remote
 
 .. cl:type:: remote
 
-.. cl:method:: get-object remote
-
 .. cl:method:: full-name remote
 
 .. cl:method:: short-name remote
+
+.. cl:method:: get-object remote common-lisp:t common-lisp:t
+
+.. cl:method:: list-objects remote common-lisp:t
 
 .. cl:method:: git-ls remote
 

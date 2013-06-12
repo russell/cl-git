@@ -59,7 +59,8 @@ qualified name of the reference must be specified.
 Listing
 ~~~~~~~
 
-To list references LIST-OBJECTS is used.
+To list references :cl:symbol:`LIST-OBJECTS` is used.  It returns a
+list of the references as CLOS objects.
 
 .. cl:method:: list-objects reference common-lisp:t
 

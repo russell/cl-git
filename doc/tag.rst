@@ -46,9 +46,9 @@ Creating
 Accessing
 ---------
 
-.. cl:method:: get-object 'tag common-lisp:t common-lisp:t
+.. cl:method:: get-object tag common-lisp:t common-lisp:t
 
-.. cl:method:: list-objects 'tag common-lisp:t
+.. cl:method:: list-objects tag common-lisp:t
 
    .. code-block:: common-lisp-repl
 
