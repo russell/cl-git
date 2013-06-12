@@ -210,21 +210,22 @@ This does count the number of direct children, not recursively."
           (loop :for index :from 1 :upto pathname-length
                 :collect (chomp-pathname pathname index))))))
 
-(defmethod tree-directory ((object tree) &optional pathname)
-  "List objects from a tree.  Optional argument pathname a wild
-pathname that the entries must match."
-  (labels ((tree-iterate (objects path)
-             (apply #'concatenate
-                    'list
-                    (loop :for object :in objects
-                          :collect (tree-entries object path)))))
-    (if pathname
-        (let ((paths (split-pathname (pathname pathname))))
-          (loop :for path :in paths
-                :for subtrees = (tree-entries object path)
-                  :then (tree-iterate subtrees path)
-                :finally (return subtrees)))
-        (tree-entries object pathname))))
+(defgeneric tree-directory (tree &optional pathname)
+  (:documentation "List objects from a tree.  Optional argument pathname a wild
+pathname that the entries must match.")
+  (:method ((object tree) &optional pathname)
+      (labels ((tree-iterate (objects path)
+                 (apply #'concatenate
+                        'list
+                        (loop :for object :in objects
+                              :collect (tree-entries object path)))))
+        (if pathname
+            (let ((paths (split-pathname (pathname pathname))))
+              (loop :for path :in paths
+                    :for subtrees = (tree-entries object path)
+                      :then (tree-iterate subtrees path)
+                    :finally (return subtrees)))
+            (tree-entries object pathname)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

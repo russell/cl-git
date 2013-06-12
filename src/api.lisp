@@ -87,7 +87,7 @@ for normal commits, > 1 for merges and 0 for initial commits.
 "))
 
 
-(defgeneric git-tree (object &key path repository)
+(defgeneric get-tree (object &key path repository)
   (:documentation
   "Returns the tree as a git tree object, for object OBJECT.
 
@@ -152,6 +152,7 @@ What exactly the name is depends on the type of the object.
 
 - REFERENCE -- The name of the of the reference, e.g.: \"refs/heads/master\"
 - TAG       -- The name of the tag, e.g.: \"refs/tags/v0.17\"
+- OBJECT    -- The string representation of the oid, e.g. \"a742eb9f5290476daf54afb5d28429710b81e3f3\"
 "))
 
 (defgeneric short-name (object)
@@ -161,6 +162,7 @@ What exactly the name is depends on the type of the object.
 
 - REFERENCE -- The name of the of the reference, e.g.: \"master\"
 - TAG       -- The name of the tag, e.g.: \"v0.17\"
+- OBJECT    -- The string representation of the oid, e.g. \"a742eb9\"
 "))
 
 (defgeneric target (object)

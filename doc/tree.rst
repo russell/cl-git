@@ -9,7 +9,7 @@ Tree
 
 .. cl:method:: list-objects tree common-lisp:t
 
-.. cl:generic:: open-tree
+.. cl:generic:: get-tree
 
    .. code-block:: common-lisp-repl
 
