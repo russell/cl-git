@@ -53,21 +53,25 @@
 (defmethod get-object ((class (eql 'blob)) oid repository)
   (git-object-lookup oid class repository))
 
-(defmethod blob-size ((blob blob))
-  (%git-blob-raw-size blob))
+(defgeneric blob-size (blob)
+  (:documentation "Return the size of the blob in bytes.")
+  (:method ((blob blob))
+    (%git-blob-raw-size blob)))
 
-(defmethod blob-content ((blob blob))
-  "Returns the content of the blob BLOB as an array of UNSIGNED-BYTE's"
-  (let ((result (make-array (blob-size blob)
-                            :element-type '(unsigned-byte 8)
-                            :initial-element 0))
-        (content (%git-blob-raw-content blob)))
-    (loop :for index :from 0
-          :repeat (length result)
-          :do (setf (aref result index)
-                    (mem-aref content :unsigned-char index)))
-    result))
+(defgeneric blob-content (blob)
+  (:documentation "Returns the content of the blob BLOB as an array of UNSIGNED-BYTE's")
+  (:method ((blob blob))
+    (let ((result (make-array (blob-size blob)
+                              :element-type '(unsigned-byte 8)
+                              :initial-element 0))
+          (content (%git-blob-raw-content blob)))
+      (loop :for index :from 0
+            :repeat (length result)
+            :do (setf (aref result index)
+                      (mem-aref content :unsigned-char index)))
+      result)))
 
-(defmethod binary-p ((blob blob))
-  "Return T if the contents of the blob is binary."
-  (%git-blob-is-binary blob))
+(defgeneric binary-p (blob)
+  (:documentation "Return T if the contents of the blob is binary.")
+  (:method ((blob blob))
+    (%git-blob-is-binary blob)))
