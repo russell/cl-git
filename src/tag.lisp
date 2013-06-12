@@ -176,12 +176,17 @@ will be returned.")
                           :type :any
                           :facilitator (facilitator tag))))
 
-(defmethod git-peel ((tag tag))
-  "Peels layers of the tag until the resulting object is not a tag anymore.
-Basically calls GIT-TARGET on tag and if the result of that is a TAG,
-repeat the process."
-  (with-foreign-object (%object :pointer)
-    (%git-tag-peel %object tag)
-    (make-instance-object :pointer (mem-ref %object :pointer)
-                          :type :any
-                          :facilitator (facilitator tag))))
+
+(defmethod resolve ((object tag) &optional (stop-at '(commit)))
+  "Resolve the tag target until the target object is not a tag anymore.
+Basically calls TARGET on tag and result until there is a COMMIT
+returned.
+
+Using values returns the finally found object and a list of the
+traversed objects."
+  (let ((objects
+          (do ((refs (list (target object) object)
+                     (cons (target (car refs)) refs)))
+              ((member (type-of (car refs)) stop-at)
+               refs))))
+    (values (car objects) (cdr objects))))
