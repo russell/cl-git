@@ -99,8 +99,7 @@
 
    ;; References
    #:branch-p
-   #:git-peel
-   #:git-resolve
+   #:resolve
    #:head-p
    #:reference
    #:remote-p

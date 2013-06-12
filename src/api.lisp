@@ -166,12 +166,8 @@ What exactly the name is depends on the type of the object.
 (defgeneric target (object)
   (:documentation "Returns the target of OBJECT."))
 
+(defgeneric resolve (object &optional stop-at))
 
-(defgeneric git-peel (object)
-  (:documentation "Returns the final target of OBJECT.
-
-This is to follow symbolic tag chains to find the object pointed to.
-"))
 
 (defgeneric git-entry-count (object)
   (:documentation "Returns the number elements in the collection OBJECT.

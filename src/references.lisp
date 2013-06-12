@@ -169,6 +169,9 @@ We need to figure this out by using the type argument to do dispatch."
                  :facilitator repository
                  :free-function #'%git-reference-free))
 
+;; XXX (RS) not sure what to do about this functionality, it could be
+;; expected that the user uses RESOLVE's second value to determine the
+;; OID ref, so perhaps this is redundant?
 (defun git-resolve (reference)
   "If the reference is symbolic, follow the it until it finds a non
 symbolic reference."
@@ -319,17 +322,17 @@ is symbolic then the reference it points to will be returned."
       (enable-garbage-collection reference)
       (%git-reference-free old-pointer))))
 
-(defmethod git-peel ((reference reference))
-  "Peels layers of the reference until the resulting object is not a
-tag or reference anymore.  Basically calls GIT-TARGET until the
-returned object is neither a TAG or a REFERENCE."
-  ;; XXX (RS) there is a libgit2 function called
-  ;; git_resolve_reference, this will resolve a symbolic reference to
-  ;; an oid one.  Should this be used instead?
-  (let ((references
-          (do ((refs (cons (target reference) nil)
+
+(defmethod resolve ((object reference) &optional (stop-at '(commit tag)))
+  "Resolve the reference until the resulting object is a tag or
+commit.  Basically calls TARGET until the returned object is a COMMIT
+or TAG.
+
+Using values returns the finally found object and a list of the
+traversed objects."
+  (let ((objects
+          (do ((refs (list (target object) object)
                      (cons (target (car refs)) refs)))
-              ((not (or (eql (type-of (car refs)) 'reference)
-                        (eql (type-of (car refs)) 'tag)))
+              ((member (type-of (car refs)) stop-at)
                refs))))
-    (values (car references) (cdr references))))
+    (values (car objects) (cdr objects))))

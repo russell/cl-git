@@ -12,12 +12,35 @@ Details
 
 .. cl:method:: short-name reference
 
-.. cl:generic:: target
+Resolving
+---------
 
-   .. cl:method:: target reference
+:cl:symbol:`TARGET` is used to find the object that a
+:cl:symbol:`REFERENCE` or :cl:symbol:`TAG` points to
 
-.. cl:function:: git-resolve
+.. cl:method:: target reference
 
+   .. code-block:: common-lisp-repl
+
+      GIT> (target (get-object 'reference "HEAD"
+               (open-repository (merge-pathnames #p"projects/ecl"
+                                                 (user-homedir-pathname)))))
+      #<REFERENCE refs/heads/master {1007CD3D53}>
+
+To avoid having to manually traverse many symbolic
+:cl:symbol:`REFERENCE`, resolve will traverse for you and return the
+resulting object and the references traversed along the way.
+
+.. cl:method:: resolve reference
+
+   .. code-block:: common-lisp-repl
+
+      GIT> (resolve (get-object 'reference "HEAD"
+               (open-repository (merge-pathnames #p"projects/ecl"
+                                                 (user-homedir-pathname)))))
+
+      #<COMMIT E92F8C418F626A5041FC242C0FB1CEB1BEC4D61B {1007497AB3}>
+      (#<REFERENCE refs/heads/master {1007496723}> #<REFERENCE HEAD {1007495C53}>)
 
 Creating
 --------
