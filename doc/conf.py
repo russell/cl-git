@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'cl-git'
-copyright = u'2012, Russell Sim'
+copyright = u'2012-2013, Russell Sim'
 
 googleanalytics_id = "UA-28069739-2"
 if os.environ.get("GOOGLE_ANALYTICS"):
@@ -149,7 +149,7 @@ html_theme_options = {
 
     # Location of link to source.
     # Options are "nav" (default), "footer" or anything else to exclude.
-    # 'source_link_position': "nav",
+    'source_link_position': "footer",
 
     # Bootswatch (http://bootswatch.com/) theme.
     #
@@ -198,8 +198,8 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
-html_sidebars = {'[!glossery]': ['sidebartoc.html'],
-}
+html_sidebars = {'**': ['localtoc.html'],
+                 'glossary': None,}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -215,10 +215,10 @@ html_sidebars = {'[!glossery]': ['sidebartoc.html'],
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-#html_show_sphinx = True
+html_show_sphinx = True
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 #html_show_copyright = True
