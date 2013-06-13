@@ -1,6 +1,6 @@
 -*-mode: rst;-*-
 
-0.18.0 - UNRELEASED
+0.18.0 - 2013-06-13
 -------------------
 
  * Changed numbering to match libgit2.
