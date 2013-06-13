@@ -1,13 +1,18 @@
 -*-mode: rst;-*-
 
-0.2 - UNRELEASED
-----------------
+0.18.0 - UNRELEASED
+-------------------
 
+ * Changed numbering to match libgit2.
  * support for multiple start revisions when doing revision walk
    [Willem]
  * Git blob interface [Willem]
+ * Conversion to new CFFI struct interface [Willem]
  * Signature translation to native types [Willem]
+ * New Tree API using a mixin [Russell]
+ * Implementation of remotes [Willem]
  * OID Translation to native types [Willem]
+ * initial implementation of narrative documentation [Willem]
  * Complete re-factoring of public API, changes since 0.1
    Removed symbols:
    - *git-repository*
