@@ -74,6 +74,22 @@
    #:reflog
    #:short-name
 
+   ;; Errors
+   #:git-error
+   #:not-found
+   #:exists
+   #:ambiguous-error
+   #:buffer-error
+   #:user-error
+   #:barerepo-error
+   #:orphanedhead-error
+   #:unmerged-error
+   #:non-fast-forward-error
+   #:invalid-spec-error
+   #:merge-conflict-error
+   #:passthrough
+   #:stop-iteration
+
    ;; Tags
    #:make-tag
    #:tag

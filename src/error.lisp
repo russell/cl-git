@@ -92,7 +92,7 @@
         (list klass message))))
 
 (defmethod translate-from-foreign (return-value (type return-value-type))
-  ;; TODO (RS) this is stopping prorogation of errors below 30, to
+  ;; TODO (RS) this is stopping propagation of errors below 30, to
   ;; allow iteration exiting to be handled externally.  This should
   ;; probably be using condition handling instead.
   (if (or (not return-value) (and (< return-value 0)
@@ -114,23 +114,23 @@
 (define-condition git-error (error)
   ((message
     :initarg :message
-    :accessor git-error-message
+    :accessor error-message
     :initform nil
     :documentation "Text message indicating what went wrong.")
    (code
     :initarg :code
-    :accessor git-error-code
+    :accessor error-code
     :initform nil
     :documentation "The error value returned by a function.")
    (class
     :initarg :class
-    :accessor git-error-class
+    :accessor error-class
     :initform nil
     :documentation "The error code/class returned by git_lasterr."))
   (:report (lambda (condition stream)
              (format stream "Error ~S, ~A"
-                     (git-error-class condition)
-                     (git-error-message condition)))))
+                     (error-class condition)
+                     (error-message condition)))))
 
 (defmacro git-define-condition (error-type)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
