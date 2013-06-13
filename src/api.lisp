@@ -229,6 +229,6 @@ objects are available anymore return nil."))
 (defgeneric git-ls (remote))
 
 
-(defgeneric odb-open (path-or-repository)
+(defgeneric open-odb (path-or-repository)
   (:documentation "Open the ODB at the specified path or
 repository."))

@@ -35,15 +35,15 @@
 (def-test odb-load (:fixture repository-with-commits)
   "load an object from the database."
   (let* ((commit (next-test-commit))
-         (object (git-load 'odb-object (getf commit :sha) *test-repository*)))
+         (object (get-object 'odb-object (getf commit :sha) *test-repository*)))
     (is
      (equal
       (oid object)
       (getf commit :sha)))
     (is
      (equal
-      (odb-type object)
+      (odb-type0 object)
       :commit))
     (is
      (search (getf (getf commit :author) :name)
-      (octets-to-string (git-data object) :external-format :utf-8)))))
+      (octets-to-string (odb-data object) :external-format :utf-8)))))

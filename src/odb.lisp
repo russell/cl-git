@@ -78,7 +78,7 @@
     *oid-values*))
 
 (defmethod list-objects ((class (eql :oid)) (repository repository) &key test test-not)
-  (list-objects class (odb-open repository) :test test :test-not test-not))
+  (list-objects class (open-odb repository) :test test :test-not test-not))
 
 (defmethod get-object ((class (eql 'odb-object)) oid (odb odb))
   (with-foreign-object (out :pointer)

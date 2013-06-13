@@ -21,13 +21,25 @@
 
 (in-suite :cl-git)
 
-(def-test blob-content (:fixture repository-with-commits)
+(def-test blob-content (:fixture repository-with-commit)
+  ;; TODO (RS) this test sucks, it should be sorting the tree object
+  ;; at the start.
   (let* ((commit (next-test-commit))
          (object (get-object 'commit (getf commit :sha) *test-repository*)))
     (is
-     (equal (tree-directory commit))
-     nil)
+     (equal
+      (sort-strings
+       (mapcar (compose #'namestring #'filename)
+               (tree-directory (get-tree object))))
+      (sort-strings
+       (mapcar (lambda (e) (getf e :filename))
+               (getf commit :files)))))
     (is
      (equal
-      (getf (getf commit :files) :name)
-      (octets-to-string (blob-content object) :external-format :utf-8)))))
+      (sort-strings
+        (mapcar (lambda (e) (getf e :text))
+                (getf commit :files)))
+      (sort-strings
+       (mapcar (compose #'(lambda (o) (octets-to-string o :external-format :utf-8))
+                        #'blob-content)
+               (tree-directory (get-tree object))))))))

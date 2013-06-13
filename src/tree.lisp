@@ -218,6 +218,7 @@ pathname that the entries must match.")
                  (apply #'concatenate
                         'list
                         (loop :for object :in objects
+                              ;; TODO (RS) only call for 'tree types?
                               :collect (tree-entries object path)))))
         (if pathname
             (let ((paths (split-pathname (pathname pathname))))
