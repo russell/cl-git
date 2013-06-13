@@ -63,9 +63,8 @@ Usage
    indexes
    remote
    config
-   internals
    odb
-   generic
+   internals
 
 
 Contributing
