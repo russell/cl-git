@@ -3,6 +3,11 @@ ODB
 
 .. cl:type:: odb
 
+.. warning::
+
+   This functionally is still under development.  So stability of this
+   part of the API is uncertain.
+
 .. cl:type:: odb-object
 
 .. cl:generic:: open-odb

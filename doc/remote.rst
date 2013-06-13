@@ -3,6 +3,11 @@ Remote
 
 .. cl:package:: cl-git
 
+.. warning::
+
+   This functionally is still under development.  So stability of this
+   part of the API is uncertain.
+
 .. cl:type:: remote
 
 .. cl:method:: full-name remote
