@@ -20,7 +20,7 @@ Objects
 .. cl:generic:: list-objects
 
 Note that although we are looking up a commit we specify as class
-:object. The advantage of specifying :object instead of :commit is
+OBJECT. The advantage of specifying OBJECT instead of COMMIT is
 that you do not need to know that the SHA refers to a commit. If the
 SHA refers to a tag a tag will be returned.
 
