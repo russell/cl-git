@@ -91,3 +91,15 @@
   (is (equal
        (head-orphaned-p *test-repository*)
        nil)))
+
+(def-test with-repository ()
+  "Create a repository and test the with-repository macro."
+  (for-all ((path 'gen-temp-path))
+    (finishes
+      (unwind-protect
+	   (progn
+	     (init-repository :repository path :bare t)
+	     (with-repository (repository path)
+           (is (typep repository 'repository))))
+	(progn
+	  (delete-directory-and-files path))))))
