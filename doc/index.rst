@@ -43,15 +43,26 @@ can from http://github.com/libgit2/libgit2.
 cl-git package should be added to the systems load path so that ASDF
 can find it.
 
-The dependencies for cl-git itself are: cffi, local-time, cl-fad,
-trivial-garbage, anaphora. The tests in package cl-git-tests, need in
-addition to cl-git the following packages: FiveAM and inferior-shell.
+The dependencies for cl-git itself are: `cffi`_, `local-time`_,
+`cl-fad`_, `trivial-garbage`_, `anaphora`_ and `alexandria`_. The
+tests in package cl-git-tests, need in addition to cl-git the
+following packages: `FiveAM`_ and `inferior-shell`_.
+
+.. _cffi: http://common-lisp.net/project/cffi/
+.. _local-time: http://common-lisp.net/project/local-time/
+.. _cl-fad: http://weitz.de/cl-fad/
+.. _trivial-garbage: http://common-lisp.net/project/trivial-garbage/
+.. _alexandria: http://common-lisp.net/project/alexandria/
+.. _anaphora: http://common-lisp.net/project/anaphora/
+.. _FiveAM: https://github.com/cl-fiveam/fiveam
+.. _inferior-shell: http://www.cliki.net/inferior-shell
 
 Usage
 -----
 
 .. toctree::
    :maxdepth: 4
+   :numbered:
 
    repositories
    objects
