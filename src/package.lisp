@@ -75,7 +75,7 @@
    #:short-name
 
    ;; Errors
-   #:git-error
+   #:basic-error
    #:not-found
    #:exists
    #:ambiguous-error
@@ -89,6 +89,7 @@
    #:merge-conflict-error
    #:passthrough
    #:stop-iteration
+   #:unknown-error
 
    ;; Tags
    #:make-tag
