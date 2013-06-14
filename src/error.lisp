@@ -26,24 +26,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(eval-when (:compile-toplevel :load-toplevel)
-  (defparameter error-type-list
-    '((ok 0)
-      (git-error -1)
-      (not-found -3)
-      (exists -4)
-      (ambiguous-error -5)
-      (buffer-error -6)  ;; buffer is too small
-      (user-error -7)
-      (barerepo-error -8)
-      (orphanedhead-error -9)
-      (unmerged-error -10)
-      (non-fast-forward-error -11)
-      (invalid-spec-error -12)
-      (merge-conflict-error -13)
-      (passthrough -30)
-      (stop-iteration -31)))
-
+(eval-when (:compile-toplevel :execute :load-toplevel)
   (defvar error-conditions (make-hash-table)))
 
 (defcenum %error-class-list
@@ -95,10 +78,9 @@
   ;; TODO (RS) this is stopping propagation of errors below 30, to
   ;; allow iteration exiting to be handled externally.  This should
   ;; probably be using condition handling instead.
-  (if (or (not return-value) (and (< return-value 0)
-                                  (> return-value -30)))
+  (if (or (not return-value) (< return-value 0))
       (let ((last-error (giterr-last)))
-        (error (gethash return-value error-conditions 'git-error)
+        (error (gethash return-value error-conditions 'unknown-error)
                :code return-value
                :message (cadr last-error)
                :class (car last-error)))
@@ -111,7 +93,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-condition git-error (error)
+(define-condition basic-error (error)
   ((message
     :initarg :message
     :accessor error-message
@@ -132,11 +114,27 @@
                      (error-class condition)
                      (error-message condition)))))
 
-(defmacro git-define-condition (error-type)
-  `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (define-condition ,error-type (git-error) ())))
+(defmacro define-git-condition (error-type error-number)
+  `(progn
+     (eval-when (:compile-toplevel :execute :load-toplevel)
+       (define-condition ,error-type (basic-error) ()))
+     (eval-when (:execute :load-toplevel)
+       (setf (gethash ,error-number error-conditions) (quote ,error-type)))))
 
-(eval-when (:compile-toplevel :load-toplevel)
-  (loop :for (error-type error-number) :in error-type-list
-        :do (git-define-condition error-type)
-        :do (setf (gethash error-number error-conditions) error-type)))
+(setf (gethash -1 error-conditions) 'basic-error)
+(define-git-condition not-found -3)
+(define-git-condition exists -4)
+(define-git-condition ambiguous-error -5)
+(define-git-condition buffer-error -6)  ;; buffer is too small
+(define-git-condition user-error -7)
+(define-git-condition barerepo-error -8)
+(define-git-condition orphanedhead-error -9)
+(define-git-condition unmerged-error -10)
+(define-git-condition non-fast-forward-error -11)
+(define-git-condition invalid-spec-error -12)
+(define-git-condition merge-conflict-error -13)
+(define-git-condition passthrough -30)
+(define-git-condition stop-iteration -31)
+
+(define-condition unknown-error (basic-error) ()
+  (:documentation "This return value is not expected."))
