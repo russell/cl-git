@@ -1,43 +1,56 @@
--*-mode: rst;-*-
+.. -*-mode: rst;-*-
+Changelog
+---------
 
 0.18.1 - UNRELEASED
--------------------
+~~~~~~~~~~~~~~~~~~~
 
+* fixed exporting of error symbols.
+* removed with-revisions
+* updated revision-walker, it now uses commit objects not direct oids.
+  It also uses conditions handling instead of return values to stop
+  iteration.
 
 0.18.0 - 2013-06-13
--------------------
+~~~~~~~~~~~~~~~~~~~
 
- * Changed numbering to match libgit2.
- * support for multiple start revisions when doing revision walk
-   [Willem]
- * Git blob interface [Willem]
- * Conversion to new CFFI struct interface [Willem]
- * Signature translation to native types [Willem]
- * New Tree API using a mixin [Russell]
- * Implementation of remotes [Willem]
- * OID Translation to native types [Willem]
- * initial implementation of narrative documentation [Willem]
- * Complete re-factoring of public API, changes since 0.1
-   Removed symbols:
-   - *git-repository*
-   - *git-repository-index*
-   - git-repository-init
-   - git-repository-open
-   - git-repository-free
-   Renamed Symbols:
-   - git-commit-create -> make-commit
-   - git-commit-author -> commit-author
-   - git-commit-message -> commit-message
-   - git-commit-committer -> commit-committer
-   - git-commit-create -> commit-create
-   - git-commit-create -> commit-create
-   - with-git-repository-index -> with-repository-index
-   - ensure-git-repository-exist -> ensure-repository-exist
-   - with-git-repository -> with-repository
-   Most other changes involved removing git- prefixes from symbols.
+
+* Changed numbering to match libgit2.
+* support for multiple start revisions when doing revision walk
+  [Willem]
+* Git blob interface [Willem]
+* Conversion to new CFFI struct interface [Willem]
+* Signature translation to native types [Willem]
+* New Tree API using a mixin [Russell]
+* Implementation of remotes [Willem]
+* OID Translation to native types [Willem]
+* initial implementation of narrative documentation [Willem]
+* Complete re-factoring of public API, changes since 0.1
+  Removed symbols:
+
+  - *git-repository*
+  - *git-repository-index*
+  - git-repository-init
+  - git-repository-open
+  - git-repository-free
+
+  Renamed Symbols:
+
+  - git-commit-create -> make-commit
+  - git-commit-author -> commit-author
+  - git-commit-message -> commit-message
+  - git-commit-committer -> commit-committer
+  - git-commit-create -> commit-create
+  - git-commit-create -> commit-create
+  - with-git-repository-index -> with-repository-index
+  - ensure-git-repository-exist -> ensure-repository-exist
+  - with-git-repository -> with-repository
+
+  Most other changes involved removing git- prefixes from symbols.
 
 0.1 - 2012-01-20
-----------------
+~~~~~~~~~~~~~~~~
 
- * basic support for the libgit2 features like creating a new
-   repository and listing it's commit history [Russell]
+
+* basic support for the libgit2 features like creating a new
+  repository and listing it's commit history [Russell]
