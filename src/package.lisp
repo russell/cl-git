@@ -101,12 +101,11 @@
    #:bind-git-commits
    #:commit
    #:committer
-   #:git-next
    #:make-commit
    #:message
    #:parents
    #:revision-walk
-   #:with-git-revisions
+   #:next-revision
 
    ;; Blobs
    #:binary-p

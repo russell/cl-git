@@ -61,28 +61,29 @@ Iterating
 
 .. cl:function:: revision-walk
 
-.. cl:macro:: with-git-revisions
+.. cl:generic:: next-revision
 
-   .. code-block:: common-lisp-repl
+To walk commits, :cl:symbol:`REVISION-WALK` and
+:cl:symbol:`NEXT-REVISION` are provided.
 
-      GIT> (with-repository (repository #p"/home/russell/projects/lisp/cl-git/")
-             (with-git-revisions (commit :sha "28483cbb5b9747354b520c2cc034211c11dbb63b"
-                                         :repository repository)
-               (print (message commit))))
+.. code-block:: common-lisp-repl
 
-      "added some git commit and revwalk functions
-      "
-      "added git str to oid
-      "
-      "added some lowlevel methods for revtree walking
-      "
-      "added error condition strings
-      "
-      "added repository open and list all refs
-      "
-      "initial commit
-      "
-      NIL
+   GIT> (let ((repository (open-repository (merge-pathnames #p"projects/ecl" 
+                                              (user-homedir-pathname)))))
+          (loop 
+            :with walker = (revision-walk 
+                            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a" 
+                                        repository))
+            :for revision = (next-revision walker)
+            :until (null revision)
+            :collect revision))
+
+   (#<COMMIT EA010DEE347E50666331B77EDCF0588735C3205A {1007BA1003}>
+    #<COMMIT F2DA18A5913EEA2D3F8BBD336F08AB48D9D3ECCE {1007BA1253}>
+    #<COMMIT DC4DF60020DF2BFF026B26E6227127F6A3CC9FC {1007BA14A3}>
+    #<COMMIT FE8BCD1B8BD27891F260892CC16BBA4A93999D89 {1007BA16F3}>
+    #<COMMIT 2D8D0CD44B87C724ACBCA9F835C2142778007DA9 {1007BA1943}>)
+
 
 Inspecting
 ----------
