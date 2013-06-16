@@ -126,7 +126,7 @@ pointer to null-pointer as well."
   (dispose object)
   nil)
 
-(defmethod enable-garbage-collection ((instance git-pointer))
+(defmethod enable-garbage-collection (instance)
   (when (slot-value instance 'libgit2-pointer)
     (let ((finalizer-data (finalizer-data instance))
           (pointer (slot-value instance 'libgit2-pointer))

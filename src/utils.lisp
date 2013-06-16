@@ -22,7 +22,7 @@
 
 (defcstruct git-strings
   (strings :pointer)
-  (count size))
+  (count size-t))
 
 (defcfun ("git_strarray_free" %git-strarray-free)
     :void

@@ -24,6 +24,8 @@
                 #:define-foreign-library
                 #:translate-to-foreign
                 #:translate-from-foreign
+                #:translate-name-to-foreign
+                #:translate-underscore-separated-name
                 #:free-translated-object
                 #:convert-from-foreign
                 #:with-foreign-object

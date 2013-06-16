@@ -24,6 +24,14 @@
 (defctype off-t :uint64)
 
 
+(defcenum git-file-mode
+  (:new 0000000)
+  (:tree 0040000)
+  (:blob 0100644)
+  (:blob-executable 0100755)
+  (:link 0120000)
+  (:commit 0160000))
+
 (define-foreign-type git-object ()
   ()
   (:actual-type :pointer)
@@ -114,6 +122,23 @@
   nil
   (:actual-type :pointer)
   (:simple-parser %index-entry))
+
+(define-foreign-type git-pointer-type ()
+  ((libgit2-pointer :initarg :pointer
+                    :accessor pointer
+                    :initform (null-pointer)
+                    :documentation "A CFFI pointer from libgit2.
+This is the git object that is wrapped by the instance of this class.")
+   (free-function :accessor free-function :initarg :free-function :initform nil)
+   (facilitator :accessor facilitator :initarg :facilitator :initform nil)
+   (finalizer-data :accessor finalizer-data :initform (cons t nil)))
+  (:actual-type :pointer)
+  (:simple-parser %git-object))
+
+(defmethod translate-to-foreign (value (type git-pointer-type))
+  (if (null-pointer-p (pointer value))
+      (error "Object hasn't been initialised correctly")
+      (pointer value)))
 
 (define-foreign-type refspec-type ()
   nil

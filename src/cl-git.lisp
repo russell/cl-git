@@ -26,3 +26,11 @@
   (:default "libgit2"))
 
 (use-foreign-library libgit2)
+
+(defmethod translate-name-to-foreign ((lisp-name symbol)
+                                      (package (eql *package*))
+                                      &optional varp)
+  (let ((name (translate-underscore-separated-name lisp-name)))
+    (if varp
+        (string-trim '(#\* #\%) name)
+        (string-trim '(#\%) name))))

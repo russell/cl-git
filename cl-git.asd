@@ -29,6 +29,7 @@
                  (:file "branch" :depends-on ("package" "api" "cffi-types"))
                  (:file "commit" :depends-on ("package" "api" "cffi-types"))
                  (:file "tag" :depends-on ("package" "api" "cffi-types"))
+                 (:file "diff" :depends-on ("package" "api" "cffi-types"))
                  (:file "blob" :depends-on ("package" "api" "cffi-types"))
                  (:file "tree" :depends-on ("package" "api" "cffi-types" "blob" "git-pointer"))
                  (:file "config" :depends-on ("package" "api" "cffi-types"))
