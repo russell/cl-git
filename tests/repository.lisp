@@ -98,7 +98,7 @@
     (finishes
       (unwind-protect
 	   (progn
-	     (init-repository :repository path :bare t)
+	     (init-repository path :bare t)
 	     (with-repository (repository path)
            (is (typep repository 'repository))))
 	(progn

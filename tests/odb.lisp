@@ -42,7 +42,7 @@
       (getf commit :sha)))
     (is
      (equal
-      (odb-type0 object)
+      (odb-type object)
       :commit))
     (is
      (search (getf (getf commit :author) :name)

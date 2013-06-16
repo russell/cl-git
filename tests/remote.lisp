@@ -51,7 +51,7 @@
            (let ((remote-repo (open-repository remote-repo-path)))
              (make-object 'remote "origin"
                           remote-repo
-                          :url (concatenate 'string "file://" (namestring *repository-path*)))
+                          :url (namestring *repository-path*))
              (let ((remote (get-object 'remote "origin" remote-repo)))
                (remote-connect remote)
                (is

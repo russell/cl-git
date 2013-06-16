@@ -23,22 +23,6 @@
 (in-suite :cl-git)
 
 
-(test create-random-commits
-  "create a repository and add several random commits to it. then
-check that the commit messages match the expected messages."
-  (with-test-repository ()
-    (make-test-revisions 10)
-    (let* ((commit-list *test-repository-state*)
-           (tcommit (pop commit-list))
-           (count 0))
-      (with-git-revisions
-          (commit :sha (getf tcommit :sha) :repository *test-repository*)
-        (commit-equal tcommit commit)
-        (setf count (1+ count))
-        (setf tcommit (pop commit-list)))
-      (is (equal count 10)))))
-
-
 (test revision-walker-test
   "create a repository and add several random commits to it. then
 check that the commit messages match the expected messages."
