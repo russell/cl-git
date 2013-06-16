@@ -266,7 +266,7 @@ See also git-pushspec."
 (defmethod remote-download ((remote remote))
   "Download the required packfile from the remote to bring the
 repository into sync."
-  (%git-remote-download remote (cffi-sys:null-pointer) (cffi-sys:null-pointer)))
+  (%git-remote-download remote (null-pointer) (null-pointer)))
 
 (defmethod git-ls ((remote remote))
   (let ((*remote-ls-values* (list)))

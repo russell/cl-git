@@ -48,8 +48,8 @@
 (defun null-or-nullpointer (obj)
   (or (not obj)
       (typecase obj
-    (git-pointer (null-pointer-p (pointer obj)))
-    (t (null-pointer-p obj)))))
+        (git-pointer (null-pointer-p (pointer obj)))
+        (t (null-pointer-p obj)))))
 
 (defun getenv (name &optional default)
   #+CMU

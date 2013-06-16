@@ -46,8 +46,6 @@
   (:actual-type :pointer)
   (:simple-parser %tree-entry))
 
-;; XXX (RS) Is this needed???? it also adds confusion because it has
-;; the same name as a function.
 (define-foreign-type git-tree (git-object)
   nil
   (:simple-parser %tree))

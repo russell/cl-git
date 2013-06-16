@@ -108,7 +108,7 @@ Status
 .. cl:function:: repository-status
 
 
-.. code-block:: common-lisp
+.. code-block:: common-lisp-repl
 
    CL-GIT> (with-repository (#p"/home/russell/projects/lisp/cl-git/")
               (git-status))

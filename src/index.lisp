@@ -30,7 +30,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #+nil (defbitfield (index-entry-flag :unsigned-short)
-  (:update #. (ash 1 0))
+  (:update #.(ash 1 0))
   :remove
   :uptodate
   :added

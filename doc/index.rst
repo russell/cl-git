@@ -65,8 +65,8 @@ Usage
    :numbered:
 
    repositories
-   objects
    references
+   objects
    tag
    commits
    tree

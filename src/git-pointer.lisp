@@ -94,7 +94,7 @@ because it is called from the finalize method it cannot access the relevant
 object directly."
   (when (car finalizer-data)
     (setf (car finalizer-data) nil)            ;; mark as disposed
-    (mapc-weak #'dispose (cdr finalizer-data)) ;; dispose dependends
+    (mapc-weak #'dispose (cdr finalizer-data)) ;; dispose dependencies
     (funcall free-function pointer)))          ;; free git object
 
 
@@ -107,8 +107,8 @@ the repository is closed.")
 pointer to null-pointer as well."
     (when (car (finalizer-data object))
       (internal-dispose (finalizer-data object)
-            (pointer object)
-            (free-function object))
+                        (pointer object)
+                        (free-function object))
       (setf (slot-value object 'libgit2-pointer) nil)
       (setf (slot-value object 'libgit2-disposed) t))))
 
