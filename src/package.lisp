@@ -104,6 +104,8 @@
    #:make-commit
    #:message
    #:parents
+
+   ;; Revision walker
    #:revision-walk
    #:next-revision
 

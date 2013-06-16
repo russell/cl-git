@@ -208,10 +208,6 @@ git config to a specific level.  Possible levels are :HIGHEST-LEVEL
 (defgeneric index (object)
   (:documentation "Returns an index object for OBJECT (a repository)"))
 
-(defgeneric git-next (walker)
-  (:documentation "Returns the next object for the walker.  If no
-objects are available anymore return nil."))
-
 (defgeneric remote-connect (object &key direction)
   (:documentation "Connects the object if applicable."))
 
