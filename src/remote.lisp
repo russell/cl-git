@@ -161,7 +161,7 @@
 (defmethod make-object ((class (eql 'remote)) name repository
                        &key url)
   "Create a new remote."
-  (let ((url (if (pathnamep url) (namestring url) url)))
+  (let ((url (namestring url)))
     (with-foreign-object (remote :pointer)
       (%git-remote-create remote repository name url)
       (make-instance 'remote
