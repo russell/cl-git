@@ -126,6 +126,9 @@ html_theme_options = {
     # Navigation bar title. (Default: ``project`` value)
     # 'navbar_title': "Demo",
 
+    'navbar_sidebarrel': False,
+
+    'navbar_pagenav': False,
     # Global TOC depth for "site" navbar tab. (Default: 1)
     # Switching to -1 shows all levels.
     # 'globaltoc_depth': 2,
@@ -142,6 +145,9 @@ html_theme_options = {
     # HTML navbar class (Default: "navbar") to attach to <div> element.
     # For black navbar, do "navbar navbar-inverse"
     # 'navbar_class': "navbar navbar-inverse",
+    'navbar_site_name': "Documentation",
+
+    'navbar_links': [("Contributing", "contributing")],
 
     # Fix navigation bar to top of page?
     # Values: "true" (default) or "false"

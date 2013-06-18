@@ -1,5 +1,5 @@
-Developing
-==========
+Contributing
+============
 
 Testing
 -------

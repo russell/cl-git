@@ -27,7 +27,7 @@ are instances of corresponding classes in CL-GIT.
 
 
 Download
---------
+~~~~~~~~
 
 Since there is currently no released version, the source is available
 on `github`_.
@@ -35,7 +35,7 @@ on `github`_.
 .. _github: https://github.com/russell/cl-git/
 
 Installation
-------------
+~~~~~~~~~~~~
 
 You'll need a recent version of the libgit2 library, which
 can from http://github.com/libgit2/libgit2.
@@ -57,8 +57,8 @@ following packages: `FiveAM`_ and `inferior-shell`_.
 .. _FiveAM: https://github.com/cl-fiveam/fiveam
 .. _inferior-shell: http://www.cliki.net/inferior-shell
 
-Usage
------
+Documentation
+-------------
 
 .. toctree::
    :maxdepth: 4
@@ -76,15 +76,6 @@ Usage
    config
    odb
    internals
-
-
-Contributing
-------------
-
-.. toctree::
-   :maxdepth: 4
-
-   developing
 
 
 Indices and tables
