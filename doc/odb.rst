@@ -1,12 +1,14 @@
 ODB
 ===
 
-.. cl:type:: odb
-
 .. warning::
 
    This functionally is still under development.  So stability of this
    part of the API is uncertain.
+
+.. cl:package:: cl-git
+
+.. cl:type:: odb
 
 .. cl:type:: odb-object
 
