@@ -229,53 +229,65 @@ pointer will need to be freed manually."
       ((slot-value object 'libgit2-disposed)
        (princ "(disposed)" stream)))))
 
-(defmethod remote-connect ((remote remote) &key (direction :fetch))
-  "Opens the remote connection.
+(defgeneric remote-connect (object &key direction)
+  (:documentation
+   "Opens the remote connection.
 The url used for the connection can be queried by GIT-URL.
 
 The opened connection is one way, either data is retrieved from the
 remote, or data is send to the remote.  The direction is specified
 with the DIRECTION argument, :FETCH is for retrieving data, :PUSH is
-for sending data."
-  (%git-remote-connect remote direction))
+for sending data.")
+  (:method ((remote remote) &key (direction :fetch))
+    (%git-remote-connect remote direction)))
 
-(defmethod remote-connected-p ((remote remote))
-  "Returns t if the connection is open, nil otherwise."
-  (%git-remote-connected remote))
+(defgeneric remote-connected-p (remote)
+  (:documentation "Returns t if the connection is open, nil otherwise.")
+  (:method ((remote remote))
+    (%git-remote-connected remote)))
 
-(defmethod remote-disconnect ((remote remote))
-  "Disconnects an opened connection."
-  (%git-remote-disconnect remote))
+(defgeneric remote-disconnect (remote)
+  (:documentation "Disconnects an opened connection.")
+  (:method ((remote remote))
+    (%git-remote-disconnect remote)))
 
-(defmethod remote-pushspec ((remote remote))
-  "Returns a list of push specifications of the remote.
+(defgeneric remote-pushspec (remote)
+  (:documentation
+   "Returns a list of push specifications of the remote.
 Each specification is property list with the following keys:
 
 - SRC, a string matching the source references,
 - DST, the pattern used to rewrite the references at the remote.
-- FLAGS, a combination of the following flags :FORCE, :PATTERN, :MATCHING."
-  (%git-remote-pushspec remote))
+- FLAGS, a combination of the following flags :FORCE, :PATTERN, :MATCHING.")
+  (:method ((remote remote))
+    (%git-remote-pushspec remote)))
 
-(defmethod remote-fetchspec ((remote remote))
-  "Returns a list of fetch specifications for the remote.
+(defgeneric remote-fetchspec (remote)
+  (:documentation
+   "Returns a list of fetch specifications for the remote.
 Each specification is propety list with the keys: SRC, DST and FLAGS.
 
-See also git-pushspec."
-  (%git-remote-fetchspec remote))
+See also git-pushspec.")
+  (:method ((remote remote))
+    (%git-remote-fetchspec remote)))
 
-(defmethod remote-download ((remote remote))
-  "Download the required packfile from the remote to bring the
-repository into sync."
-  (%git-remote-download remote (null-pointer) (null-pointer)))
+(defgeneric remote-download (remote)
+  (:documentation "Download the required packfile from the remote to
+bring the repository into sync.")
+  (:method ((remote remote))
+    (%git-remote-download remote (null-pointer) (null-pointer))))
 
 (defmethod git-ls ((remote remote))
   (let ((*remote-ls-values* (list)))
     (%git-remote-ls remote (callback collect-remote-ls-values) (null-pointer))
     *remote-ls-values*))
 
-(defmethod remote-push-url ((remote remote))
-  (%git-remote-push-url remote))
+(defgeneric remote-push-url (remote)
+  (:method ((remote remote))
+    (%git-remote-push-url remote)))
 
-(defmethod remote-url ((remote remote))
-  "Return the url to the remote."
-  (%git-remote-url remote))
+(defgeneric remote-url (remote)
+  (:documentation
+   "Return the url to the remote.")
+  (:method ((remote remote))
+    (%git-remote-url remote)))

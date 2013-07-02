@@ -174,22 +174,7 @@ git config to a specific level.  Possible levels are :HIGHEST-LEVEL
 (defgeneric open-index (object)
   (:documentation "Returns an index object for OBJECT (a repository)"))
 
-(defgeneric remote-connect (object &key direction)
-  (:documentation "Connects the object if applicable."))
-
-(defgeneric remote-disconnect (object)
-  (:documentation "Disconnects the object if applicable."))
-
-(defgeneric remote-connected-p (object)
-  (:documentation "Returns if the object is connected."))
-
-(defgeneric remote-pushspec (remote))
-(defgeneric remote-fetchspec (remote))
-
-(defgeneric remote-download (remote))
-
 (defgeneric git-ls (remote))
-
 
 (defgeneric open-odb (path-or-repository)
   (:documentation "Open the ODB at the specified path or
