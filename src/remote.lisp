@@ -39,11 +39,11 @@
 (defmethod translate-from-foreign (value (type refspec-type))
   (unless (null-pointer-p value)
     (with-foreign-slots ((next src dst flags) value (:struct git-refspec))
-			(when (or src dst flags)
-			  (cons (list  :src src
-				       :dst dst
-				       :flags flags)
-				(translate-from-foreign next type))))))
+      (when (or src dst flags)
+        (cons (list  :src src
+                     :dst dst
+                     :flags flags)
+              (translate-from-foreign next type))))))
 
 
 (defcstruct (git-indexer-stats :class indexer-stats-struct-type)
@@ -124,14 +124,15 @@
   :void
   (remote %remote))
 
-(defcfun ("git_remote_fetchspec" %git-remote-fetchspec)
-  %refspec
+(defcfun ("git_remote_get_fetch_refspecs" %git-remote-get-fetch-refspecs)
+  %return-value
+  (fetchspec :pointer)
   (remote %remote))
 
-(defcfun ("git_remote_pushspec" %git-remote-pushspec)
-  %refspec
+(defcfun ("git_remote_get_push_refspecs" %git-remote-get-push-refspecs)
+  %return-value
+  (pushspec :pointer)
   (remote %remote))
-
 
 (defcfun ("git_remote_download" %git-remote-download)
   %return-value
@@ -251,25 +252,25 @@ for sending data.")
   (:method ((remote remote))
     (%git-remote-disconnect remote)))
 
-(defgeneric remote-pushspec (remote)
+(defgeneric remote-push-refspecs (remote)
   (:documentation
-   "Returns a list of push specifications of the remote.
-Each specification is property list with the following keys:
-
-- SRC, a string matching the source references,
-- DST, the pattern used to rewrite the references at the remote.
-- FLAGS, a combination of the following flags :FORCE, :PATTERN, :MATCHING.")
+   "Returns a list of push specifications of the remote. ")
   (:method ((remote remote))
-    (%git-remote-pushspec remote)))
+    (with-foreign-object (string-array '(:struct git-strings))
+      (%git-remote-get-push-refspecs string-array remote)
+      (prog1
+          (convert-from-foreign string-array '%git-strings)
+        (free-translated-object string-array '%git-strings t)))))
 
-(defgeneric remote-fetchspec (remote)
+(defgeneric remote-fetch-refspecs (remote)
   (:documentation
-   "Returns a list of fetch specifications for the remote.
-Each specification is propety list with the keys: SRC, DST and FLAGS.
-
-See also git-pushspec.")
+   "Returns a list of fetch specifications for the remote.")
   (:method ((remote remote))
-    (%git-remote-fetchspec remote)))
+    (with-foreign-object (string-array '(:struct git-strings))
+      (%git-remote-get-fetch-refspecs string-array remote)
+      (prog1
+          (convert-from-foreign string-array '%git-strings)
+        (free-translated-object string-array '%git-strings t)))))
 
 (defgeneric remote-download (remote)
   (:documentation "Download the required packfile from the remote to

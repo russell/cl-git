@@ -20,11 +20,13 @@ Remote
 
 .. cl:method:: git-ls remote
 
-.. cl:generic:: remote-pushspec
+.. cl:generic:: remote-url
+
+.. cl:generic:: remote-fetch-refspecs
 
 .. cl:generic:: remote-push-url
 
-.. cl:generic:: remote-fetchspec
+.. cl:generic:: remote-push-refspecs
 
 .. cl:generic:: remote-connect
 
@@ -33,6 +35,4 @@ Remote
 .. cl:generic:: remote-disconnect
 
 .. cl:generic:: remote-download
-
-.. cl:generic:: remote-url
 

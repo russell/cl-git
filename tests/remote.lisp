@@ -68,9 +68,7 @@
                (remote-download remote)
                (is
                 (equal
-                 (remote-fetchspec remote)
-                 '((:src "refs/heads/*"
-                    :dst "refs/remotes/origin/*"
-                    :flags (:force :pattern))))))))
+                 (remote-fetch-refspecs remote)
+                 '("+refs/heads/*:refs/remotes/origin/*"))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))

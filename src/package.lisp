@@ -167,9 +167,9 @@
    #:remote-connected-p
    #:remote-disconnect
    #:remote-download
-   #:remote-fetchspec
+   #:remote-push-refspecs
+   #:remote-fetch-refspecs
    #:remote-push-url
-   #:remote-pushspec
    #:remote-url
 
    ;; Repository
