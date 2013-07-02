@@ -20,20 +20,26 @@ def build():
         local("sphinx-build -b html -E . html")
 
 
-def inc_version():
-    version = float(local("git describe --tags --abbrev=0", capture=True))
-    version += 0.1
-    return version
+def add(x, y):
+    return x + y
+
+
+def inc_version(major=0, minor=0, patch=0):
+    version = local("git describe --tags --abbrev=0", capture=True)
+    version = map(int, version.split("."))
+    version = map(add, version, [major, minor, patch])
+    version = map(str, version)
+    return ".".join(version)
 
 
 @task
 def release_minor():
-    generate_version(inc_version())
+    generate_version(inc_version(patch=1))
 
 
 @task
 def release_major():
-    generate_version(float(int(inc_version() + 1.0)))
+    generate_version(inc_version(minor=1))
 
 
 def generate_version(version):
