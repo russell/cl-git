@@ -15,7 +15,7 @@ documentation libgit2 http://libgit2.github.com/libgit2/#HEAD is helpful.
 The following configuration on Linux (Debian Sid) is known to work:
 
 * SBCL
-* libgit2 0.18
+* libgit2 0.19.0
 
 CL-GIT's API is modelled off the underlying Libgit2 interface.  The
 CL-GIT project takes advantage of it and provides a object oriented
