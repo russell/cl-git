@@ -87,12 +87,12 @@ author and a message about the commit.  They also contain state
 information about the current tree and links to any parent commits.
 Commits that have more then one parent are considered to be merges."))
 
-(defun make-commit (oid message &key
-                                  (update-ref "HEAD")
-                                  author
-                                  committer
-                                  parents
-                                  repository)
+(defun make-commit (tree-or-oid message &key
+                                          (update-ref "HEAD")
+                                          author
+                                          committer
+                                          parents
+                                          repository)
   "Create a new commit from the tree with the OID specified and
 MESSAGE.  Optional :UPDATE-REF is the name of the reference that will
 be updated to point to this commit.  The default value \"HEAD\" will
@@ -104,7 +104,9 @@ optional instance of a GIT-SIGNATURE the details the committer.
 
   (assert (not (null-or-nullpointer repository)))
 
-  (let ((tree (get-object 'tree oid repository))
+  (let ((tree (if (eql (type-of tree-or-oid) 'tree)
+                  tree-or-oid
+                  (get-object 'tree tree-or-oid repository)))
         (parents (ensure-list parents)))
 
     ;; lookup all the git commits
