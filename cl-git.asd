@@ -5,7 +5,7 @@
   :version (:read-file-form "version.lisp-expr")
   :serial t
   :defsystem-depends-on (:asdf)
-  :depends-on (#:cffi #:local-time #:cl-fad #:trivial-garbage #:anaphora #:alexandria)
+  :depends-on (#:cffi #:local-time #:cl-fad #:trivial-garbage #:anaphora #:alexandria #:closer-mop)
   :author "Russell Sim <russell.sim@gmail.com>"
   :licence "Lisp-LGPL"
   :components ((:static-file "cl-git.asd")

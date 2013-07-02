@@ -15,6 +15,8 @@
                 #:pathname-relative-p)
   (:import-from #:alexandria
                 #:ensure-list)
+  (:import-from #:closer-mop
+                #:subclassp)
   (:import-from #:cffi
                 #:define-parse-method
                 #:define-foreign-type

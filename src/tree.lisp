@@ -178,7 +178,10 @@ This does count the number of direct children, not recursively."
                   (:tree 'tree-tree)
                   (:blob 'tree-blob))))
           (make-tree-entry type
-                           (merge-pathnames filename (filename tree))
+                           (merge-pathnames filename ;; TODO (RS) Test the pathname returned.
+                                            (if (subclassp (class-of tree) 'pathname-mixin)
+                                                (filename tree)
+                                                ""))
                            filemode
                            oid
                            (facilitator tree))))))
