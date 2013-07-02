@@ -41,6 +41,11 @@
   :skip-worktree
   :extended-2)
 
+(defvar git-index-entry-namemask #x0fff)
+(defvar git-index-entry-stagemask #x3000)
+(defvar git-index-entry-extended #x4000)
+(defvar git-index-entry-valid #x8000)
+(defvar git-index-entry-stageshift 12)
 
 (defcstruct (git-index-time :class index-time-struct-type)
   (seconds %time)
@@ -156,7 +161,8 @@ and 3 (theirs) are in conflict."
           :flags flags
           :flags-extended flags-extended
           :path path
-          :stage (git-index-entry-stage value))))
+          :stage (ash (logand flags git-index-entry-stagemask)
+                      (- 0 git-index-entry-stageshift)))))
 
 (defmethod translate-to-foreign (value (type index-entry-type))
   (let ((index-entry (foreign-alloc '(:struct git-index-entry))))
