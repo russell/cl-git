@@ -46,7 +46,7 @@ list return values are :THREADS and :HTTPS.")
 
 
 ;;; Init threading on load
-(eval-when (:execute)
+(eval-when (:load-toplevel :execute)
   (git-threads-init))
 
 
