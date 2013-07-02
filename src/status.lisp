@@ -41,6 +41,13 @@
   (:worktree-typechange 1024)
   (:ignored 16384))
 
+
+(defcfun ("git_status_file" %git-status-file)
+    git-status-flags
+  (repository %repository)
+  (path :string))
+
+
 (defcfun ("git_status_foreach" %git-status-for-each)
     %return-value
   (repository %repository)
