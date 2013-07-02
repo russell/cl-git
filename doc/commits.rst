@@ -96,6 +96,8 @@ Inspecting
 
 .. cl:generic:: parents commit
 
+.. cl:generic:: commit-tree
+
 If we have found a commit and assinged it *commit* we can inspect this
 object to find out various bits of information.
 
@@ -134,4 +136,14 @@ Or we can see what is parents are,
    (#<COMMIT F2DA18A5913EEA2D3F8BBD336F08AB48D9D3ECCE (weak) {100559E5A3}>)
 
 To see the state of the repository when this commit was made, use the
-:cl:symbol:`GET-TREE`.
+:cl:symbol:`COMMIT-TREE`.
+
+.. code-block:: common-lisp-repl
+
+   GIT> (get-tree
+         (target
+          (repository-head
+           (open-repository (merge-pathnames #p"projects/ecl"
+                                             (user-homedir-pathname))))))
+   #<TREE 96F8A446E020204589710FE1BF0CE1DD5B5B5AD0 {10079C9C03}>
+

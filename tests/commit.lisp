@@ -58,6 +58,7 @@ signature then it will be added automatically."
       (bind-git-commits (((commit :sha (getf test-commit :sha))) *test-repository*)
         (commit-equal test-commit commit)))))
 
+
 (def-test commit-parents (:fixture repository-with-commits)
   (let ((test-commit (next-test-commit)))
     (is (equal

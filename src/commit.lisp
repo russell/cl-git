@@ -170,16 +170,13 @@ optional instance of a GIT-SIGNATURE the details the committer.
               (git-commit-parent-oid commit index)
               (facilitator commit))))
 
-(defmethod get-tree ((commit commit) &key path repository)
+(defmethod commit-tree ((commit commit))
   "Returns the TREE object of the commit."
-  (let ((tree (with-foreign-object (%tree :pointer)
-                (%git-commit-tree %tree commit)
-                (make-instance-object :pointer (mem-aref %tree :pointer)
-                                      :facilitator (facilitator commit)
-                                      :type 'tree))))
-    (if path
-        (git-tree tree :path path :repository repository)
-        tree)))
+  (with-foreign-object (%tree :pointer)
+    (%git-commit-tree %tree commit)
+    (make-instance-object :pointer (mem-aref %tree :pointer)
+                          :facilitator (facilitator commit)
+                          :type 'tree)))
 
 (defun git-commit-from-oid (oid repository)
   "Returns a git-commit object identified by the `oid'.

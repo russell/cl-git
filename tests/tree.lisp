@@ -29,14 +29,14 @@
      (equal
       (sort-strings
        (mapcar (compose #'namestring #'filename)
-               (tree-directory (get-tree object))))
+               (tree-directory (commit-tree object))))
       (sort-strings
        (mapcar (lambda (e) (getf e :filename))
                (getf commit :files)))))
     (is
      (equal
       (mapcar (compose #'octets-to-string #'blob-content)
-       (sort (tree-directory (get-tree object)) #'string-lessp
+       (sort (tree-directory (commit-tree object)) #'string-lessp
              :key (compose #'namestring #'filename)))
       (mapcar (lambda (e) (getf e :text))
        (sort (getf commit :files) #'string-lessp

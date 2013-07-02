@@ -30,7 +30,7 @@
      (equal
       (sort-strings
        (mapcar (compose #'namestring #'filename)
-               (tree-directory (get-tree object))))
+               (tree-directory (commit-tree object))))
       (sort-strings
        (mapcar (lambda (e) (getf e :filename))
                (getf commit :files)))))
@@ -42,4 +42,4 @@
       (sort-strings
        (mapcar (compose #'(lambda (o) (octets-to-string o :external-format :utf-8))
                         #'blob-content)
-               (tree-directory (get-tree object))))))))
+               (tree-directory (commit-tree object))))))))

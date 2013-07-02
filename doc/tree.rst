@@ -9,17 +9,6 @@ Tree
 
 .. cl:method:: list-objects tree common-lisp:t
 
-.. cl:generic:: get-tree
-
-   .. code-block:: common-lisp-repl
-
-      GIT> (get-tree
-            (target
-             (repository-head
-              (open-repository (merge-pathnames #p"projects/ecl"
-                                                (user-homedir-pathname))))))
-      #<TREE 96F8A446E020204589710FE1BF0CE1DD5B5B5AD0 {10079C9C03}>
-
 Listing Contents
 ----------------
 

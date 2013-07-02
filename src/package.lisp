@@ -102,6 +102,7 @@
    #:commit
    #:committer
    #:make-commit
+   #:commit-tree
    #:message
    #:parents
 

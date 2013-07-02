@@ -75,21 +75,7 @@ timestamp.
   (:documentation "Returns the number of parents of OBJECT.
 
 For Commits this indicate the number of parent commits.  So it is 1
-for normal commits, > 1 for merges and 0 for initial commits.
-
-"))
-
-
-(defgeneric get-tree (object &key path repository)
-  (:documentation
-  "Returns the tree as a git tree object, for object OBJECT.
-
-The tree from for example a commit is the object that contains a
-directory listing of the files in the commit with OIDs pointing to the
-content of the files.  So basically the tree of a commit corresponds
-to the content of the commit.  If PATH is specified then the tree
-returned node will be a child node of the tree.
-"))
+for normal commits, > 1 for merges and 0 for initial commits."))
 
 (defgeneric make-object (class id/name repository &key &allow-other-keys))
 
