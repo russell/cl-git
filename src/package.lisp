@@ -128,11 +128,11 @@
    #:upstream
 
    ;; Index
-   #:*git-repository-index*
-   #:git-add
-   #:git-write
-   #:git-write-tree
    #:index
+   #:index-add-file
+   #:index-write
+   #:index-to-tree
+   #:open-index
    #:index-clear
    #:index-conflicts-p
    #:index-refresh

@@ -19,9 +19,6 @@
 
 (in-package #:cl-git)
 
-(defparameter *git-repository-index* nil
-  "A global that stores a pointer to the current Git repository index.")
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -114,22 +111,23 @@
   (oid :pointer)
   (index %index))
 
-(defcfun ("git_index_entrycount" git-index-entry-count)
+(defcfun ("git_index_entrycount" %git-index-entry-count)
     :unsigned-int
   (index %index))
 
-(defcfun ("git_index_entry_stage" git-index-entry-stage)
+(defcfun ("git_index_entry_stage" %git-index-entry-stage)
     :int
   "Return an int with a value from 0 to 4.  Files in the working
-directory return stage 0.  Files with stages 1-3 are in conflict."
+directory return stage 0.  Files with stages 1 (ancestor), 2 (ours)
+and 3 (theirs) are in conflict."
   (index-entry :pointer))
 
-(defcfun ("git_index_get_byindex" git-index-get-by-index)
+(defcfun ("git_index_get_byindex" %git-index-get-by-index)
     %index-entry
   (index %index)
   (position :unsigned-int))
 
-(defcfun ("git_index_get_bypath" git-index-get-by-path)
+(defcfun ("git_index_get_bypath" %git-index-get-by-path)
     %index-entry
   (index %index)
   (path :string)
@@ -190,50 +188,59 @@ directory return stage 0.  Files with stages 1-3 are in conflict."
 ;;; Highlevel Interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defclass index
     (git-pointer)
   ()
   (:documentation "A git index"))
 
+;; TODO (RS) perhaps rename back to index-add, seems unlikely to have
+;; naming clash.
+(defgeneric index-add-file (path index)
+  (:documentation
+   "Adds the PATH to the current index *GIT-REPOSITORY-INDEX* or the
+explicit keyword argument :INDEX"))
 
-(defmethod git-add ((path string) &key (index *git-repository-index*))
+(defmethod index-add-file ((path string) (index index))
   (%git-index-add-by-path index path))
 
-(defmethod git-add ((path pathname) &key (index *git-repository-index*))
+(defmethod index-add-file ((path pathname) (index index))
   (let ((path (if (pathname-relative-p path)
                    path
                    (enough-namestring path (repository-workdir (slot-value index 'facilitator))))))
-    (git-add (namestring path) :index index)))
+    (index-add-file (namestring path) index)))
 
-(defmethod git-add ((entry list) &key (index *git-repository-index*))
+(defmethod index-add-file ((entry list) (index index))
   (%git-index-add index entry))
 
-(defmethod index-clear ((index index))
-  "Clear contents of the index removing all entries.  Changes need to
-be written back to disk to take effect."
-  (%git-index-clear index))
+(defgeneric index-clear (index)
+  (:documentation "Clear contents of the index removing all entries.
+Changes need to be written back to disk to take effect.")
+  (:method ((index index))
+    (%git-index-clear index)))
 
-(defmethod index-refresh ((index index))
-  "Refresh the state of the index with objects read from disk."
-  (%git-index-read index))
+(defgeneric index-reload (index)
+  (:documentation "Reload the state of the index with objects read from disk.")
+  (:method ((index index))
+    (%git-index-read index)))
 
-(defmethod git-write ((index index))
-  "Write the git index back to the file system."
-  (%git-index-write index))
+(defgeneric index-write (index)
+  (:documentation "Write the git index back to the file system.")
+  (:method ((index index))
+    (%git-index-write index)))
 
 (defmacro with-index ((var &optional repository-or-path) &body body)
   "Load an index from a repository, path or if none is specified then
 an in-memory index is used.  The newly opened index is bound to the
 variable VAR."
-  ;;TODO add gensym
   `(let ((,var ,(if repository-or-path
-                    `(index ,repository-or-path)
-                    `(index-new))))
+                    `(open-index ,repository-or-path)
+                    `(new-index))))
      (unwind-protect
           (progn ,@body)
        (free ,var))))
 
-(defun index-new ()
+(defun new-index ()
   "Create a new in-memory index that can be used to perform in memory
 operations that may not be written back to the disk."
   (with-foreign-object (index :pointer)
@@ -242,7 +249,7 @@ operations that may not be written back to the disk."
            :pointer (mem-ref index :pointer)
            :free-function #'%git-index-free)))
 
-(defmethod index ((path string))
+(defmethod open-index ((path string))
   "Open a new index in a file."
   (with-foreign-object (index :pointer)
     (%git-index-open index path)
@@ -250,26 +257,34 @@ operations that may not be written back to the disk."
            :pointer (mem-ref index :pointer)
            :free-function #'%git-index-free)))
 
-(defmethod index ((path pathname))
+(defmethod open-index ((path pathname))
   "Open a new index in a file."
-  (index (namestring path)))
+  (open-index (namestring path)))
 
 (defmethod index-conflicts-p ((index index))
   (%git-index-has-conflicts index))
 
 (defmethod git-entry-count ((index index))
-  (git-index-entry-count index))
+  (%git-index-entry-count index))
 
 (defmethod git-entry-by-index ((index index) position)
-  (git-index-get-by-index index position))
+  (%git-index-get-by-index index position))
+
+(defmethod index-entries ((index index))
+  (loop
+    :for i :from 0 :below (git-entry-count index)
+    :for entry = (git-entry-by-index index i)
+    :collect entry))
 
 (defmethod git-entry-by-path ((index index) (path string))
-  (git-index-get-by-path index path 1))
+  (%git-index-get-by-path index path 1))
 
-(defmethod git-write-tree ((index index))
-  (with-foreign-object (oid-pointer '(:struct git-oid))
-    (%git-index-write-tree oid-pointer index)
-    (convert-from-foreign oid-pointer '%oid)))
+(defgeneric index-to-tree (index)
+  (:documentation "Write the current index to a new tree object.")
+  (:method ((index index))
+      (with-foreign-object (oid-pointer '(:struct git-oid))
+        (%git-index-write-tree oid-pointer index)
+        (get-object 'tree (convert-from-foreign oid-pointer '%oid) (facilitator index)))))
 
 (defmethod git-entry ((index index))
   (with-foreign-object (oid-pointer '(:struct git-oid))

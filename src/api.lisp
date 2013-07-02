@@ -22,13 +22,6 @@
 (in-package #:cl-git)
 
 
-(defparameter *git-repository-index* nil
-  "A global that stores the current Git index.
-
-This value is used as the default index for all index related
-functions.  It is set bound by (WITH-REPOSITORY-INDEX ..)  But can
-also be set by user code.")
-
 (defgeneric oid (object)
   (:documentation "Return the identifier of OBJECT.
 The identifier is typically the SHA-1 checksum or hash code.
@@ -131,20 +124,6 @@ where the repository isn't bare then it will be the location of the
 (defgeneric repository-workdir (object)
   (:documentation "Return the path to the root of the repository."))
 
-(defgeneric git-add (path &key &allow-other-keys)
-  (:documentation
-   "Adds the PATH to the current index *GIT-REPOSITORY-INDEX* or the
-explicit keyword argument :INDEX"))
-
-(defgeneric index-clear (object)
-  (:documentation
-   "Clears the content of the index."))
-
-(defgeneric git-write (object)
-  (:documentation
-   "Writes the OBJECT to its store.
-"))
-
 (defgeneric full-name (object)
   (:documentation "Returns the name of OBJECT, as a string.
 
@@ -169,7 +148,6 @@ What exactly the name is depends on the type of the object.
   (:documentation "Returns the target of OBJECT."))
 
 (defgeneric resolve (object &optional stop-at))
-
 
 (defgeneric git-entry-count (object)
   (:documentation "Returns the number elements in the collection OBJECT.
@@ -205,7 +183,7 @@ start defaults to 0."))
 git config to a specific level.  Possible levels are :HIGHEST-LEVEL
 :SYSTEM :XDG :GLOBAL or :LOCAL"))
 
-(defgeneric index (object)
+(defgeneric open-index (object)
   (:documentation "Returns an index object for OBJECT (a repository)"))
 
 (defgeneric remote-connect (object &key direction)

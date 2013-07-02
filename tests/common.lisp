@@ -109,6 +109,8 @@
   "store the state of the current test repository traversal state, it
 will update to the new head when a new commit is added.")
 
+(defvar *test-repository-index* nil)
+
 (defmacro with-test-repository ((&key bare) &body body)
   "Create a new repository and bind the randomly generated path."
   `(let ((*repository-path* (gen-temp-path))
@@ -145,15 +147,15 @@ commit alist. The commit argument is an alist that should contain the
 keys :FILES :MESSAGE :AUTHOR :COMMITTER the returned alist will also
 contain the a :SHA containing the sha1 hash of the newly created
 commit."
-  (with-index (*git-repository-index* *test-repository*)
+  (with-index (*test-repository-index* *test-repository*)
     (dolist (file (getf commit :files))
       (funcall #'write-string-to-file (getf file :filename) (getf file :text))
-      (git-add (getf file :filename) :index *git-repository-index*))
-    (git-write *git-repository-index*)
+      (index-add-file (getf file :filename) *test-repository-index*))
+    (index-write *test-repository-index*)
     (setf (getf commit :sha)
           (oid
            (make-commit
-            (git-write-tree *git-repository-index*)
+            (index-to-tree *test-repository-index*)
             (getf commit :message)
             :repository *test-repository*
             :parents (getf commit :parents)

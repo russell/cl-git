@@ -27,7 +27,7 @@
     (let ((filename (if (functionp filename)
                         (funcall filename)
                         filename)))
-      (with-index (*git-repository-index* *test-repository*)
+      (with-index (*test-repository-index* *test-repository*)
         (write-string-to-file filename filetext)
         (&body)))))
 
@@ -47,10 +47,10 @@
   (< (timestamp-difference a (now)) 5))
 
 (defun index-path-test (filename filetext)
-  (git-add filename)
-  (git-write *git-repository-index*)
+  (index-add-file filename *test-repository-index*)
+  (index-write *test-repository-index*)
   (mapcar #'plist-equal
-          (git-entries *git-repository-index*)
+          (git-entries *test-repository-index*)
           `((:C-TIME ,#'approximately-now-p
              :M-TIME ,#'approximately-now-p
              :FILE-SIZE ,(length filetext)
@@ -76,18 +76,19 @@
     (index-path-test filename filetext)))
 
 (def-test index-clear (:fixture (index-with-file #P"test-file" "foo blah."))
-  (is (eq (git-entry-count *git-repository-index*) 0))
-  (git-add filename)
-  (is (eq (git-entry-count *git-repository-index*) 1))
-  (index-clear *git-repository-index*)
-  (is (eq (git-entry-count *git-repository-index*) 0)))
+  "Add an entry to the index and clear it."
+  (is (eq (git-entry-count *test-repository-index*) 0))
+  (index-add-file filename *test-repository-index*)
+  (is (eq (git-entry-count *test-repository-index*) 1))
+  (index-clear *test-repository-index*)
+  (is (eq (git-entry-count *test-repository-index*) 0)))
 
 
 (def-test index-has-conflicts (:fixture repository)
   (let ((filename "test-file"))
     (with-index (test-index *test-repository*)
       (write-string-to-file filename "foo")
-      (git-add filename :index test-index)
+      (index-add-file filename test-index)
       (is (eq (index-conflicts-p test-index)
               nil)))))
 
@@ -96,12 +97,12 @@
         (index-file-path (gen-temp-path)))
     (with-index (test-index *test-repository*)
       (write-string-to-file filename "foo")
-      (git-add filename :index test-index)
+      (index-add-file filename test-index)
       (unwind-protect
            (with-index (index-file index-file-path)
              (let ((entry (git-entry-by-index test-index 0)))
                ;; Add the entry from the other git index.
-               (git-add entry :index index-file)
+               (index-add-file entry index-file)
                (plist-equal entry
                             (git-entry-by-index index-file 0))))
         (when (file-exists-p index-file-path)
@@ -111,12 +112,12 @@
   (let ((filename "test-file"))
     (with-index (test-index *test-repository*)
       (write-string-to-file filename "foo")
-      (git-add filename :index test-index)
+      (index-add-file filename test-index)
       (with-index (index-in-memory)
-        (git-write test-index)
+        (index-write test-index)
         (let ((entry (git-entry-by-index test-index 0)))
           ;; Add the entry from the other git index.
-          (git-add entry :index index-in-memory)
+          (index-add-file entry index-in-memory)
           ;; TODO (RS) there is an intermittent failure which results
           ;; from the index-in-memory index having a different set of
           ;; FLAGS-EXTENDED to the disk index.  Adding a sleep seems
