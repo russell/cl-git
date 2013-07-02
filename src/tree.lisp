@@ -78,28 +78,24 @@ This does count the number of direct children, not recursively."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass tree (object)
-  ((filename :reader filename :initarg :filename :initform "")))
+(defclass tree (object) ())
 
-(defclass tree-mixin ()
-  ((filemode :reader filemode :initarg :filemode :initform nil)
-   (filename :reader filename :initarg :filename :initform nil))
-  (:documentation "A git tree entry mixin."))
-
-(defclass tree-blob (tree-mixin blob)
-  ()
+(defclass tree-blob (pathname-mixin blob)
+  ((filemode :reader filemode :initarg :filemode :initform nil))
   (:documentation "A git tree blob."))
 
-(defclass tree-tree (tree-mixin tree)
-  ()
+(defclass tree-tree (pathname-mixin tree)
+  ((filemode :reader filemode :initarg :filemode :initform nil))
   (:documentation "A git tree entry."))
 
-(defclass tree-commit (tree-mixin commit)
-  ()
+(defclass tree-commit (pathname-mixin commit)
+  ((filemode :reader filemode :initarg :filemode :initform nil))
   (:documentation "A git tree commit."))
 
-(defclass tree-link (tree-mixin)
-  ()
+;; TODO (RS) this is currently broken because i have no idea what type
+;; they are in the odb.
+(defclass tree-link (pathname-mixin)
+  ((filemode :reader filemode :initarg :filemode :initform nil))
   (:documentation "A git tree symlink."))
 
 (defun make-tree-entry (type filename mode oid repository)
@@ -172,9 +168,9 @@ This does count the number of direct children, not recursively."
     :when (if pathname (tree-pathname-match-p (getf entry :filename)
                                               pathname)
               t)
-    :collect
-    (destructuring-bind (&key type filename filemode oid)
-        entry
+      :collect
+      (destructuring-bind (&key type filename filemode oid)
+          entry
         (let ((type
                 (ecase type
                   (:commit 'tree-commit)
@@ -234,7 +230,7 @@ pathname that the entries must match.")
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod print-object ((object tree-mixin) stream)
+(defmethod print-object ((object pathname-mixin) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (cond
       ((not (null-pointer-p (slot-value object 'libgit2-pointer)))

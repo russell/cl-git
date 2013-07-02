@@ -22,6 +22,11 @@
 (in-package #:cl-git)
 
 
+(defclass pathname-mixin ()
+  ((filename :reader filename :initarg :filename :initform nil))
+  (:documentation "A mixin that has a filename attribute."))
+
+
 (defgeneric oid (object)
   (:documentation "Return the identifier of OBJECT.
 The identifier is typically the SHA-1 checksum or hash code.

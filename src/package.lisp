@@ -145,6 +145,8 @@
    #:tree-directory
 
    ;; Tree-Entries (sub-classes of blob, commit, tree or tag)
+   #:tree-blob
+   #:tree-tree
    #:filemode
    #:filename
 
