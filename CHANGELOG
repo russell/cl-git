@@ -2,10 +2,13 @@
 Changelog
 ---------
 
-0.18.1 - UNRELEASED
+0.18.1 - 2013-07-02
 ~~~~~~~~~~~~~~~~~~~
 
-* fixed exporting of error symbols.
+* get-tree has been renamed to commit-tree
+* re-factored index functionality
+* documentation improvements
+* now exporting of error symbols.
 * removed with-revisions
 * updated revision-walker, it now uses commit objects not direct oids.
   It also uses conditions handling instead of return values to stop
