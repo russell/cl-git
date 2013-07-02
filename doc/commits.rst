@@ -140,7 +140,7 @@ To see the state of the repository when this commit was made, use the
 
 .. code-block:: common-lisp-repl
 
-   GIT> (get-tree
+   GIT> (commit-tree
          (target
           (repository-head
            (open-repository (merge-pathnames #p"projects/ecl"
