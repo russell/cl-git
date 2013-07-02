@@ -129,16 +129,16 @@ wrap git pointers to repositories, config, index etc."
 (defun git-object-lookup (oid type repository)
   "Returns a git object which is identified by the OID.
 The type argument specifies which type is expected.  If the found
-object is not of the right type, an error will be signaled.  The type
-is one of :ANY, :BAD, :COMMIT :TREE :BLOB :TAG :OFS-DELTA :REFS-DELTA.
-:ANY and :BAD are special cases.
-:ANY means return the object found, regardless of type.  Also :ANY is
-not a type of any real object, but only used for querying like in this function.
-:BAD should never occur, it indicates an error in the data store."
+object is not of the right type, an error will be signalled.
+
+If the oid is of the type TYPE then this operation will be
+idempotent."
   (assert (not (null-or-nullpointer repository)))
-  (make-instance-object :pointer (git-object-lookup-ptr oid type repository)
-                        :facilitator repository
-                        :type type))
+  (if (eql (type-of oid) type)
+      oid
+      (make-instance-object :pointer (git-object-lookup-ptr oid type repository)
+                            :facilitator repository
+                            :type type)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
