@@ -63,7 +63,13 @@
   (flags-extended :unsigned-short)
   (path :string))
 
-
+(defcenum git-index-capabilities
+  (:normal 0)
+  (:ignore-case 1)
+  (:no-filemode 2)
+  (:no-symlinks 4)
+  ;; (:from-owner ~0u)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -100,6 +106,10 @@
 
 (defcfun ("git_index_read" %git-index-read)
     %return-value
+  (index %index))
+
+(defcfun ("git_index_caps" %git-index-caps)
+    git-index-capabilities
   (index %index))
 
 (defcfun ("git_index_has_conflicts" %git-index-has-conflicts)
