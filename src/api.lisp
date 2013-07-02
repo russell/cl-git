@@ -67,9 +67,7 @@ Example
 
 A signature is a list with the keys :NAME :EMAIL and :TIME.  The :NAME
 and :EMAIL values are strings, and the :TIME value is LOCAL-TIME
-timestamp.
-"))
-
+timestamp."))
 
 (defgeneric parent-count (object)
   (:documentation "Returns the number of parents of OBJECT.
@@ -100,7 +98,6 @@ or a PATHNAME.  A truthful value for the key BARE will init a
 repository that does not have a local checkout, it's normally
 appropriate for the basename of the path to end in '.git'.  A
 REPOSITORY instance is returned."))
-
 
 (defgeneric repository-path (object)
   (:documentation "Return the path to the repository.  In the case
