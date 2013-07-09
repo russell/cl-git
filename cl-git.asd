@@ -61,7 +61,8 @@
                (:file "odb" :depends-on ("common" "fixtures"))
                (:file "blob" :depends-on ("common" "fixtures"))
                (:file "references" :depends-on ("common"))
-               (:file "revwalker" :depends-on ("common")))
+               (:file "revwalker" :depends-on ("common"))
+               (:file "libgit2" :depends-on ("common")))
   :in-order-to ((compile-op (load-op :cl-git))))
 
 
