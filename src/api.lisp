@@ -60,7 +60,7 @@ timestamp.
 
 Example
 
-    (cl-git:git-author *commit*)
+    (author *commit*)
     ==>
     (:NAME \"Willem Rein Oudshoorn\"
      :EMAIL \"woudshoo+github@xs4all.nl\"
