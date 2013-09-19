@@ -50,7 +50,10 @@
 (def-test references-list-oid (:fixture reference)
   (is
    (equal
-    (sort-strings (mapcar #'full-name (list-objects 'reference *test-repository* :test-not #'symbolic-p)))
+    (sort-strings
+     (mapcar #'full-name
+             (list-objects 'reference *test-repository*
+                           :test-not #'symbolic-p)))
     (sort-strings (list "refs/heads/oid" "refs/heads/master")))))
 
 (def-test references-list-symbolic (:fixture reference)
