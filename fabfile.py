@@ -20,6 +20,16 @@ def build():
         local("sphinx-build -b html -E . html")
 
 
+@task
+def doc_server(port="8000"):
+    """Serve documentation from localhost.
+
+    @param port  Port to run server on.
+    """
+    with lcd("doc/html"):
+        local("python -m SimpleHTTPServer %s" % port)
+
+
 def add(x, y):
     return x + y
 
@@ -51,7 +61,6 @@ def generate_version(version):
     message = "Released " + str(version)
     local("git commit -m '%s'" % message)
     local("git tag -a -m '" + message + "' %s" % version)
-
 
 try:
     execfile(expandvars("$HOME/.projects.py"))

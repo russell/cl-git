@@ -129,6 +129,10 @@ html_theme_options = {
     'navbar_sidebarrel': False,
 
     'navbar_pagenav': False,
+
+    # Tab name for entire site. (Default: "Site")
+    "navbar_site_name": "Contents",
+
     # Global TOC depth for "site" navbar tab. (Default: 1)
     # Switching to -1 shows all levels.
     # 'globaltoc_depth': 2,
