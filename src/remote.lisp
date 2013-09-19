@@ -1,6 +1,6 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
-;; cl-git an Common Lisp interface to git repositories.
+;; cl-git is a Common Lisp interface to git repositories.
 ;; Copyright (C) 2011-2012 Russell Sim <russell.sim@gmail.com>
 ;; Copyright (C) 2012 Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;;
