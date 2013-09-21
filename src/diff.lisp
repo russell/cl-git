@@ -83,6 +83,11 @@
   (defvar *diff-new-prefix* "b")
   (defvar *diff-max-size* (* 512 1024 1024)))
 
+(define-foreign-type patch (git-pointer-type)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %patch))
+
 (defcstruct git-diff-options
   (version :unsigned-int)
   (flags git-diff-option-flags)
@@ -230,11 +235,6 @@
   (enable-garbage-collection type)  ;; TODO (RS) this should be moved
                                     ;; out to an after method.
   type)
-
-(define-foreign-type patch (git-pointer-type)
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %patch))
 
 (defmethod translate-from-foreign (value (type patch))
   (setf (pointer type) value)
