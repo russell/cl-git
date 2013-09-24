@@ -46,7 +46,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass blob (object)
+(defclass blob (git-object)
   ()
   (:documentation "A git blob."))
 

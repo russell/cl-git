@@ -79,7 +79,7 @@ of parents of the commit `commit'."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass commit (object)
+(defclass commit (git-object)
   ()
   (:documentation "Commit objects link the state of the tree with a
 description.  Commits contain a description of the author, commit

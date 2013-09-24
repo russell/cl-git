@@ -78,7 +78,7 @@ This does count the number of direct children, not recursively."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass tree (object) ())
+(defclass tree (git-object) ())
 
 (defclass tree-blob (pathname-mixin blob)
   ((filemode :reader filemode :initarg :filemode :initform nil))

@@ -77,7 +77,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass tag (object)
+(defclass tag (git-object)
   ()
   (:documentation "Tags are used to identify interesting points in the
 repositories history."))

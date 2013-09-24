@@ -35,22 +35,29 @@
 ;;; 2 - All dependend objects that need to be invalidated.
 ;;;
 
-(defclass git-pointer ()
+
+
+(define-foreign-type git-pointer ()
   ((libgit2-pointer :initarg :pointer
+                    :accessor pointer
                     :initform (null-pointer)
                     :documentation "A CFFI pointer from libgit2.
 This is the git object that is wrapped by the instance of this class.")
-   (libgit2-oid :initarg :oid :initform nil)
-   (libgit2-name :initarg :name :initform nil)
-   (libgit2-disposed :initform nil)
-   (free-function :reader free-function :initarg :free-function :initform nil)
+   (free-function :accessor free-function :initarg :free-function :initform nil)
    (facilitator :accessor facilitator :initarg :facilitator :initform nil)
    (finalizer-data :accessor finalizer-data :initform (cons t nil)))
-  (:documentation "Class wrapping a pointer, handles finalization and freeing of the underlying object"))
+  (:actual-type :pointer))
+
+(defmethod translate-to-foreign (value (type git-pointer))
+  (if (pointerp value)
+      value
+      (if (null-pointer-p (pointer value))
+          (error "Object hasn't been initialised correctly")
+          (pointer value))))
 
 (defvar object-type-mapping (list 'commit :commit 'tree :tree 'blob :blob 'tag :tag))
 
-(defmethod pointer ((object git-pointer))
+(defmethod pointer ((object git-object))
   "Try and resolve the pointer if it isn't set."
   (when (and (null-pointer-p (slot-value object 'libgit2-pointer))
              (not (slot-value object 'libgit2-disposed)))
@@ -101,18 +108,16 @@ object directly."
 (defgeneric dispose (object)
   (:documentation "This interface is used to mark as invalid git objects when for example
 the repository is closed.")
-
   (:method ((object git-pointer))
-    "Basically identical to internal-dispose but sets the underlying
-pointer to null-pointer as well."
+    "Dispose of the object and any association to the facilitator."
+    (setf (facilitator object) nil)
     (when (car (finalizer-data object))
       (internal-dispose (finalizer-data object)
                         (pointer object)
                         (free-function object))
-      (setf (slot-value object 'libgit2-pointer) nil)
-      (setf (slot-value object 'libgit2-disposed) t))))
+      (setf (slot-value object 'libgit2-pointer) nil))))
 
-(defmethod print-object ((object git-pointer) stream)
+(defmethod print-object ((object git-object) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (cond
       ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
@@ -143,7 +148,7 @@ pointer to null-pointer as well."
                 (lambda ()
                   (internal-dispose finalizer-data pointer free-function))))))
 
-(defmethod initialize-instance :after ((instance git-pointer) &rest r)
+(defmethod initialize-instance :after ((instance git-object) &rest r)
   "Setup the finalizer to call internal-dispose with the right arguments."
   (when (getf r :pointer)
     (enable-garbage-collection instance)))

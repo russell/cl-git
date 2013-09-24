@@ -80,9 +80,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defclass object (git-pointer) ()
-  (:documentation "Object encapsulating git objects from libgit2"))
-
 (defun make-instance-object (&key pointer facilitator type)
   "Creates an object wrapping OBJECT-PTR.
 OBJECT-PTR needs to point to one of the git storage types, such as:
@@ -104,10 +101,16 @@ wrap git pointers to repositories, config, index etc."
                    :facilitator facilitator
                    :free-function #'git-object-free)))
 
-(defmethod dispose ((object object))
-  "Do the normal free and dispose children, but also clear reference to facilitator."
-  (call-next-method object)
-  (setf (facilitator object) nil))
+(defmethod dispose ((object git-object))
+  "Dispose of the object and association to the facilitator.  Mark
+the pointer as disposed."
+  (setf (facilitator object) nil)
+  (when (car (finalizer-data object))
+    (internal-dispose (finalizer-data object)
+                      (pointer object)
+                      (free-function object))
+    (setf (slot-value object 'libgit2-pointer) nil)
+    (setf (slot-value object 'libgit2-disposed) t)))
 
 
 (defun git-object-lookup-ptr (oid type repository)
@@ -142,16 +145,16 @@ object is not of the right type, an error will be signalled."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod oid ((object object))
+(defmethod oid ((object git-object))
   (git-object-id object))
 
-(defmethod full-name ((object object))
+(defmethod full-name ((object git-object))
   (format nil "~x" (oid object)))
 
-(defmethod short-name ((object object))
+(defmethod short-name ((object git-object))
   (subseq (format nil "~x" (oid object)) 0 7))
 
-(defmethod print-object ((object object) stream)
+(defmethod print-object ((object git-object) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (cond
       ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
@@ -164,7 +167,7 @@ object is not of the right type, an error will be signalled."
 (defmethod get-object ((class (eql 'object)) oid repository)
   (git-object-lookup oid :any repository))
 
-(defmethod object-type ((object object))
+(defmethod object-type ((object git-object))
   (git-object-type object))
 
 (defmethod git-entries (object &key (start 0) end)

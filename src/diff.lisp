@@ -27,6 +27,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(define-foreign-type diff-options ()
+  ((version :reader diff-version :initarg :version :initform *diff-options-version*)
+   (flags :accessor diff-flags :initarg :flags :initform '(:normal))
+   (context-lines :accessor diff-context-lines :initarg :context-lines :initform *diff-context-lines*)
+   (interhunk-lines :accessor diff-interhunk-lines :initarg :interhunk-lines :initform *diff-interhunk-lines*)
+   (old-prefix :accessor diff-old-prefix :initarg :old-prefix :initform *diff-old-prefix*)
+   (new-prefix :accessor diff-new-prefix :initarg :new-prefix :initform *diff-new-prefix*)
+   (max-size :accessor diff-max-size :initarg :max-size :initform *diff-max-size*)
+   (pathspec :accessor diff-pathspec :initarg :pathspec :initform nil)
+   (notify-cb :accessor diff-notify-cb :initarg :notify-cb :initform (null-pointer))
+   (notify-payload :accessor diff-notify-payload :initarg :notify-payload :initform (null-pointer)))
+  (:actual-type :pointer)
+  (:simple-parser %diff-options))
+
+(define-foreign-type diff-list (git-pointer)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %diff-list))
+
 (defbitfield (git-diff-option-flags :unsigned-int)
   (:normal 0)
   (:reverse #.(ash 1 0))
@@ -83,7 +102,7 @@
   (defvar *diff-new-prefix* "b")
   (defvar *diff-max-size* (* 512 1024 1024)))
 
-(define-foreign-type patch (git-pointer-type)
+(define-foreign-type patch (git-pointer)
   nil
   (:actual-type :pointer)
   (:simple-parser %patch))
@@ -132,9 +151,9 @@
     %return-value
   (diff-list %diff-list)
   (repository %repository)
-  (old_tree %tree)
-  (new_tree %tree)
-  (options (:pointer (:struct git-diff-options))))
+  (old-tree %tree)
+  (new-tree %tree)
+  (options %diff-options))
 
 (defcfun %git-diff-tree-to-index
     %return-value
@@ -174,21 +193,8 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-foreign-type diff-options ()
-  ((version :reader diff-version :initarg :version :initform *diff-options-version*)
-   (flags :accessor diff-flags :initarg :flags :initform '(:normal))
-   (context-lines :accessor diff-context-lines :initarg :context-lines :initform *diff-context-lines*)
-   (interhunk-lines :accessor diff-interhunk-lines :initarg :interhunk-lines :initform *diff-interhunk-lines*)
-   (old-prefix :accessor diff-old-prefix :initarg :old-prefix :initform *diff-old-prefix*)
-   (new-prefix :accessor diff-new-prefix :initarg :new-prefix :initform *diff-new-prefix*)
-   (max-size :accessor diff-max-size :initarg :max-size :initform *diff-max-size*)
-   (pathspec :accessor diff-pathspec :initarg :pathspec :initform nil)
-   (notify-cb :accessor diff-notify-cb :initarg :notify-cb :initform (null-pointer))
-   (notify-payload :accessor diff-notify-payload :initarg :notify-payload :initform (null-pointer)))
-  (:actual-type :pointer)
-  (:simple-parser %diff-options))
 
-(defmethod translate-to-foreign ((value diff-options) (type diff-options))
+(defmethod translate-to-foreign (value (type diff-options))
   (let ((options (foreign-alloc '(:struct git-diff-options))))
     (with-foreign-slots ((version flags context-lines interhunk-lines old-prefix new-prefix
                                   max-size diff-notify-cb notify-payload)
@@ -218,13 +224,7 @@
   ;; cleanup the nested strarray.
   (foreign-free pointer))
 
-
-(define-foreign-type diff-list (git-pointer-type)
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %diff-list))
-
-(defmethod translate-from-foreign (value (type git-pointer-type))
+(defmethod translate-from-foreign (value (type git-pointer))
   (setf (pointer type) value)
   ;; TODO (RS) hook up garbage collection here
   type)
@@ -269,7 +269,7 @@
   (with-foreign-objects ((diff-list :pointer))
     (%git-diff-tree-to-index diff-list (facilitator index) tree index options)
     (translate-from-foreign (mem-ref diff-list :pointer)
-                            (make-instance 'diff-list :facilitator (facilitator tree-old)))))
+                            (make-instance 'diff-list :facilitator (facilitator tree)))))
 
 (defmethod make-patch ((diff diff-list) index)
   (with-foreign-objects ((patch :pointer) (delta :pointer))
@@ -287,4 +287,4 @@
       (foreign-free (mem-ref string :pointer)))))
 
 (defmethod diff-list-size ((diff-list diff-list))
-  (git-diff-num-deltas diff-list))
+  (%git-diff-num-deltas diff-list))

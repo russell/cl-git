@@ -114,7 +114,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass reference (git-pointer) ())
+(defclass reference (git-object) ())
 
 ;;; XXX (RS) should probably look at using the groveller to get these
 ;;; values.

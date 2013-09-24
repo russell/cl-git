@@ -156,7 +156,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass remote (git-pointer) ())
+(defclass remote (git-object) ())
 
 
 (defmethod make-object ((class (eql 'remote)) name repository

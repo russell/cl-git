@@ -205,8 +205,7 @@ and 3 (theirs) are in conflict."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass index
-    (git-pointer)
+(defclass index (git-pointer)
   ()
   (:documentation "A git index"))
 

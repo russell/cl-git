@@ -78,7 +78,7 @@ GIT-REPOSITORY-CONFIG."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass config (object) ())
+(defclass config (git-pointer) ())
 
 (defmethod git-values ((config config))
   "Returns the key value pairs in the config as an association list."

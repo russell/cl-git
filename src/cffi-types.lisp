@@ -32,10 +32,14 @@
   (:link 0120000)
   (:commit 0160000))
 
-(define-foreign-type git-object ()
-  ()
+(define-foreign-type git-object (git-pointer)
+  ((libgit2-oid :initarg :oid :initform nil)
+   (libgit2-name :initarg :name :initform nil)
+   (libgit2-disposed :initform nil))
   (:actual-type :pointer)
-  (:simple-parser %object))
+  (:simple-parser %object)
+  (:documentation "Class wrapping a pointer, handles finalization and
+  freeing of the underlying object"))
 
 (define-foreign-type git-commit (git-object)
   nil
@@ -58,11 +62,11 @@
   nil
   (:simple-parser %tree))
 
-(define-foreign-type git-config (git-object)
+(define-foreign-type git-config (git-pointer)
   nil
   (:simple-parser %config))
 
-(define-foreign-type git-remote (git-object)
+(define-foreign-type git-remote (git-pointer)
   nil
   (:simple-parser %remote))
 
@@ -70,31 +74,31 @@
   nil
   (:simple-parser %reference))
 
-(define-foreign-type git-reflog (git-object)
+(define-foreign-type git-reflog (git-pointer)
   nil
   (:simple-parser %reflog))
 
-(define-foreign-type git-reflog-entry (git-object)
+(define-foreign-type git-reflog-entry (git-pointer)
   nil
   (:simple-parser %reflog-entry))
 
-(define-foreign-type git-repository (git-object)
+(define-foreign-type git-repository (git-pointer)
   ()
   (:simple-parser %repository))
 
-(define-foreign-type git-odb (git-object)
+(define-foreign-type git-odb (git-pointer)
   ()
   (:simple-parser %odb))
 
-(define-foreign-type git-index (git-object)
+(define-foreign-type git-index (git-pointer)
   ()
   (:simple-parser %index))
 
-(define-foreign-type git-odb-object (git-object)
+(define-foreign-type git-odb-object (git-pointer)
   ()
   (:simple-parser %odb-object))
 
-(define-foreign-type git-revision-walker (git-object)
+(define-foreign-type git-revision-walker (git-pointer)
   ()
   (:simple-parser %revwalker))
 
@@ -122,23 +126,6 @@
   nil
   (:actual-type :pointer)
   (:simple-parser %index-entry))
-
-(define-foreign-type git-pointer-type ()
-  ((libgit2-pointer :initarg :pointer
-                    :accessor pointer
-                    :initform (null-pointer)
-                    :documentation "A CFFI pointer from libgit2.
-This is the git object that is wrapped by the instance of this class.")
-   (free-function :accessor free-function :initarg :free-function :initform nil)
-   (facilitator :accessor facilitator :initarg :facilitator :initform nil)
-   (finalizer-data :accessor finalizer-data :initform (cons t nil)))
-  (:actual-type :pointer)
-  (:simple-parser %git-object))
-
-(defmethod translate-to-foreign (value (type git-pointer-type))
-  (if (null-pointer-p (pointer value))
-      (error "Object hasn't been initialised correctly")
-      (pointer value)))
 
 (define-foreign-type refspec-type ()
   nil
