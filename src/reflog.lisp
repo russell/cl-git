@@ -32,7 +32,7 @@
 
 (defcfun ("git_reflog_free" %git-reflog-free)
   :void
-  (reflog %reflog))
+  (reflog :pointer))
 
 (defcfun ("git_reflog_read" %git-reflog-read)
     %return-value

@@ -85,7 +85,7 @@
 
 (defcfun ("git_reference_free" %git-reference-free)
     :void
-  (reference %reference))
+  (reference :pointer))
 
 (defcfun ("git_reference_type" git-reference-type)
     git-reference-flags

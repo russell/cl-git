@@ -41,7 +41,7 @@ contains the object database.")
 
 (defcfun ("git_repository_free" git-repository-free)
     :void
-  (repository %repository))
+  (repository :pointer))
 
 (defcfun ("git_repository_config" %git-repository-config)
     %return-value

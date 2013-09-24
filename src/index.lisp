@@ -92,11 +92,11 @@
 
 (defcfun ("git_index_new" %git-index-new)
     %return-value
-  (index %index))
+  (index :pointer))
 
 (defcfun ("git_index_open" %git-index-open)
     %return-value
-  (index %index)
+  (index :pointer)
   (path :string))
 
 (defcfun ("git_index_add" %git-index-add)
@@ -115,7 +115,7 @@
 
 (defcfun ("git_index_free" %git-index-free)
     :void
-  (index %index))
+  (index :pointer))
 
 (defcfun ("git_index_write" %git-index-write)
     %return-value

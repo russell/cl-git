@@ -107,7 +107,7 @@
 
 (defcfun ("git_remote_free" %git-remote-free)
     :void
-  (remote %remote))
+  (remote :pointer))
 
 (defcfun ("git_remote_pushurl" %git-remote-push-url)
     :string

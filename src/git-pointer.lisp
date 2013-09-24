@@ -50,11 +50,7 @@ This is the git object that is wrapped by the instance of this class.")
 
 
 (defmethod translate-to-foreign (value (type git-pointer))
-  (if (pointerp value)
-      value
-      (if (null-pointer-p (pointer value))
-          (error "Object hasn't been initialised correctly")
-          (pointer value))))
+  (pointer value))
 
 
 (defun null-or-nullpointer (obj)

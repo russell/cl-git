@@ -44,7 +44,7 @@
     :void
   "Free the git configuration object that is acquired with
 GIT-REPOSITORY-CONFIG."
-  (config %config))
+  (config :pointer))
 
 (defcfun ("git_config_foreach" %git-config-for-each)
     %return-value

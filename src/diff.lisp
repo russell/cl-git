@@ -162,7 +162,7 @@
 
 (defcfun %git-diff-tree-to-tree
     %return-value
-  (diff-list %diff-list)
+  (diff-list :pointer)
   (repository %repository)
   (old-tree %tree)
   (new-tree %tree)
@@ -178,7 +178,7 @@
 
 (defcfun %git-diff-list-free
     :void
-  (diff-list %diff-list))
+  (diff-list :pointer))
 
 (defcfun %git-diff-patch-free
     :void

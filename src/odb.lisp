@@ -34,7 +34,7 @@
 
 (defcfun ("git_odb_free" %git-odb-free)
     :void
-  (odb %odb))
+  (odb :pointer))
 
 (defcfun ("git_odb_foreach" %git-odb-for-each)
     %return-value
@@ -50,7 +50,7 @@
 
 (defcfun ("git_odb_object_free" %git-odb-object-free)
     :void
-  (obd-object %odb-object))
+  (obd-object :pointer))
 
 (defcfun ("git_odb_object_type" %git-odb-object-type)
     git-object-type
