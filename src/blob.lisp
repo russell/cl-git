@@ -20,11 +20,10 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-foreign-type blob (git-object)
+  nil
+  (:documentation "A git blob.")
+  (:simple-parser %blob))
 
 
 (defcfun ("git_blob_rawcontent" %git-blob-raw-content)
@@ -45,10 +44,6 @@
 ;;; Highlevel Interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass blob (git-object)
-  ()
-  (:documentation "A git blob."))
 
 (defmethod get-object ((class (eql 'blob)) oid repository)
   (git-object-lookup oid class repository))

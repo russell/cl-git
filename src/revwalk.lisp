@@ -20,17 +20,17 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defbitfield git-revwalk-flags
   (:none 0)
   (:topological 1)
   (:time 2)
   (:reverse 4))
+
+
+(define-foreign-type revision-walker (git-pointer)
+  ()
+  (:simple-parser %revwalker))
+
 
 (defcfun ("git_revwalk_new" %git-revwalk-new)
     %return-value
@@ -68,7 +68,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defmethod translate-to-foreign (value (type git-revision-walker))
+(defmethod translate-to-foreign (value (type revision-walker))
   (if (pointerp value)
       value
       (pointer value)))
@@ -80,7 +80,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass revision-walker (git-pointer) ())
 
 (defgeneric next-revision (walker)
   (:documentation "Returns the next object for the walker.  If no

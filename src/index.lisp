@@ -20,12 +20,6 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 #+nil (defbitfield (index-entry-flag :unsigned-short)
   (:update #.(ash 1 0))
   :remove
@@ -41,18 +35,22 @@
   :skip-worktree
   :extended-2)
 
+
 (defvar git-index-entry-namemask #x0fff)
 (defvar git-index-entry-stagemask #x3000)
 (defvar git-index-entry-extended #x4000)
 (defvar git-index-entry-valid #x8000)
 (defvar git-index-entry-stageshift 12)
 
+
 (defcstruct (git-index-time :class index-time-struct-type)
   (seconds %time)
   (nanoseconds :unsigned-int))
 
+
 (defctype struct-index-time
     (:struct git-index-time))
+
 
 (defcstruct git-index-entry
   (ctime (:struct git-index-time))
@@ -68,6 +66,7 @@
   (flags-extended :unsigned-short)
   (path :string))
 
+
 (defcenum git-index-capabilities
   (:normal 0)
   (:ignore-case 1)
@@ -75,6 +74,19 @@
   (:no-symlinks 4)
   ;; (:from-owner ~0u)
   )
+
+
+(define-foreign-type index (git-pointer)
+  ()
+  (:documentation "A git index")
+  (:simple-parser %index))
+
+
+(define-foreign-type index-entry-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %index-entry))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -205,9 +217,6 @@ and 3 (theirs) are in conflict."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass index (git-pointer)
-  ()
-  (:documentation "A git index"))
 
 ;; TODO (RS) perhaps rename back to index-add, seems unlikely to have
 ;; naming clash.

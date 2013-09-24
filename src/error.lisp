@@ -58,6 +58,19 @@
   (message :string)
   (klass %error-class-list))
 
+
+(define-foreign-type git-error-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %git-error))
+
+
+(define-foreign-type return-value-type ()
+  nil
+  (:actual-type :int)
+  (:simple-parser %return-value))
+
+
 (defcfun ("giterr_last" giterr-last) %git-error)
 
 

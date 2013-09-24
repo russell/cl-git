@@ -20,32 +20,6 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(define-foreign-type diff-options ()
-  ((version :reader diff-version :initarg :version :initform *diff-options-version*)
-   (flags :accessor diff-flags :initarg :flags :initform '(:normal))
-   (context-lines :accessor diff-context-lines :initarg :context-lines :initform *diff-context-lines*)
-   (interhunk-lines :accessor diff-interhunk-lines :initarg :interhunk-lines :initform *diff-interhunk-lines*)
-   (old-prefix :accessor diff-old-prefix :initarg :old-prefix :initform *diff-old-prefix*)
-   (new-prefix :accessor diff-new-prefix :initarg :new-prefix :initform *diff-new-prefix*)
-   (max-size :accessor diff-max-size :initarg :max-size :initform *diff-max-size*)
-   (pathspec :accessor diff-pathspec :initarg :pathspec :initform nil)
-   (notify-cb :accessor diff-notify-cb :initarg :notify-cb :initform (null-pointer))
-   (notify-payload :accessor diff-notify-payload :initarg :notify-payload :initform (null-pointer)))
-  (:actual-type :pointer)
-  (:simple-parser %diff-options))
-
-(define-foreign-type diff-list (git-pointer)
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %diff-list))
-
 (defbitfield (git-diff-option-flags :unsigned-int)
   (:normal 0)
   (:reverse #.(ash 1 0))
@@ -67,6 +41,14 @@
   :include_typechange_trees
   :ignore_filemode
   :recurse_ignored_dirs)
+
+(defcenum git-file-mode
+  (:new 0000000)
+  (:tree 0040000)
+  (:blob 0100644)
+  (:blob-executable 0100755)
+  (:link 0120000)
+  (:commit 0160000))
 
 (defbitfield git-diff-flags
   (:binary #.(ash 1 0)) ;; file(s) treated as binary data
@@ -94,13 +76,6 @@
   (:hunk_hdr #.(char-int #\H))
   (:binary #.(char-int #\B)))
 
-(eval-when (:compile-toplevel :execute)
-  (defvar *diff-options-version* 1)
-  (defvar *diff-context-lines* 3)
-  (defvar *diff-interhunk-lines* 0)
-  (defvar *diff-old-prefix* "a")
-  (defvar *diff-new-prefix* "b")
-  (defvar *diff-max-size* (* 512 1024 1024)))
 
 (define-foreign-type patch (git-pointer)
   nil
@@ -139,6 +114,44 @@
   (new_start :int)  ;; Starting line number in new_file
   (new_lines :int)) ;; Number of lines in new_file
 
+(define-foreign-type diff-options ()
+  ((version :reader diff-version
+            :initarg :version
+            :initform *diff-options-version*)
+   (flags :accessor diff-flags
+          :initarg :flags
+          :initform '(:normal))
+   (context-lines :accessor diff-context-lines
+                  :initarg :context-lines
+                  :initform *diff-context-lines*)
+   (interhunk-lines :accessor diff-interhunk-lines
+                    :initarg :interhunk-lines
+                    :initform *diff-interhunk-lines*)
+   (old-prefix :accessor diff-old-prefix
+               :initarg :old-prefix
+               :initform *diff-old-prefix*)
+   (new-prefix :accessor diff-new-prefix
+               :initarg :new-prefix
+               :initform *diff-new-prefix*)
+   (max-size :accessor diff-max-size
+             :initarg :max-size
+             :initform *diff-max-size*)
+   (pathspec :accessor diff-pathspec
+             :initarg :pathspec
+             :initform nil)
+   (notify-cb :accessor diff-notify-cb
+              :initarg :notify-cb
+              :initform (null-pointer))
+   (notify-payload :accessor diff-notify-payload
+                   :initarg :notify-payload
+                   :initform (null-pointer)))
+  (:actual-type :pointer)
+  (:simple-parser %diff-options))
+
+(define-foreign-type diff-list (git-pointer)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %diff-list))
 
 (defcfun %git-diff-index-to-workdir
     %return-value

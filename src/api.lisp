@@ -27,6 +27,14 @@
   (:documentation "A mixin that has a filename attribute."))
 
 
+(defvar *diff-options-version* 1)
+(defvar *diff-context-lines* 3)
+(defvar *diff-interhunk-lines* 0)
+(defvar *diff-old-prefix* "a")
+(defvar *diff-new-prefix* "b")
+(defvar *diff-max-size* (* 512 1024 1024))
+
+
 (defgeneric oid (object)
   (:documentation "Return the identifier of OBJECT.
 The identifier is typically the SHA-1 checksum or hash code.

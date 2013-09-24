@@ -187,4 +187,10 @@
    #:repository-head
    #:repository-path
    #:repository-status
-   #:repository-workdir))
+   #:repository-workdir
+
+   ;; diff
+   #:diff
+   #:diff-list-size
+   #:patch-to-string
+   ))

@@ -20,13 +20,6 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 (defcfun ("git_commit_create" %git-commit-create)
     %return-value
   (oid :pointer)
@@ -39,6 +32,17 @@
   (tree %tree)
   (parent-count :int)
   (parents :pointer))
+
+
+(define-foreign-type commit (git-object)
+  nil
+  (:documentation "Commit objects link the state of the tree with a
+description.  Commits contain a description of the author, commit
+author and a message about the commit.  They also contain state
+information about the current tree and links to any parent commits.
+Commits that have more then one parent are considered to be merges.")
+  (:simple-parser %commit))
+
 
 (defcfun ("git_commit_message" git-commit-message)
     :string
@@ -79,13 +83,6 @@ of parents of the commit `commit'."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass commit (git-object)
-  ()
-  (:documentation "Commit objects link the state of the tree with a
-description.  Commits contain a description of the author, commit
-author and a message about the commit.  They also contain state
-information about the current tree and links to any parent commits.
-Commits that have more then one parent are considered to be merges."))
 
 (defun make-commit (tree-or-oid message &key
                                           (update-ref "HEAD")

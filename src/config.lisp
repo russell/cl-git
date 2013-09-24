@@ -20,11 +20,6 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcenum git-config-level
   (:system 1)
@@ -33,10 +28,17 @@
   (:local 4)
   (:highest-level -1))
 
+
 (defcstruct git-config-entry
   (name :string)
   (value :string)
   (level git-config-level))
+
+
+(define-foreign-type config (git-pointer)
+  nil
+  (:simple-parser %config))
+
 
 (defcfun ("git_config_free" git-config-free)
     :void
@@ -77,8 +79,6 @@ GIT-REPOSITORY-CONFIG."
 ;;; Highlevel Interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass config (git-pointer) ())
 
 (defmethod git-values ((config config))
   "Returns the key value pairs in the config as an association list."

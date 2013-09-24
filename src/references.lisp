@@ -20,17 +20,17 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defbitfield git-reference-flags
   (:oid 1)
   (:symbolic 2)
   (:packed 4)
   (:has-peel 8))
+
+
+(define-foreign-type reference (git-object)
+  nil
+  (:simple-parser %reference))
+
 
 (defcfun ("git_reference_list" %git-reference-list)
     %return-value
@@ -114,7 +114,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass reference (git-object) ())
 
 ;;; XXX (RS) should probably look at using the groveller to get these
 ;;; values.

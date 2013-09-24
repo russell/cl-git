@@ -19,11 +19,17 @@
 
 (in-package #:cl-git)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-Level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-foreign-type reflog (git-pointer)
+  nil
+  (:simple-parser %reflog))
+
+
+(define-foreign-type reflog-entry (git-pointer)
+  nil
+  (:simple-parser %reflog-entry))
+
+
 (defcfun ("git_reflog_free" %git-reflog-free)
   :void
   (reflog %reflog))
@@ -56,9 +62,6 @@
 ;;; High-Level interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass reflog (git-pointer) ())
-(defclass reflog-entry (git-pointer) ())
 
 (defmethod reflog ((reference reference))
   (with-foreign-object (reflog :pointer)

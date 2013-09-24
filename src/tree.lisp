@@ -19,11 +19,16 @@
 
 (in-package #:cl-git)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-foreign-type tree (git-object)
+  nil
+  (:simple-parser %tree))
+
+
+(define-foreign-type tree-entry ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %tree-entry))
 
 
 #+nil (defcfun ("git_tree_create_fromindex" git-tree-create-fromindex)
@@ -78,8 +83,6 @@ This does count the number of direct children, not recursively."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass tree (git-object) ())
-
 (defclass tree-blob (pathname-mixin blob)
   ((filemode :reader filemode :initarg :filemode :initform nil))
   (:documentation "A git tree blob."))
@@ -107,7 +110,7 @@ This does count the number of direct children, not recursively."
                  :facilitator repository
                  :free-function #'git-object-free))
 
-(defmethod translate-from-foreign (value (type git-tree-entry-type))
+(defmethod translate-from-foreign (value (type tree-entry))
   (unless (null-pointer-p value)
     (let ((type (git-tree-entry-type value))
           (filename (git-tree-entry-name value)))

@@ -21,18 +21,13 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-foreign-type repository (git-pointer)
+  ()
+  (:documentation "Repository is the root type, it
+contains the object database.")
+  (:simple-parser %repository))
 
 
-;;; Git Repositories
-
-;;(defctype git-repository-index :pointer) ;; TODO move to index.
-
-;;; Git Config
 (defcfun ("git_repository_init" %git-repository-init)
     :int
   (repository :pointer)
@@ -97,10 +92,6 @@
 ;;; Highlevel Interface
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass repository (git-pointer) ()
-  (:documentation "Repository is the root type, it
-contains the object database."))
 
 (defmethod translate-to-foreign :before (value (type repository))
   (when (not (pointerp value))

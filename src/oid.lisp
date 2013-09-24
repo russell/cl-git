@@ -34,6 +34,12 @@
   (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
 
 
+(define-foreign-type oid-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %oid))
+
+
 (defcfun ("git_oid_tostr" git-oid-tostr)
     :pointer
   "Returns the buffer that the string is written into.  The size of

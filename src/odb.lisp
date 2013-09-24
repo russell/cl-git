@@ -22,6 +22,16 @@
 
 (defparameter *oid-values* nil)
 
+
+(define-foreign-type odb (git-pointer)
+  ()
+  (:simple-parser %odb))
+
+(define-foreign-type odb-object (git-pointer)
+  ()
+  (:simple-parser %odb-object))
+
+
 (defcfun ("git_odb_free" %git-odb-free)
     :void
   (odb %odb))
@@ -66,8 +76,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass odb (git-pointer) ())
-(defclass odb-object (git-pointer) ())
 
 (defmethod list-objects ((class (eql :oid)) (repository odb) &key test test-not)
   (let ((*oid-values* (list)))

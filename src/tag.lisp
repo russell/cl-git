@@ -20,11 +20,14 @@
 (in-package #:cl-git)
 
 (defparameter *tag-values* nil)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(define-foreign-type tag (git-object)
+  nil
+  (:documentation "Tags are used to identify interesting points in the
+repositories history.")
+  (:simple-parser %tag))
+
 
 (defcfun ("git_tag_list" %git-tag-list)
     %return-value
@@ -77,10 +80,6 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass tag (git-object)
-  ()
-  (:documentation "Tags are used to identify interesting points in the
-repositories history."))
 
 (defgeneric tag-p (tag)
   (:documentation

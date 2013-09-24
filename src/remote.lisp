@@ -27,14 +27,28 @@
   :pattern
   :matching)
 
+
 (defcstruct (git-refspec :class refspec-struct-type)
   (next :pointer)
   (src :string)
   (dst :string)
   (flags refspec-flags))
 
+
+(define-foreign-type remote (git-object)
+  nil
+  (:simple-parser %remote))
+
+
+(define-foreign-type refspec-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %refspec))
+
+
 (defmethod translate-from-foreign (value (type refspec-struct-type))
   (translate-from-foreign value (make-instance 'refspec-type)))
+
 
 (defmethod translate-from-foreign (value (type refspec-type))
   (unless (null-pointer-p value)
@@ -155,8 +169,6 @@
   (payload :pointer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass remote (git-object) ())
 
 
 (defmethod make-object ((class (eql 'remote)) name repository

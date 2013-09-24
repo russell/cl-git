@@ -24,11 +24,17 @@
   (strings :pointer)
   (count size-t))
 
+
+(define-foreign-type git-strings-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %git-strings))
+
+
 (defcfun ("git_strarray_free" %git-strarray-free)
     :void
   (strings %git-strings))
 
-;;; New translation
 
 (defmethod translate-to-foreign ((value t) (type git-strings-type))
   (if (pointerp value)
@@ -43,13 +49,6 @@
 (defmethod free-translated-object (pointer (type git-strings-type) do-not-free)
   (%git-strarray-free pointer)
   (unless do-not-free (foreign-free pointer)))
-
-;;; Helper function for debugging
-(defun null-or-nullpointer (obj)
-  (or (not obj)
-      (typecase obj
-        (git-pointer (null-pointer-p (pointer obj)))
-        (t (null-pointer-p obj)))))
 
 (defun getenv (name &optional default)
   #+CMU

@@ -48,6 +48,7 @@ This is the git object that is wrapped by the instance of this class.")
    (finalizer-data :accessor finalizer-data :initform (cons t nil)))
   (:actual-type :pointer))
 
+
 (defmethod translate-to-foreign (value (type git-pointer))
   (if (pointerp value)
       value
@@ -55,31 +56,12 @@ This is the git object that is wrapped by the instance of this class.")
           (error "Object hasn't been initialised correctly")
           (pointer value))))
 
-(defvar object-type-mapping (list 'commit :commit 'tree :tree 'blob :blob 'tag :tag))
 
-(defmethod pointer ((object git-object))
-  "Try and resolve the pointer if it isn't set."
-  (when (and (null-pointer-p (slot-value object 'libgit2-pointer))
-             (not (slot-value object 'libgit2-disposed)))
-    (cond
-      ;; Resolve by oid
-      ((slot-value object 'libgit2-oid)
-       (setf (slot-value object 'libgit2-pointer)
-             (git-object-lookup-ptr (slot-value object 'libgit2-oid)
-                                    (getf object-type-mapping (type-of object))
-                                    (facilitator object)))
-       (enable-garbage-collection object)
-       (setf (slot-value object 'libgit2-oid) nil))
-      ;; Resolve by name
-      ((slot-value object 'libgit2-name)
-       (setf (slot-value object 'libgit2-pointer)
-             (%git-lookup-by-name (type-of object)
-                                  (slot-value object 'libgit2-name)
-                                  (facilitator object)))
-       (enable-garbage-collection object)
-       (setf (slot-value object 'libgit2-name) nil))
-      (t (error "Unable to lookup object in git repository."))))
-  (slot-value object 'libgit2-pointer))
+(defun null-or-nullpointer (obj)
+  (or (not obj)
+      (typecase obj
+        (git-pointer (null-pointer-p (pointer obj)))
+        (t (null-pointer-p obj)))))
 
 
 (defun mapc-weak (function list)
@@ -117,19 +99,11 @@ the repository is closed.")
                         (free-function object))
       (setf (slot-value object 'libgit2-pointer) nil))))
 
-(defmethod print-object ((object git-object) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (cond
-      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
-       (format stream "~X" (pointer-address (pointer object))))
-      ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
-       (princ "(weak)" stream))
-      ((slot-value object 'libgit2-disposed)
-       (princ "(disposed)" stream)))))
 
 (defmethod free ((object git-pointer))
   (dispose object)
   nil)
+
 
 (defmethod enable-garbage-collection (instance)
   (when (slot-value instance 'libgit2-pointer)
@@ -147,8 +121,3 @@ the repository is closed.")
       (finalize instance
                 (lambda ()
                   (internal-dispose finalizer-data pointer free-function))))))
-
-(defmethod initialize-instance :after ((instance git-object) &rest r)
-  "Setup the finalizer to call internal-dispose with the right arguments."
-  (when (getf r :pointer)
-    (enable-garbage-collection instance)))

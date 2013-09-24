@@ -20,12 +20,6 @@
 (in-package #:cl-git)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defcstruct timeval
   (time %time)
   (offset :int))
@@ -34,6 +28,12 @@
   (name :string)
   (email :string)
   (time (:struct timeval)))
+
+
+(define-foreign-type git-signature-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %git-signature))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

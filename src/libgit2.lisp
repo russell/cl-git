@@ -25,6 +25,26 @@
   (:threads 1)
   (:https 2))
 
+(define-foreign-library libgit2
+  (:linux "libgit2.so.0")
+  (:windows "libgit2.dll")
+  (:darwin "libgit2.0.dylib")
+  (:default "libgit2"))
+
+(use-foreign-library libgit2)
+
+
+(defctype size :unsigned-long)
+(defctype size-t :unsigned-long)
+(defctype off-t :uint64)
+
+
+(define-foreign-type time-type ()
+  nil
+  (:actual-type :int64)
+  (:simple-parser %time))
+
+
 (defcfun ("git_libgit2_capabilities" libgit2-capabilities)
   git-capabilities
   "Return a list of the libgit2 capabilities, possible values in the
@@ -43,7 +63,6 @@ list return values are :THREADS and :HTTPS.")
 (defcfun ("git_threads_shutdown" git-threads-shutdown)
     :void
     "Shutdown libgit2 threading.")
-
 
 ;;; Init threading on load
 (eval-when (:load-toplevel :execute)
@@ -64,3 +83,11 @@ list return values are :THREADS and :HTTPS.")
     (list (mem-ref maj :int)
           (mem-ref min :int)
           (mem-ref rev :int))))
+
+(defmethod translate-name-to-foreign ((lisp-name symbol)
+                                      (package (eql *package*))
+                                      &optional varp)
+  (let ((name (translate-underscore-separated-name lisp-name)))
+    (if varp
+        (string-trim '(#\* #\%) name)
+        (string-trim '(#\%) name))))

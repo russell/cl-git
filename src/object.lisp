@@ -37,6 +37,71 @@
   (:ofs-delta 6)  ; A delta, base is given by an offset.
   (:ref-delta 7)) ; A delta, base is given by object id.
 
+(define-foreign-type git-object (git-pointer)
+  ((libgit2-oid :initarg :oid
+                :initform nil)
+   (libgit2-name :initarg :name
+                 :initform nil)
+   (libgit2-disposed :initform nil))
+  (:actual-type :pointer)
+  (:simple-parser %object)
+  (:documentation "Class wrapping a pointer, handles finalization and
+  freeing of the underlying object"))
+
+(defvar object-type-mapping
+  (list 'commit :commit
+        'tree :tree
+        'blob :blob
+        'tag :tag))
+
+(defmethod pointer ((object git-object))
+  "Try and resolve the pointer if it isn't set."
+  (when (and (null-pointer-p (slot-value object 'libgit2-pointer))
+             (not (slot-value object 'libgit2-disposed)))
+    (cond
+      ;; Resolve by oid
+      ((slot-value object 'libgit2-oid)
+       (setf (slot-value object 'libgit2-pointer)
+             (git-object-lookup-ptr (slot-value object 'libgit2-oid)
+                                    (getf object-type-mapping (type-of object))
+                                    (facilitator object)))
+       (enable-garbage-collection object)
+       (setf (slot-value object 'libgit2-oid) nil))
+      ;; Resolve by name
+      ((slot-value object 'libgit2-name)
+       (setf (slot-value object 'libgit2-pointer)
+             (%git-lookup-by-name (type-of object)
+                                  (slot-value object 'libgit2-name)
+                                  (facilitator object)))
+       (enable-garbage-collection object)
+       (setf (slot-value object 'libgit2-name) nil))
+      (t (error "Unable to lookup object in git repository."))))
+  (slot-value object 'libgit2-pointer))
+
+
+(defmethod initialize-instance :after ((instance git-object) &rest r)
+  "Setup the finalizer to call internal-dispose with the right arguments."
+  (when (getf r :pointer)
+    (enable-garbage-collection instance)))
+
+
+(defmethod print-object ((object git-object) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (cond
+      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
+       (format stream "~X" (pointer-address (pointer object))))
+      ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
+       (princ "(weak)" stream))
+      ((slot-value object 'libgit2-disposed)
+       (princ "(disposed)" stream)))))
+
+
+(defmethod translate-to-foreign (value (type git-object))
+  (if (pointerp value)
+      value
+      (pointer value)))
+
+
 (defcfun ("git_object_id" git-object-id)
     %oid
   "Returns the oid identifying OBJECT"
@@ -58,19 +123,6 @@
     :void
   "Free the git object."
   (object :pointer))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Foreign Type Translation
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defmethod translate-to-foreign (value (type git-object))
-  (if (pointerp value)
-      value
-      (pointer value)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
