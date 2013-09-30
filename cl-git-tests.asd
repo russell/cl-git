@@ -11,6 +11,7 @@
                  (:file "index" :depends-on ("common" "fixtures"))
                  (:file "repository" :depends-on ("common" "fixtures"))
                  (:file "remote" :depends-on ("common" "fixtures"))
+                 (:file "strings" :depends-on ("common" "fixtures"))
                  (:file "tag" :depends-on ("common" "fixtures"))
                  (:file "tree" :depends-on ("common" "fixtures"))
                  (:file "config" :depends-on ("common" "fixtures"))

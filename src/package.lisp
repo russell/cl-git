@@ -23,6 +23,7 @@
                 #:use-foreign-library
                 #:define-foreign-library
                 #:translate-to-foreign
+                #:translate-into-foreign-memory
                 #:translate-from-foreign
                 #:translate-name-to-foreign
                 #:translate-underscore-separated-name

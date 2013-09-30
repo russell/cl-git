@@ -90,6 +90,9 @@
    (gen-string :length (gen-integer :min length :max length)
                :elements (gen-alpha-numeric))))
 
+(defun random-list (&key (length (gen-integer :min 0 :max 10)))
+  (gen-list :length length :elements (gen-string :elements (gen-alpha-numeric))))
+
 (defun assoc-default (key alist)
   (cdr (assoc key alist)))
 

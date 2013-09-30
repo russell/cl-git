@@ -33,18 +33,33 @@
 
 (defcfun ("git_strarray_free" %git-strarray-free)
     :void
-  (strings %git-strings))
+  (strings :pointer))
 
 
-(defmethod translate-to-foreign ((value t) (type git-strings-type))
+(defmethod translate-to-foreign (value (type git-strings-type))
   (if (pointerp value)
       (values value t)
       (error "Cannot convert type: ~A to git-strings" (type-of value))))
 
+(defmethod translate-to-foreign ((value list) (type git-strings-type))
+  (let ((ptr (foreign-alloc '(:struct git-strings))))
+    (translate-into-foreign-memory value type ptr)))
+
+(defmethod translate-into-foreign-memory ((object list) (type git-strings-type) ptr)
+  (setf (cffi:foreign-slot-value ptr '(:struct git-strings) 'count) (length object))
+  (let ((array (foreign-alloc :pointer :initial-element (null-pointer)
+                                       :count (length object))))
+    (loop :for string :in object
+          :for i :from 0
+          :for str = (foreign-string-alloc string)
+          :do (setf (mem-aref array :pointer i) str))
+    (setf (cffi:foreign-slot-value ptr '(:struct git-strings) 'strings) array))
+  ptr)
+
 (defmethod translate-from-foreign (value (type git-strings-type))
   (with-foreign-slots ((strings count) value (:struct git-strings))
     (loop :for i :below count
-       :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
+          :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
 
 (defmethod free-translated-object (pointer (type git-strings-type) do-not-free)
   (%git-strarray-free pointer)
