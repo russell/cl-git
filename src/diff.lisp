@@ -82,18 +82,6 @@
   (:actual-type :pointer)
   (:simple-parser %patch))
 
-(defcstruct git-diff-options
-  (version :unsigned-int)
-  (flags git-diff-option-flags)
-  (context-lines :uint16)
-  (interhunk-lines :uint16)
-  (old-prefix :string)
-  (new-prefix :string)
-  (pathspec (:struct git-strings))
-  (max-size off-t)  ;; defaults to 512MB
-  (diff-notify-cb :pointer)  ;; this isn't really a pointer?
-  (notify-payload :pointer))
-
 (defcstruct git-diff-file
   (oid %oid)
   (path :string)
@@ -113,6 +101,18 @@
   (old_lines :int)  ;; Number of lines in old_file
   (new_start :int)  ;; Starting line number in new_file
   (new_lines :int)) ;; Number of lines in new_file
+
+(defcstruct git-diff-options
+  (version :unsigned-int)
+  (flags git-diff-option-flags)
+  (context-lines :uint16)
+  (interhunk-lines :uint16)
+  (old-prefix :string)
+  (new-prefix :string)
+  (pathspec (:struct git-strings))
+  (max-size off-t)  ;; defaults to 512MB
+  (diff-notify-cb :pointer)  ;; this isn't really a pointer?
+  (notify-payload :pointer))
 
 (define-foreign-type diff-options ()
   ((version :reader diff-version
@@ -174,7 +174,7 @@
   (repository %repository)
   (old_tree %tree)
   (index %index)
-  (options (:pointer (:struct git-diff-options))))
+  (options %diff-options))
 
 (defcfun %git-diff-list-free
     :void
@@ -206,12 +206,14 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 (defmethod translate-to-foreign (value (type diff-options))
-  (let ((options (foreign-alloc '(:struct git-diff-options))))
-    (with-foreign-slots ((version flags context-lines interhunk-lines old-prefix new-prefix
+  (let ((ptr (foreign-alloc '(:struct git-diff-options))))
+    (translate-into-foreign-memory value type ptr)))
+
+(defmethod translate-into-foreign-memory ((value diff-options) (type diff-options) ptr)
+  (with-foreign-slots ((version flags context-lines interhunk-lines old-prefix new-prefix
                                   max-size diff-notify-cb notify-payload)
-                         options (:struct git-diff-options))
+                         ptr (:struct git-diff-options))
       (setf version (diff-version value))
       (setf flags (diff-flags value))
       (setf context-lines (diff-context-lines value))
@@ -219,28 +221,18 @@
       (setf old-prefix (diff-old-prefix value))
       (setf new-prefix (diff-new-prefix value))
       (let ((pathspecs (diff-pathspec value))
-            (strings-list (foreign-slot-pointer options '(:struct git-diff-options) 'pathspec)))
-        (setf (cffi:foreign-slot-value strings-list '(:struct git-strings) 'count) (length pathspecs))
-        (let ((array (foreign-alloc :pointer :initial-element (null-pointer) :count (length pathspecs))))
-          (loop :for string :in pathspecs
-                :for i :from 0 :below (length pathspecs)
-                :for str = (foreign-string-alloc string)
-                :do (setf (mem-aref array :pointer i) str))
-          (setf (cffi:foreign-slot-value strings-list '(:struct git-strings) 'strings) array)))
+            (strings-list (foreign-slot-pointer ptr '(:struct git-diff-options) 'pathspec)))
+        (translate-into-foreign-memory pathspecs (make-instance 'git-strings-type)
+                                       strings-list))
       (setf max-size (diff-max-size value))
       (setf diff-notify-cb (diff-notify-cb value))
       (setf notify-payload (diff-notify-cb value))
-      options)))
+      ptr))
 
 (defmethod free-translated-object (pointer (type diff-options) param)
-  ;; TODO (RS) this currently leaks memory, needs to be extended to
-  ;; cleanup the nested strarray.
+  (%git-strarray-free
+   (foreign-slot-pointer pointer '(:struct git-diff-options) 'pathspec))
   (foreign-free pointer))
-
-(defmethod translate-from-foreign (value (type git-pointer))
-  (setf (pointer type) value)
-  ;; TODO (RS) hook up garbage collection here
-  type)
 
 (defmethod translate-from-foreign (value (type diff-list))
   (setf (pointer type) value)

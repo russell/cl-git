@@ -1,0 +1,23 @@
+diff --git a/test-file b/test-file
+index 1120f3c..2aa9fa4 100644
+--- a/test-file
++++ b/test-file
+@@ -4,8 +4,9 @@ Donec hendrerit tempor tellus.
+ Donec pretium posuere tellus.
+ Proin quam nisl, tincidunt et, mattis eget, convallis nec, purus.
+ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+-Nulla posuere.
+-Donec vitae dolor.
++Aliquam erat volutpat.
++Nunc eleifend leo vitae magna.
++In id erat non orci commodo lobortis.
+ Nullam tristique diam non turpis.
+ Cras placerat accumsan nulla.
+ Nullam rutrum.
+@@ -23,6 +24,5 @@ Etiam vel neque nec dui dignissim bibendum.
+ Vivamus id enim.
+ Phasellus neque orci, porta a, aliquet quis, semper a, massa.
+ Phasellus purus.
+-Pellentesque tristique imperdiet tortor.
+ Nam euismod tellus id erat.
+ 

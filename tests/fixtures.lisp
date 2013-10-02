@@ -37,3 +37,85 @@
   (with-test-repository ()
     (make-test-revisions 1)
     (&body)))
+
+
+(def-fixture repository-with-changes ()
+  (with-test-repository ()
+    (let* ((commit1-content
+             (make-test-commit
+              (random-commit
+               :files '((:filename "test-file"
+                         :text "
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Donec hendrerit tempor tellus.
+Donec pretium posuere tellus.
+Proin quam nisl, tincidunt et, mattis eget, convallis nec, purus.
+Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+Nulla posuere.
+Donec vitae dolor.
+Nullam tristique diam non turpis.
+Cras placerat accumsan nulla.
+Nullam rutrum.
+Nam vestibulum accumsan nisl.
+Aliquam erat volutpat.
+Nunc eleifend leo vitae magna.
+In id erat non orci commodo lobortis.
+Proin neque massa, cursus ut, gravida ut, lobortis eget, lacus.
+Sed diam.
+Praesent fermentum tempor tellus.
+Nullam tempus.
+Mauris ac felis vel velit tristique imperdiet.
+Donec at pede.
+Etiam vel neque nec dui dignissim bibendum.
+Vivamus id enim.
+Phasellus neque orci, porta a, aliquet quis, semper a, massa.
+Phasellus purus.
+Pellentesque tristique imperdiet tortor.
+Nam euismod tellus id erat.
+
+")))))
+           (commit2-content
+             (make-test-commit
+              (random-commit
+               :parents (getf commit1-content :sha)
+               :files '((:filename "test-file"
+                         :text "
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Donec hendrerit tempor tellus.
+Donec pretium posuere tellus.
+Proin quam nisl, tincidunt et, mattis eget, convallis nec, purus.
+Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+Aliquam erat volutpat.
+Nunc eleifend leo vitae magna.
+In id erat non orci commodo lobortis.
+Nullam tristique diam non turpis.
+Cras placerat accumsan nulla.
+Nullam rutrum.
+Nam vestibulum accumsan nisl.
+Aliquam erat volutpat.
+Nunc eleifend leo vitae magna.
+In id erat non orci commodo lobortis.
+Proin neque massa, cursus ut, gravida ut, lobortis eget, lacus.
+Sed diam.
+Praesent fermentum tempor tellus.
+Nullam tempus.
+Mauris ac felis vel velit tristique imperdiet.
+Donec at pede.
+Etiam vel neque nec dui dignissim bibendum.
+Vivamus id enim.
+Phasellus neque orci, porta a, aliquet quis, semper a, massa.
+Phasellus purus.
+Nam euismod tellus id erat.
+
+"))))))
+      (bind-git-commits (((commit1 :sha (getf commit1-content :sha))
+                          (commit2 :sha (getf commit2-content :sha))) *test-repository* )
+        (&body)))))
+
+(eval-when (:compile-toplevel)
+  (defvar repository-with-changes-diff
+    (with-open-file (stream (merge-pathnames "repository-with-changes.diff"
+                                             *compile-file-truename*))
+    (let ((string (make-string (file-length stream))))
+      (read-sequence string stream)
+      string))))

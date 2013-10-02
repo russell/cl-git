@@ -13,6 +13,7 @@
                  (:file "remote" :depends-on ("common" "fixtures"))
                  (:file "strings" :depends-on ("common" "fixtures"))
                  (:file "tag" :depends-on ("common" "fixtures"))
+                 (:file "diff" :depends-on ("common" "fixtures"))
                  (:file "tree" :depends-on ("common" "fixtures"))
                  (:file "config" :depends-on ("common" "fixtures"))
                  (:file "odb" :depends-on ("common" "fixtures"))

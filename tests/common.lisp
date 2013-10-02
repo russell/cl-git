@@ -144,6 +144,12 @@ will update to the new head when a new commit is added.")
                                       :if-exists :supersede)
       (format stream content))))
 
+(defun read-file-to-string (filename)
+  (with-open-file (stream filename)
+    (let ((string (make-string (file-length stream))))
+      (read-sequence string stream)
+      string)))
+
 (defun make-test-commit (commit)
   "Make a commit to the current repository and return the updated
 commit alist. The commit argument is an alist that should contain the
