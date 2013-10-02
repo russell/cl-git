@@ -50,6 +50,8 @@ This is the git object that is wrapped by the instance of this class.")
 
 
 (defmethod translate-to-foreign (value (type git-pointer))
+  (unless (eql (class-of value) (class-of type))
+    (error "Object doesn't match expected type."))
   (pointer value))
 
 
