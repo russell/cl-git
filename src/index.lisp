@@ -222,8 +222,7 @@ and 3 (theirs) are in conflict."
 ;; naming clash.
 (defgeneric index-add-file (path index)
   (:documentation
-   "Adds the PATH to the current index *GIT-REPOSITORY-INDEX* or the
-explicit keyword argument :INDEX"))
+   "Adds the PATH to the INDEX."))
 
 (defmethod index-add-file ((path string) (index index))
   (%git-index-add-by-path index path))
@@ -238,18 +237,18 @@ explicit keyword argument :INDEX"))
   (%git-index-add index entry))
 
 (defgeneric index-clear (index)
-  (:documentation "Clear contents of the index removing all entries.
+  (:documentation "Clear contents of the INDEX removing all entries.
 Changes need to be written back to disk to take effect.")
   (:method ((index index))
     (%git-index-clear index)))
 
 (defgeneric index-reload (index)
-  (:documentation "Reload the state of the index with objects read from disk.")
+  (:documentation "Reload the state of the INDEX with objects read from disk.")
   (:method ((index index))
     (%git-index-read index)))
 
 (defgeneric index-write (index)
-  (:documentation "Write the git index back to the file system.")
+  (:documentation "Write the INDEX back to the file system.")
   (:method ((index index))
     (%git-index-write index)))
 
