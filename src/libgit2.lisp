@@ -33,9 +33,6 @@
 
 (use-foreign-library libgit2)
 
-
-(defctype size :unsigned-long)
-(defctype size-t :unsigned-long)
 (defctype off-t :uint64)
 
 

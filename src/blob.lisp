@@ -31,7 +31,7 @@
   (blob %blob))
 
 (defcfun ("git_blob_rawsize" %git-blob-raw-size)
-    size
+    size-t
   "The number of content bytes in the blob."
   (blob %blob))
 

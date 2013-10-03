@@ -1,5 +1,8 @@
 ;;;; cl-git.asd
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (asdf:oos 'asdf:load-op :cffi-grovel))
+
 (asdf:defsystem #:cl-git
   :description "A CFFI wrapper of libgit2."
   :version (:read-file-form "version.lisp-expr")
@@ -12,8 +15,9 @@
                (:module "src"
                 :components
                 ((:file "package")
+                 (cffi-grovel:grovel-file "libgit2-types")
                  (:file "api" :depends-on ("package"))
-                 (:file "libgit2" :depends-on ("package"))
+                 (:file "libgit2" :depends-on ("package" "libgit2-types"))
                  (:file "error" :depends-on ("libgit2"))
                  (:file "utils" :depends-on ("libgit2"))
                  (:file "git-pointer" :depends-on ("libgit2"))
