@@ -28,7 +28,10 @@
                 #:translate-name-to-foreign
                 #:translate-underscore-separated-name
                 #:free-translated-object
+                #:convert-into-foreign-memory
+                #:convert-to-foreign
                 #:convert-from-foreign
+                #:free-converted-object
                 #:with-foreign-object
                 #:with-foreign-objects
                 #:with-foreign-slots

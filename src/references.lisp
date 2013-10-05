@@ -197,8 +197,8 @@ symbolic reference."
             (mapcar (lambda (ref-name)
                       (make-reference-from-name ref-name repository))
              (prog1
-                 (convert-from-foreign string-array '%git-strings)
-               (free-translated-object string-array '%git-strings t)))))
+                 (convert-from-foreign string-array '(:struct git-strings))
+               (free-converted-object string-array '(:struct git-strings) t)))))
       (cond (test
              (remove-if-not test refs))
             (test-not

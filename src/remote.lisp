@@ -203,8 +203,8 @@ pointer will need to be freed manually."
            (mapcar (lambda (remote-name)
                      (make-remote-from-name remote-name repository))
                    (prog1
-                       (convert-from-foreign string-array '%git-strings)
-                     (free-translated-object string-array '%git-strings t)))))
+                       (convert-from-foreign string-array '(:struct git-strings))
+                     (free-converted-object string-array '(:struct git-strings) t)))))
       (cond (test
              (remove-if-not test remotes))
             (test-not
@@ -271,8 +271,8 @@ for sending data.")
     (with-foreign-object (string-array '(:struct git-strings))
       (%git-remote-get-push-refspecs string-array remote)
       (prog1
-          (convert-from-foreign string-array '%git-strings)
-        (free-translated-object string-array '%git-strings t)))))
+          (convert-from-foreign string-array '(:struct git-strings))
+        (free-converted-object string-array '(:struct git-strings) t)))))
 
 (defgeneric remote-fetch-refspecs (remote)
   (:documentation
@@ -281,8 +281,8 @@ for sending data.")
     (with-foreign-object (string-array '(:struct git-strings))
       (%git-remote-get-fetch-refspecs string-array remote)
       (prog1
-          (convert-from-foreign string-array '%git-strings)
-        (free-translated-object string-array '%git-strings t)))))
+          (convert-from-foreign string-array '(:struct git-strings))
+        (free-converted-object string-array '(:struct git-strings) t)))))
 
 (defgeneric remote-download (remote)
   (:documentation "Download the required packfile from the remote to

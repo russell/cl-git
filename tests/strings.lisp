@@ -24,10 +24,9 @@
 (test string-list
   (for-all ((strings-fixture (random-list)))
     (let ((str-pointer
-            (cffi:translate-to-foreign strings-fixture
-                                       (make-instance 'cl-git::git-strings-type))))
+            (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))
       (is
        (equal
-        (cffi:translate-from-foreign str-pointer (make-instance 'cl-git::git-strings-type))
+        (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strings))
         strings-fixture))
-      (cffi:free-translated-object str-pointer (make-instance 'cl-git::git-strings-type) nil))))
+      (cffi:free-converted-object str-pointer '(:struct cl-git::git-strings) t))))
