@@ -113,9 +113,11 @@ Nam euismod tellus id erat.
         (&body)))))
 
 (eval-when (:compile-toplevel)
-  (defvar repository-with-changes-diff
+  (defvar repository-with-changes-diff1
     (with-open-file (stream (merge-pathnames "repository-with-changes.diff"
                                              *compile-file-truename*))
     (let ((string (make-string (file-length stream))))
       (read-sequence string stream)
       string))))
+
+(defvar repository-with-changes-diff repository-with-changes-diff1)

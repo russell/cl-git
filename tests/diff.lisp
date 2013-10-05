@@ -28,4 +28,4 @@
     (let ((diffs (diff tree1 tree2)))
       (is (eq (diff-list-size diffs) 1))
       (is (equal (patch-to-string diffs)
-                 (read-file-to-string ))))))
+                 repository-with-changes-diff)))))
