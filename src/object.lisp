@@ -209,12 +209,13 @@ object is not of the right type, an error will be signalled."
 (defmethod print-object ((object git-object) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (cond
-      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
+      ((and (slot-value object 'libgit2-pointer)
+            (not (null-pointer-p (slot-value object 'libgit2-pointer))))
        (format stream "~a" (full-name object)))
       ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
        (format stream "~a (weak)" (full-name object)))
       ((slot-value object 'libgit2-disposed)
-       (princ "(disposed)" stream)))))
+       (format stream "(disposed)")))))
 
 (defmethod get-object ((class (eql 'object)) oid repository)
   (git-object-lookup oid :any repository))
