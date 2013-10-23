@@ -23,9 +23,34 @@
 
 
 (def-test diff-revisions (:fixture repository-with-changes)
-  (let ((tree1 (commit-tree commit1))
-        (tree2 (commit-tree commit2)))
-    (let ((diffs (diff tree1 tree2)))
-      (is (eq (diff-list-size diffs) 1))
-      (is (equal (patch-to-string diffs)
-                 repository-with-changes-diff)))))
+  (let ((diffs (diff commit1 commit2)))
+    (is (eq (diff-deltas-count diffs) 1))
+    (is (equal (diff-deltas-summary diffs)
+               '((:status :modified :similarity 0 :flags 0
+                  :file-a (:mode 33188
+                           :flags (:valid-oid)
+                           :size 0
+                           :path "test-file"
+                           :oid 97787706012661474925191056142692387097255677107)
+                  :file-b (:mode 33188
+                           :flags (:valid-oid)
+                           :size 0
+                           :path "test-file"
+                           :oid 243568240973109882797341286687005129339258402139)))))
+    (is (equal (make-patch diffs)
+               `((:patch ,repository-with-changes-diff
+                  :status :modified
+                  :similarity 0
+                  :flags 2
+                  :file-a (:mode 33188
+                           :flags (:not-binary :valid-oid)
+                           :size 902
+                           :path "test-file"
+                           :oid
+                           97787706012661474925191056142692387097255677107)
+                  :file-b (:mode 33188
+                           :flags (:not-binary :valid-oid)
+                           :size 919
+                           :path "test-file"
+                           :oid
+                           243568240973109882797341286687005129339258402139)))))))

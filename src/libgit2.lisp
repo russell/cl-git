@@ -21,6 +21,9 @@
 
 (in-package #:cl-git)
 
+(defvar +success+ 0
+  "Used to signal success for C return values in callbacks.")
+
 (defbitfield git-capabilities
   (:threads 1)
   (:https 2))

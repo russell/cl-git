@@ -195,6 +195,8 @@
 
    ;; diff
    #:diff
-   #:diff-list-size
+   #:diff-deltas-count
+   #:diff-deltas-summary
+   #:make-patch
    #:patch-to-string
    ))

@@ -42,7 +42,7 @@
   :ignore_filemode
   :recurse_ignored_dirs)
 
-(defcenum git-file-mode
+(defcenum (git-file-mode :uint16)
   (:new 0000000)
   (:tree 0040000)
   (:blob 0100644)
@@ -52,8 +52,8 @@
 
 (defbitfield git-diff-flags
   (:binary #.(ash 1 0)) ;; file(s) treated as binary data
-  :not_binary         ;; file(s) treated as text data
-  :valid_oid)         ;; `oid` value is known correct
+  :not-binary         ;; file(s) treated as text data
+  :valid-oid)         ;; `oid` value is known correct
 
 (defcenum git-delta-status
   :unmodified  ;; no changes
@@ -83,18 +83,18 @@
   (:simple-parser %patch))
 
 (defcstruct git-diff-file
-  (oid %oid)
-  (path :string)
-  (size off-t)
-  (flags git-diff-flags)
-  (mode git-file-mode))
+  (:oid (:struct git-oid))
+  (:path :string)
+  (:size off-t)
+  (:flags git-diff-flags)
+  (:mode :uint16))
 
-(defcstruct git-diff-delta
-  (old_file (:struct git-diff-file))
-  (new_file (:struct git-diff-file))
+(defcstruct (git-diff-delta :class diff-delta-type)
+  (old-file (:struct git-diff-file))
+  (new-file (:struct git-diff-file))
   (status git-delta-status)
-  (similarity :unsigned-int) ;;< for RENAMED and COPIED, value 0-100
-  (flags :unsigned-int))
+  (similarity :uint32) ;;< for RENAMED and COPIED, value 0-100
+  (flags :uint32))
 
 (defcstruct git-diff-range
   (old_start :int)  ;; Starting line number in old_file
@@ -188,6 +188,14 @@
     size-t
   (diff-list %diff-list))
 
+(defcfun %git-diff-foreach
+    %return-value
+  (diff-list %diff-list)
+  (file-callback :pointer)
+  (hunk-callback :pointer)
+  (data-callback :pointer)
+  (payload :pointer))
+
 (defcfun %git-diff-get-patch
     %return-value
   (patch :pointer)
@@ -234,19 +242,34 @@
    (foreign-slot-pointer pointer '(:struct git-diff-options) 'pathspec))
   (foreign-free pointer))
 
+
+(defmethod translate-from-foreign (value (type diff-delta-type))
+  (with-foreign-slots ((old-file new-file status similarity flags)
+                       value (:struct git-diff-delta))
+    (list :status status :similarity similarity :flags flags
+          :file-a old-file
+          :file-b new-file)))
+
 (defmethod translate-from-foreign (value (type diff-list))
-  (setf (pointer type) value)
-  (setf (free-function type) #'%git-diff-list-free)
-  (enable-garbage-collection type)  ;; TODO (RS) this should be moved
-                                    ;; out to an after method.
-  type)
+  (let ((diff-list (make-instance 'diff-list
+                                  :free-function #'%git-diff-list-free
+                                  :pointer value)))
+    diff-list))
 
 (defmethod translate-from-foreign (value (type patch))
-  (setf (pointer type) value)
-  (setf (free-function type) #'%git-diff-patch-free)
-  (enable-garbage-collection type)  ;; TODO (RS) this should be moved
-                                    ;; out to an after method.
-  type)
+  (let ((patch (make-instance 'patch
+                              :free-function #'%git-diff-patch-free
+                              :pointer value)))
+    patch))
+
+(defvar *git-diff-deltas* nil
+  "Used to handle return values from the git diff")
+
+(defcallback collect-diff-files :int ((delta (:pointer (:struct git-diff-delta)))
+                                      (progress :float) (data :pointer))
+  (declare (ignore data progress))
+  (push (convert-from-foreign delta '(:struct git-diff-delta)) *git-diff-deltas*)
+  +success+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -261,35 +284,56 @@
 (defmethod diff ((repository repository) (index index) &optional (options (make-instance 'diff-options)))
   (with-foreign-objects ((diff-list :pointer))
     (%git-diff-index-to-workdir diff-list repository index options)
-    (translate-from-foreign (mem-ref diff-list :pointer)
-                            (make-instance 'diff-list :facilitator repository))))
+    (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
+      (setf (facilitator diff-list) repository)
+      diff-list)))
 
 (defmethod diff ((tree-old tree) (tree-new tree) &optional (options (make-instance 'diff-options)))
   (with-foreign-objects ((diff-list :pointer))
     (%git-diff-tree-to-tree diff-list (facilitator tree-old) tree-old tree-new options)
-    (translate-from-foreign (mem-ref diff-list :pointer)
-                            (make-instance 'diff-list :facilitator (facilitator tree-old)))))
+    (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
+      (setf (facilitator diff-list) (facilitator tree-old))
+      diff-list)))
 
 (defmethod diff ((tree tree) (index index) &optional (options (make-instance 'diff-options)))
   (with-foreign-objects ((diff-list :pointer))
     (%git-diff-tree-to-index diff-list (facilitator index) tree index options)
-    (translate-from-foreign (mem-ref diff-list :pointer)
-                            (make-instance 'diff-list :facilitator (facilitator tree)))))
+    (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
+      (setf (facilitator diff-list) (facilitator tree))
+      diff-list)))
 
-(defmethod make-patch ((diff diff-list) index)
+(defmethod diff ((commit-old commit) (commit-new commit)
+                 &optional (options (make-instance 'diff-options)))
+  (diff (commit-tree commit-old) (commit-tree commit-new) options))
+
+(defmethod diff-deltas-count ((diff-list diff-list))
+  (%git-diff-num-deltas diff-list))
+
+(defmethod diff-deltas-summary ((diff-list diff-list))
+  (let (*git-diff-deltas*)
+    (%git-diff-foreach diff-list
+                       (callback collect-diff-files)
+                       (null-pointer)
+                       (null-pointer)
+                       (null-pointer))
+    *git-diff-deltas*))
+
+(defmethod make-patch1 ((diff diff-list) index)
   (with-foreign-objects ((patch :pointer) (delta :pointer))
     (%git-diff-get-patch patch delta diff index)
-    (translate-from-foreign
-     (mem-ref patch :pointer)
-     (make-instance 'patch
-                    :facilitator (facilitator diff)))))
+    (let ((patch (convert-from-foreign (mem-ref patch :pointer) '%patch))
+          (delta (convert-from-foreign (mem-ref delta :pointer) '(:struct git-diff-delta))))
+      (setf (facilitator patch) (facilitator diff))
+      (setf (getf delta :patch) (patch-to-string patch))
+      delta)))
 
-(defmethod patch-to-string ((diff diff-list))
+(defmethod patch-to-string ((patch patch))
   (with-foreign-object (string :pointer)
-    (%git-diff-patch-to-str string (make-patch diff 0))
+    (%git-diff-patch-to-str string patch)
     (prog1
         (foreign-string-to-lisp (mem-ref string :pointer) :encoding :utf-8)
       (foreign-free (mem-ref string :pointer)))))
 
-(defmethod diff-list-size ((diff-list diff-list))
-  (%git-diff-num-deltas diff-list))
+(defmethod make-patch ((diff diff-list))
+  (loop :for i :below (diff-deltas-count diff)
+        :collect (make-patch1 diff i)))
