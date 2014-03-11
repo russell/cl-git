@@ -75,7 +75,7 @@ contains the object database.")
     :boolean
   (repository %repository))
 
-(defcfun ("git_repository_head_orphan" %git-repository-head-orphaned)
+(defcfun %git-repository-head-unborn
     :boolean
   (repository %repository))
 
@@ -179,7 +179,14 @@ direct commit.")
     (:documentation "Returns t if the HEAD points to a commit that
 doesn't exist.")
   (:method ((repository repository))
-    (%git-repository-head-orphaned repository)))
+    (warn "~A is deprecated and will be removed in 0.21.0" 'head-orphaned-p)
+    (%git-repository-head-unborn repository)))
+
+(defgeneric head-unborn-p (repository)
+    (:documentation "Returns t if the HEAD points to a commit that
+doesn't exist.")
+  (:method ((repository repository))
+    (%git-repository-head-unborn repository)))
 
 (defgeneric bare-p (repository)
     (:documentation "Return T if the repository is bare.")

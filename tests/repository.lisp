@@ -92,6 +92,18 @@
        (head-orphaned-p *test-repository*)
        nil)))
 
+(def-test repository-head-unborn (:fixture (repository))
+  "Confirm that the current head is orphaned then check that not."
+  ;; confirm head is orphaned
+  (is (equal
+       (head-unborn-p *test-repository*)
+       t))
+  (make-test-revision)
+  ;; confirm head no longer orphaned
+  (is (equal
+       (head-unborn-p *test-repository*)
+       nil)))
+
 (def-test with-repository ()
   "Create a repository and test the with-repository macro."
   (for-all ((path 'gen-temp-path))
