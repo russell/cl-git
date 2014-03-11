@@ -110,8 +110,8 @@ Status
 
 .. code-block:: common-lisp-repl
 
-   CL-GIT> (with-repository (#p"/home/russell/projects/lisp/cl-git/")
-              (git-status))
+   CL-GIT> (with-repository (repository #p"/home/russell/projects/lisp/cl-git/")
+              (repository-status repository))
 
    (("src/status.lisp" :CURRENT :WORKTREE-MODIFIED)
     ("src/package.lisp" :CURRENT :WORKTREE-MODIFIED)
