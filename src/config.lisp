@@ -30,9 +30,9 @@
 
 
 (defcstruct git-config-entry
-  (name :string)
-  (value :string)
-  (level git-config-level))
+  (:name :string)
+  (:value :string)
+  (:level git-config-level))
 
 
 (define-foreign-type config (git-pointer)
@@ -61,16 +61,15 @@ GIT-REPOSITORY-CONFIG."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
-;;; Support for callbackes
+;;; Support for callbacks
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *config-values* nil)
 
-(defcallback collect-config-values :int ((entry git-config-entry) (data :pointer))
-  (declare (ignore data))
-  (with-foreign-slots ((name value level) entry (:struct git-config-entry))
-    (push (list :name name :value value :level level) *config-values*))
+(defcallback collect-config-values :int ((entry git-config-entry) (payload :pointer))
+  (declare (ignore payload))
+  (push (convert-from-foreign entry '(:struct git-config-entry)) *config-values*)
   0);;; replace with success
 
 
