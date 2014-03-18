@@ -182,8 +182,6 @@ git config to a specific level.  Possible levels are :HIGHEST-LEVEL
 (defgeneric open-index (object)
   (:documentation "Returns an index object for OBJECT (a repository)"))
 
-(defgeneric git-ls (remote))
-
 (defgeneric open-odb (path-or-repository)
   (:documentation "Open the ODB at the specified path or
 repository."))

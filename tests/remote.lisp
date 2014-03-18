@@ -56,15 +56,15 @@
                (remote-connect remote)
                (is
                 (equal
-                 (git-ls remote)
+                 (ls-remote remote)
                  `((:local nil
-                    :oid ,(oid (repository-head *test-repository*))
-                    :loid 0
-                    :name "refs/heads/master")
+                    :remote-oid ,(oid (repository-head *test-repository*))
+                    :local-oid 0
+                    :name "HEAD")
                    (:local nil
-                    :oid ,(oid (repository-head *test-repository*))
-                    :loid 0
-                    :name "HEAD"))))
+                    :remote-oid ,(oid (repository-head *test-repository*))
+                    :local-oid 0
+                    :name "refs/heads/master"))))
                (remote-download remote)
                (is
                 (equal

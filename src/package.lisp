@@ -167,12 +167,12 @@
    #:open-odb
 
    ;; Remote
-   #:git-ls
    #:remote
    #:remote-connect
    #:remote-connected-p
    #:remote-disconnect
    #:remote-download
+   #:ls-remote
    #:remote-push-refspecs
    #:remote-fetch-refspecs
    #:remote-push-url

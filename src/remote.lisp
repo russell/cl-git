@@ -80,10 +80,10 @@
 
 (defmethod translate-from-foreign (value (type remote-head-struct-type))
   (with-foreign-slots ((local oid loid name) value (:struct git-remote-head))
-		      (list :local local
-			    :oid oid
-			    :loid loid
-			    :name name)))
+    (list :local local
+          :remote-oid oid
+          :local-oid loid
+          :name name)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -154,19 +154,11 @@
   (callback :pointer)
   (payload :pointer))
 
-(defcallback collect-remote-ls-values :int ((remote-head
-					     (:pointer (:struct git-remote-head)))
-					    (payload :pointer))
-  (declare (ignore payload))
-  (push (convert-from-foreign remote-head '(:struct git-remote-head))
-	*remote-ls-values*)
-  0)
-
-(defcfun ("git_remote_ls" %git-remote-ls)
+(defcfun %git-remote-ls
   %return-value
-  (remote %remote)
-  (callback :pointer)
-  (payload :pointer))
+  (output :pointer)
+  (size :pointer)
+  (remote %remote))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -290,10 +282,17 @@ bring the repository into sync.")
   (:method ((remote remote))
     (%git-remote-download remote (null-pointer) (null-pointer))))
 
-(defmethod git-ls ((remote remote))
-  (let ((*remote-ls-values* (list)))
-    (%git-remote-ls remote (callback collect-remote-ls-values) (null-pointer))
-    *remote-ls-values*))
+(defgeneric ls-remote (remote)
+  (:documentation "Lists the current refs at the remote.  Return a
+list of the refs described by NAME, REMOTE-OID, LOCAL-OID and a
+LOCAL bool that is true if the ref has a local copy.")
+  (:method ((remote remote))
+      (with-foreign-objects ((count 'size-t)
+                             (remotes :pointer))
+        (%git-remote-ls remotes count remote)
+        (loop :for i :below (mem-ref count :int)
+              :collect (mem-ref (mem-aref (mem-ref remotes :pointer) :pointer i)
+                                '(:struct git-remote-head))))))
 
 (defgeneric remote-push-url (remote)
   (:method ((remote remote))

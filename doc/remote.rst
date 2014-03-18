@@ -18,7 +18,7 @@ Remote
 
 .. cl:method:: list-objects remote common-lisp:t
 
-.. cl:method:: git-ls remote
+.. cl:generic:: ls-remote
 
 .. cl:generic:: remote-url
 
@@ -35,4 +35,3 @@ Remote
 .. cl:generic:: remote-disconnect
 
 .. cl:generic:: remote-download
-
