@@ -26,6 +26,7 @@
   ((filename :reader filename :initarg :filename :initform nil))
   (:documentation "A mixin that has a filename attribute."))
 
+(defvar *oid-abbrev* 7)
 
 (defvar *diff-options-version* 1)
 (defvar *diff-context-lines* 3)

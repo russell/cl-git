@@ -76,6 +76,13 @@
   (:hunk_hdr #.(char-int #\H))
   (:binary #.(char-int #\B)))
 
+(defcenum (git-diff-submodule-ignore :int16)
+  (:reset -1)
+  :none
+  :untracked
+  :dirty
+  :all
+  :default)
 
 (define-foreign-type patch (git-pointer)
   nil
@@ -90,29 +97,33 @@
   (:mode :uint16))
 
 (defcstruct (git-diff-delta :class diff-delta-type)
+  (status git-delta-status)
+  (flags :uint32)
+  (similarity :uint16) ;;< for RENAMED and COPIED, value 0-100
+  (number-files :uint16)
   (old-file (:struct git-diff-file))
   (new-file (:struct git-diff-file))
-  (status git-delta-status)
-  (similarity :uint32) ;;< for RENAMED and COPIED, value 0-100
-  (flags :uint32))
+  )
 
 (defcstruct git-diff-range
-  (old_start :int)  ;; Starting line number in old_file
-  (old_lines :int)  ;; Number of lines in old_file
-  (new_start :int)  ;; Starting line number in new_file
-  (new_lines :int)) ;; Number of lines in new_file
+  (:start-a :int)  ;; Starting line number in old_file
+  (:lines-a :int)  ;; Number of lines in old_file
+  (:start-b :int)  ;; Starting line number in new_file
+  (:lines-b :int)) ;; Number of lines in new_file
 
 (defcstruct git-diff-options
   (version :unsigned-int)
   (flags git-diff-option-flags)
+  (ignore-submodules git-diff-submodule-ignore)
+  (pathspec (:struct git-strings))
+  (diff-notify-cb :pointer)  ;; this isn't really a pointer?
+  (notify-payload :pointer)
   (context-lines :uint16)
   (interhunk-lines :uint16)
-  (old-prefix :string)
-  (new-prefix :string)
-  (pathspec (:struct git-strings))
+  (oid-abbrev :uint16)
   (max-size off-t)  ;; defaults to 512MB
-  (diff-notify-cb :pointer)  ;; this isn't really a pointer?
-  (notify-payload :pointer))
+  (old-prefix :string)
+  (new-prefix :string))
 
 (define-foreign-type diff-options ()
   ((version :reader diff-version
@@ -121,6 +132,12 @@
    (flags :accessor diff-flags
           :initarg :flags
           :initform '(:normal))
+   (oid-abbrev :accessor diff-oid-abbrev
+               :initarg :oid-abbrev
+               :initform *oid-abbrev*)
+   (ignore-submodules :accessor diff-ignore-submodules
+                     :initarg :submodule-ignore
+                     :initform :default)
    (context-lines :accessor diff-context-lines
                   :initarg :context-lines
                   :initform *diff-context-lines*)
@@ -180,13 +197,14 @@
     :void
   (diff-list :pointer))
 
-(defcfun %git-diff-patch-free
-    :void
-  (patch :pointer))
-
 (defcfun %git-diff-num-deltas
     size-t
   (diff-list %diff-list))
+
+(defcfun %git-diff-get-delta
+    (:pointer (:struct git-diff-delta))
+  (diff-list %diff-list)
+  (index size-t))
 
 (defcfun %git-diff-foreach
     %return-value
@@ -196,17 +214,24 @@
   (data-callback :pointer)
   (payload :pointer))
 
-(defcfun %git-diff-get-patch
+(defcfun %git-patch-from-diff
     %return-value
   (patch :pointer)
-  (delta :pointer)
   (diff-list %diff-list)
   (index size-t))
 
-(defcfun %git-diff-patch-to-str
+(defcfun %git-patch-get-delta
+    (:pointer (:struct git-diff-delta))
+  (patch %patch))
+
+(defcfun %git-patch-to-str
     %return-value
   (string :pointer)
   (patch %patch))
+
+(defcfun %git-diff-patch-free
+    :void
+  (patch :pointer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -219,11 +244,13 @@
     (translate-into-foreign-memory value type ptr)))
 
 (defmethod translate-into-foreign-memory ((value diff-options) (type diff-options) ptr)
-  (with-foreign-slots ((version flags context-lines interhunk-lines old-prefix new-prefix
-                                max-size diff-notify-cb notify-payload)
+  (with-foreign-slots ((version flags oid-abbrev ignore-submodules context-lines interhunk-lines
+                                old-prefix new-prefix max-size diff-notify-cb notify-payload)
                        ptr (:struct git-diff-options))
     (setf version (diff-version value))
     (setf flags (diff-flags value))
+    (setf oid-abbrev (diff-oid-abbrev value))
+    (setf ignore-submodules (diff-ignore-submodules value))
     (setf context-lines (diff-context-lines value))
     (setf interhunk-lines (diff-interhunk-lines value))
     (setf old-prefix (diff-old-prefix value))
@@ -319,17 +346,19 @@
     *git-diff-deltas*))
 
 (defmethod make-patch1 ((diff diff-list) index)
-  (with-foreign-objects ((patch :pointer) (delta :pointer))
-    (%git-diff-get-patch patch delta diff index)
-    (let ((patch (convert-from-foreign (mem-ref patch :pointer) '%patch))
-          (delta (convert-from-foreign (mem-ref delta :pointer) '(:struct git-diff-delta))))
+  (with-foreign-objects ((patch :pointer))
+    (%git-patch-from-diff patch diff index)
+    (let* ((patch (convert-from-foreign (mem-ref patch :pointer) '%patch))
+           (delta (convert-from-foreign (%git-patch-get-delta patch)
+                                        '(:struct git-diff-delta))))
+
       (setf (facilitator patch) (facilitator diff))
       (setf (getf delta :patch) (patch-to-string patch))
       delta)))
 
 (defmethod patch-to-string ((patch patch))
   (with-foreign-object (string :pointer)
-    (%git-diff-patch-to-str string patch)
+    (%git-patch-to-str string patch)
     (prog1
         (foreign-string-to-lisp (mem-ref string :pointer) :encoding :utf-8)
       (foreign-free (mem-ref string :pointer)))))
