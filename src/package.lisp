@@ -140,6 +140,7 @@
    #:index
    #:index-add-file
    #:index-write
+   #:index-entries
    #:index-to-tree
    #:open-index
    #:index-clear
