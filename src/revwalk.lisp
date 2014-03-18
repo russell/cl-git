@@ -47,7 +47,7 @@
 
 (defcfun ("git_revwalk_next" %git-revwalk-next)
     %return-value
-  (oid (:pointer (:struct git-oid)))
+  (oid :pointer)
   (revwalk %revwalker))
 
 (defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
@@ -84,12 +84,14 @@
 (defgeneric next-revision (walker)
   (:documentation "Returns the next object for the walker.  If no
 objects are available anymore return nil.")
-  (:method  ((walker revision-walker))
+  (:method ((walker revision-walker))
     (with-foreign-object (oid '(:struct git-oid))
       (handler-case
           (progn
             (%git-revwalk-next oid walker)
-            (get-object 'commit oid (facilitator walker)))
+            (get-object 'commit
+                        (convert-from-foreign oid '(:struct git-oid))
+                        (facilitator walker)))
         (stop-iteration nil)))))
 
 (defun make-revwalk (repository)

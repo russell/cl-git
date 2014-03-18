@@ -19,40 +19,15 @@
 
 (in-package #:cl-git)
 
-(defparameter *git-oid-size* 20)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defparameter *git-oid-size* 20))
 
 (defparameter *git-oid-hex-size* (+ 40 1)
   "The size of a Git commit hash.")
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Low-level interface
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcstruct (git-oid :class oid-struct-type)
-  (id :unsigned-char :count 20)) ;; should be *git-oid-size* or +git-oid-size+
-
-
-(define-foreign-type oid-type ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %oid))
-
-
-(defcfun ("git_oid_tostr" git-oid-tostr)
-    :pointer
-  "Returns the buffer that the string is written into.  The size of
-the input buffer should be equal to git oid hex size + 1."
-  (buffer :pointer)
-  (size size-t)
-  (oid %oid))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Foreign type translation
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (id :unsigned-char :count #.*git-oid-size*))
 
 (defun oid-to-foreign (oid foreign)
   (loop
@@ -62,19 +37,21 @@ the input buffer should be equal to git oid hex size + 1."
        (setf (mem-aref foreign :unsigned-char c-index)
              (ldb (byte 8 byte-index) oid))))
 
-(defmethod translate-to-foreign ((value number) (type oid-type))
-  (declare (ignore type))
-  (let ((c-oid (foreign-alloc '(:struct git-oid))))
-    (oid-to-foreign value (foreign-slot-pointer c-oid '(:struct git-oid) 'id))
-    c-oid))
-
-(defmethod translate-to-foreign ((value string) (type oid-type))
-  (translate-to-foreign (parse-integer value :radix 16) type))
-
-(defmethod translate-to-foreign ((value t) (type oid-type))
+(defmethod translate-into-foreign-memory (value (type oid-struct-type) ptr)
   (if (pointerp value)
-      (values value t)
-      (error "Cannot convert type: ~A to git-oid struct" (type-of value))))
+      value
+      (error "Don't know how to translate ~A." value)))
+
+(defmethod translate-into-foreign-memory ((value number) (type oid-struct-type) ptr)
+  (oid-to-foreign value (foreign-slot-pointer ptr '(:struct git-oid) 'id)))
+
+(defmethod translate-to-foreign ((value number) (type oid-struct-type))
+  (let ((ptr (foreign-alloc '(:struct git-oid))))
+    (translate-into-foreign-memory value type ptr)
+    ptr))
+
+(defmethod translate-to-foreign ((value string) (type oid-struct-type))
+  (translate-to-foreign (parse-integer value :radix 16) type))
 
 (defun oid-from-foreign (value)
   (let ((lisp-oid 0))
@@ -87,24 +64,43 @@ the input buffer should be equal to git oid hex size + 1."
                              :unsigned-char c-index)))
         lisp-oid))
 
-(defmethod translate-from-foreign (value (type oid-type))
+(defmethod translate-from-foreign (value (type oid-struct-type))
   "Translates a pointer to a libgit2 oid structure to an integer, the lisp
 version of the oid.  If the pointer is a C null pointer return nil.
 This can happen for example when the oid is asked for a reference and the
 reference is symbolic."
-  (declare (ignore type))
   (if (null-pointer-p value)
       nil
-      (let ((ptr (oid-from-foreign (foreign-slot-pointer value '(:struct git-oid) 'id))))
-        ptr)))
+      (let ((oid (oid-from-foreign (foreign-slot-pointer value '(:struct git-oid) 'id))))
+        oid)))
 
-(defmethod translate-from-foreign (value (type oid-struct-type))
-  "No clue why this all works, seems dodgy to me.  But I think it does."
-  (translate-from-foreign value (make-instance 'oid-type)))
-
-
-(defmethod free-translated-object (pointer (type oid-type) do-not-free)
+(defmethod free-translated-object (pointer (type oid-struct-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))
+
+
+(define-foreign-type oid-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %oid))
+
+(defmethod translate-to-foreign (value (type oid-type))
+  (convert-to-foreign value '(:struct git-oid)))
+
+(defmethod translate-from-foreign (value (type oid-type))
+  (convert-from-foreign value '(:struct git-oid)))
+
+(defmethod free-translated-object (value (type oid-type) param)
+  (free-converted-object value '(:struct git-oid) param))
+
+
+(defcfun ("git_oid_tostr" git-oid-tostr)
+    :pointer
+  "Returns the buffer that the string is written into.  The size of
+the input buffer should be equal to git oid hex size + 1."
+  (buffer :pointer)
+  (size size-t)
+  (oid %oid))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

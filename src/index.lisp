@@ -197,12 +197,9 @@ and 3 (theirs) are in conflict."
 
       (setf file-size (getf value :file-size 0))
       (setf flags (getf value :flags 0))
-      (oid-to-foreign (getf value :oid 0)
-                      (foreign-slot-pointer
-                       (foreign-slot-pointer
-                        index-entry
-                        '(:struct git-index-entry) 'oid)
-                       '(:struct git-oid) 'id))
+      (convert-into-foreign-memory (getf value :oid 0)
+                                   '(:struct git-oid)
+                                   (foreign-slot-pointer index-entry '(:struct git-index-entry) 'oid))
       (setf path (foreign-string-alloc (getf value :path "")))
       index-entry)))
 

@@ -42,7 +42,7 @@ repositories history.")
 
 (defcfun ("git_tag_create" %git-tag-create)
     %return-value
-  (oid %oid)
+  (oid :pointer)
   (repo %repository)
   (tag-name :string)
   (target %object)
