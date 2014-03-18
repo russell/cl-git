@@ -232,37 +232,6 @@ error if that is the case."
                    :facilitator repository
                    :free-function #'%git-reference-free)))
 
-
-(defun find-oid (name repository &key (flags :both))
-  "Find a head or sha that matches the NAME. Possible flags
-are :SHA, :HEAD or :BOTH"
-  (assert (not (null-or-nullpointer repository)))
-  (flet ((and-both (flag other-flag)
-           (find flag (list :both other-flag))))
-  (acond
-    ((and (and-both flags :head)
-          (remove-if-not (lambda (ref) (equal ref name))
-             (list-objects 'reference repository)))
-     (lookup-oid :head (car it) :repository repository))
-    ((numberp name)
-     (lookup-oid :sha name :repository repository))
-    ((and (and-both flags :sha)
-          (find (length name) '(40 7))
-          (not (loop :for char :across name
-                     :when (not (find char "1234567890abcdef"))
-                       :collect char)))
-     (lookup-oid :sha name :repository repository))
-    (t (error "Invalid reference named ~A." name)))))
-
-(defun find-oids (name-or-names repository &key (flags :both))
-  "Find a head or sha that matches the NAME. Possible flags
-are :SHA, :HEAD or :BOTH"
-  (assert (not (null-or-nullpointer repository)))
-  (if (stringp name-or-names)
-      (find-oid name-or-names repository :flags flags)
-      (loop :for name :in name-or-names
-            :collect (find-oid name repository :flags flags))))
-
 (defmethod full-name ((object reference))
   (if (slot-value object 'libgit2-name)
       (slot-value object 'libgit2-name)
