@@ -75,10 +75,6 @@ contains the object database.")
     :boolean
   (repository %repository))
 
-(defcfun ("git_repository_head_orphan" %git-repository-head-orphaned)
-    :boolean
-  (repository %repository))
-
 (defcfun ("git_repository_path" %git-repository-path)
     :string
   (repository %repository))
@@ -174,12 +170,6 @@ the HEAD reference is not a symbolic reference to a branch, but a
 direct commit.")
   (:method ((repository repository))
     (%git-repository-head-detached repository)))
-
-(defgeneric head-orphaned-p (repository)
-    (:documentation "Returns t if the HEAD points to a commit that
-doesn't exist.")
-  (:method ((repository repository))
-    (%git-repository-head-orphaned repository)))
 
 (defgeneric bare-p (repository)
     (:documentation "Return T if the repository is bare.")
