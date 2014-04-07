@@ -26,7 +26,9 @@
   (let ((diffs (diff commit1 commit2)))
     (is (eq (diff-deltas-count diffs) 1))
     (is (equal (diff-deltas-summary diffs)
-               '((:status :modified :similarity 0 :flags 0
+               '((:status :modified
+                  :similarity 0
+                  :flags nil
                   :file-a (:mode :blob
                            :flags (:valid-oid)
                            :size 0
@@ -41,7 +43,7 @@
                `((:patch ,repository-with-changes-diff
                   :status :modified
                   :similarity 0
-                  :flags 2
+                  :flags (:not-binary)
                   :file-a (:mode :blob
                            :flags (:not-binary :valid-oid)
                            :size 902

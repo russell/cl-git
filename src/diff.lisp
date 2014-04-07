@@ -98,7 +98,7 @@
 
 (defcstruct (git-diff-delta :class diff-delta-type)
   (status git-delta-status)
-  (flags :uint32)
+  (flags git-diff-flags)
   (similarity :uint16) ;;< for RENAMED and COPIED, value 0-100
   (number-files :uint16)
   (old-file (:struct git-diff-file))
