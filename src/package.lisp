@@ -53,6 +53,9 @@
                 #:foreign-free
                 #:pointer-address
                 #:defcenum)
+  (:import-from #:local-time
+                #:unix-to-timestamp
+                #:timestamp-to-universal)
   (:export
    ;; LibGit2 Library
    #:libgit2-capabilities
@@ -109,6 +112,9 @@
    #:make-commit
    #:commit-tree
    #:message
+   #:message-encoding
+   #:commit-time
+   #:commit-time-offset
    #:parents
 
    ;; Revision walker
