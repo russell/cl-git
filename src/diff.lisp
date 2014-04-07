@@ -43,12 +43,12 @@
   :recurse_ignored_dirs)
 
 (defcenum (git-file-mode :uint16)
-  (:new 0000000)
-  (:tree 0040000)
-  (:blob 0100644)
-  (:blob-executable 0100755)
-  (:link 0120000)
-  (:commit 0160000))
+  (:new #o0000000)
+  (:tree #o0040000)
+  (:blob #o0100644)
+  (:blob-executable #o0100755)
+  (:link #o0120000)
+  (:commit #o0160000))
 
 (defbitfield git-diff-flags
   (:binary #.(ash 1 0)) ;; file(s) treated as binary data
@@ -94,7 +94,7 @@
   (:path :string)
   (:size off-t)
   (:flags git-diff-flags)
-  (:mode :uint16))
+  (:mode git-file-mode))
 
 (defcstruct (git-diff-delta :class diff-delta-type)
   (status git-delta-status)
