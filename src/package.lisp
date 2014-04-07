@@ -186,7 +186,6 @@
    #:empty-p
    #:git-has-log
    #:head-detached-p
-   #:head-orphaned-p
    #:init-repository
    #:open-repository
    #:with-repository
