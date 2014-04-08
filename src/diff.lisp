@@ -312,21 +312,27 @@
   (with-foreign-objects ((diff-list :pointer))
     (%git-diff-index-to-workdir diff-list repository index options)
     (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
+      ;; TODO (RS) this is a crap way to enable garbage collection
       (setf (facilitator diff-list) repository)
+      (enable-garbage-collection diff-list)
       diff-list)))
 
 (defmethod diff ((tree-old tree) (tree-new tree) &optional (options (make-instance 'diff-options)))
   (with-foreign-objects ((diff-list :pointer))
     (%git-diff-tree-to-tree diff-list (facilitator tree-old) tree-old tree-new options)
     (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
+      ;; TODO (RS) this is a crap way to enable garbage collection
       (setf (facilitator diff-list) (facilitator tree-old))
+      (enable-garbage-collection diff-list)
       diff-list)))
 
 (defmethod diff ((tree tree) (index index) &optional (options (make-instance 'diff-options)))
   (with-foreign-objects ((diff-list :pointer))
     (%git-diff-tree-to-index diff-list (facilitator index) tree index options)
     (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
+      ;; TODO (RS) this is a crap way to enable garbage collection
       (setf (facilitator diff-list) (facilitator tree))
+      (enable-garbage-collection diff-list)
       diff-list)))
 
 (defmethod diff ((commit commit) (index index)
@@ -356,7 +362,9 @@
            (delta (convert-from-foreign (%git-patch-get-delta patch)
                                         '(:struct git-diff-delta))))
 
+      ;; TODO (RS) this is a crap way to enable garbage collection
       (setf (facilitator patch) (facilitator diff))
+      (enable-garbage-collection patch)
       (setf (getf delta :patch) (patch-to-string patch))
       delta)))
 
