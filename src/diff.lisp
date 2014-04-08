@@ -193,7 +193,7 @@
   (index %index)
   (options %diff-options))
 
-(defcfun %git-diff-list-free
+(defcfun %git-diff-free
     :void
   (diff-list :pointer))
 
@@ -229,7 +229,7 @@
   (string :pointer)
   (patch %patch))
 
-(defcfun %git-diff-patch-free
+(defcfun %git-patch-free
     :void
   (patch :pointer))
 
@@ -279,13 +279,13 @@
 
 (defmethod translate-from-foreign (value (type diff-list))
   (let ((diff-list (make-instance 'diff-list
-                                  :free-function #'%git-diff-list-free
+                                  :free-function #'%git-diff-free
                                   :pointer value)))
     diff-list))
 
 (defmethod translate-from-foreign (value (type patch))
   (let ((patch (make-instance 'patch
-                              :free-function #'%git-diff-patch-free
+                              :free-function #'%git-patch-free
                               :pointer value)))
     patch))
 
