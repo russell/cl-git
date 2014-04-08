@@ -172,7 +172,7 @@
 
 (defcfun %git-diff-index-to-workdir
     %return-value
-  (diff-list %diff-list)
+  (diff-list :pointer)
   (repository %repository)
   (index %index)
   (options %diff-options))
@@ -187,7 +187,7 @@
 
 (defcfun %git-diff-tree-to-index
     %return-value
-  (diff-list %diff-list)
+  (diff-list :pointer)
   (repository %repository)
   (old_tree %tree)
   (index %index)
@@ -328,6 +328,10 @@
     (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
       (setf (facilitator diff-list) (facilitator tree))
       diff-list)))
+
+(defmethod diff ((commit commit) (index index)
+                 &optional (options (make-instance 'diff-options)))
+  (diff (commit-tree commit) index options))
 
 (defmethod diff ((commit-old commit) (commit-new commit)
                  &optional (options (make-instance 'diff-options)))

@@ -56,3 +56,75 @@
                            :path "test-file"
                            :oid
                            243568240973109882797341286687005129339258402139)))))))
+
+
+(def-test diff-working (:fixture repository-with-unstaged)
+  (let ((diffs (diff *test-repository* (open-index *test-repository*))))
+    (is (eq (diff-deltas-count diffs) 1))
+    (is (equal (diff-deltas-summary diffs)
+               '((:status :modified
+                  :similarity 0
+                  :flags nil
+                  :file-a (:mode :blob
+                           :flags (:valid-oid)
+                           :size 902
+                           :path "test-file"
+                           :oid 97787706012661474925191056142692387097255677107)
+                  :file-b (:mode :blob
+                           :flags (:valid-oid)
+                           :size 919
+                           :path "test-file"
+                           :oid 243568240973109882797341286687005129339258402139)))))
+    (is (equal (make-patch diffs)
+               `((:patch ,repository-with-changes-diff
+                  :status :modified
+                  :similarity 0
+                  :flags (:not-binary)
+                  :file-a (:mode :blob
+                           :flags (:not-binary :valid-oid)
+                           :size 902
+                           :path "test-file"
+                           :oid
+                           97787706012661474925191056142692387097255677107)
+                  :file-b (:mode :blob
+                           :flags (:not-binary :valid-oid)
+                           :size 919
+                           :path "test-file"
+                           :oid
+                           243568240973109882797341286687005129339258402139)))))))
+
+
+(def-test diff-staged (:fixture repository-with-staged)
+  (let ((diffs (diff commit1 (open-index *test-repository*))))
+    (is (eq (diff-deltas-count diffs) 1))
+    (is (equal (diff-deltas-summary diffs)
+               '((:status :modified
+                  :similarity 0
+                  :flags nil
+                  :file-a (:mode :blob
+                           :flags (:valid-oid)
+                           :size 0
+                           :path "test-file"
+                           :oid 97787706012661474925191056142692387097255677107)
+                  :file-b (:mode :blob
+                           :flags (:valid-oid)
+                           :size 919
+                           :path "test-file"
+                           :oid 243568240973109882797341286687005129339258402139)))))
+    (is (equal (make-patch diffs)
+               `((:patch ,repository-with-changes-diff
+                  :status :modified
+                  :similarity 0
+                  :flags (:not-binary)
+                  :file-a (:mode :blob
+                           :flags (:not-binary :valid-oid)
+                           :size 902
+                           :path "test-file"
+                           :oid
+                           97787706012661474925191056142692387097255677107)
+                  :file-b (:mode :blob
+                           :flags (:not-binary :valid-oid)
+                           :size 919
+                           :path "test-file"
+                           :oid
+                           243568240973109882797341286687005129339258402139)))))))
