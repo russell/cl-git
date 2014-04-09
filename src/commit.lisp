@@ -49,6 +49,14 @@ Commits that have more then one parent are considered to be merges.")
   "Return a string containing the commit message."
   (commit %commit))
 
+(defcfun %git-commit-message-encoding
+    :string
+  "Return a string containing the encoding of the commit message.
+
+The encoding may be NIL if the encoding header in the commit is
+missing; in that case UTF-8 is assumed."
+  (commit %commit))
+
 (defcfun ("git_commit_author" git-commit-author)
     %git-signature
   "Given a commit return the commit author's signature."
@@ -147,6 +155,10 @@ optional instance of a GIT-SIGNATURE the details the committer.
 (defmethod message ((commit commit))
   "Return a string containing the commit message."
   (git-commit-message commit))
+
+(defmethod message-encoding ((commit commit))
+  "Return a string containing the encoding of the commit message."
+  (git-commit-message-encoding commit))
 
 (defmethod author ((commit commit))
   "Given a commit return the commit author's signature."
