@@ -42,8 +42,8 @@
     "/dev/null")))
 
 
-(def-test fetch-remotes (:fixture repository-with-commits)
-  "Create a new repository and check it's remotes."
+(def-test ls-remote (:fixture repository-with-commits)
+  "Create a new repository and check the contents with ls-remote."
   (let ((remote-repo-path (gen-temp-path)))
     (unwind-protect
          (progn
@@ -53,6 +53,8 @@
                           remote-repo
                           :url (namestring *repository-path*))
              (let ((remote (get-object 'remote "origin" remote-repo)))
+               (signals connection-error
+                 (ls-remote remote))
                (remote-connect remote)
                (is
                 (equal
@@ -64,7 +66,25 @@
                    (:local nil
                     :remote-oid ,(oid (repository-head *test-repository*))
                     :local-oid 0
-                    :name "refs/heads/master"))))
+                    :name "refs/heads/master")))))))
+      (progn
+        (delete-directory-and-files remote-repo-path)))))
+
+
+(def-test fetch-remotes (:fixture repository-with-commits)
+  "Create a new repository and check it's remotes."
+  (let ((remote-repo-path (gen-temp-path)))
+    (unwind-protect
+         (progn
+           (init-repository remote-repo-path)
+           (let ((remote-repo (open-repository remote-repo-path)))
+             (make-object 'remote "origin"
+                          remote-repo
+                          :url (namestring *repository-path*))
+             (let ((remote (get-object 'remote "origin" remote-repo)))
+               (signals connection-error
+                 (remote-download remote))
+               (remote-connect remote)
                (remote-download remote)
                (is
                 (equal

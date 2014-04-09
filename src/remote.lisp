@@ -162,6 +162,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define-condition connection-error (basic-error)
+  ())
 
 (defmethod make-object ((class (eql 'remote)) name repository
                        &key url)
@@ -280,6 +282,9 @@ for sending data.")
   (:documentation "Download the required packfile from the remote to
 bring the repository into sync.")
   (:method ((remote remote))
+    (unless (remote-connected-p remote)
+      (error 'connection-error
+             :message "Remote is not connected."))
     (%git-remote-download remote (null-pointer) (null-pointer))))
 
 (defgeneric ls-remote (remote)
@@ -287,12 +292,15 @@ bring the repository into sync.")
 list of the refs described by NAME, REMOTE-OID, LOCAL-OID and a
 LOCAL bool that is true if the ref has a local copy.")
   (:method ((remote remote))
-      (with-foreign-objects ((count 'size-t)
-                             (remotes :pointer))
-        (%git-remote-ls remotes count remote)
-        (loop :for i :below (mem-ref count :int)
-              :collect (mem-ref (mem-aref (mem-ref remotes :pointer) :pointer i)
-                                '(:struct git-remote-head))))))
+    (unless (remote-connected-p remote)
+      (error 'connection-error
+             :message "Remote is not connected."))
+    (with-foreign-objects ((count 'size-t)
+                           (remotes :pointer))
+      (%git-remote-ls remotes count remote)
+      (loop :for i :below (mem-ref count :int)
+            :collect (mem-ref (mem-aref (mem-ref remotes :pointer) :pointer i)
+                              '(:struct git-remote-head))))))
 
 (defgeneric remote-push-url (remote)
   (:method ((remote remote))

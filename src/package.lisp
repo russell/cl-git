@@ -94,6 +94,7 @@
    #:exists
    #:ambiguous-error
    #:buffer-error
+   #:connection-error
    #:user-error
    #:barerepo-error
    #:orphanedhead-error

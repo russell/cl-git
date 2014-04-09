@@ -124,7 +124,7 @@
     :documentation "The error code/class returned by git_lasterr."))
   (:report (lambda (condition stream)
              (format stream "Error ~S, ~A"
-                     (error-class condition)
+                     (or (error-class condition) (class-name (class-of condition)))
                      (error-message condition)))))
 
 (defmacro define-git-condition (error-type error-number)
