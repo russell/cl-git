@@ -48,6 +48,22 @@ Commits that have more then one parent are considered to be merges.")
     :string
   "Return a string containing the commit message."
   (commit %commit))
+  
+(defcfun ("git_commit_message_encoding" git-commit-message-encoding)
+    :string
+  "Return a string containing the encoding of the commit message.
+  The encoding may be NIL if the encoding header in the commit is missing; in that case UTF-8 is assumed."
+  (commit %commit))
+
+(defcfun ("git_commit_time" git-commit-time)
+    :int
+  "Return the number of the commit time."
+  (commit %commit))
+
+(defcfun ("git_commit_time_offset" git-commit-time-offset)
+    :int
+  "Return commit timezone offset in minute (i.e. committer's preferred timezone) of a commit."
+  (commit %commit))
 
 (defcfun ("git_commit_author" git-commit-author)
     %git-signature
@@ -147,6 +163,18 @@ optional instance of a GIT-SIGNATURE the details the committer.
 (defmethod message ((commit commit))
   "Return a string containing the commit message."
   (git-commit-message commit))
+
+(defmethod message-encoding ((commit commit))
+  "Return a string containing the encoding of the commit message."
+  (git-commit-message-encoding commit))
+
+(defmethod commit-time ((commit commit))
+  "Return universal time of the commit time."
+  (timestamp-to-universal (unix-to-timestamp (git-commit-time commit))))
+
+(defmethod commit-time-offset ((commit commit))
+  "Return commit timezone offset in minute (i.e. committer's preferred timezone) of a commit."
+  (git-commit-time-offset commit))
 
 (defmethod author ((commit commit))
   "Given a commit return the commit author's signature."
