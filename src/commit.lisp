@@ -45,7 +45,7 @@ Commits that have more then one parent are considered to be merges.")
 
 
 (defcfun ("git_commit_message" git-commit-message)
-    :string
+    :pointer
   "Return a string containing the commit message."
   (commit %commit))
 
@@ -122,6 +122,8 @@ optional instance of a GIT-SIGNATURE the details the committer.
     (with-foreign-objects ((%parents :pointer (length parents))
                            (newoid '(:struct git-oid)))
       (with-foreign-strings ((%message message)
+                             ;; TODO (RS) if this is NULL then UTF-8
+                             ;; is assumed.
                              (%message-encoding "UTF-8")
                              (%update-ref update-ref))
 
@@ -154,11 +156,18 @@ optional instance of a GIT-SIGNATURE the details the committer.
 
 (defmethod message ((commit commit))
   "Return a string containing the commit message."
-  (git-commit-message commit))
+  (foreign-string-to-lisp (git-commit-message commit)
+                          :encoding (message-encoding commit)))
 
 (defmethod message-encoding ((commit commit))
-  "Return a string containing the encoding of the commit message."
-  (git-commit-message-encoding commit))
+  "Return a KEYWORD containing the encoding of the commit message."
+  (let ((original-encoding (%git-commit-message-encoding commit)))
+    (if original-encoding
+        (external-format-name
+         (make-external-format
+          (intern (string-upcase original-encoding)
+                  (find-package 'keyword))))
+        :utf-8)))
 
 (defmethod author ((commit commit))
   "Given a commit return the commit author's signature."

@@ -17,6 +17,9 @@
                 #:ensure-list)
   (:import-from #:closer-mop
                 #:subclassp)
+  (:import-from #:flexi-streams
+                #:external-format-name
+                #:make-external-format)
   (:import-from #:cffi
                 #:define-parse-method
                 #:define-foreign-type
