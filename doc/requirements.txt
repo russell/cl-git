@@ -2,3 +2,4 @@ sphinx
 sphinxcontrib-cldomain
 sphinxcontrib-googleanalytics
 sphinx-bootstrap-theme
+pygments-cl-repl
