@@ -122,10 +122,12 @@ First we get the commit message and author as follows:
    GIT> (author
          (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
                      (open-repository #p"/home/russell/projects/ecl/")))
-   (:NAME "jjgarcia" :EMAIL "jjgarcia" :TIME @2001-07-13T02:32:15.000000+10:00
+   (:NAME "jjgarcia"
+    :EMAIL "jjgarcia"
+    :TIME @2001-07-13T02:32:15.000000+10:00
     :TIMEZONE #<LOCAL-TIME::TIMEZONE +0000>)
 
-Or we can see what is parents are,
+Or we can see what it's parents are,
 
 .. code-block:: common-lisp-repl
 

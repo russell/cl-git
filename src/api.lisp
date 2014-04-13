@@ -69,11 +69,11 @@ timestamp.
 
 Example
 
-    (author *commit*)
-    ==>
+    GIT> (author *commit*)
     (:NAME \"Willem Rein Oudshoorn\"
      :EMAIL \"woudshoo+github@xs4all.nl\"
-     :TIME  @2012-05-06T18:46:35.000000+02:00)
+     :TIME @2012-05-05T05:05:08.000000+10:00
+     :TIMEZONE #<LOCAL-TIME::TIMEZONE +0200>)
 "))
 
 (defgeneric committer (object)
