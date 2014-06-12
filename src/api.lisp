@@ -66,14 +66,6 @@ tags the message associated with the tag.
 A signature is a list with the keys :NAME :EMAIL and :TIME.  The :NAME
 and :EMAIL values are strings, and the :TIME value is LOCAL-TIME
 timestamp.
-
-Example
-
-    GIT> (author *commit*)
-    (:NAME \"Willem Rein Oudshoorn\"
-     :EMAIL \"woudshoo+github@xs4all.nl\"
-     :TIME @2012-05-05T05:05:08.000000+10:00
-     :TIMEZONE #<LOCAL-TIME::TIMEZONE +0200>)
 "))
 
 (defgeneric committer (object)
@@ -106,10 +98,9 @@ related objects will have undefined behaviour."))
 
 (defgeneric init-repository (path/name &key bare)
   (:documentation
-   "Create a new Git repository.  CLASS should be the
-keyword :REPOSITORY.  PATH/NAME can be either an instance of a STRING
-or a PATHNAME.  A truthful value for the key BARE will init a
-repository that does not have a local checkout, it's normally
+   "Create a new Git repository.  PATH/NAME can be either an instance
+of a STRING or a PATHNAME.  A truthful value for the key BARE will
+init a repository that does not have a local checkout, it's normally
 appropriate for the basename of the path to end in '.git'.  A
 REPOSITORY instance is returned."))
 
@@ -125,20 +116,12 @@ where the repository isn't bare then it will be the location of the
   (:documentation "Returns the name of OBJECT, as a string.
 
 What exactly the name is depends on the type of the object.
-
-- REFERENCE -- The name of the of the reference, e.g.: \"refs/heads/master\"
-- TAG       -- The name of the tag, e.g.: \"refs/tags/v0.17\"
-- OBJECT    -- The string representation of the oid, e.g. \"a742eb9f5290476daf54afb5d28429710b81e3f3\"
 "))
 
 (defgeneric short-name (object)
   (:documentation "Returns the short name of OBJECT, as a string.
 
 What exactly the name is depends on the type of the object.
-
-- REFERENCE -- The name of the of the reference, e.g.: \"master\"
-- TAG       -- The name of the tag, e.g.: \"v0.17\"
-- OBJECT    -- The string representation of the oid, e.g. \"a742eb9\"
 "))
 
 (defgeneric target (object)
