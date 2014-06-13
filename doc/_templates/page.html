@@ -1,0 +1,9 @@
+{%- extends "layout.html" %}
+{% block body %}
+  {% if pagename == 'index' %}
+    <div class="jumbotron">
+      <h1>CL-GIT</h1>
+    </div>
+  {% endif %}
+  {{ body }}
+{% endblock %}
