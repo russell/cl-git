@@ -17,7 +17,7 @@ Listing Contents
    .. code-block:: common-lisp-repl
 
       GIT> (tree-directory
-            (get-tree
+            (commit-tree
              (target
               (repository-head
                (open-repository (merge-pathnames #p"projects/ecl" (user-homedir-pathname)))))))

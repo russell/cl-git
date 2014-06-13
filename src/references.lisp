@@ -233,11 +233,14 @@ error if that is the case."
                    :free-function #'%git-reference-free)))
 
 (defmethod full-name ((object reference))
+  "Return the full path to the REFERENCE as a STRING."
   (if (slot-value object 'libgit2-name)
       (slot-value object 'libgit2-name)
       (%git-reference-name object)))
 
 (defmethod short-name ((object reference))
+  "Return the short name of the REFERENCE as a STRING.  This could for
+example be the text \"master\" or \"HEAD\"."
   (let ((name (full-name object)))
     (cond
       ((remote-p name)
@@ -293,11 +296,9 @@ is symbolic then the reference it points to will be returned."
 
 (defmethod resolve ((object reference) &optional (stop-at '(commit tag)))
   "Resolve the reference until the resulting object is a tag or
-commit.  Basically calls TARGET until the returned object is a COMMIT
-or TAG.
-
-Using values returns the finally found object and a list of the
-traversed objects."
+commit.  The accumulated result is calling TARGET repeatedly is
+returned as using VALUES. By default the resolving will stop when a
+COMMIT or TAG is found."
   (let ((objects
           (do ((refs (list (target object) object)
                      (cons (target (car refs)) refs)))

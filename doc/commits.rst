@@ -14,11 +14,6 @@ Creating
 Accessing
 ---------
 
-.. cl:method:: get-object commit common-lisp:t common-lisp:t
-
-.. cl:macro:: bind-git-commits
-
-.. cl:method:: list-objects commit common-lisp:t
 
 There are a few ways to find commits in the repository, the easiest is
 to find a commit when we know the SHA-1 has. In that case the process
@@ -56,6 +51,12 @@ frequently, but references to tags are more common.
 
 So in normal code you have to check for that and act accordingly.
 
+.. cl:method:: get-object commit common-lisp:t common-lisp:t
+
+.. cl:macro:: bind-git-commits
+
+.. cl:method:: list-objects commit common-lisp:t
+
 Iterating
 ~~~~~~~~~
 
@@ -90,62 +91,64 @@ Inspecting
 
 .. cl:generic:: message
 
+   .. code-block:: common-lisp-repl
+
+      GIT> (message
+            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
+                        (open-repository #p"/home/russell/projects/ecl/")))
+      "Add new declaration, si::c-export-fname, which produces lisp compiled files with
+      meaningful names for the exported functions. For instance,
+          (proclaim '(si::c-export-fname union))
+      is used to produce a C function with name clLunion, which can be directly used
+      in other compiled files. This feature has been applied to almost all functions
+      in the Lisp runtime.
+      "
+
 .. cl:generic:: author
+
+   .. code-block:: common-lisp-repl
+
+      GIT> (author
+            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
+                        (open-repository #p"/home/russell/projects/ecl/")))
+      (:NAME "jjgarcia"
+       :EMAIL "jjgarcia"
+       :TIME @2001-07-13T02:32:15.000000+10:00
+       :TIMEZONE #<LOCAL-TIME::TIMEZONE +0000>)
 
 .. cl:generic:: committer
 
+   .. code-block:: common-lisp-repl
+
+      GIT> (committer
+            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
+                        (open-repository #p"/home/russell/projects/ecl/")))
+      (:NAME "jjgarcia"
+       :EMAIL "jjgarcia"
+       :TIME @2001-07-13T02:32:15.000000+10:00
+       :TIMEZONE #<LOCAL-TIME::TIMEZONE +0000>)
+
 .. cl:generic:: parents commit
+
+   .. code-block:: common-lisp-repl
+
+
+      GIT> (parents
+            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
+                        (open-repository #p"/home/russell/projects/ecl/")))
+      (#<COMMIT F2DA18A5913EEA2D3F8BBD336F08AB48D9D3ECCE (weak) {100559E5A3}>)
 
 .. cl:generic:: commit-tree
 
-If we have found a commit and assinged it *commit* we can inspect this
-object to find out various bits of information.
+   To see the state of the repository when this commit was made, use the
+   :cl:symbol:`COMMIT-TREE`.
 
-First we get the commit message and author as follows:
+   .. code-block:: common-lisp-repl
 
-
-.. code-block:: common-lisp-repl
-
-   GIT> (message
-         (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
-                     (open-repository #p"/home/russell/projects/ecl/")))
-   "Add new declaration, si::c-export-fname, which produces lisp compiled files with
-   meaningful names for the exported functions. For instance,
-       (proclaim '(si::c-export-fname union))
-   is used to produce a C function with name clLunion, which can be directly used
-   in other compiled files. This feature has been applied to almost all functions
-   in the Lisp runtime.
-   "
-
-.. code-block:: common-lisp-repl
-
-   GIT> (author
-         (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
-                     (open-repository #p"/home/russell/projects/ecl/")))
-   (:NAME "jjgarcia"
-    :EMAIL "jjgarcia"
-    :TIME @2001-07-13T02:32:15.000000+10:00
-    :TIMEZONE #<LOCAL-TIME::TIMEZONE +0000>)
-
-Or we can see what it's parents are,
-
-.. code-block:: common-lisp-repl
-
-
-   GIT> (parents
-         (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
-                     (open-repository #p"/home/russell/projects/ecl/")))
-   (#<COMMIT F2DA18A5913EEA2D3F8BBD336F08AB48D9D3ECCE (weak) {100559E5A3}>)
-
-To see the state of the repository when this commit was made, use the
-:cl:symbol:`COMMIT-TREE`.
-
-.. code-block:: common-lisp-repl
-
-   GIT> (commit-tree
-         (target
-          (repository-head
-           (open-repository (merge-pathnames #p"projects/ecl"
-                                             (user-homedir-pathname))))))
-   #<TREE 96F8A446E020204589710FE1BF0CE1DD5B5B5AD0 {10079C9C03}>
+      GIT> (commit-tree
+            (target
+             (repository-head
+              (open-repository (merge-pathnames #p"projects/ecl"
+                                                (user-homedir-pathname))))))
+      #<TREE 96F8A446E020204589710FE1BF0CE1DD5B5B5AD0 {10079C9C03}>
 

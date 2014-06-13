@@ -5,17 +5,14 @@ Tag
 
 
 Within git there are 2 types of tags, lightweight and annotated.
-Lightweight tags are :cl:symbol:`references <REFERENCE>` within the tag
-namespace.  Annotated tags are objects stored in the ODB.  Annotated
-tags have a TARGET and a TAGGER, which makes them different from
-commits.
+Lightweight tags are :cl:symbol:`REFERENCES` within the
+tag namespace.  Annotated tags are objects stored in the ODB.
+Annotated tags have a TARGET and a TAGGER, which makes them different
+from commits. :cl:generic:`~TAG-P` can be used to determine if a tag
+or reference is a "tag".
 
 
 .. cl:type:: tag
-
-TAG-P can be used to determine if a tag or reference is a "tag".
-
-.. cl:generic:: tag-p
 
 
 Details

@@ -105,7 +105,6 @@ contains the object database.")
            :free-function #'git-repository-free)))
 
 (defmethod init-repository ((path pathname) &key bare)
-  "Open an existing repository located at PATH."
   (init-repository (namestring path) :bare bare))
 
 (defmethod open-repository ((path string))
@@ -120,11 +119,12 @@ contains the object database.")
 
 (defmethod repository-path ((repository repository))
   "Returns the path the the .git directory of the repository.
-Or for a bare repository to the repository itself."
+For a bare repository to the repository itself."
   (pathname (%git-repository-path repository)))
 
 (defmethod repository-workdir ((repository repository))
-  "Returns the working directory for the repository."
+  "Returns the working directory for the repository.  This is the
+directory that files are checked out into."
   (awhen (%git-repository-workdir repository)
       (pathname it)))
 
@@ -177,13 +177,14 @@ direct commit.")
 
 (defgeneric head-orphaned-p (repository)
     (:documentation "Returns t if the HEAD points to a commit that
-doesn't exist.")
+doesn't exist.  This function is depreciated and will be removed in
+0.21.0.")
   (:method ((repository repository))
     (warn "~A is deprecated and will be removed in 0.21.0" 'head-orphaned-p)
     (%git-repository-head-unborn repository)))
 
 (defgeneric head-unborn-p (repository)
-    (:documentation "Returns t if the HEAD points to a commit that
+    (:documentation "Returns T if the HEAD points to a commit that
 doesn't exist.")
   (:method ((repository repository))
     (%git-repository-head-unborn repository)))
