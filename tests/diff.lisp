@@ -71,10 +71,10 @@
                            :path "test-file"
                            :oid 97787706012661474925191056142692387097255677107)
                   :file-b (:mode :blob
-                           :flags (:valid-oid)
+                           :flags nil
                            :size 919
                            :path "test-file"
-                           :oid 243568240973109882797341286687005129339258402139)))))
+                           :oid 0)))))
     (is (equal (make-patch diffs)
                `((:patch ,repository-with-changes-diff
                   :status :modified

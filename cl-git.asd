@@ -13,9 +13,11 @@
   :licence "Lisp-LGPL"
   :pathname "src/"
   :components ((:file "package")
-               (cffi-grovel:grovel-file "libgit2-types")
+               (cffi-grovel:grovel-file "libgit2-types-grovel")
+               (:file "libgit2-types" :depends-on ("package" "libgit2-types-grovel"))
                (:file "api" :depends-on ("package"))
                (:file "libgit2" :depends-on ("package" "libgit2-types"))
+               (:file "buffer" :depends-on ("libgit2"))
                (:file "error" :depends-on ("libgit2"))
                (:file "utils" :depends-on ("libgit2"))
                (:file "git-pointer" :depends-on ("libgit2"))
@@ -29,7 +31,7 @@
                (:file "branch" :depends-on ("object"))
                (:file "commit" :depends-on ("object" "tree"))
                (:file "tag" :depends-on ("object"))
-               (:file "diff" :depends-on ("git-pointer" "tree"))
+               (:file "diff" :depends-on ("git-pointer" "tree" "buffer"))
                (:file "blob" :depends-on ("object"))
                (:file "tree" :depends-on ("object" "blob"))
                (:file "config" :depends-on ("git-pointer"))

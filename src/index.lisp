@@ -57,7 +57,7 @@
   (mtime (:struct git-index-time))
   (dev :unsigned-int)
   (ino :unsigned-int)
-  (mode :unsigned-int)
+  (mode git-file-mode)
   (uid :unsigned-int)
   (gid :unsigned-int)
   (file-size off-t)
@@ -163,11 +163,12 @@ and 3 (theirs) are in conflict."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod translate-from-foreign (value (type index-entry-type))
-  (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path)
+  (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path mode)
                        value
                        (:struct git-index-entry))
     (list :c-time ctime
           :m-time mtime
+          :mode mode
           :file-size file-size
           :oid oid
           :flags flags
@@ -178,7 +179,7 @@ and 3 (theirs) are in conflict."
 
 (defmethod translate-to-foreign (value (type index-entry-type))
   (let ((index-entry (foreign-alloc '(:struct git-index-entry))))
-    (with-foreign-slots ((file-size flags flags-extended path)
+    (with-foreign-slots ((file-size flags flags-extended path mode)
                          index-entry
                          (:struct git-index-entry))
       (with-foreign-slots ((seconds nanoseconds)
@@ -197,6 +198,7 @@ and 3 (theirs) are in conflict."
 
       (setf file-size (getf value :file-size 0))
       (setf flags (getf value :flags 0))
+      (setf mode (getf value :mode))
       (convert-into-foreign-memory (getf value :oid 0)
                                    '(:struct git-oid)
                                    (foreign-slot-pointer index-entry '(:struct git-index-entry) 'oid))

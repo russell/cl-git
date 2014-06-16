@@ -42,14 +42,6 @@
   :ignore_filemode
   :recurse_ignored_dirs)
 
-(defcenum (git-file-mode :uint16)
-  (:new #o0000000)
-  (:tree #o0040000)
-  (:blob #o0100644)
-  (:blob-executable #o0100755)
-  (:link #o0120000)
-  (:commit #o0160000))
-
 (defbitfield git-diff-flags
   (:binary #.(ash 1 0)) ;; file(s) treated as binary data
   :not-binary         ;; file(s) treated as text data
@@ -224,9 +216,9 @@
     (:pointer (:struct git-diff-delta))
   (patch %patch))
 
-(defcfun %git-patch-to-str
+(defcfun %git-patch-to-buf
     %return-value
-  (string :pointer)
+  (out (:pointer (:struct git-buf)))
   (patch %patch))
 
 (defcfun %git-patch-free
@@ -369,11 +361,17 @@
       delta)))
 
 (defmethod patch-to-string ((patch patch))
-  (with-foreign-object (string :pointer)
-    (%git-patch-to-str string patch)
-    (prog1
-        (foreign-string-to-lisp (mem-ref string :pointer) :encoding :utf-8)
-      (foreign-free (mem-ref string :pointer)))))
+  (with-foreign-object (buffer '(:struct git-buf))
+    (with-foreign-slots ((ptr size asize) buffer (:struct git-buf))
+      ;; Set the buffer's pointer to null so that libgit allocates the
+      ;; memory needed.
+      (setf ptr (null-pointer))
+      (setf size 0)
+      (setf asize 0)
+      (%git-patch-to-buf buffer patch)
+      (prog1
+          (foreign-string-to-lisp ptr :encoding :utf-8 :count size)
+        (%git-buf-free buffer)))))
 
 (defmethod make-patch ((diff diff-list))
   (loop :for i :below (diff-deltas-count diff)

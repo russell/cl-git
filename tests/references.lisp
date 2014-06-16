@@ -135,7 +135,7 @@ fixture"
 (def-test reference-has-reflog (:fixture reference-with-context)
   "Check that the ref has a reflog."
   (is (equal
-       (git-has-log ref-default)
+       (git-has-log *test-repository* ref-default)
        nil)))
 
 (def-test reference-set-target (:fixture reference-with-context)

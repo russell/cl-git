@@ -63,7 +63,9 @@
   (repository %repository)
   (name :string)
   (oid %oid)
-  (force :boolean))
+  (force :boolean)
+  (signature %git-signature)
+  (log-message :string))
 
 (defcfun ("git_reference_symbolic_create" %git-reference-symbolic-create)
     %return-value
@@ -71,13 +73,17 @@
   (repository %repository)
   (name :string)
   (target :string)
-  (force :boolean))
+  (force :boolean)
+  (signature %git-signature)
+  (log-message :string))
 
 (defcfun ("git_reference_set_target" %git-reference-set-target)
     %return-value
   (new-reference :pointer)
   (reference %reference)
-  (oid %oid))
+  (oid %oid)
+  (signature %git-signature)
+  (log-message :string))
 
 (defcfun ("git_reference_symbolic_target" %git-reference-symbolic-target)
     :string
@@ -104,6 +110,7 @@
 (defcfun ("git_reference_has_log" git-has-log)
     :boolean
   "Returns t if there exists a REFLOG for the reference."
+  (repo %repository)
   (reference %reference))
 
 (define-condition unresolved-reference-error (error) ())
@@ -211,11 +218,14 @@ symbolic reference."
                        &key
                          (type :oid)
                          force
-                         target)
+                         target
+                         signature
+                         (log-message ""))
   "Create a reference to TARGET.
 The type of reference depends on TYPE.  If TYPE is :OID the value of
 TARGET should be an OID and a direct reference is created.  If TYPE
 is :SYMBOLIC, a symbolic reference is created and TARGET should be a
+string. SIGNATURE should be a signature plist. LOG-MESSAGE should be a
 string.
 
 If FORCE is t the reference will be created, even if a reference with
@@ -224,9 +234,9 @@ error if that is the case."
   (with-foreign-object (reference :pointer)
     (ecase type
       (:oid
-       (%git-reference-create reference repository name target force))
+       (%git-reference-create reference repository name target force signature log-message))
       (:symbolic
-       (%git-reference-symbolic-create reference repository name target force)))
+       (%git-reference-symbolic-create reference repository name target force signature log-message)))
     (make-instance 'reference
                    :pointer (mem-ref reference :pointer)
                    :facilitator repository
@@ -278,12 +288,14 @@ is symbolic then the reference it points to will be returned."
                   (%git-reference-target reference)
                   (facilitator reference))))
 
-(defun (setf target) (val reference)
+(defun (setf target) (val reference &key signature (log-message ""))
   (with-foreign-object (new-reference :pointer)
     (%git-reference-set-target
      new-reference
      reference
-     (if (numberp val) val (oid val)))
+     (if (numberp val) val (oid val))
+     signature
+     log-message)
     (let ((old-pointer (pointer reference)))
       ;; XXX (RS) Swap out the old pointer with a new one.  This
       ;; should be extracted out to a function.

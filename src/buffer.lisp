@@ -17,13 +17,18 @@
 ;; License along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
 
-
 (in-package #:cl-git)
 
-(defcenum (git-file-mode :uint16)
-  (:new #o0000000)
-  (:tree #o0040000)
-  (:blob #o0100644)
-  (:blob-executable #o0100755)
-  (:link #o0120000)
-  (:commit #o0160000))
+(defcstruct git-buf
+  (ptr :pointer)
+  (asize size-t)
+  (size size-t))
+
+(define-foreign-type buffer (git-pointer)
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %buffer))
+
+(defcfun %git-buf-free
+    :void
+  (buffer (:pointer (:struct git-buf))))
