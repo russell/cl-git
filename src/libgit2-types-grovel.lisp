@@ -20,10 +20,7 @@
 
 (in-package #:cl-git)
 
-(defcenum (git-file-mode :uint16)
-  (:new #o0000000)
-  (:tree #o0040000)
-  (:blob #o0100644)
-  (:blob-executable #o0100755)
-  (:link #o0120000)
-  (:commit #o0160000))
+(include "stddef.h")
+
+(ctype size-t "size_t")
+
