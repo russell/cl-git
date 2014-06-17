@@ -26,7 +26,8 @@
 
 (defbitfield git-capabilities
   (:threads 1)
-  (:https 2))
+  (:https 2)
+  (:ssh 4))
 
 (define-foreign-library libgit2
   (:linux "libgit2.so.0")
@@ -45,7 +46,7 @@
   (:simple-parser %time))
 
 
-(defcfun ("git_libgit2_capabilities" libgit2-capabilities)
+(defcfun ("git_libgit2_features" libgit2-features)
   git-capabilities
   "Return a list of the libgit2 capabilities, possible values in the
 list return values are :THREADS and :HTTPS.")
