@@ -64,7 +64,7 @@
                 #:timestamp-to-universal)
   (:export
    ;; LibGit2 Library
-   #:libgit2-capabilities
+   #:libgit2-features
    #:libgit2-version
 
    ;; Config
