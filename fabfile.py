@@ -38,6 +38,8 @@ def inc_version(major=0, minor=0, patch=0):
     version = local("git describe --tags --abbrev=0", capture=True)
     version = map(int, version.split("."))
     version = map(add, version, [major, minor, patch])
+    if minor > 0:
+        version[2] = 0
     version = map(str, version)
     return ".".join(version)
 

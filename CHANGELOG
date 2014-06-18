@@ -2,6 +2,20 @@
 Changelog
 ---------
 
+0.20.0 - 2014-06-18
+~~~~~~~~~~~~~~~~~~~
+
+* updated to work with libgit2 0.20.0.
+* re-factored some of the internals to work better with CFFI.
+* updated for asdf 3
+* updated and improved diff interface
+
+0.19.0 - 2013-10-23
+~~~~~~~~~~~~~~~~~~~
+* added initial diff interface
+* added more CFFI like translations to string lists
+* added groveling for some platform specific datatypes
+
 0.18.1 - 2013-07-02
 ~~~~~~~~~~~~~~~~~~~
 
