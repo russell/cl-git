@@ -3,6 +3,7 @@
 ;; cl-git is a Common Lisp interface to git repositories.
 ;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
 ;; Copyright (C) 2012 Willem Rein Oudshoorn <woudshoo@xs4all.nl>
+;; Copyright (C) 2014 Eric Timmons <etimmons@alum.mit.edu>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -20,12 +21,46 @@
 
 (in-package #:cl-git)
 
+(defconstant +git-remote-callbacks-version+ 1)
+
 (defparameter *remote-ls-values* nil)
 
 (defbitfield (refspec-flags :unsigned-int)
   :force
   :pattern
   :matching)
+
+(defcstruct git-remote-callbacks
+  (version :uint)
+  (sideband-progress :pointer)
+  (completion :pointer)
+  (credentials :pointer)
+  (transfer-progress :pointer)
+  (update-tips :pointer)
+  (payload :pointer))
+
+(define-foreign-type remote-callbacks ()
+  ((credentials
+    :initform nil
+    :initarg :credentials
+    :accessor credentials))
+  (:simple-parser %remote-callbacks)
+  (:actual-type :pointer))
+
+(defmethod translate-to-foreign (value (type remote-callbacks))
+  (let ((ptr (foreign-alloc '(:struct git-remote-callbacks))))
+    ;; First, initialize the structure with default values.
+    (%git-remote-init-callbacks ptr +git-remote-callbacks-version+)
+    (translate-into-foreign-memory value type ptr)))
+
+(defmethod translate-into-foreign-memory ((value remote-callbacks) (type remote-callbacks) ptr)
+  "Translate a remote-callbacks class into a foreign structure. This
+assumes that *available-credentials* has a new binding established."
+  (with-foreign-slots ((credentials) ptr (:struct git-remote-callbacks))
+    ;; Use our callback to process credential requests.
+    (setf credentials (callback git-cred-acquire-cb))
+    (setf *available-credentials* (credentials value)))
+  ptr)
 
 
 (defcstruct (git-refspec :class refspec-struct-type)
@@ -153,6 +188,11 @@
   (remote %remote)
   (callback :pointer)
   (payload :pointer))
+
+(defcfun %git-remote-init-callbacks
+    %return-value
+  (callbacks :pointer)
+  (version :uint))
 
 (defcfun %git-remote-ls
   %return-value

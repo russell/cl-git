@@ -196,12 +196,18 @@
    #:head-unborn-p
    #:init-repository
    #:open-repository
+   #:clone-repository
    #:with-repository
    #:repository
    #:repository-head
    #:repository-path
    #:repository-status
    #:repository-workdir
+
+   ;; Credentials
+   #:ssh-key-from-agent
+   #:ssh-key
+   #:username-password
 
    ;; diff
    #:diff

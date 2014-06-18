@@ -20,7 +20,6 @@
 
 (in-package #:cl-git)
 
-
 (define-foreign-type repository (git-pointer)
   ()
   (:documentation "Repository is the root type, it
