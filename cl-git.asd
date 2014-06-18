@@ -38,7 +38,10 @@
                (:file "status" :depends-on ("git-pointer"))
                (:file "revwalk" :depends-on ("git-pointer"))
                (:file "remote" :depends-on ("object"))
-               (:file "odb" :depends-on ("object"))))
+               (:file "odb" :depends-on ("object"))
+               (:file "checkout" :depends-on ("object"))
+               (:file "clone" :depends-on ("checkout" "credentials"))
+               (:file "credentials" :depends-on ("object"))))
 
 
 (asdf:defsystem #:cl-git/tests
