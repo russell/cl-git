@@ -20,11 +20,11 @@ To build the documentation you need sphinxcontrib.cldomain which
 depends on:
 
 * Sphinx
-* `pygments`_ (with common lisp repl support) `mecurial <https://bitbucket.org/russell/pygments-main>`_
 * `sphinxcontrib.cldomain`_ latest `pypi <https://pypi.python.org/pypi/sphinxcontrib-cldomain>`_
+* `pygments-cl-repl`_ latest `pypi <https://pypi.python.org/pypi/pygments-cl-repl>`_
 
   * `cl-launch`_ 3.21.7 `git <http://common-lisp.net/project/xcvb/git/cl-launch.git>`_
-  * `asdf`_ 2.33.3 `git <http://common-lisp.net/projects/asdf/asdf.git>`_
+  * `asdf`_ 3.1 `git <http://common-lisp.net/projects/asdf/asdf.git>`_
   * `Quicklisp`_
 
 .. _cl-launch: http://cliki.net/cl-launch

@@ -120,6 +120,9 @@ pygments_style = 'emacs'
 
 import sphinx_bootstrap_theme
 html_theme = 'bootstrap'
+
+html_translator_class = 'sphinx_bootstrap_theme.BootstrapTranslator'
+
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 html_theme_options = {
@@ -168,7 +171,7 @@ html_theme_options = {
     # such as "amelia" or "cosmo".
     #
     # Note that this is served off CDN, so won't be available offline.
-    'bootswatch_theme': "spacelab",
+    'bootswatch_theme': "yeti",
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme

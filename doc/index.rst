@@ -1,11 +1,14 @@
-CL-Git is an interface to the C library `libgit2`_.  Some knowledge of
-git can be useful to make sense of all the concepts but largely this
-library aims to make access to git repositories as easy as possible.
+CL-Git is an interface to the C library `libgit2`_.  The API is an
+almost complete exposure of the underlying library.
 
 License `LLGPL`_
 
+The source is available on `github`_.
+
 .. _LLGPL: http://opensource.franz.com/preamble.html
 .. _libgit2: http://libgit2.github.com/
+.. _github: https://github.com/russell/cl-git/
+
 
 
 .. code-block:: common-lisp-repl
@@ -31,7 +34,6 @@ Documentation
    :maxdepth: 2
    :numbered:
 
-   quickstart
    objects
    repositories
    references
