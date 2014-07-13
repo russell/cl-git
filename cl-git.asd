@@ -37,7 +37,7 @@
                (:file "config" :depends-on ("git-pointer"))
                (:file "status" :depends-on ("git-pointer"))
                (:file "revwalk" :depends-on ("git-pointer"))
-               (:file "remote" :depends-on ("object"))
+               (:file "remote" :depends-on ("object" "credentials"))
                (:file "odb" :depends-on ("object"))
                (:file "checkout" :depends-on ("object"))
                (:file "clone" :depends-on ("checkout" "credentials"))

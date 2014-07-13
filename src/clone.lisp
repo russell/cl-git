@@ -95,10 +95,7 @@
 (defmethod clone-repository ((url string) (path string) &key credentials)
   "Clone a repository from URL to PATH. CREDENTIALS "
   (with-foreign-object (repository-ref :pointer)
-    ;; make a new binding for the available-credentials callback to
-    ;; use.
-    (let (*available-credentials*)
-      (%git-clone repository-ref url path (make-instance 'clone-options :credentials credentials)))
+	(%git-clone repository-ref url path (make-instance 'clone-options :credentials credentials))
     (make-instance 'repository
            :pointer (mem-ref repository-ref :pointer)
            :free-function #'git-repository-free)))
