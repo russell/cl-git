@@ -21,14 +21,55 @@
 
 (in-package #:cl-git)
 
-(defconstant +git-remote-callbacks-version+ 1)
+;; The remote callbacks data structure and supporting functions.
 
-(defparameter *remote-ls-values* nil)
+(defconstant +git-remote-callbacks-version+ 1
+  "The version of the C remote callbacks structure that this code
+uses.")
 
-(defbitfield (refspec-flags :unsigned-int)
-  :force
-  :pattern
-  :matching)
+(defstruct remote-callback-db
+  (last-used-id 0)
+  (id->instance-map (tg:make-weak-hash-table :weakness :value)))
+
+(defvar *git-remote-callbacks* (make-remote-callback-db)
+  "This database maps from a uint ID to a REMOTE-CALLBACKS
+structure. When a C remote callbacks structure is created, the ID of
+the Lisp structure it was created from is entered into the payload
+slot. This way, Lisp can figure out which callback structure generated
+the callback.")
+
+(defun remote-callback-db-id-in-use-p (id &optional (db *git-remote-callbacks*))
+  (multiple-value-bind (value present-p)
+	  (gethash id (remote-callback-db-id->instance-map db))
+	(declare (ignore value))
+	present-p))
+
+(defun remote-callbacks-by-id (id &optional (db *git-remote-callbacks*))
+  (gethash id (remote-callback-db-id->instance-map db)))
+
+(defun register-remote-callback (remote-callback &optional (db *git-remote-callbacks*))
+  "Returns the ID of the remote callback in the database."
+  ;; Note: this is NOT thread safe.
+  (loop
+	 with max-id = (1- (expt 2 32))
+	 with id = (min max-id (remote-callback-db-last-used-id db))
+	 ;; Repeat "only" 2^32 times
+	 repeat (1+ max-id)
+	 until (not (remote-callback-db-id-in-use-p id db))
+	 do (if (= id max-id)
+			(setf id 0)
+			(incf id))
+	 finally
+	   (if (remote-callback-db-id-in-use-p id db)
+		   ;; This means we were unable to find an unused 32bit
+		   ;; ID. Signal an error.
+		   (error "Unable to find an ID for remote callbcak.")
+		   ;; We were able to find an unused ID.
+		   (progn
+			 (setf (gethash id (remote-callback-db-id->instance-map db))
+				   remote-callback)
+			 (setf (remote-callback-db-last-used-id db) id)
+			 (return id)))))
 
 (defcstruct git-remote-callbacks
   (version :uint)
@@ -40,12 +81,36 @@
   (payload :pointer))
 
 (define-foreign-type remote-callbacks ()
-  ((credentials
+  ((id
+	:reader id)
+   (credentials
     :initform nil
     :initarg :credentials
     :accessor credentials))
   (:simple-parser %remote-callbacks)
   (:actual-type :pointer))
+
+(defcallback %git-remote-callback-acquire-credentials
+    :int
+    ((git-cred :pointer)
+     (url :string)
+     (username-from-url :string)
+     (allowed-types git-credtype)
+     (payload :pointer))
+  "This is the callback we give to libgit. It finds the
+REMOTE-CALLBACKS structure referenced by the PAYLOAD and dispatches on
+its credentials slot to provide a pointer to credentials allocated in
+foreign memory."
+  ;; Convert the payload to an ID.
+  (let* ((id (cffi:pointer-address payload))
+		 (remote-callbacks (remote-callbacks-by-id id)))
+	;; If no credentials have been provided, return a positive integer.
+	(if remote-callbacks
+		(acquire-credentials (credentials remote-callbacks) git-cred url username-from-url allowed-types payload)
+		1)))
+
+(defmethod initialize-instance :after ((inst remote-callbacks) &rest args)
+  (setf (slot-value inst 'id) (register-remote-callback inst)))
 
 (defmethod translate-to-foreign (value (type remote-callbacks))
   (let ((ptr (foreign-alloc '(:struct git-remote-callbacks))))
@@ -54,14 +119,20 @@
     (translate-into-foreign-memory value type ptr)))
 
 (defmethod translate-into-foreign-memory ((value remote-callbacks) (type remote-callbacks) ptr)
-  "Translate a remote-callbacks class into a foreign structure. This
-assumes that *available-credentials* has a new binding established."
-  (with-foreign-slots ((credentials) ptr (:struct git-remote-callbacks))
+  "Translate a remote-callbacks class into a foreign structure."
+  (with-foreign-slots ((credentials payload) ptr (:struct git-remote-callbacks))
     ;; Use our callback to process credential requests.
-    (setf credentials (callback git-cred-acquire-cb))
-    (setf *available-credentials* (credentials value)))
+    (setf credentials (callback %git-remote-callback-acquire-credentials))
+	(setf payload (cffi:make-pointer (id value))))
   ptr)
 
+
+(defparameter *remote-ls-values* nil)
+
+(defbitfield (refspec-flags :unsigned-int)
+  :force
+  :pattern
+  :matching)
 
 (defcstruct (git-refspec :class refspec-struct-type)
   (next :pointer)

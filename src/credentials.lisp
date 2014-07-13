@@ -21,9 +21,6 @@
 
 (in-package #:cl-git)
 
-(defvar *available-credentials* nil "The credentials available for
-interacting with remotes.")
-
 (defbitfield git-credtype
   (:userpass-plaintext)
   (:ssh-key)
@@ -51,21 +48,6 @@ interacting with remotes.")
   (git-cred :pointer)
   (username :string)
   (password :string))
-
-(defcallback git-cred-acquire-cb
-    :int
-    ((git-cred :pointer)
-     (url :string)
-     (username-from-url :string)
-     (allowed-types git-credtype)
-     (payload :pointer))
-  "This is the callback we give to libgit. It dispatches on
-*available-credentials* to provide a pointer to credentials allocated
-in foreign memory."
-  ;; If no credentials have been provided, return a positive integer.
-  (if *available-credentials*
-      (acquire-credentials *available-credentials* git-cred url username-from-url allowed-types payload)
-      1))
 
 (defgeneric acquire-credentials (credential-type git-cred url username-from-url allowed-types payload)
   (:documentation "Specializes on CREDENTIAL-TYPE to fill GIT-CRED
