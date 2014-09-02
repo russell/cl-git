@@ -1,0 +1,16 @@
+language: lisp
+
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq sbcl cl-quicklisp
+ - wget --progress=dot https://github.com/libgit2/libgit2/archive/v0.21.1.tar.gz
+ - tar -zxf v0.21.1.tar.gz
+ - mkdir libgit-build
+ - pushd libgit-build && cmake -DCMAKE_VERBOSE_MAKEFILE=ON ../libgit2-0.21.1 && popd
+ - pushd libgit-build && cmake --build . && popd
+ - pushd libgit-build && sudo cmake --build . --target install && popd
+
+env:
+ - LD_LIBRARY_PATH=/usr/local/lib
+
+script: ./run-tests

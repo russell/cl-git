@@ -1,16 +1,26 @@
-#!/usr/local/bin/sbcl --script
+#!/usr/bin/sbcl --script
 ; -*- mode: Lisp;-*-
 
-(load (merge-pathnames (user-homedir-pathname) (make-pathname :name ".sbclrc")))
+(defun ~ (path)
+  (merge-pathnames path (user-homedir-pathname)))
 
-(sb-ext:enable-debugger)
-(use-package 'asdf)
+(if (not (or (probe-file (~ ".quicklisp/setup.lisp"))
+             (probe-file (~ "quicklisp/setup.lisp"))))
+    (load "/usr/share/cl-quicklisp/quicklisp.lisp"))
 
+(if (not (or (probe-file (~ ".quicklisp/setup.lisp"))
+             (probe-file (~ "quicklisp/setup.lisp"))))
+    (quicklisp-quickstart:install)
+    (let ((quicklisp-init (or (probe-file (~ ".quicklisp/setup.lisp"))
+                              (probe-file (~ "quicklisp/setup.lisp")))))
+      (when (probe-file quicklisp-init)
+        (load quicklisp-init))))
 
-(asdf:oos 'asdf:load-op :quicklisp)
+(ql:quickload 'cffi)
+
 (push (probe-file #p"./") asdf:*central-registry*)
 (ql:quickload 'cl-git)
-(ql:quickload 'cl-git-tests)
+(ql:quickload 'cl-git/tests)
 
 (defun safe-trace (sym package)
   (handler-bind ((simple-error
@@ -39,4 +49,11 @@
     (do-symbols (sym 'cl-git)
       (safe-trace sym "CL-GIT"))))
 
-(FiveAM:run! :cl-git)
+(let ((result-list (fiveam:run :cl-git)))
+  (fiveam:explain! result-list)
+  (uiop:quit
+   (if (remove-if-not
+        (lambda (res)
+          (typep res 'fiveam::test-failure))
+        result-list)
+       1 0)))

@@ -29,8 +29,8 @@
     (is (integerp minor))
     (is (integerp revision))))
 
-(test libgit2-capabilities
+(test libgit2-features
   "Check that the capabilities of libgit2, can only really check it's
 a list."
-  (let ((capabilities (libgit2-capabilities)))
+  (let ((capabilities (libgit2-features)))
     (is (listp capabilities))))
