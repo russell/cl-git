@@ -1,30 +1,36 @@
-#!/usr/bin/sbcl --script
-; -*- mode: Lisp;-*-
+(in-package :common-lisp-user)
 
-(defun ~ (path)
-  (merge-pathnames path (user-homedir-pathname)))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun ~ (path)
+    (merge-pathnames path (user-homedir-pathname)))
 
-(if (not (or (probe-file (~ ".quicklisp/setup.lisp"))
-             (probe-file (~ "quicklisp/setup.lisp"))))
-    (load "/usr/share/cl-quicklisp/quicklisp.lisp"))
+  (defun load-quicklisp ()
+    (block nil
+      (flet ((try (x) (when (probe-file x) (return (load x)))))
+        (try (~ "quicklisp/setup.lisp"))
+        (try (~ ".quicklisp/setup.lisp"))
+        (error "Can't find an installation of quicklisp."))))
 
-(if (not (or (probe-file (~ ".quicklisp/setup.lisp"))
-             (probe-file (~ "quicklisp/setup.lisp"))))
-    (quicklisp-quickstart:install)
-    (let ((quicklisp-init (or (probe-file (~ ".quicklisp/setup.lisp"))
-                              (probe-file (~ "quicklisp/setup.lisp")))))
-      (when (probe-file quicklisp-init)
-        (load quicklisp-init))))
+  #-quicklisp
+  (load-quicklisp))
 
-(ql:quickload 'cffi)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  #-fiveam
+  (quicklisp:quickload 'fiveam)
+  #-unixoptions
+  (quicklisp:quickload 'unix-options))
 
-(push (probe-file #p"./") asdf:*central-registry*)
-(ql:quickload 'cl-git)
-(ql:quickload 'cl-git/tests)
+;; CFFI grovel is needed for cl-git.asd
+(quicklisp:quickload 'cffi)
+
+(push (truename #p"./") asdf:*central-registry*)
+(quicklisp:quickload 'cl-git)
+(quicklisp:quickload 'cl-git/tests)
 
 (defun safe-trace (sym package)
   (handler-bind ((simple-error
                   #'(lambda (c)
+                      (declare (ignore c))
                       (format t "Skipping Symbol (probably a macro)~%")
                       (invoke-restart 'skip-symbol))))
     (when (and (fboundp sym)
@@ -37,14 +43,13 @@
           (eval `(trace ,(intern (symbol-name sym) package)))
         (skip-symbol () nil)))))
 
-(use-package 'unix-options)
-(with-cli-options ()
+(unix-options:with-cli-options ()
     (help trace)
   (when help
-    (print-usage-summary
+    (unix-options:print-usage-summary
      "Usage:~%~@{~A~%~}"
      '(((#\t "trace") nil "trace the functions during a test run.")))
-    (cl-user::quit :unix-status 1))
+    (uiop::quit :unix-status 1))
   (when trace
     (do-symbols (sym 'cl-git)
       (safe-trace sym "CL-GIT"))))

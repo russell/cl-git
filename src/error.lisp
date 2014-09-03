@@ -112,7 +112,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-condition basic-error (error)
+(define-condition basic-error (simple-error)
   ((message
     :initarg :message
     :accessor error-message
@@ -133,12 +133,13 @@
                      (or (error-class condition) (class-name (class-of condition)))
                      (error-message condition)))))
 
-(defmacro define-git-condition (error-type error-number)
-  `(progn
-     (eval-when (:compile-toplevel :execute :load-toplevel)
-       (define-condition ,error-type (basic-error) ()))
-     (eval-when (:execute :load-toplevel)
-       (setf (gethash ,error-number error-conditions) (quote ,error-type)))))
+(eval-when (:compile-toplevel :execute :load-toplevel)
+ (defmacro define-git-condition (error-type error-number)
+   `(progn
+      (eval-when (:compile-toplevel :execute :load-toplevel)
+        (define-condition ,error-type (basic-error) ()))
+      (eval-when (:execute :load-toplevel)
+        (setf (gethash ,error-number error-conditions) (quote ,error-type))))))
 
 (setf (gethash -1 error-conditions) 'basic-error)
 (define-git-condition not-found -3)
