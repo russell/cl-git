@@ -20,7 +20,7 @@
 
 (in-package #:cl-git)
 
-(defcenum (git-file-mode :uint16)
+(defcenum (git-file-mode)
   (:new #o0000000)
   (:tree #o0040000)
   (:blob #o0100644)
