@@ -118,13 +118,9 @@
         (let ((entry (git-entry-by-index test-index 0)))
           ;; Add the entry from the other git index.
           (index-add-file entry index-in-memory)
-          ;; TODO (RS) there is an intermittent failure which results
-          ;; from the index-in-memory index having a different set of
-          ;; FLAGS-EXTENDED to the disk index.  Adding a sleep seems
-          ;; to make the test behave consistently.  But the proper fix
-          ;; should be removing the check since the FLAGS-EXTENDED
-          ;; just stores internal details about the state of the
-          ;; index.
-          (sleep 1)
-          (plist-equal entry
-                       (git-entry-by-index index-in-memory 0)))))))
+          (let ((entry1 (git-entry-by-index index-in-memory 0)))
+            ;; NOTE Removed the check of the FLAGS-EXTENDED field
+            ;; since it stores internal details about the state of the
+            ;; index.
+            (setf (getf entry1 :flags-extended) 0)
+            (plist-equal entry entry1)))))))
