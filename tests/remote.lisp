@@ -92,3 +92,16 @@
                  '("+refs/heads/*:refs/remotes/origin/*"))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))
+
+
+(def-test clone-repository (:fixture repository-with-commits)
+  "Create a new repository and clone it."
+  (let ((remote-repo-path (gen-temp-path)))
+    (unwind-protect
+         (let ((cloned-repository
+                 (clone-repository (namestring *repository-path*) remote-repo-path)))
+           (is (eql
+                (oid (repository-head *test-repository*))
+                (oid (repository-head cloned-repository)))))
+      (progn
+        (delete-directory-and-files remote-repo-path)))))
