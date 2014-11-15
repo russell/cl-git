@@ -262,7 +262,8 @@ example be the text \"master\" or \"HEAD\"."
 (defmethod print-object ((object reference) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (cond
-      ((not (null-pointer-p (slot-value object 'libgit2-pointer)))
+      ((and (slot-value object 'libgit2-pointer)
+            (not (null-pointer-p (slot-value object 'libgit2-pointer))))
        (format stream "~a" (full-name object)))
       ((or (slot-value object 'libgit2-oid) (slot-value object 'libgit2-name))
        (format stream "~a (weak)" (full-name object)))
