@@ -37,7 +37,8 @@
 (defcfun ("git_reflog_read" %git-reflog-read)
     %return-value
   (out :pointer)
-  (reference %reference))
+  (repository %repository)
+  (name :string))
 
 (defcfun ("git_reflog_entrycount" %git-reflog-entry-count)
     :unsigned-int
@@ -65,7 +66,7 @@
 
 (defmethod reflog ((reference reference))
   (with-foreign-object (reflog :pointer)
-    (%git-reflog-read reflog reference)
+    (%git-reflog-read reflog (facilitator reference) (full-name reference))
     (make-instance 'reflog
 		   :pointer (mem-ref reflog :pointer)
 		   :facilitator (facilitator reference)
@@ -79,6 +80,12 @@
 		 :pointer (%git-reflog-entry-by-index reflog index)
 		 :facilitator reflog
 		 :free-function #'identity))
+
+(defmethod entries ((reflog reflog) &key (start 0) (end (entry-count reflog)))
+  (loop
+    :for i :from start :below end
+    :for entry = (entry-by-index reflog i)
+    :collect entry))
 
 (defmethod committer ((reflog-entry reflog-entry))
   (%git-reflog-entry-commiter reflog-entry))
