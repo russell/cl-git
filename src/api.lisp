@@ -129,27 +129,27 @@ What exactly the name is depends on the type of the object.
 
 (defgeneric resolve (object &optional stop-at))
 
-(defgeneric git-entry-count (object)
+(defgeneric entry-count (object)
   (:documentation "Returns the number elements in the collection OBJECT.
 "))
 
-(defgeneric git-entry-by-index (object index)
+(defgeneric entry-by-index (object index)
   (:documentation "Returns the element at position INDEX from the
 collection OBJECT."))
 
-(defgeneric git-entry-by-path (object path)
+(defgeneric entry-by-path (object path)
   (:documentation "Returns the element at location PATH from the
 collection OBJECT."))
 
-(defgeneric git-entries (object &key start end)
+(defgeneric entries (object &key start end)
   (:documentation "Returns the elements of the collection OBJECT as a
 list.  The start and end keyword arguments allow to retrieve a subset
 of all elements.  All entries with index satisfying
 
-   start <= index < end
+   START <= INDEX < END
 
-are returned.  If end is not specified or nil, no end condition exists.
-start defaults to 0."))
+are returned.  If END is not specified or nil, no END condition
+exists.  start defaults to 0."))
 
 (defgeneric git-values (object)
   (:documentation "TODO"))

@@ -71,11 +71,10 @@
 		   :facilitator (facilitator reference)
 		   :free-function #'%git-reflog-free)))
 
-
-(defmethod git-entry-count ((reflog reflog))
+(defmethod entry-count ((reflog reflog))
   (%git-reflog-entry-count reflog ))
 
-(defmethod git-entry-by-index ((reflog reflog) index)
+(defmethod entry-by-index ((reflog reflog) index)
   (make-instance 'reflog-entry
 		 :pointer (%git-reflog-entry-by-index reflog index)
 		 :facilitator reflog

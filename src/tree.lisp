@@ -133,10 +133,10 @@ This does count the number of direct children, not recursively."
 (defmethod get-object ((class (eql 'tree)) oid repository)
   (git-object-lookup oid class repository))
 
-(defmethod git-entry-count ((object tree))
+(defmethod entry-count ((object tree))
   (git-tree-entry-count object))
 
-(defmethod git-entry-by-index ((object tree) index)
+(defmethod entry-by-index ((object tree) index)
   (git-tree-entry-by-index object index))
 
 ;; Set up the object mappings
@@ -166,8 +166,8 @@ This does count the number of direct children, not recursively."
 
 (defun tree-entries (tree pathname)
   (loop
-    :for index :from 0 :below (git-entry-count tree)
-    :for entry = (git-entry-by-index tree index)
+    :for index :from 0 :below (entry-count tree)
+    :for entry = (entry-by-index tree index)
     :when (if pathname (tree-pathname-match-p (getf entry :filename)
                                               pathname)
               t)

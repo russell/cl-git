@@ -77,9 +77,6 @@
    #:free
    #:full-name
    #:get-object
-   #:git-entries
-   #:git-entry-count
-   #:git-entry-by-index
    #:list-objects
    #:make-object
    #:object
@@ -87,6 +84,11 @@
    #:oid
    #:reflog
    #:short-name
+
+   ;; Git Objects -- collections
+   #:entries
+   #:entry-count
+   #:entry-by-index
 
    ;; Errors
    #:basic-error

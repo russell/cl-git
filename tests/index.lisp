@@ -50,7 +50,7 @@
   (index-add-file filename *test-repository-index*)
   (index-write *test-repository-index*)
   (mapcar #'plist-equal
-          (git-entries *test-repository-index*)
+          (entries *test-repository-index*)
           `((:C-TIME ,#'approximately-now-p
              :M-TIME ,#'approximately-now-p
              :FILE-SIZE ,(length filetext)
@@ -77,11 +77,11 @@
 
 (def-test index-clear (:fixture (index-with-file #P"test-file" "foo blah."))
   "Add an entry to the index and clear it."
-  (is (eq (git-entry-count *test-repository-index*) 0))
+  (is (eq (entry-count *test-repository-index*) 0))
   (index-add-file filename *test-repository-index*)
-  (is (eq (git-entry-count *test-repository-index*) 1))
+  (is (eq (entry-count *test-repository-index*) 1))
   (index-clear *test-repository-index*)
-  (is (eq (git-entry-count *test-repository-index*) 0)))
+  (is (eq (entry-count *test-repository-index*) 0)))
 
 
 (def-test index-has-conflicts (:fixture repository)
@@ -100,11 +100,11 @@
       (index-add-file filename test-index)
       (unwind-protect
            (with-index (index-file index-file-path)
-             (let ((entry (git-entry-by-index test-index 0)))
+             (let ((entry (entry-by-index test-index 0)))
                ;; Add the entry from the other git index.
                (index-add-file entry index-file)
                (plist-equal entry
-                            (git-entry-by-index index-file 0))))
+                            (entry-by-index index-file 0))))
         (when (file-exists-p index-file-path)
           (delete-file index-file-path))))))
 
@@ -115,10 +115,10 @@
       (index-add-file filename test-index)
       (with-index (index-in-memory)
         (index-write test-index)
-        (let ((entry (git-entry-by-index test-index 0)))
+        (let ((entry (entry-by-index test-index 0)))
           ;; Add the entry from the other git index.
           (index-add-file entry index-in-memory)
-          (let ((entry1 (git-entry-by-index index-in-memory 0)))
+          (let ((entry1 (entry-by-index index-in-memory 0)))
             ;; NOTE Removed the check of the FLAGS-EXTENDED field
             ;; since it stores internal details about the state of the
             ;; index.

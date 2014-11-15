@@ -286,19 +286,19 @@ operations that may not be written back to the disk."
 (defmethod index-conflicts-p ((index index))
   (%git-index-has-conflicts index))
 
-(defmethod git-entry-count ((index index))
+(defmethod entry-count ((index index))
   (%git-index-entry-count index))
 
-(defmethod git-entry-by-index ((index index) position)
+(defmethod entry-by-index ((index index) position)
   (%git-index-get-by-index index position))
 
-(defmethod index-entries ((index index))
+(defmethod entries ((index index) &key (start 0) (end (entry-count index)))
   (loop
-    :for i :from 0 :below (git-entry-count index)
-    :for entry = (git-entry-by-index index i)
+    :for i :from start :below end
+    :for entry = (entry-by-index index i)
     :collect entry))
 
-(defmethod git-entry-by-path ((index index) (path string))
+(defmethod entry-by-path ((index index) (path string))
   (%git-index-get-by-path index path 1))
 
 (defgeneric index-to-tree (index)
@@ -307,8 +307,3 @@ operations that may not be written back to the disk."
       (with-foreign-object (oid-pointer '(:struct git-oid))
         (%git-index-write-tree oid-pointer index)
         (get-object 'tree (convert-from-foreign oid-pointer '%oid) (facilitator index)))))
-
-(defmethod git-entry ((index index))
-  (with-foreign-object (oid-pointer '(:struct git-oid))
-    (%git-index-write-tree oid-pointer index)
-    (convert-from-foreign oid-pointer '%oid)))
