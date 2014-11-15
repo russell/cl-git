@@ -272,7 +272,7 @@ operations that may not be written back to the disk."
            :free-function #'%git-index-free)))
 
 (defmethod open-index ((path string))
-  "Open a new index in a file."
+  "Open a new INDEX from a file."
   (with-foreign-object (index :pointer)
     (%git-index-open index path)
     (make-instance 'index
@@ -280,11 +280,14 @@ operations that may not be written back to the disk."
            :free-function #'%git-index-free)))
 
 (defmethod open-index ((path pathname))
-  "Open a new index in a file."
+  "Open a new INDEX from a file."
   (open-index (namestring path)))
 
-(defmethod index-conflicts-p ((index index))
-  (%git-index-has-conflicts index))
+(defgeneric index-conflicts-p (index)
+  (:documentation "Return T if the index contains any conflicting
+  changes.")
+  (:method ((index index))
+    (%git-index-has-conflicts index)))
 
 (defmethod entry-count ((index index))
   (%git-index-entry-count index))
