@@ -122,7 +122,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;;; XXX (RS) should probably look at using the groveller to get these
+;;; TODO (RS) should probably look at using the groveller to get these
 ;;; values.
 (defvar reference-dir "refs/")
 (defvar reference-heads-dir (concatenate 'string reference-dir "heads/"))
