@@ -26,7 +26,7 @@ Requires
 --------
 
 * SBCL 1.0.56 (sbcl-1.0.56.55-b06f72f-linux-x86)
-* libgit2: 0.20.0
+* libgit2: 0.21.0
 
 
 Building Documentation
