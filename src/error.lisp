@@ -111,27 +111,27 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(define-condition basic-error (simple-error)
-  ((message
-    :initarg :message
-    :accessor error-message
-    :initform nil
-    :documentation "Text message indicating what went wrong.")
-   (code
-    :initarg :code
-    :accessor error-code
-    :initform nil
-    :documentation "The error value returned by a function.")
-   (class
-    :initarg :class
-    :accessor error-class
-    :initform nil
-    :documentation "The error code/class returned by git_lasterr."))
-  (:report (lambda (condition stream)
-             (format stream "Error ~S, ~A"
-                     (or (error-class condition) (class-name (class-of condition)))
-                     (error-message condition)))))
+(eval-when (:compile-toplevel :execute :load-toplevel)
+  (define-condition basic-error (simple-error)
+    ((message
+      :initarg :message
+      :accessor error-message
+      :initform nil
+      :documentation "Text message indicating what went wrong.")
+     (code
+      :initarg :code
+      :accessor error-code
+      :initform nil
+      :documentation "The error value returned by a function.")
+     (class
+      :initarg :class
+      :accessor error-class
+      :initform nil
+      :documentation "The error code/class returned by git_lasterr."))
+    (:report (lambda (condition stream)
+               (format stream "Error ~S, ~A"
+                       (or (error-class condition) (class-name (class-of condition)))
+                       (error-message condition))))))
 
 (eval-when (:compile-toplevel :execute :load-toplevel)
  (defmacro define-git-condition (error-type error-number)
