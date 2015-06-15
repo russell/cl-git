@@ -41,4 +41,4 @@ script:
   - cl -e "(prin1 (slot-value (asdf:find-system 'asdf) 'asdf:version))"
   - cl -e "(print (lisp-implementation-version))"
   - $LISP --help
-  - tail -n +2 run-tests.lisp | LD_LIBRARY_PATH=/usr/local/lib cl
+  - LD_LIBRARY_PATH=/usr/local/lib cl --load run-tests.lisp
