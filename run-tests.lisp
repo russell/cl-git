@@ -24,7 +24,9 @@
 (ql:quickload 'cffi)
 
 (push (truename #p"./") asdf:*central-registry*)
+(ql:quickload (asdf:system-depends-on (asdf:find-system 'cl-git)))
 (ql:quickload 'cl-git :verbose t)
+(ql:quickload (asdf:system-depends-on (asdf:find-system 'cl-git/tests)))
 (ql:quickload 'cl-git/tests :verbose t)
 
 (defun safe-trace (sym package)
