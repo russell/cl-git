@@ -67,7 +67,8 @@ REPOSITORY-CONFIG."
 
 (defparameter *config-values* nil)
 
-(defcallback collect-config-values :int ((entry git-config-entry) (payload :pointer))
+(defcallback collect-config-values :int ((entry (:pointer (:struct git-config-entry)))
+                                         (payload :pointer))
   (declare (ignore payload))
   (push (convert-from-foreign entry '(:struct git-config-entry)) *config-values*)
   0);;; replace with success
