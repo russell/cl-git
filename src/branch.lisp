@@ -27,13 +27,6 @@
   (:local 1)
   (:remote 2))
 
-(defcfun ("git_branch_foreach" %git-branch-for-each)
-    %return-value
-  (repository %repository)
-  (flags git-branch-type-flags)
-  (callback :pointer)
-  (payload :pointer))
-
 (defcfun ("git_branch_lookup" %git-branch-lookup)
     %return-value
   (ref :pointer)
