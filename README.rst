@@ -25,7 +25,7 @@ What It Can Do
 Requires
 --------
 
-* SBCL 1.0.56 (sbcl-1.0.56.55-b06f72f-linux-x86)
+* SBCL 1.2.6 x86-64 or CCL 1.10 x86-64
 * libgit2: 0.21.0
 
 
@@ -36,7 +36,7 @@ Documentation requires sphinxcontrib.cldomain which depends on
 
 * Sphinx
 * cl-launch 3.21.7
-* asdf 2.33.3
+* asdf 3.1
 * quicklisp
 
 Using `virtualenv`_ run::

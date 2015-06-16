@@ -17,7 +17,6 @@ matrix:
  allow_failures:
    - env: LISP=clisp LIBGIT2_VERSION=0.21.3
    - env: LISP=ecl LIBGIT2_VERSION=0.21.3
-   - env: LISP=ccl LIBGIT2_VERSION=0.21.3
 
 before_install:
  - sudo apt-get update
