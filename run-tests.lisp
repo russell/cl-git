@@ -16,16 +16,16 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   #-fiveam
-  (quicklisp:quickload 'fiveam)
+  (ql:quickload 'fiveam)
   #-unixoptions
-  (quicklisp:quickload 'unix-options))
+  (ql:quickload 'unix-options))
 
 ;; CFFI grovel is needed for cl-git.asd
-(quicklisp:quickload 'cffi)
+(ql:quickload 'cffi)
 
 (push (truename #p"./") asdf:*central-registry*)
-(quicklisp:quickload 'cl-git)
-(quicklisp:quickload 'cl-git/tests)
+(ql:quickload 'cl-git :verbose t)
+(ql:quickload 'cl-git/tests :verbose t)
 
 (defun safe-trace (sym package)
   (handler-bind ((simple-error
