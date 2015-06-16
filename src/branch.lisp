@@ -82,20 +82,22 @@ This means that this is the branch that is checked out.")
   (:method ((branch reference))
     (%git-branch-is-head branch)))
 
-(defmethod upstream ((branch reference))
-  "Returns the reference for the remote tracking branch, corresponding
+(defgeneric upstream (branch)
+  (:method ((branch reference))
+    "Returns the reference for the remote tracking branch, corresponding
 to the local branch BRANCH."
-  (with-foreign-object (reference :pointer)
-    (%git-branch-upstream reference branch)
-    (make-instance 'reference
-		   :pointer (mem-ref reference :pointer)
-		   :facilitator (facilitator branch)
-		   :free-function #'%git-reference-free)))
+    (with-foreign-object (reference :pointer)
+      (%git-branch-upstream reference branch)
+      (make-instance 'reference
+                     :pointer (mem-ref reference :pointer)
+                     :facilitator (facilitator branch)
+                     :free-function #'%git-reference-free))))
 
-(defmethod remote-name ((branch reference))
-  (with-foreign-pointer-as-string ((out size)
-                                   (%git-branch-remote-name
-                                    (null-pointer) 0
-                                    (facilitator branch)
-                                    (full-name branch)))
-    (%git-branch-remote-name out size (facilitator branch) (full-name branch))))
+(defgeneric remote-name (branch)
+  (:method ((branch reference))
+    (with-foreign-pointer-as-string ((out size)
+                                     (%git-branch-remote-name
+                                      (null-pointer) 0
+                                      (facilitator branch)
+                                      (full-name branch)))
+      (%git-branch-remote-name out size (facilitator branch) (full-name branch)))))

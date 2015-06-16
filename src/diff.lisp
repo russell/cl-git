@@ -335,44 +335,49 @@
                  &optional (options (make-instance 'diff-options)))
   (diff (commit-tree commit-old) (commit-tree commit-new) options))
 
-(defmethod diff-deltas-count ((diff-list diff-list))
-  (%git-diff-num-deltas diff-list))
+(defgeneric diff-deltas-count (diff-list)
+  (:method ((diff-list diff-list))
+    (%git-diff-num-deltas diff-list)))
 
-(defmethod diff-deltas-summary ((diff-list diff-list))
-  (let (*git-diff-deltas*)
-    (%git-diff-foreach diff-list
-                       (callback collect-diff-files)
-                       (null-pointer)
-                       (null-pointer)
-                       (null-pointer))
-    *git-diff-deltas*))
+(defgeneric diff-deltas-summary (diff-list)
+  (:method ((diff-list diff-list))
+    (let (*git-diff-deltas*)
+      (%git-diff-foreach diff-list
+                         (callback collect-diff-files)
+                         (null-pointer)
+                         (null-pointer)
+                         (null-pointer))
+      *git-diff-deltas*)))
 
-(defmethod make-patch1 ((diff diff-list) index)
-  (with-foreign-objects ((patch :pointer))
-    (%git-patch-from-diff patch diff index)
-    (let* ((patch (convert-from-foreign (mem-ref patch :pointer) '%patch))
-           (delta (convert-from-foreign (%git-patch-get-delta patch)
-                                        '(:struct git-diff-delta))))
+(defgeneric make-patch1 (diff-list index)
+  (:method ((diff diff-list) index)
+    (with-foreign-objects ((patch :pointer))
+      (%git-patch-from-diff patch diff index)
+      (let* ((patch (convert-from-foreign (mem-ref patch :pointer) '%patch))
+             (delta (convert-from-foreign (%git-patch-get-delta patch)
+                                          '(:struct git-diff-delta))))
 
-      ;; TODO (RS) this is a crap way to enable garbage collection
-      (setf (facilitator patch) (facilitator diff))
-      (enable-garbage-collection patch)
-      (setf (getf delta :patch) (patch-to-string patch))
-      delta)))
+        ;; TODO (RS) this is a crap way to enable garbage collection
+        (setf (facilitator patch) (facilitator diff))
+        (enable-garbage-collection patch)
+        (setf (getf delta :patch) (patch-to-string patch))
+        delta))))
 
-(defmethod patch-to-string ((patch patch))
-  (with-foreign-object (buffer '(:struct git-buf))
-    (with-foreign-slots ((ptr size asize) buffer (:struct git-buf))
-      ;; Set the buffer's pointer to null so that libgit allocates the
-      ;; memory needed.
-      (setf ptr (null-pointer))
-      (setf size 0)
-      (setf asize 0)
-      (%git-patch-to-buf buffer patch)
-      (prog1
-          (foreign-string-to-lisp ptr :encoding :utf-8 :count size)
-        (%git-buf-free buffer)))))
+(defgeneric patch-to-string (patch)
+  (:method ((patch patch))
+   (with-foreign-object (buffer '(:struct git-buf))
+     (with-foreign-slots ((ptr size asize) buffer (:struct git-buf))
+       ;; Set the buffer's pointer to null so that libgit allocates the
+       ;; memory needed.
+       (setf ptr (null-pointer))
+       (setf size 0)
+       (setf asize 0)
+       (%git-patch-to-buf buffer patch)
+       (prog1
+           (foreign-string-to-lisp ptr :encoding :utf-8 :count size)
+         (%git-buf-free buffer))))))
 
-(defmethod make-patch ((diff diff-list))
-  (loop :for i :below (diff-deltas-count diff)
-        :collect (make-patch1 diff i)))
+(defgeneric make-patch (diff-list)
+  (:method ((diff diff-list))
+    (loop :for i :below (diff-deltas-count diff)
+          :collect (make-patch1 diff i))))

@@ -89,13 +89,13 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod clone-repository ((url string) (path pathname) &key credentials)
-  (clone-repository url (namestring path) :credentials credentials))
-
-(defmethod clone-repository ((url string) (path string) &key credentials)
-  "Clone a repository from URL to PATH. CREDENTIALS "
-  (with-foreign-object (repository-ref :pointer)
-	(%git-clone repository-ref url path (make-instance 'clone-options :credentials credentials))
-    (make-instance 'repository
-           :pointer (mem-ref repository-ref :pointer)
-           :free-function #'git-repository-free)))
+(defgeneric clone-repository (url path &key credentials)
+  (:documentation "Clone a repository from URL to PATH. CREDENTIALS ")
+  (:method ((url string) (path pathname) &key credentials)
+    (clone-repository url (namestring path) :credentials credentials))
+  (:method ((url string) (path string) &key credentials)
+    (with-foreign-object (repository-ref :pointer)
+      (%git-clone repository-ref url path (make-instance 'clone-options :credentials credentials))
+      (make-instance 'repository
+                     :pointer (mem-ref repository-ref :pointer)
+                     :free-function #'git-repository-free))))

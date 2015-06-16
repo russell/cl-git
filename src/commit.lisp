@@ -159,15 +159,16 @@ optional instance of a GIT-SIGNATURE the details the committer.
   (foreign-string-to-lisp (git-commit-message commit)
                           :encoding (message-encoding commit)))
 
-(defmethod message-encoding ((commit commit))
-  "Return a KEYWORD containing the encoding of the commit message."
-  (let ((original-encoding (%git-commit-message-encoding commit)))
-    (if original-encoding
-        (external-format-name
-         (make-external-format
-          (intern (string-upcase original-encoding)
-                  (find-package 'keyword))))
-        :utf-8)))
+(defgeneric message-encoding (commit)
+  (:documentation "Return a KEYWORD containing the encoding of the commit message.")
+  (:method ((commit commit))
+    (let ((original-encoding (%git-commit-message-encoding commit)))
+      (if original-encoding
+          (external-format-name
+           (make-external-format
+            (intern (string-upcase original-encoding)
+                    (find-package 'keyword))))
+          :utf-8))))
 
 (defmethod author ((commit commit))
   "Given a commit return the commit author's signature."
@@ -180,21 +181,23 @@ optional instance of a GIT-SIGNATURE the details the committer.
   "Returns the number of parent commits of the argument COMMIT."
   (git-commit-parentcount commit))
 
-(defmethod parents ((commit commit))
-  "Returns a list of oids identifying the parents of OBJECT."
-  (loop
-    :for index :from 0 :below (parent-count commit)
-    :collect (make-commit-from-oid
-              (git-commit-parent-oid commit index)
-              (facilitator commit))))
+(defgeneric parents (commit)
+  (:documentation "Returns a list of oids identifying the parents of OBJECT.")
+  (:method ((commit commit))
+   (loop
+     :for index :from 0 :below (parent-count commit)
+     :collect (make-commit-from-oid
+               (git-commit-parent-oid commit index)
+               (facilitator commit)))))
 
-(defmethod commit-tree ((commit commit))
-  "Returns the TREE object of the commit."
-  (with-foreign-object (%tree :pointer)
-    (%git-commit-tree %tree commit)
-    (make-instance-object :pointer (mem-aref %tree :pointer)
-                          :facilitator (facilitator commit)
-                          :type 'tree)))
+(defgeneric commit-tree (commit)
+  (:documentation "Returns the TREE object of the commit.")
+  (:method ((commit commit))
+   (with-foreign-object (%tree :pointer)
+     (%git-commit-tree %tree commit)
+     (make-instance-object :pointer (mem-aref %tree :pointer)
+                           :facilitator (facilitator commit)
+                           :type 'tree))))
 
 (defun git-commit-from-oid (oid repository)
   "Returns a git-commit object identified by the `oid'.
