@@ -43,7 +43,7 @@
           (eval `(trace ,(intern (symbol-name sym) package)))
         (skip-symbol () nil)))))
 
-(unix-options:with-cli-options ()
+(unix-options:with-cli-options (uiop:*command-line-arguments*)
     (help trace)
   (when help
     (unix-options:print-usage-summary
