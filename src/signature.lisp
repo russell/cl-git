@@ -69,24 +69,24 @@
 
 
 ;; Signatures
-(defmethod translate-to-foreign ((value list) (type git-signature-type))
-  (declare (ignore type))
-  (let ((signature (foreign-alloc '(:struct git-signature))))
-    (with-foreign-slots ((name email) signature (:struct git-signature))
-      (setf name (getf value :name (getenv "USER")))
-      (setf email (getf value :email (default-email)))
-      (with-foreign-slots ((time offset)
-			   (foreign-slot-pointer signature '(:struct git-signature) 'time)
-			   (:struct timeval))
-        (let ((time-to-set (getf value :time (local-time:now))))
-          (setf time time-to-set)
-          (setf offset (timezone-offset time)))))
-    signature))
-
-(defmethod translate-to-foreign ((value t) (type git-signature-type))
-  (if (pointerp value)
-      (values value t)
-      (error "Cannot convert type: ~A to git-signature struct" (type-of value))))
+(defmethod translate-to-foreign (value (type git-signature-type))
+  (cond
+    ((pointerp value)
+     (values value t))
+    ((listp value)
+     (let ((signature (foreign-alloc '(:struct git-signature))))
+       (with-foreign-slots ((name email) signature (:struct git-signature))
+         (setf name (getf value :name (getenv "USER")))
+         (setf email (getf value :email (default-email)))
+         (with-foreign-slots ((time offset)
+                              (foreign-slot-pointer signature '(:struct git-signature) 'time)
+                              (:struct timeval))
+           (let ((time-to-set (getf value :time (local-time:now))))
+             (setf time time-to-set)
+             (setf offset (timezone-offset time)))))
+       signature))
+    (t
+     (error "Cannot convert type: ~A to git-signature struct" (type-of value)))))
 
 (defun make-timezone (offset)
   "Return a new timezone based on the number on minutes in the
