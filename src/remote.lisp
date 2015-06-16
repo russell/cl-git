@@ -110,6 +110,7 @@ foreign memory."
 		1)))
 
 (defmethod initialize-instance :after ((inst remote-callbacks) &rest args)
+  (declare (ignore args))
   (setf (slot-value inst 'id) (register-remote-callback inst)))
 
 (defmethod translate-to-foreign (value (type remote-callbacks))

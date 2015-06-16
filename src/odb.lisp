@@ -78,6 +78,8 @@
 
 
 (defmethod list-objects ((class (eql :oid)) (repository odb) &key test test-not)
+  ;; TODO (RS) need to implement filtering here
+  (declare (ignore test test-not))
   (let ((*oid-values* (list)))
     (%git-odb-for-each
      repository
