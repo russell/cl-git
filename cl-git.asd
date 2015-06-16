@@ -8,7 +8,7 @@
   :version (:read-file-form "version.lisp-expr")
   :defsystem-depends-on (:asdf :cffi-grovel)
   :depends-on (#:cffi #:local-time #:cl-fad #:flexi-streams #:trivial-garbage
-                      #:anaphora #:alexandria #:closer-mop)
+                      #:anaphora #:alexandria #:closer-mop #:uiop)
   :author "Russell Sim <russell.sim@gmail.com>"
   :licence "Lisp-LGPL"
   :pathname "src/"

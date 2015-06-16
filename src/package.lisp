@@ -20,6 +20,8 @@
   (:import-from #:flexi-streams
                 #:external-format-name
                 #:make-external-format)
+  (:import-from #:uiop
+                #:getenv)
   (:import-from #:cffi
                 #:define-parse-method
                 #:define-foreign-type
