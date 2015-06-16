@@ -257,6 +257,7 @@
     ptr))
 
 (defmethod free-translated-object (pointer (type diff-options) param)
+  (declare (ignore param))
   (%git-strarray-free
    (foreign-slot-pointer pointer '(:struct git-diff-options) 'pathspec))
   (foreign-free pointer))

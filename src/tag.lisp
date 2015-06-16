@@ -90,6 +90,7 @@ repositories history.")
   (:method ((tag tag))
     (tag-p (full-name tag)))
   (:method (tag)
+    (declare (ignore tag))
     nil))
 
 (defun make-tag (name message &key

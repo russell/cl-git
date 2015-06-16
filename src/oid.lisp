@@ -38,6 +38,7 @@
              (ldb (byte 8 byte-index) oid))))
 
 (defmethod translate-into-foreign-memory (value (type oid-struct-type) ptr)
+  (declare (ignore ptr))
   (if (pointerp value)
       value
       (error "Don't know how to translate ~A." value)))
