@@ -64,13 +64,14 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod reflog ((reference reference))
-  (with-foreign-object (reflog :pointer)
-    (%git-reflog-read reflog (facilitator reference) (full-name reference))
-    (make-instance 'reflog
-		   :pointer (mem-ref reflog :pointer)
-		   :facilitator (facilitator reference)
-		   :free-function #'%git-reflog-free)))
+(defgeneric reflog (reference)
+  (:method ((reference reference))
+    (with-foreign-object (reflog :pointer)
+      (%git-reflog-read reflog (facilitator reference) (full-name reference))
+      (make-instance 'reflog
+                     :pointer (mem-ref reflog :pointer)
+                     :facilitator (facilitator reference)
+                     :free-function #'%git-reflog-free))))
 
 (defmethod entry-count ((reflog reflog))
   (%git-reflog-entry-count reflog ))

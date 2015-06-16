@@ -103,19 +103,20 @@ the repository is closed.")
   nil)
 
 
-(defmethod enable-garbage-collection (instance)
-  (when (slot-value instance 'libgit2-pointer)
-    (let ((finalizer-data (finalizer-data instance))
-          (pointer (slot-value instance 'libgit2-pointer))
-          (free-function (free-function instance)))
+(defgeneric enable-garbage-collection (instance)
+    (:method (instance)
+      (when (slot-value instance 'libgit2-pointer)
+        (let ((finalizer-data (finalizer-data instance))
+              (pointer (slot-value instance 'libgit2-pointer))
+              (free-function (free-function instance)))
 
-      (unless finalizer-data (error "No Finalizer data"))
-      (unless free-function (error "No Free function"))
+          (unless finalizer-data (error "No Finalizer data"))
+          (unless free-function (error "No Free function"))
 
-      (when (facilitator instance)
-        (push (make-weak-pointer instance)
-              (cdr (finalizer-data (facilitator instance)))))
+          (when (facilitator instance)
+            (push (make-weak-pointer instance)
+                  (cdr (finalizer-data (facilitator instance)))))
 
-      (finalize instance
-                (lambda ()
-                  (internal-dispose finalizer-data pointer free-function))))))
+          (finalize instance
+                    (lambda ()
+                      (internal-dispose finalizer-data pointer free-function)))))))

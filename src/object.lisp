@@ -220,5 +220,6 @@ object is not of the right type, an error will be signalled."
 (defmethod get-object ((class (eql 'object)) oid repository)
   (git-object-lookup oid :any repository))
 
-(defmethod object-type ((object git-object))
-  (git-object-type object))
+(defgeneric object-type (object)
+  (:method ((object git-object))
+    (git-object-type object)))

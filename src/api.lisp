@@ -169,3 +169,7 @@ git config to a specific level.  Possible levels are :HIGHEST-LEVEL
 (defgeneric open-odb (path-or-repository)
   (:documentation "Open the ODB at the specified path or
 repository."))
+
+(defgeneric %git-lookup-by-name (class name repository)
+  (:documentation "Lookup a reference by name and return a pointer to
+it.  This pointer will need to be freed manually."))

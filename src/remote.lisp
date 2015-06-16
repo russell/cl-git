@@ -289,8 +289,6 @@ foreign memory."
                      :free-function #'%git-remote-free))))
 
 (defmethod %git-lookup-by-name ((class (eql 'remote)) name repository)
-  "Lookup a reference by name and return a pointer to it.  This
-pointer will need to be freed manually."
   (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (remote :pointer)
     (%git-remote-load remote repository name)
