@@ -161,7 +161,7 @@ keys :NAME, :EMAIL and :TIME.  If the tag is not annotated then nil
 will be returned.")
   (:method ((tag tag))
     (git-tag-tagger tag))
-  (:method tagger ((tag reference))
+  (:method ((tag reference))
     nil))
 
 (defmethod message ((tag tag))
