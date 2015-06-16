@@ -24,6 +24,7 @@
                 #:define-parse-method
                 #:define-foreign-type
                 #:use-foreign-library
+                #:foreign-library-loaded-p
                 #:define-foreign-library
                 #:translate-to-foreign
                 #:translate-into-foreign-memory

@@ -35,7 +35,8 @@
   (:darwin "libgit2.0.dylib")
   (:default "libgit2"))
 
-(use-foreign-library libgit2)
+(unless (foreign-library-loaded-p 'libgit2)
+  (use-foreign-library libgit2))
 
 (defctype off-t :uint64)
 
