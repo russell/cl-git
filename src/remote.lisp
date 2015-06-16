@@ -29,7 +29,7 @@ uses.")
 
 (defstruct remote-callback-db
   (last-used-id 0)
-  (id->instance-map (tg:make-weak-hash-table :weakness :value)))
+  (id->instance-map (make-weak-hash-table :weakness :value)))
 
 (defvar *git-remote-callbacks* (make-remote-callback-db)
   "This database maps from a uint ID to a REMOTE-CALLBACKS

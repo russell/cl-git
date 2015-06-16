@@ -10,6 +10,7 @@
   (:import-from #:trivial-garbage
                 #:make-weak-pointer
                 #:cancel-finalization
+                #:make-weak-hash-table
                 #:finalize)
   (:import-from #:cl-fad
                 #:pathname-relative-p)
