@@ -21,6 +21,16 @@
 
 (in-suite :cl-git)
 
+(defun sort-flags (object &rest key-path)
+  (loop :for key :in (butlast key-path)
+        :for obj = (getf (or obj object) key)
+        :finally (setf (getf obj (car (last key-path)))
+                       (stable-sort (getf obj (car (last key-path))) #'string<)))
+  object)
+
+(defun sort-diff-flags (diff)
+  (loop :for patch :in diff
+        :collect (sort-flags (sort-flags patch :file-a :flags) :file-b :flags)))
 
 (def-test diff-revisions (:fixture repository-with-changes)
   (let ((diffs (diff commit1 commit2)))
@@ -39,7 +49,7 @@
                            :size 0
                            :path "test-file"
                            :oid 243568240973109882797341286687005129339258402139)))))
-    (is (equal (make-patch diffs)
+    (is (equal (sort-diff-flags (make-patch diffs))
                `((:patch ,repository-with-changes-diff
                   :status :modified
                   :similarity 0
@@ -75,7 +85,7 @@
                            :size 919
                            :path "test-file"
                            :oid 0)))))
-    (is (equal (make-patch diffs)
+    (is (equal (sort-diff-flags (make-patch diffs))
                `((:patch ,repository-with-changes-diff
                   :status :modified
                   :similarity 0
@@ -111,7 +121,7 @@
                            :size 919
                            :path "test-file"
                            :oid 243568240973109882797341286687005129339258402139)))))
-    (is (equal (make-patch diffs)
+    (is (equal (sort-diff-flags (make-patch diffs))
                `((:patch ,repository-with-changes-diff
                   :status :modified
                   :similarity 0
