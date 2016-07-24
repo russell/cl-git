@@ -32,7 +32,7 @@
 (define-foreign-library libgit2
   (:linux "libgit2.so.21")
   (:windows "libgit2.dll")
-  (:darwin "libgit2.0.dylib")
+  (:darwin "libgit2.dylib")
   (:default "libgit2"))
 
 (unless (foreign-library-loaded-p 'libgit2)
