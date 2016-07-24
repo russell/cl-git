@@ -58,17 +58,17 @@ list return values are :THREADS and :HTTPS.")
   (minor :pointer)
   (revision :pointer))
 
-(defcfun ("git_threads_init" git-threads-init)
+(defcfun ("git_libgit2_init" git-init)
     :void
-    "Init libgit2 threading.")
+    "Init libgit2.")
 
-(defcfun ("git_threads_shutdown" git-threads-shutdown)
+(defcfun ("git_libgit2_shutdown" git-shutdown)
     :void
-    "Shutdown libgit2 threading.")
+    "Shutdown libgit2.")
 
 ;;; Init threading on load
 (eval-when (:load-toplevel :execute)
-  (git-threads-init))
+  (git-init))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
