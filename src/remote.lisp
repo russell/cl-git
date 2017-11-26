@@ -206,7 +206,7 @@ foreign memory."
   (strings :pointer)
   (repository %repository))
 
-(defcfun ("git_remote_load" %git-remote-load)
+(defcfun ("git_remote_lookup" %git-remote-lookup)
     %return-value
   (remote-out :pointer)
   (repository %repository)
@@ -291,7 +291,7 @@ foreign memory."
 (defmethod %git-lookup-by-name ((class (eql 'remote)) name repository)
   (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (remote :pointer)
-    (%git-remote-load remote repository name)
+    (%git-remote-lookup remote repository name)
     (mem-ref remote :pointer)))
 
 (defun make-remote-from-name (name repository)
@@ -318,7 +318,7 @@ foreign memory."
 
 (defmethod get-object ((class (eql 'remote)) name repository)
   (with-foreign-object (remote-out :pointer)
-    (%git-remote-load remote-out repository name)
+    (%git-remote-lookup remote-out repository name)
     (make-instance 'remote
            :pointer (mem-ref remote-out :pointer)
            :facilitator repository

@@ -18,7 +18,7 @@ matrix:
 
 before_install:
  - sudo apt-get update
- - sudo apt-get install libc6-dev-i386
+ - sudo apt-get install libc6-dev-i386 cmake
  - wget --progress=dot https://github.com/libgit2/libgit2/archive/v${LIBGIT2_VERSION}.tar.gz
  - tar -zxf v${LIBGIT2_VERSION}.tar.gz
  - mkdir libgit-build
