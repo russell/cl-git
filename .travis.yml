@@ -3,20 +3,18 @@ language: lisp
 env:
   matrix:
     # - LISP=abcl
-    - LISP=sbcl LIBGIT2_VERSION=0.21.1
-    - LISP=sbcl LIBGIT2_VERSION=0.21.2
-    - LISP=sbcl LIBGIT2_VERSION=0.21.3
-    - LISP=ccl LIBGIT2_VERSION=0.21.3
+    - LISP=sbcl LIBGIT2_VERSION=0.26.0
+    - LISP=ccl LIBGIT2_VERSION=0.26.0
     # - LISP=ccl32
-    - LISP=clisp LIBGIT2_VERSION=0.21.3
+    - LISP=clisp LIBGIT2_VERSION=0.26.0
     # - LISP=clisp32
     # - LISP=cmucl
-    - LISP=ecl LIBGIT2_VERSION=0.21.3
+    - LISP=ecl LIBGIT2_VERSION=0.26.0
 
 matrix:
  allow_failures:
-   - env: LISP=clisp LIBGIT2_VERSION=0.21.3
-   - env: LISP=ecl LIBGIT2_VERSION=0.21.3
+   - env: LISP=clisp LIBGIT2_VERSION=0.26.0
+   - env: LISP=ecl LIBGIT2_VERSION=0.26.0
 
 before_install:
  - sudo apt-get update
@@ -26,7 +24,7 @@ before_install:
  - mkdir libgit-build
  - pushd libgit-build && cmake -DCMAKE_VERBOSE_MAKEFILE=ON ../libgit2-${LIBGIT2_VERSION} && popd
  - pushd libgit-build && cmake --build . && popd
- - pushd libgit-build && sudo cmake --build . --target install && popd
+ - pushd libgit-build && cmake --build . --target install && popd
 
 install:
   - if [ -x ./install.sh ] && head -2 ./install.sh | grep '^#cl-travis' > /dev/null;
