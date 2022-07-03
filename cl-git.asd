@@ -21,6 +21,7 @@
                (:file "error" :depends-on ("libgit2"))
                (:file "utils" :depends-on ("libgit2"))
                (:file "git-pointer" :depends-on ("libgit2"))
+               (:file "proxy" :depends-on ("libgit2"))
                (:file "oid" :depends-on ("api" "libgit2"))
                (:file "object" :depends-on ("git-pointer" "repository" "oid"))
                (:file "signature" :depends-on ("libgit2"))

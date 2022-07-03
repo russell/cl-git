@@ -73,12 +73,20 @@ the callback.")
 
 (defcstruct git-remote-callbacks
   (version :uint)
-  (sideband-progress :pointer)
-  (completion :pointer)
-  (credentials :pointer)
-  (transfer-progress :pointer)
-  (update-tips :pointer)
-  (payload :pointer))
+  (sideband-progress-cb :pointer)
+  (completion-cb :pointer)
+  (credentials-cb :pointer)
+  (certificate-check-cb :pointer)
+  (transfer-progress-cb :pointer)
+  (update-tips-cb :pointer)
+  (pack-progress-cb :pointer)
+  (push-transfer-progress-cb :pointer)
+  (push-update-reference-cb :pointer)
+  (push-negotiation-cb :pointer)
+  (transport-cb :pointer)
+  (remote-ready-cb :pointer)
+  (payload :pointer)
+  (resolve-url-cb :pointer))
 
 (define-foreign-type remote-callbacks ()
   ((id
@@ -121,7 +129,7 @@ foreign memory."
 
 (defmethod translate-into-foreign-memory ((value remote-callbacks) (type remote-callbacks) ptr)
   "Translate a remote-callbacks class into a foreign structure."
-  (with-foreign-slots ((credentials payload) ptr (:struct git-remote-callbacks))
+  (with-foreign-slots ((credentials-cb payload) ptr (:struct git-remote-callbacks))
     ;; Use our callback to process credential requests.
     (setf credentials (callback %git-remote-callback-acquire-credentials))
 	(setf payload (cffi:make-pointer (id value))))
@@ -183,14 +191,17 @@ foreign memory."
   (local :boolean)
   (oid (:struct git-oid))
   (loid (:struct git-oid))
-  (name :string))
+  (name :string)
+  (symref-target :string))
 
 (defmethod translate-from-foreign (value (type remote-head-struct-type))
-  (with-foreign-slots ((local oid loid name) value (:struct git-remote-head))
+  (with-foreign-slots ((local oid loid name symref-target) value (:struct git-remote-head))
     (list :local local
           :remote-oid oid
           :local-oid loid
-          :name name)))
+          :name name
+          :symref-target symref-target)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -239,7 +250,10 @@ foreign memory."
 (defcfun ("git_remote_connect" %git-remote-connect)
   %return-value
   (remote %remote)
-  (direction %direction))
+  (direction %direction)
+  (callbacks %remote-callbacks)
+  (proxy-options %proxy-options)
+  (custom-headers :pointer))
 
 (defcfun ("git_remote_disconnect" %git-remote-disconnect)
   :void
@@ -346,7 +360,7 @@ foreign memory."
       ((slot-value object 'libgit2-disposed)
        (princ "(disposed)" stream)))))
 
-(defgeneric remote-connect (object &key direction)
+(defgeneric remote-connect (object &key direction credentials)
   (:documentation
    "Opens the remote connection.
 The url used for the connection can be queried by GIT-URL.
@@ -355,8 +369,11 @@ The opened connection is one way, either data is retrieved from the
 remote, or data is send to the remote.  The direction is specified
 with the DIRECTION argument, :FETCH is for retrieving data, :PUSH is
 for sending data.")
-  (:method ((remote remote) &key (direction :fetch))
-    (%git-remote-connect remote direction)))
+  (:method ((remote remote) &key (direction :fetch) credentials)
+    (let ((callbacks (make-instance 'remote-callbacks :credentials credentials)))
+      (with-foreign-objects ((proxy-options '(:struct git-proxy-options))
+                             (headers '(:struct git-strings)))
+        (%git-remote-connect remote direction callbacks proxy-options headers)))))
 
 (defgeneric remote-connected-p (remote)
   (:documentation "Returns t if the connection is open, nil otherwise.")

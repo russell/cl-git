@@ -62,11 +62,13 @@
                  `((:local nil
                     :remote-oid ,(oid (repository-head *test-repository*))
                     :local-oid 0
-                    :name "HEAD")
+                    :name "HEAD"
+                    :symref-target "refs/heads/master")
                    (:local nil
                     :remote-oid ,(oid (repository-head *test-repository*))
                     :local-oid 0
-                    :name "refs/heads/master")))))))
+                    :name "refs/heads/master"
+                    :symref-target nil)))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))
 
