@@ -70,6 +70,8 @@ exec ros -Q -- $0 "$@"
 
   (let ((result-list (fiveam:run :cl-git)))
     (fiveam:explain! result-list)
+    #+sbcl
+    (sb-ext:gc :full t)
     (uiop:quit
      (if (remove-if-not
           (lambda (res)
