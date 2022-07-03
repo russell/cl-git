@@ -28,6 +28,16 @@ Requires
 * SBCL 1.2.6 x86-64 or CCL 1.10 x86-64
 * libgit2: 0.21.0
 
+Testing
+-------
+
+Install roswell
+
+Installing::
+
+  ros install sbcl
+
+  ./run-tests.lisp
 
 Building Documentation
 ----------------------
@@ -42,7 +52,7 @@ Documentation requires sphinxcontrib.cldomain which depends on
 Using `virtualenv`_ run::
 
    pip install -r doc/requirements.txt
-   
+
 If you do not have fabric::
 
    pip install fabric
