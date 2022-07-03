@@ -31,6 +31,12 @@
         (write-string-to-file filename filetext)
         (&body)))))
 
+(defun approximately-now-p (a)
+  (timestamp-approximately-equal-p a (now)))
+
+(defun timestamp-approximately-equal-p (a b)
+  (< (timestamp-difference a b) 2))
+
 
 (defun plist-equal (a b)
   "Compare an plist, if the plist contains a function then use that as
@@ -40,11 +46,8 @@
               ((functionp value)
                (is (funcall value (getf a key))))
               ((eql (type-of value) 'local-time:timestamp)
-               (is (local-time:timestamp= (getf a key) value)))
+               (is (timestamp-approximately-equal-p (getf a key) value)))
               (t (is (equal (getf a key) value))))))
-
-(defun approximately-now-p (a)
-  (< (timestamp-difference a (now)) 5))
 
 (defun index-path-test (filename filetext)
   (index-add-file filename *test-repository-index*)
