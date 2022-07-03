@@ -20,22 +20,18 @@
 
 (in-package #:cl-git)
 
+(defctype off-t :int64)
+(defctype object-size-t :uint64)
 
-;; 32-bit mode, split into (high to low bits)
-;;
-;; 4-bit object type
-;; valid values in binary are 1000 (regular file), 1010 (symbolic link)
-;; and 1110 (gitlink)
-;;
-;; 3-bit unused
-;;
-;; 9-bit unix permission. Only 0755 and 0644 are valid for regular files.
-;; Symbolic links and gitlinks have value 0 in this field.
+(define-foreign-type time-t ()
+  nil
+  (:actual-type :int64)
+  (:simple-parser %time-t))
 
-(defcenum (git-file-mode)
-  (:new #o0000000)
+(defcenum (git-filemode-t :uint16)
+  (:unreadable #o0000000)
   (:tree #o0040000)
   (:blob #o0100644)
   (:blob-executable #o0100755)
   (:link #o0120000)
-  (:gitlink #o0160000))
+  (:commit #o0160000))

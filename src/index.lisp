@@ -44,23 +44,37 @@
 
 
 (defcstruct (git-index-time :class index-time-struct-type)
-  (seconds %time)
+  (seconds :int32)
   (nanoseconds :uint32))
 
+;; 32-bit mode, split into (high to low bits)
+;;
+;; 4-bit object type
+;; valid values in binary are 1000 (regular file), 1010 (symbolic link)
+;; and 1110 (gitlink)
+;;
+;; 3-bit unused
+;;
+;; 9-bit unix permission. Only 0755 and 0644 are valid for regular files.
+;; Symbolic links and gitlinks have value 0 in this field.
 
-(defctype struct-index-time
-    (:struct git-index-time))
-
+(defcenum (git-index-file-mode)
+  (:new #o0000000)
+  (:tree #o0040000)
+  (:blob #o0100644)
+  (:blob-executable #o0100755)
+  (:link #o0120000)
+  (:gitlink #o0160000))
 
 (defcstruct git-index-entry
   (ctime (:struct git-index-time))
   (mtime (:struct git-index-time))
   (dev :uint32)
   (ino :uint32)
-  (mode git-file-mode)
+  (mode git-index-file-mode)
   (uid :uint32)
   (gid :uint32)
-  (file-size off-t)
+  (file-size :uint32)
   (oid (:struct git-oid))
   (flags :uint16)
   ;; Flags Extended is for internal use only, so should be hidden
@@ -207,7 +221,7 @@ and 3 (theirs) are in conflict."
 
 (defmethod translate-from-foreign (value (type index-time-struct-type))
   (with-foreign-slots ((seconds nanoseconds) value (:struct git-index-time))
-    (local-time:timestamp+ seconds nanoseconds :nsec)))
+    (local-time:unix-to-timestamp seconds :nsec nanoseconds)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

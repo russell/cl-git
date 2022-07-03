@@ -38,15 +38,6 @@
 (unless (foreign-library-loaded-p 'libgit2)
   (use-foreign-library libgit2))
 
-(defctype off-t :uint32)
-
-
-(define-foreign-type time-type ()
-  nil
-  (:actual-type :int32)
-  (:simple-parser %time))
-
-
 (defcfun ("git_libgit2_features" libgit2-features)
   git-capabilities
   "Return a list of the libgit2 capabilities, possible values in the

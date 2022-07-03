@@ -21,7 +21,7 @@
 
 
 (defcstruct timeval
-  (time %time)
+  (time %time-t)
   (offset :int))
 
 (defcstruct git-signature
@@ -44,15 +44,15 @@
 
 ;; Time
 
-(defmethod translate-from-foreign (value (type time-type))
+(defmethod translate-from-foreign (value (type time-t))
   "Translate a git time_t to a local-time"
   (local-time:unix-to-timestamp value))
 
-(defmethod translate-to-foreign ((value local-time:timestamp) (type time-type))
+(defmethod translate-to-foreign ((value local-time:timestamp) (type time-t))
   "Translate a local-time value to a git time_t"
   (local-time:timestamp-to-unix value))
 
-(defmethod translate-to-foreign ((value integer) (type time-type))
+(defmethod translate-to-foreign ((value integer) (type time-t))
   "Translate a universal-time to a git time_t"
   (translate-to-foreign (local-time:unix-to-timestamp value) type))
 

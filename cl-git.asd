@@ -32,7 +32,7 @@
                (:file "branch" :depends-on ("object"))
                (:file "commit" :depends-on ("object" "tree"))
                (:file "tag" :depends-on ("object"))
-               (:file "diff" :depends-on ("git-pointer" "tree" "buffer"))
+               (:file "diff" :depends-on ("libgit2-types" "git-pointer" "tree" "buffer"))
                (:file "blob" :depends-on ("object"))
                (:file "tree" :depends-on ("object" "blob"))
                (:file "config" :depends-on ("git-pointer"))
