@@ -21,10 +21,10 @@
 
 
 (defbitfield git-revwalk-flags
-  (:none 0)
-  (:topological 1)
-  (:time 2)
-  (:reverse 4))
+  (:none        #b000)
+  (:topological #b001)
+  (:time        #b010)
+  (:reverse     #b100))
 
 
 (define-foreign-type revision-walker (git-pointer)
