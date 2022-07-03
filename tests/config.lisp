@@ -23,9 +23,14 @@
 (in-suite :cl-git)
 
 (def-test repository-config (:fixture (repository))
-  (is (mapcar #'plist-equal
-       (git-values (git-config *test-repository* :level :local))
-       '((:name "core.filemode" :value "true" :level :local)
-         (:name "core.logallrefupdates" :value "true" :level :local)
-         (:name "core.bare" :value "false" :level :local)
-         (:name "core.repositoryformatversion" :value "0" :level :local)))))
+  (let ((config (sort
+                 (git-values (git-config *test-repository* :level :local))
+                 #'string<
+                 :key (lambda (a) (getf a :name))))
+        (expected-config
+          '((:name "core.bare" :value "false" :level :local)
+            (:name "core.filemode" :value "true" :level :local)
+            (:name "core.logallrefupdates" :value "true" :level :local)
+            (:name "core.repositoryformatversion" :value "0" :level :local))))
+    (is (mapcar #'plist-equal config expected-config))
+    (is (eql (length config) (length expected-config)))))
