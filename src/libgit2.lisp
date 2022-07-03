@@ -38,12 +38,12 @@
 (unless (foreign-library-loaded-p 'libgit2)
   (use-foreign-library libgit2))
 
-(defctype off-t :uint64)
+(defctype off-t :uint32)
 
 
 (define-foreign-type time-type ()
   nil
-  (:actual-type :int64)
+  (:actual-type :int32)
   (:simple-parser %time))
 
 
