@@ -30,7 +30,7 @@
   (:ssh 4))
 
 (define-foreign-library libgit2
-  (:linux "libgit2.so.21")
+  (:linux "libgit2.so.1.3.0")
   (:windows "libgit2.dll")
   (:darwin "libgit2.0.dylib")
   (:default "libgit2"))
