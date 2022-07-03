@@ -57,7 +57,7 @@ exec ros -Q -- $0 "$@"
 
 
 (defun main (&rest argv)
-  (unix-options:with-cli-options argv
+  (unix-options:with-cli-options (argv)
                                  (help trace)
                                  (when help
                                    (unix-options:print-usage-summary
