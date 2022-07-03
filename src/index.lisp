@@ -45,7 +45,7 @@
 
 (defcstruct (git-index-time :class index-time-struct-type)
   (seconds %time)
-  (nanoseconds :unsigned-int))
+  (nanoseconds :uint32))
 
 
 (defctype struct-index-time
@@ -55,15 +55,16 @@
 (defcstruct git-index-entry
   (ctime (:struct git-index-time))
   (mtime (:struct git-index-time))
-  (dev :unsigned-int)
-  (ino :unsigned-int)
+  (dev :uint32)
+  (ino :uint32)
   (mode git-file-mode)
-  (uid :unsigned-int)
-  (gid :unsigned-int)
+  (uid :uint32)
+  (gid :uint32)
   (file-size off-t)
   (oid (:struct git-oid))
-  (flags :unsigned-short)
-  (flags-extended :unsigned-short)
+  (flags :uint16)
+  ;; Flags Extended is for internal use only, so should be hidden
+  (flags-extended :uint16)
   (path :string))
 
 
@@ -163,7 +164,7 @@ and 3 (theirs) are in conflict."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod translate-from-foreign (value (type index-entry-type))
-  (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path mode)
+  (with-foreign-slots ((ctime mtime file-size oid flags path mode)
                        value
                        (:struct git-index-entry))
     (list :c-time ctime
@@ -172,7 +173,6 @@ and 3 (theirs) are in conflict."
           :file-size file-size
           :oid oid
           :flags flags
-          :flags-extended flags-extended
           :path path
           :stage (ash (logand flags git-index-entry-stagemask)
                       (- 0 git-index-entry-stageshift)))))

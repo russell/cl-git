@@ -56,7 +56,6 @@
              :FILE-SIZE ,(length filetext)
              :OID 475587057170892494251873940086020553338329808131
              :FLAGS ,(length (namestring filename))
-             :FLAGS-EXTENDED 0
              :PATH ,(namestring filename)
              :STAGE 0))))
 
@@ -119,8 +118,4 @@
           ;; Add the entry from the other git index.
           (index-add-file entry index-in-memory)
           (let ((entry1 (entry-by-index index-in-memory 0)))
-            ;; NOTE Removed the check of the FLAGS-EXTENDED field
-            ;; since it stores internal details about the state of the
-            ;; index.
-            (setf (getf entry1 :flags-extended) 0)
             (plist-equal entry entry1)))))))
