@@ -80,18 +80,6 @@
     (bare-p *test-repository*)
     t)))
 
-(def-test repository-head-orphaned (:fixture (repository))
-  "Confirm that the current head is orphaned then check that not."
-  ;; confirm head is orphaned
-  (is (equal
-       (head-orphaned-p *test-repository*)
-       t))
-  (make-test-revision)
-  ;; confirm head no longer orphaned
-  (is (equal
-       (head-orphaned-p *test-repository*)
-       nil)))
-
 (def-test repository-head-unborn (:fixture (repository))
   "Confirm that the current head is orphaned then check that not."
   ;; confirm head is orphaned

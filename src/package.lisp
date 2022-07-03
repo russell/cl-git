@@ -198,7 +198,6 @@
    #:empty-p
    #:git-has-log
    #:head-detached-p
-   #:head-orphaned-p
    #:head-unborn-p
    #:init-repository
    #:open-repository

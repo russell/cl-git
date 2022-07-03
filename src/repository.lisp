@@ -174,14 +174,6 @@ direct commit.")
   (:method ((repository repository))
     (%git-repository-head-detached repository)))
 
-(defgeneric head-orphaned-p (repository)
-    (:documentation "Returns t if the HEAD points to a commit that
-doesn't exist.  This function is depreciated and will be removed in
-0.21.0.")
-  (:method ((repository repository))
-    (warn "~A is deprecated and will be removed in 0.21.0" 'head-orphaned-p)
-    (%git-repository-head-unborn repository)))
-
 (defgeneric head-unborn-p (repository)
     (:documentation "Returns T if the HEAD points to a commit that
 doesn't exist.")
