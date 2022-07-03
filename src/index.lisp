@@ -154,7 +154,7 @@
   (index %index))
 
 (defcfun ("git_index_entrycount" %git-index-entry-count)
-    :unsigned-int
+    size-t
   (index %index))
 
 (defcfun ("git_index_entry_stage" %git-index-entry-stage)
@@ -167,7 +167,7 @@ and 3 (theirs) are in conflict."
 (defcfun ("git_index_get_byindex" %git-index-get-by-index)
     %index-entry
   (index %index)
-  (position :unsigned-int))
+  (position size-t))
 
 (defcfun ("git_index_get_bypath" %git-index-get-by-path)
     %index-entry

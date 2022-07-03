@@ -30,7 +30,7 @@
   (message-encoding :pointer)
   (message :pointer)
   (tree %tree)
-  (parent-count :int)
+  (parent-count size-t)
   (parents :pointer))
 
 
