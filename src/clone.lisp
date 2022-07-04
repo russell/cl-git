@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;; Copyright (C) 2014 Eric Timmons <etimmons@alum.mit.edu>
 ;;
 ;; This program is free software: you can redistribute it and/or
@@ -73,6 +73,7 @@
 (defmethod translate-to-foreign (value (type clone-options))
   (let ((ptr (foreign-alloc '(:struct git-clone-options))))
     ;; Init the structure with default values.
+    ;; TODO(RS) this struct is leaked here, there is no freeing of it
     (%git-clone-init-options ptr +git-clone-options-version+)
     (translate-into-foreign-memory value type ptr)))
 
