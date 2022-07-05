@@ -32,16 +32,16 @@
   (type git-proxy)
   (url :string)
 
-  ;; This will be called if the remote host requires authentication in
+  ;; this will be called if the remote host requires authentication in
   ;; order to connect to it.
   ;;
-  ;; Returning GIT_PASSTHROUGH will make libgit2 behave as though this
+  ;; returning git_passthrough will make libgit2 behave as though this
   ;; field isn't set.
   (credentials-cb :pointer)
 
-  ;; If cert verification fails, this will be called to let the user
+  ;; if cert verification fails, this will be called to let the user
   ;; make the final decision of whether to allow the connection to
-  ;; proceed. Returns 0 to allow the connection or a negative value to
+  ;; proceed. returns 0 to allow the connection or a negative value to
   ;; indicate an error.
   (certificate-check-cb :pointer)
   (payload :pointer))
@@ -59,7 +59,7 @@
   (version :uint))
 
 
-(defmethod translate-to-foreign (value (type proxy-options-struct-type))
+(defmethod translate-to-foreign (value (type proxy-options))
   (let ((ptr (foreign-alloc '(:struct git-proxy-options))))
     ;; Init the structure with default values.
     (%git-proxy-options-init ptr +git-proxy-options-version+)
