@@ -90,7 +90,7 @@ the callback.")
 
 (define-foreign-type remote-callbacks ()
   ((id
-	:reader id)
+    :reader id)
    (credentials
     :initform nil
     :initarg :credentials
@@ -131,8 +131,8 @@ foreign memory."
   "Translate a remote-callbacks class into a foreign structure."
   (with-foreign-slots ((credentials-cb payload) ptr (:struct git-remote-callbacks))
     ;; Use our callback to process credential requests.
-    (setf credentials (callback %git-remote-callback-acquire-credentials))
-	(setf payload (cffi:make-pointer (id value))))
+    (setf credentials-cb (callback %git-remote-callback-acquire-credentials))
+    (setf payload (cffi:make-pointer (id value))))
   ptr)
 
 
@@ -202,8 +202,49 @@ foreign memory."
           :name name
           :symref-target symref-target)))
 
+(defconstant +git-fetch-options-version+ 1)
+
+(defcenum git-fetch-prune
+  ;; Use the setting in the configuration
+  :unspecified
+  ;; Prune during fetch
+  :prune
+  ;; Don't prune during fetch
+  :no-prune)
+
+(defcenum git-remote-autotag-options
+  ;; Use the setting from the configuration
+  :unspecified
+  ;; Ask the server for tags pointing to objects we are downloading
+  :auto
+  ;; Don't ask for any tags beyond the refspecs
+  :none
+  ;; Ask for all the tags
+  :all)
+
+(defbitfield git-remote-redirect
+  ;; Do not follow any redirects
+  :none
+  ;; Only follow redirects for the initial request
+  :initial
+  ;; Follow redirects in any stage of the fetch or push
+  :all)
+
+(defcstruct git-fetch-options
+  (version :int)
+  (callbacks (:struct git-remote-callbacks))
+  (prune git-fetch-prune)
+  (update-fetchhead :boolean)
+  (download-tags git-remote-autotag-options)
+  (proxy-options (:struct git-proxy-options))
+  (custom-headers (:struct git-strings)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defcfun %git-fetch-options-init
+    %return-value
+  (options :pointer)
+  (version :uint))
 
 (defcfun ("git_remote_create" %git-remote-create)
     %return-value
@@ -243,6 +284,8 @@ foreign memory."
   :boolean
   (remote %remote))
 
+;; TODO(RS) should all the low level data structures have a % at the
+;; start, we do that with functions.
 (defcenum %direction
   :fetch
   :push)

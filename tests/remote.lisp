@@ -95,15 +95,15 @@
       (progn
         (delete-directory-and-files remote-repo-path)))))
 
-
-(def-test clone-repository (:fixture repository-with-commits)
-  "Create a new repository and clone it."
-  (let ((remote-repo-path (gen-temp-path)))
-    (unwind-protect
-         (let ((cloned-repository
-                 (clone-repository (namestring *repository-path*) remote-repo-path)))
-           (is (eql
-                (oid (repository-head *test-repository*))
-                (oid (repository-head cloned-repository)))))
-      (progn
-        (delete-directory-and-files remote-repo-path)))))
+(def-test git-fetch-options-struct ()
+  "Verify initialising a GIT-FETCH-OPTIONS-STRUCT."
+  (cffi:with-foreign-object (ptr '(:struct cl-git::git-fetch-options))
+    (cffi:with-foreign-slots ((cl-git::version cl-git::custom-headers)
+                              ptr (:struct cl-git::git-fetch-options))
+      (setf cl-git::version 1234)
+      (setf cl-git::custom-headers (cffi:convert-to-foreign (funcall (random-list)) '(:struct cl-git::git-strings))))
+    (cl-git::%git-fetch-options-init ptr cl-git::+git-fetch-options-version+)
+    (cffi:with-foreign-slots ((cl-git::version cl-git::custom-headers)
+                               ptr (:struct cl-git::git-fetch-options))
+      (is (eql cl-git::+git-fetch-options-version+ cl-git::version))
+      (is (eql nil cl-git::custom-headers)))))

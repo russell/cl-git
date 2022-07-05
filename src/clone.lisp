@@ -23,22 +23,31 @@
 
 (defconstant +git-clone-options-version+ 1)
 
-(defcenum git-clone-local-t
+(defcenum git-clone-local
+  ;; will bypass the git-aware transport for local paths, but use
+  ;; normal fetch for file:// URLs.
   (:auto)
+
+  ;; Bypass git-aware transport for all URLs
   (:local)
+
+  ;; Don't bypass git-aware transport
   (:no-local)
+
+  ;; Bypass git-aware transport but don't use hardlinks
   (:local-no-links))
 
 (defcstruct git-clone-options
-  (version :uint)
+  (version :unsigned-int)
   (checkout-options (:struct git-checkout-options))
-  (remote-callbacks (:struct git-remote-callbacks))
-  (bare :boolean)
-  (ignore-cert-errors :boolean)
-  (local git-clone-local-t)
-  (remote-name :string)
+  (fetch-options (:struct git-fetch-options))
+  (bare :bool)
+  (local git-clone-local)
   (checkout-branch :string)
-  (signature (:pointer (:struct git-signature))))
+  (repository-cb :pointer)
+  (repository-cb-payload :pointer)
+  (remote-cb :pointer)
+  (remote-cb-payload :pointer))
 
 (define-foreign-type clone-options ()
   ((remote-callbacks
@@ -80,8 +89,10 @@
 (defmethod translate-into-foreign-memory ((value clone-options) (type clone-options) ptr)
   (with-foreign-slots (((:pointer remote-callbacks))
                        ptr (:struct git-clone-options))
+    ;; TODO(RS) this is disabled until i can move it to the remote.lisp
     ;; Fill in the remote-callbacks structure.
-    (translate-into-foreign-memory (remote-callbacks value) (remote-callbacks value) remote-callbacks))
+    ;; (translate-into-foreign-memory (remote-callbacks value) (remote-callbacks value) remote-callbacks)
+    )
   ptr)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

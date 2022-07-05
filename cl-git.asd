@@ -41,7 +41,7 @@
                (:file "remote" :depends-on ("object" "credentials"))
                (:file "odb" :depends-on ("object"))
                (:file "checkout" :depends-on ("object"))
-               (:file "clone" :depends-on ("checkout" "credentials"))
+               (:file "clone" :depends-on ("checkout" "credentials" "remote"))
                (:file "credentials" :depends-on ("object"))))
 
 
@@ -56,6 +56,8 @@
                (:file "common" :depends-on ("package"))
                (:file "fixtures" :depends-on ("package"))
                (:file "commit" :depends-on ("common"))
+               (:file "clone" :depends-on ("common" "fixtures"))
+               (:file "checkout" :depends-on ("common"))
                (:file "index" :depends-on ("common" "fixtures"))
                (:file "repository" :depends-on ("common" "fixtures"))
                (:file "remote" :depends-on ("common" "fixtures"))

@@ -17,26 +17,16 @@
 ;; License along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
 
+
 (in-package #:cl-git-tests)
 
 (in-suite :cl-git)
 
-(def-test individual-strings ()
-  (for-all ((strings-fixture (random-list)))
-    (let ((str-pointer
-            (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))
-      (is
-       (equal
-        (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strings))
-        strings-fixture))
-      (cffi:free-converted-object str-pointer '(:struct cl-git::git-strings) t))))
-
-(def-test string-list ()
-  (let* ((strings-fixture (funcall (random-list)))
-         (str-pointer
-           (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))
-    (is
-     (equal
-      (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strings))
-      strings-fixture))
-    (cffi:free-converted-object str-pointer '(:struct cl-git::git-strings) t)))
+(def-test git-checkout-options-struct ()
+  "Verify initialising a GIT-CHECKOUT-OPTIONS-STRUCT."
+  (cffi:with-foreign-object (ptr '(:struct cl-git::git-checkout-options))
+    (cl-git::%git-checkout-init-options ptr cl-git::+git-checkout-options-version+)
+    (cffi:with-foreign-slots ((cl-git::version cl-git::perfdata-payload)
+                               ptr (:struct cl-git::git-checkout-options))
+      (is (eql cl-git::+git-checkout-options-version+ cl-git::version))
+      (is (cffi:null-pointer-p cl-git::perfdata-payload)))))
