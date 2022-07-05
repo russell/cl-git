@@ -239,12 +239,38 @@ foreign memory."
   (proxy-options (:struct git-proxy-options))
   (custom-headers (:struct git-strings)))
 
+(define-foreign-type fetch-options ()
+  ((remote-callbacks
+    :initform (make-instance 'remote-callbacks)
+    :accessor remote-callbacks))
+  (:simple-parser %fetch-options)
+  (:actual-type :pointer))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcfun %git-fetch-options-init
     %return-value
   (options :pointer)
   (version :uint))
+
+(defmethod translate-to-foreign (value (type fetch-options))
+  (let ((ptr (foreign-alloc '(:struct git-fetch-options))))
+    ;; Init the structure with default values.
+    ;; TODO(RS) this struct is leaked here, there is no freeing of it
+    (%git-fetch-options-init ptr +git-fetch-options-version+)
+    (translate-into-foreign-memory value type ptr)))
+
+(defmethod translate-into-foreign-memory ((value fetch-options) (type fetch-options) ptr)
+  (with-foreign-slots (((:pointer callbacks))
+                       ptr (:struct git-fetch-options))
+    ;; Fill in the remote-callbacks structure.
+    (translate-into-foreign-memory (remote-callbacks value) (remote-callbacks value) callbacks)
+    )
+  ptr)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcfun ("git_remote_create" %git-remote-create)
     %return-value
@@ -281,7 +307,7 @@ foreign memory."
   (remote %remote))
 
 (defcfun ("git_remote_connected" %git-remote-connected)
-  :boolean
+    :boolean
   (remote %remote))
 
 ;; TODO(RS) should all the low level data structures have a % at the
@@ -291,7 +317,7 @@ foreign memory."
   :push)
 
 (defcfun ("git_remote_connect" %git-remote-connect)
-  %return-value
+    %return-value
   (remote %remote)
   (direction %direction)
   (callbacks %remote-callbacks)
@@ -299,24 +325,24 @@ foreign memory."
   (custom-headers :pointer))
 
 (defcfun ("git_remote_disconnect" %git-remote-disconnect)
-  :void
+    :void
   (remote %remote))
 
 (defcfun ("git_remote_get_fetch_refspecs" %git-remote-get-fetch-refspecs)
-  %return-value
+    %return-value
   (fetchspec :pointer)
   (remote %remote))
 
 (defcfun ("git_remote_get_push_refspecs" %git-remote-get-push-refspecs)
-  %return-value
+    %return-value
   (pushspec :pointer)
   (remote %remote))
 
-(defcfun ("git_remote_download" %git-remote-download)
-  %return-value
+(defcfun %git-remote-download
+    %return-value
   (remote %remote)
-  (callback :pointer)
-  (payload :pointer))
+  (refspecs :pointer)  ;; pointer to git_strarray
+  (options %fetch-options))
 
 (defcfun %git-remote-init-callbacks
     %return-value
@@ -324,7 +350,7 @@ foreign memory."
   (version :uint))
 
 (defcfun %git-remote-ls
-  %return-value
+    %return-value
   (output :pointer)
   (size :pointer)
   (remote %remote))
@@ -455,7 +481,7 @@ bring the repository into sync.")
     (unless (remote-connected-p remote)
       (error 'connection-error
              :message "Remote is not connected."))
-    (%git-remote-download remote (null-pointer) (null-pointer))))
+    (%git-remote-download remote (null-pointer) (make-instance 'fetch-options))))
 
 (defgeneric ls-remote (remote)
   (:documentation "Lists the current refs at the remote.  Return a

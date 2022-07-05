@@ -50,9 +50,9 @@
   (remote-cb-payload :pointer))
 
 (define-foreign-type clone-options ()
-  ((remote-callbacks
-    :initform (make-instance 'remote-callbacks)
-    :accessor remote-callbacks))
+  ((fetch-options
+    :initform (make-instance 'fetch-options)
+    :accessor fetch-options))
   (:simple-parser %clone-options)
   (:actual-type :pointer))
 
@@ -87,11 +87,9 @@
     (translate-into-foreign-memory value type ptr)))
 
 (defmethod translate-into-foreign-memory ((value clone-options) (type clone-options) ptr)
-  (with-foreign-slots (((:pointer remote-callbacks))
+  (with-foreign-slots (((:pointer fetch-options))
                        ptr (:struct git-clone-options))
-    ;; TODO(RS) this is disabled until i can move it to the remote.lisp
-    ;; Fill in the remote-callbacks structure.
-    ;; (translate-into-foreign-memory (remote-callbacks value) (remote-callbacks value) remote-callbacks)
+    (translate-into-foreign-memory (fetch-options value) (fetch-options value) fetch-options)
     )
   ptr)
 
