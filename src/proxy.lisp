@@ -59,7 +59,7 @@
   (version :uint))
 
 
-(defmethod translate-to-foreign (value (type proxy-options))
+(defmethod translate-to-foreign (value (type proxy-options-struct-type))
   (let ((ptr (foreign-alloc '(:struct git-proxy-options))))
     ;; Init the structure with default values.
     (%git-proxy-options-init ptr +git-proxy-options-version+)
