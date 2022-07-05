@@ -21,7 +21,7 @@
 
 (in-suite :cl-git)
 
-(test string-list
+(def-test individual-strings ()
   (for-all ((strings-fixture (random-list)))
     (let ((str-pointer
             (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))

@@ -21,7 +21,7 @@
 
 (in-suite :cl-git)
 
-(test libgit2-version
+(def-test libgit2-version ()
   "Check the format of the version number."
   (destructuring-bind (major minor revision)
       (libgit2-version)
@@ -29,7 +29,7 @@
     (is (integerp minor))
     (is (integerp revision))))
 
-(test libgit2-features
+(def-test libgit2-features ()
   "Check that the capabilities of libgit2, can only really check it's
 a list."
   (let ((capabilities (libgit2-features)))

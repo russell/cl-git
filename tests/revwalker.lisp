@@ -23,7 +23,7 @@
 (in-suite :cl-git)
 
 
-(test revision-walker-test
+(def-test revision-walker-test ()
   "create a repository and add several random commits to it. then
 check that the commit messages match the expected messages."
   (with-test-repository ()

@@ -22,7 +22,7 @@
 
 (in-suite :cl-git)
 
-(test repository-init
+(def-test repository-init ()
   "Create a repository and open it."
   (for-all ((path 'gen-temp-path))
     (finishes
@@ -97,9 +97,9 @@
   (for-all ((path 'gen-temp-path))
     (finishes
       (unwind-protect
-	   (progn
-	     (init-repository path :bare t)
-	     (with-repository (repository path)
-           (is (typep repository 'repository))))
-	(progn
-	  (delete-directory-and-files path))))))
+           (progn
+             (init-repository path :bare t)
+             (with-repository (repository path)
+               (is (typep repository 'repository))))
+        (progn
+          (delete-directory-and-files path))))))
