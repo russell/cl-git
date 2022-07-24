@@ -29,10 +29,11 @@ from os.path import dirname, realpath, join, expandvars
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.intersphinx',
-              'sphinxcontrib.cldomain',
-              'sphinxcontrib.hyperspec',
-              'sphinxcontrib.googleanalytics']
+extensions = [
+    'sphinx.ext.intersphinx',
+    'sphinxcontrib.cldomain',
+    'sphinxcontrib.hyperspec'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -48,13 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'cl-git'
-copyright = u'2011-2014, Russell Sim'
-
-googleanalytics_id = "UA-28069739-2"
-if os.environ.get("GOOGLE_ANALYTICS"):
-    googleanalytics_enabled = True
-else:
-    googleanalytics_enabled = False
+copyright = u'2011-2022, Russell Sim'
 
 cl_packages = {"cl-git": join(dirname(realpath(__file__)), "../")}
 
@@ -118,61 +113,66 @@ pygments_style = 'emacs'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-import sphinx_bootstrap_theme
-html_theme = 'bootstrap'
+# import sphinx_bootstrap_theme
+html_theme = 'sphinx_book_theme'
+# html_theme = 'alabaster'
 
-html_translator_class = 'sphinx_bootstrap_theme.BootstrapTranslator'
+# html_translator_class = 'sphinx_bootstrap_theme.BootstrapTranslator'
 
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 html_theme_options = {
-    # Navigation bar title. (Default: ``project`` value)
-    # 'navbar_title': "Demo",
-
-    'navbar_sidebarrel': False,
-
-    'navbar_pagenav': False,
-
-    # Tab name for entire site. (Default: "Site")
-    "navbar_site_name": "Contents",
-
-    # Global TOC depth for "site" navbar tab. (Default: 1)
-    # Switching to -1 shows all levels.
-    # 'globaltoc_depth': 2,
-
-    # Include hidden TOCs in Site navbar?
-    #
-    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
-    # non-hidden ``toctree`` directives in the same page, or else the build
-    # will break.
-    #
-    # Values: "true" (default) or "false"
-    # 'globaltoc_includehidden': "true",
-
-    # HTML navbar class (Default: "navbar") to attach to <div> element.
-    # For black navbar, do "navbar navbar-inverse"
-    # 'navbar_class': "navbar navbar-inverse",
-    'navbar_site_name': "Documentation",
-
-    'navbar_links': [("Contributing", "contributing"),
-                     ("Changelog", "changelog")],
-
-    # Fix navigation bar to top of page?
-    # Values: "true" (default) or "false"
-    # 'navbar_fixed_top': "true",
-
-    # Location of link to source.
-    # Options are "nav" (default), "footer" or anything else to exclude.
-    'source_link_position': "footer",
-
-    # Bootswatch (http://bootswatch.com/) theme.
-    #
-    # Options are nothing with "" (default) or the name of a valid theme
-    # such as "amelia" or "cosmo".
-    #
-    # Note that this is served off CDN, so won't be available offline.
-    'bootswatch_theme': "yeti",
+    "extra_navbar": "<p>Your HTML</p>",
 }
+
+# html_theme_options = {
+#     # Navigation bar title. (Default: ``project`` value)
+#     # 'navbar_title': "Demo",
+
+#     'navbar_sidebarrel': False,
+
+#     'navbar_pagenav': False,
+
+#     # Tab name for entire site. (Default: "Site")
+#     "navbar_site_name": "Contents",
+
+#     # Global TOC depth for "site" navbar tab. (Default: 1)
+#     # Switching to -1 shows all levels.
+#     # 'globaltoc_depth': 2,
+
+#     # Include hidden TOCs in Site navbar?
+#     #
+#     # Note: If this is "false", you cannot have mixed ``:hidden:`` and
+#     # non-hidden ``toctree`` directives in the same page, or else the build
+#     # will break.
+#     #
+#     # Values: "true" (default) or "false"
+#     # 'globaltoc_includehidden': "true",
+
+#     # HTML navbar class (Default: "navbar") to attach to <div> element.
+#     # For black navbar, do "navbar navbar-inverse"
+#     # 'navbar_class': "navbar navbar-inverse",
+#     'navbar_site_name': "Documentation",
+
+#     'navbar_links': [("Contributing", "contributing"),
+#                      ("Changelog", "changelog")],
+
+#     # Fix navigation bar to top of page?
+#     # Values: "true" (default) or "false"
+#     # 'navbar_fixed_top': "true",
+
+#     # Location of link to source.
+#     # Options are "nav" (default), "footer" or anything else to exclude.
+#     'source_link_position': "footer",
+
+#     # Bootswatch (http://bootswatch.com/) theme.
+#     #
+#     # Options are nothing with "" (default) or the name of a valid theme
+#     # such as "amelia" or "cosmo".
+#     #
+#     # Note that this is served off CDN, so won't be available offline.
+#     'bootswatch_theme': "yeti",
+# }
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -212,9 +212,10 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
-html_sidebars = {'**': ['localtoc.html'],
-                 'search': None,
-                 'glossary': None}
+# html_sidebars = {'**': ['localtoc.html'],
+#                  'search': None,
+#                  'glossary': None}
+# html_sidebars = {'**': ['sbt-sidebar-nav.html']}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

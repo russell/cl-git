@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -19,8 +19,9 @@
 
 (in-package #:cl-git)
 
+(defconstant +git-diff-options-version+ 1)
 
-(defbitfield (git-diff-option-flags :unsigned-int)
+(defbitfield (git-diff-option-flags :uint32)
   (:normal 0)
   (:reverse #.(ash 1 0))
   :force_text
@@ -44,8 +45,10 @@
 
 (defbitfield git-diff-flags
   (:binary #.(ash 1 0)) ;; file(s) treated as binary data
-  :not-binary         ;; file(s) treated as text data
-  :valid-oid)         ;; `oid` value is known correct
+  :not-binary           ;; file(s) treated as text data
+  :valid-oid            ;; `oid` value is known correct
+  :exists               ;; file exists at this side of the delta
+  :valid_size)          ;; file size value is known correct
 
 (defcenum git-delta-status
   :unmodified  ;; no changes
@@ -68,13 +71,34 @@
   (:hunk_hdr #.(char-int #\H))
   (:binary #.(char-int #\B)))
 
-(defcenum (git-diff-submodule-ignore :int16)
-  (:reset -1)
-  :none
-  :untracked
-  :dirty
-  :all
-  :default)
+
+
+(defcenum (git-diff-submodule-ignore)
+  "Submodule ignore values
+
+:UNSPECIFIED use the submodule's configuration
+
+:NONE don't ignore any change - i.e. even an untracked file, will mark
+the submodule as dirty.  Ignored files are still ignored, of course.
+
+:UNTRACKED ignore untracked files; only changes to tracked files, or
+the index or the HEAD commit will matter.
+
+:DIRTY ignore changes in the working directory, only considering
+changes if the HEAD of submodule has moved from the value in the
+superproject.
+
+:ALL never check if the submodule is dirty
+
+:DEFAULT not used except as static initializer when we don't want any
+particular ignore rule to be specified.
+
+"
+  (:unspecified -1)
+  (:none 1)
+  (:untracked 2)
+  (:dirty 3)
+  (:all 4))
 
 (define-foreign-type patch (git-pointer)
   nil
@@ -84,9 +108,10 @@
 (defcstruct git-diff-file
   (:oid (:struct git-oid))
   (:path :string)
-  (:size off-t)
+  (:size object-size-t)
   (:flags git-diff-flags)
-  (:mode git-file-mode))
+  (:mode git-filemode-t)
+  (:id-abbrev :uint16))
 
 (defcstruct (git-diff-delta :class diff-delta-type)
   (status git-delta-status)
@@ -108,10 +133,11 @@
   (flags git-diff-option-flags)
   (ignore-submodules git-diff-submodule-ignore)
   (pathspec (:struct git-strings))
-  (diff-notify-cb :pointer)  ;; this isn't really a pointer?
-  (notify-payload :pointer)
-  (context-lines :uint16)
-  (interhunk-lines :uint16)
+  (notify-cb :pointer)  ;; this isn't really a pointer?
+  (progress-cb :pointer)  ;; this isn't really a pointer?
+  (payload :pointer)
+  (context-lines :uint32)
+  (interhunk-lines :uint32)
   (oid-abbrev :uint16)
   (max-size off-t)  ;; defaults to 512MB
   (old-prefix :string)
@@ -129,7 +155,7 @@
                :initform *oid-abbrev*)
    (ignore-submodules :accessor diff-ignore-submodules
                      :initarg :submodule-ignore
-                     :initform :default)
+                     :initform :unspecified)
    (context-lines :accessor diff-context-lines
                   :initarg :context-lines
                   :initform *diff-context-lines*)
@@ -151,9 +177,12 @@
    (notify-cb :accessor diff-notify-cb
               :initarg :notify-cb
               :initform (null-pointer))
-   (notify-payload :accessor diff-notify-payload
-                   :initarg :notify-payload
-                   :initform (null-pointer)))
+   (progress-cb :accessor diff-progress-cb
+                :initarg :progress-cb
+                :initform (null-pointer))
+   (payload :accessor diff-payload
+            :initarg :payload
+            :initform (null-pointer)))
   (:actual-type :pointer)
   (:simple-parser %diff-options))
 
@@ -161,6 +190,11 @@
   nil
   (:actual-type :pointer)
   (:simple-parser %diff-list))
+
+(defcfun %git-diff-options-init
+    %return-value
+  (options :pointer)
+  (version :unsigned-int))
 
 (defcfun %git-diff-index-to-workdir
     %return-value
@@ -233,13 +267,13 @@
 
 (defmethod translate-to-foreign (value (type diff-options))
   (let ((ptr (foreign-alloc '(:struct git-diff-options))))
+    (%git-diff-options-init ptr +git-diff-options-version+)
     (translate-into-foreign-memory value type ptr)))
 
 (defmethod translate-into-foreign-memory ((value diff-options) (type diff-options) ptr)
   (with-foreign-slots ((version flags oid-abbrev ignore-submodules context-lines interhunk-lines
-                                old-prefix new-prefix max-size diff-notify-cb notify-payload)
+                                old-prefix new-prefix max-size notify-cb payload)
                        ptr (:struct git-diff-options))
-    (setf version (diff-version value))
     (setf flags (diff-flags value))
     (setf oid-abbrev (diff-oid-abbrev value))
     (setf ignore-submodules (diff-ignore-submodules value))
@@ -253,7 +287,6 @@
      (foreign-slot-pointer ptr '(:struct git-diff-options) 'pathspec))
     (setf max-size (diff-max-size value))
     (setf diff-notify-cb (diff-notify-cb value))
-    (setf notify-payload (diff-notify-cb value))
     ptr))
 
 (defmethod free-translated-object (pointer (type diff-options) param)
@@ -312,7 +345,8 @@
 
 (defmethod diff ((tree-old tree) (tree-new tree) &optional (options (make-instance 'diff-options)))
   (with-foreign-objects ((diff-list :pointer))
-    (%git-diff-tree-to-tree diff-list (facilitator tree-old) tree-old tree-new options)
+    (let ((ptr (foreign-alloc '(:struct git-diff-options))))
+      (%git-diff-tree-to-tree diff-list (facilitator tree-old) tree-old tree-new options))
     (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
       ;; TODO (RS) this is a crap way to enable garbage collection
       (setf (facilitator diff-list) (facilitator tree-old))

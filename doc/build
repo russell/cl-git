@@ -1,26 +1,6 @@
 #!/bin/bash
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-if [ ! -d "$DIR/.venv" ]; then
-    virtualenv -p python2.7 $DIR/.venv
-fi
-
-export VIRTUAL_ENV=$DIR/.venv
-export PATH=$VIRTUAL_ENV/bin:$PATH
-
-pip freeze | grep -q Sphinx
-if [ $? -ne 0 ]; then
-    pip install sphinx
-fi
-
-pip freeze | grep -q sphinxcontrib_cldomain
-if [ $? -ne 0 ]; then
-    pip install sphinxcontrib-cldomain
-fi
-
-pip freeze | grep -q sphinxcontrib-googleanalytics
-if [ $? -ne 0 ]; then
-    pip install sphinxcontrib-googleanalytics
-fi
+(cd $DIR; pip install -U -r requirements.txt)
 
 sphinx-build -b html -E $DIR $DIR/html

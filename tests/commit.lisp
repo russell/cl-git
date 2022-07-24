@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -22,7 +22,7 @@
 
 (in-suite :cl-git)
 
-(test commit
+(def-test commit ()
   "create a repository and add a file to it."
   (with-test-repository ()
     (let ((test-commit (make-test-revision)))  ;; get first commit
@@ -30,7 +30,7 @@
         (commit-equal test-commit commit)))))
 
 
-(test default-signature
+(def-test default-signature ()
   "Test to make sure that if there is no time or email address in the
 signature then it will be added automatically."
   (with-test-repository ()
@@ -48,7 +48,7 @@ signature then it will be added automatically."
           (commit-equal test-commit commit))))))
 
 
-(test custom-signature-time
+(def-test custom-signature-time ()
   "test if the time is an integer then it will be parsed correctly."
   (with-test-repository ()
     (let ((test-commit (make-test-revision

@@ -1,0 +1,48 @@
+name: Publish Documentation
+
+on:
+  push:
+    branches:
+      - 'master'
+
+env:
+  LIBGIT2_VERSION: 1.3.0
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install libgit2
+        run: |
+          wget --progress=dot https://github.com/libgit2/libgit2/archive/v${LIBGIT2_VERSION}.tar.gz
+          tar -zxf v${LIBGIT2_VERSION}.tar.gz
+          mkdir libgit-build
+          cd libgit-build
+          cmake -DCMAKE_VERBOSE_MAKEFILE=ON ../libgit2-${LIBGIT2_VERSION}
+          cmake --build .
+          sudo cmake --build . --target install
+      - name: Install Roswell
+        env:
+          LISP: "sbcl-bin"
+        run: |
+          curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
+      - name: Build Documentation
+        env:
+          LD_LIBRARY_PATH: /usr/local/lib
+        run: |
+          ./doc/install-dependencies.ros
+          ./doc/build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/html

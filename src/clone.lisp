@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;; Copyright (C) 2014 Eric Timmons <etimmons@alum.mit.edu>
 ;;
 ;; This program is free software: you can redistribute it and/or
@@ -23,27 +23,36 @@
 
 (defconstant +git-clone-options-version+ 1)
 
-(defcenum git-clone-local-t
+(defcenum git-clone-local
+  ;; will bypass the git-aware transport for local paths, but use
+  ;; normal fetch for file:// URLs.
   (:auto)
+
+  ;; Bypass git-aware transport for all URLs
   (:local)
+
+  ;; Don't bypass git-aware transport
   (:no-local)
+
+  ;; Bypass git-aware transport but don't use hardlinks
   (:local-no-links))
 
 (defcstruct git-clone-options
-  (version :uint)
+  (version :unsigned-int)
   (checkout-options (:struct git-checkout-options))
-  (remote-callbacks (:struct git-remote-callbacks))
-  (bare :boolean)
-  (ignore-cert-errors :boolean)
-  (local git-clone-local-t)
-  (remote-name :string)
+  (fetch-options (:struct git-fetch-options))
+  (bare :bool)
+  (local git-clone-local)
   (checkout-branch :string)
-  (signature (:pointer (:struct git-signature))))
+  (repository-cb :pointer)
+  (repository-cb-payload :pointer)
+  (remote-cb :pointer)
+  (remote-cb-payload :pointer))
 
 (define-foreign-type clone-options ()
-  ((remote-callbacks
-    :initform (make-instance 'remote-callbacks)
-    :accessor remote-callbacks))
+  ((fetch-options
+    :initform (make-instance 'fetch-options)
+    :accessor fetch-options))
   (:simple-parser %clone-options)
   (:actual-type :pointer))
 
@@ -73,14 +82,15 @@
 (defmethod translate-to-foreign (value (type clone-options))
   (let ((ptr (foreign-alloc '(:struct git-clone-options))))
     ;; Init the structure with default values.
+    ;; TODO(RS) this struct is leaked here, there is no freeing of it
     (%git-clone-init-options ptr +git-clone-options-version+)
     (translate-into-foreign-memory value type ptr)))
 
 (defmethod translate-into-foreign-memory ((value clone-options) (type clone-options) ptr)
-  (with-foreign-slots (((:pointer remote-callbacks))
+  (with-foreign-slots (((:pointer fetch-options))
                        ptr (:struct git-clone-options))
-    ;; Fill in the remote-callbacks structure.
-    (translate-into-foreign-memory (remote-callbacks value) (remote-callbacks value) remote-callbacks))
+    (translate-into-foreign-memory (fetch-options value) (fetch-options value) fetch-options)
+    )
   ptr)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

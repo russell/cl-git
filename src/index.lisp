@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -44,26 +44,41 @@
 
 
 (defcstruct (git-index-time :class index-time-struct-type)
-  (seconds %time)
-  (nanoseconds :unsigned-int))
+  (seconds :int32)
+  (nanoseconds :uint32))
 
+;; 32-bit mode, split into (high to low bits)
+;;
+;; 4-bit object type
+;; valid values in binary are 1000 (regular file), 1010 (symbolic link)
+;; and 1110 (gitlink)
+;;
+;; 3-bit unused
+;;
+;; 9-bit unix permission. Only 0755 and 0644 are valid for regular files.
+;; Symbolic links and gitlinks have value 0 in this field.
 
-(defctype struct-index-time
-    (:struct git-index-time))
-
+(defcenum (git-index-file-mode)
+  (:new #o0000000)
+  (:tree #o0040000)
+  (:blob #o0100644)
+  (:blob-executable #o0100755)
+  (:link #o0120000)
+  (:gitlink #o0160000))
 
 (defcstruct git-index-entry
   (ctime (:struct git-index-time))
   (mtime (:struct git-index-time))
-  (dev :unsigned-int)
-  (ino :unsigned-int)
-  (mode git-file-mode)
-  (uid :unsigned-int)
-  (gid :unsigned-int)
-  (file-size off-t)
+  (dev :uint32)
+  (ino :uint32)
+  (mode git-index-file-mode)
+  (uid :uint32)
+  (gid :uint32)
+  (file-size :uint32)
   (oid (:struct git-oid))
-  (flags :unsigned-short)
-  (flags-extended :unsigned-short)
+  (flags :uint16)
+  ;; Flags Extended is for internal use only, so should be hidden
+  (flags-extended :uint16)
   (path :string))
 
 
@@ -139,7 +154,7 @@
   (index %index))
 
 (defcfun ("git_index_entrycount" %git-index-entry-count)
-    :unsigned-int
+    size-t
   (index %index))
 
 (defcfun ("git_index_entry_stage" %git-index-entry-stage)
@@ -152,7 +167,7 @@ and 3 (theirs) are in conflict."
 (defcfun ("git_index_get_byindex" %git-index-get-by-index)
     %index-entry
   (index %index)
-  (position :unsigned-int))
+  (position size-t))
 
 (defcfun ("git_index_get_bypath" %git-index-get-by-path)
     %index-entry
@@ -163,7 +178,7 @@ and 3 (theirs) are in conflict."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod translate-from-foreign (value (type index-entry-type))
-  (with-foreign-slots ((ctime mtime file-size oid flags flags-extended path mode)
+  (with-foreign-slots ((ctime mtime file-size oid flags path mode)
                        value
                        (:struct git-index-entry))
     (list :c-time ctime
@@ -172,29 +187,27 @@ and 3 (theirs) are in conflict."
           :file-size file-size
           :oid oid
           :flags flags
-          :flags-extended flags-extended
           :path path
           :stage (ash (logand flags git-index-entry-stagemask)
                       (- 0 git-index-entry-stageshift)))))
 
 (defmethod translate-to-foreign (value (type index-entry-type))
-  (let ((index-entry (foreign-alloc '(:struct git-index-entry))))
+  (let ((index-entry (foreign-alloc '(:struct git-index-entry)))
+        (time-to-set (local-time:now)))
     (with-foreign-slots ((file-size flags flags-extended path mode)
                          index-entry
                          (:struct git-index-entry))
       (with-foreign-slots ((seconds nanoseconds)
                            (foreign-slot-pointer index-entry '(:struct git-index-entry) 'ctime)
                            (:struct git-index-time))
-        (let ((time-to-set (getf value :c-time (local-time:now))))
-          (setf seconds time-to-set)
-          (setf nanoseconds (local-time:nsec-of time-to-set))))
+        (setf seconds (local-time:timestamp-to-unix time-to-set))
+        (setf nanoseconds (local-time:nsec-of time-to-set)))
 
       (with-foreign-slots ((seconds nanoseconds)
                            (foreign-slot-pointer index-entry '(:struct git-index-entry) 'mtime)
                            (:struct git-index-time))
-        (let ((time-to-set (getf value :m-time (local-time:now))))
-          (setf seconds time-to-set)
-          (setf nanoseconds (local-time:nsec-of time-to-set))))
+        (setf seconds (local-time:timestamp-to-unix time-to-set))
+        (setf nanoseconds (local-time:nsec-of time-to-set)))
 
       (setf file-size (getf value :file-size 0))
       (setf flags (getf value :flags 0))
@@ -207,7 +220,7 @@ and 3 (theirs) are in conflict."
 
 (defmethod translate-from-foreign (value (type index-time-struct-type))
   (with-foreign-slots ((seconds nanoseconds) value (:struct git-index-time))
-    (local-time:timestamp+ seconds nanoseconds :nsec)))
+    (local-time:unix-to-timestamp seconds :nsec nanoseconds)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

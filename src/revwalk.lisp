@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -21,10 +21,10 @@
 
 
 (defbitfield git-revwalk-flags
-  (:none 0)
-  (:topological 1)
-  (:time 2)
-  (:reverse 4))
+  (:none        #b000)
+  (:topological #b001)
+  (:time        #b010)
+  (:reverse     #b100))
 
 
 (define-foreign-type revision-walker (git-pointer)

@@ -1,11 +1,16 @@
 ;;;; cl-git.asd
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  #+quicklisp
+  (ql:quickload 'cffi-grovel :silent t)
   (asdf:oos 'asdf:load-op :cffi-grovel))
 
 (asdf:defsystem #:cl-git
   :description "A CFFI wrapper of libgit2."
   :version (:read-file-form "version.lisp-expr")
+  ;; https://github.com/quicklisp/quicklisp-client/issues/108 There
+  ;; will be errors if loading without first calling `(ql:quickload
+  ;; 'cffi :silent t)'
   :defsystem-depends-on (:asdf :cffi-grovel)
   :depends-on (#:cffi #:local-time #:cl-fad #:flexi-streams #:trivial-garbage
                       #:anaphora #:alexandria #:closer-mop #:uiop)
@@ -21,6 +26,7 @@
                (:file "error" :depends-on ("libgit2"))
                (:file "utils" :depends-on ("libgit2"))
                (:file "git-pointer" :depends-on ("libgit2"))
+               (:file "proxy" :depends-on ("libgit2"))
                (:file "oid" :depends-on ("api" "libgit2"))
                (:file "object" :depends-on ("git-pointer" "repository" "oid"))
                (:file "signature" :depends-on ("libgit2"))
@@ -31,7 +37,7 @@
                (:file "branch" :depends-on ("object"))
                (:file "commit" :depends-on ("object" "tree"))
                (:file "tag" :depends-on ("object"))
-               (:file "diff" :depends-on ("git-pointer" "tree" "buffer"))
+               (:file "diff" :depends-on ("libgit2-types" "git-pointer" "tree" "buffer"))
                (:file "blob" :depends-on ("object"))
                (:file "tree" :depends-on ("object" "blob"))
                (:file "config" :depends-on ("git-pointer"))
@@ -40,7 +46,7 @@
                (:file "remote" :depends-on ("object" "credentials"))
                (:file "odb" :depends-on ("object"))
                (:file "checkout" :depends-on ("object"))
-               (:file "clone" :depends-on ("checkout" "credentials"))
+               (:file "clone" :depends-on ("checkout" "credentials" "remote"))
                (:file "credentials" :depends-on ("object"))))
 
 
@@ -55,6 +61,8 @@
                (:file "common" :depends-on ("package"))
                (:file "fixtures" :depends-on ("package"))
                (:file "commit" :depends-on ("common"))
+               (:file "clone" :depends-on ("common" "fixtures"))
+               (:file "checkout" :depends-on ("common"))
                (:file "index" :depends-on ("common" "fixtures"))
                (:file "repository" :depends-on ("common" "fixtures"))
                (:file "remote" :depends-on ("common" "fixtures"))

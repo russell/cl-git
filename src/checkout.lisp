@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;; Copyright (C) 2014 Eric Timmons <etimmons@alum.mit.edu>
 ;;
 ;; This program is free software: you can redistribute it and/or
@@ -23,24 +23,69 @@
 
 (defconstant +git-checkout-options-version+ 1)
 
+(defbitfield git-checkout-strategy
+  :none
+  :safe
+  :force
+  :recreate-missing
+  ;; (ash 1 3) is misssing
+  (:allow-conflicts #.(ash 1 4))
+  :remove-untracked
+  :remove-ignored
+  :update-only
+  :dont-update-index
+  :no-refresh
+  :skip-unmerged
+  :use-ours
+  :use-theirs
+  (:disable-pathspec-match #.(ash 1 13))
+  (:skip-locked-directories #.(ash 1 18))
+  :dont-overwrite-ignored
+  :conflict-style-merge
+  :conflict-style-diff3
+  :dont-remove-existing
+  :dont-write-index
+  :dry-run
+  :conflict-style-zdiff3
+
+  ;; Not implemented yet in libgit2
+  ;; https://github.com/libgit2/libgit2/blob/61f1e31a146f220a633252ecb1054535f090745b/include/git2/checkout.h#L190
+  (:update-submodules #.(ash 1 16))
+  :update-submodules-if-changed)
+
+(defbitfield git-checkout-notify
+  :none
+  :conflict
+  :dirty
+  :updated
+  :untracked
+  :ignored
+  ;; TODO(RS) :all can't be implemented yet, needs to be 0x0FFFFu but
+  ;; not sure how to add that
+  ;; https://github.com/libgit2/libgit2/blob/61f1e31a146f220a633252ecb1054535f090745b/include/git2/checkout.h#L244
+  )
+
 (defcstruct git-checkout-options
   (version :uint)
-  (checkout-strategy :uint)
+  (checkout-strategy git-checkout-strategy)
   (disable-filters :boolean)
   (dir-mode :uint)
   (file-mode :uint)
   (file-open-flags :int)
-  (notify-flags :uint)
+  (notify-flags git-checkout-notify)
   (notify-cb :pointer)
   (notify-payload :pointer)
   (progress-cb :pointer)
   (progress-payload :pointer)
   (paths (:struct git-strings))
   (baseline %tree)
+  (baseline-index %index)
   (target-directory :string)
   (ancestor-label :string)
   (our-label :string)
-  (their-label :string))
+  (their-label :string)
+  (perfdata-cb :pointer)
+  (perfdata-payload :pointer))
 
 (define-foreign-type checkout-options ()
   ()

@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;; Copyright (C) 2012 Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;; Copyright (C) 2014 Eric Timmons <etimmons@alum.mit.edu>
 ;;
@@ -73,16 +73,24 @@ the callback.")
 
 (defcstruct git-remote-callbacks
   (version :uint)
-  (sideband-progress :pointer)
-  (completion :pointer)
-  (credentials :pointer)
-  (transfer-progress :pointer)
-  (update-tips :pointer)
-  (payload :pointer))
+  (sideband-progress-cb :pointer)
+  (completion-cb :pointer)
+  (credentials-cb :pointer)
+  (certificate-check-cb :pointer)
+  (transfer-progress-cb :pointer)
+  (update-tips-cb :pointer)
+  (pack-progress-cb :pointer)
+  (push-transfer-progress-cb :pointer)
+  (push-update-reference-cb :pointer)
+  (push-negotiation-cb :pointer)
+  (transport-cb :pointer)
+  (remote-ready-cb :pointer)
+  (payload :pointer)
+  (resolve-url-cb :pointer))
 
 (define-foreign-type remote-callbacks ()
   ((id
-	:reader id)
+    :reader id)
    (credentials
     :initform nil
     :initarg :credentials
@@ -121,10 +129,10 @@ foreign memory."
 
 (defmethod translate-into-foreign-memory ((value remote-callbacks) (type remote-callbacks) ptr)
   "Translate a remote-callbacks class into a foreign structure."
-  (with-foreign-slots ((credentials payload) ptr (:struct git-remote-callbacks))
+  (with-foreign-slots ((credentials-cb payload) ptr (:struct git-remote-callbacks))
     ;; Use our callback to process credential requests.
-    (setf credentials (callback %git-remote-callback-acquire-credentials))
-	(setf payload (cffi:make-pointer (id value))))
+    (setf credentials-cb (callback %git-remote-callback-acquire-credentials))
+    (setf payload (cffi:make-pointer (id value))))
   ptr)
 
 
@@ -183,14 +191,84 @@ foreign memory."
   (local :boolean)
   (oid (:struct git-oid))
   (loid (:struct git-oid))
-  (name :string))
+  (name :string)
+  (symref-target :string))
 
 (defmethod translate-from-foreign (value (type remote-head-struct-type))
-  (with-foreign-slots ((local oid loid name) value (:struct git-remote-head))
+  (with-foreign-slots ((local oid loid name symref-target) value (:struct git-remote-head))
     (list :local local
           :remote-oid oid
           :local-oid loid
-          :name name)))
+          :name name
+          :symref-target symref-target)))
+
+(defconstant +git-fetch-options-version+ 1)
+
+(defcenum git-fetch-prune
+  ;; Use the setting in the configuration
+  :unspecified
+  ;; Prune during fetch
+  :prune
+  ;; Don't prune during fetch
+  :no-prune)
+
+(defcenum git-remote-autotag-options
+  ;; Use the setting from the configuration
+  :unspecified
+  ;; Ask the server for tags pointing to objects we are downloading
+  :auto
+  ;; Don't ask for any tags beyond the refspecs
+  :none
+  ;; Ask for all the tags
+  :all)
+
+(defbitfield git-remote-redirect
+  ;; Do not follow any redirects
+  :none
+  ;; Only follow redirects for the initial request
+  :initial
+  ;; Follow redirects in any stage of the fetch or push
+  :all)
+
+(defcstruct git-fetch-options
+  (version :int)
+  (callbacks (:struct git-remote-callbacks))
+  (prune git-fetch-prune)
+  (update-fetchhead :boolean)
+  (download-tags git-remote-autotag-options)
+  (proxy-options (:struct git-proxy-options))
+  (custom-headers (:struct git-strings)))
+
+(define-foreign-type fetch-options ()
+  ((remote-callbacks
+    :initform (make-instance 'remote-callbacks)
+    :accessor remote-callbacks))
+  (:simple-parser %fetch-options)
+  (:actual-type :pointer))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defcfun %git-fetch-options-init
+    %return-value
+  (options :pointer)
+  (version :uint))
+
+(defmethod translate-to-foreign (value (type fetch-options))
+  (let ((ptr (foreign-alloc '(:struct git-fetch-options))))
+    ;; Init the structure with default values.
+    ;; TODO(RS) this struct is leaked here, there is no freeing of it
+    (%git-fetch-options-init ptr +git-fetch-options-version+)
+    (translate-into-foreign-memory value type ptr)))
+
+(defmethod translate-into-foreign-memory ((value fetch-options) (type fetch-options) ptr)
+  (with-foreign-slots (((:pointer callbacks))
+                       ptr (:struct git-fetch-options))
+    ;; Fill in the remote-callbacks structure.
+    (translate-into-foreign-memory (remote-callbacks value) (remote-callbacks value) callbacks)
+    )
+  ptr)
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -206,7 +284,7 @@ foreign memory."
   (strings :pointer)
   (repository %repository))
 
-(defcfun ("git_remote_load" %git-remote-load)
+(defcfun ("git_remote_lookup" %git-remote-lookup)
     %return-value
   (remote-out :pointer)
   (repository %repository)
@@ -229,37 +307,42 @@ foreign memory."
   (remote %remote))
 
 (defcfun ("git_remote_connected" %git-remote-connected)
-  :boolean
+    :boolean
   (remote %remote))
 
+;; TODO(RS) should all the low level data structures have a % at the
+;; start, we do that with functions.
 (defcenum %direction
   :fetch
   :push)
 
 (defcfun ("git_remote_connect" %git-remote-connect)
-  %return-value
+    %return-value
   (remote %remote)
-  (direction %direction))
+  (direction %direction)
+  (callbacks %remote-callbacks)
+  (proxy-options %proxy-options)
+  (custom-headers :pointer))
 
 (defcfun ("git_remote_disconnect" %git-remote-disconnect)
-  :void
+    :void
   (remote %remote))
 
 (defcfun ("git_remote_get_fetch_refspecs" %git-remote-get-fetch-refspecs)
-  %return-value
+    %return-value
   (fetchspec :pointer)
   (remote %remote))
 
 (defcfun ("git_remote_get_push_refspecs" %git-remote-get-push-refspecs)
-  %return-value
+    %return-value
   (pushspec :pointer)
   (remote %remote))
 
-(defcfun ("git_remote_download" %git-remote-download)
-  %return-value
+(defcfun %git-remote-download
+    %return-value
   (remote %remote)
-  (callback :pointer)
-  (payload :pointer))
+  (refspecs :pointer)  ;; pointer to git_strarray
+  (options %fetch-options))
 
 (defcfun %git-remote-init-callbacks
     %return-value
@@ -267,7 +350,7 @@ foreign memory."
   (version :uint))
 
 (defcfun %git-remote-ls
-  %return-value
+    %return-value
   (output :pointer)
   (size :pointer)
   (remote %remote))
@@ -291,7 +374,7 @@ foreign memory."
 (defmethod %git-lookup-by-name ((class (eql 'remote)) name repository)
   (assert (not (null-or-nullpointer repository)))
   (with-foreign-object (remote :pointer)
-    (%git-remote-load remote repository name)
+    (%git-remote-lookup remote repository name)
     (mem-ref remote :pointer)))
 
 (defun make-remote-from-name (name repository)
@@ -318,7 +401,7 @@ foreign memory."
 
 (defmethod get-object ((class (eql 'remote)) name repository)
   (with-foreign-object (remote-out :pointer)
-    (%git-remote-load remote-out repository name)
+    (%git-remote-lookup remote-out repository name)
     (make-instance 'remote
            :pointer (mem-ref remote-out :pointer)
            :facilitator repository
@@ -346,7 +429,7 @@ foreign memory."
       ((slot-value object 'libgit2-disposed)
        (princ "(disposed)" stream)))))
 
-(defgeneric remote-connect (object &key direction)
+(defgeneric remote-connect (object &key direction credentials)
   (:documentation
    "Opens the remote connection.
 The url used for the connection can be queried by GIT-URL.
@@ -355,8 +438,11 @@ The opened connection is one way, either data is retrieved from the
 remote, or data is send to the remote.  The direction is specified
 with the DIRECTION argument, :FETCH is for retrieving data, :PUSH is
 for sending data.")
-  (:method ((remote remote) &key (direction :fetch))
-    (%git-remote-connect remote direction)))
+  (:method ((remote remote) &key (direction :fetch) credentials)
+    (let ((callbacks (make-instance 'remote-callbacks :credentials credentials)))
+      (with-foreign-objects ((proxy-options '(:struct git-proxy-options))
+                             (headers '(:struct git-strings)))
+        (%git-remote-connect remote direction callbacks proxy-options headers)))))
 
 (defgeneric remote-connected-p (remote)
   (:documentation "Returns t if the connection is open, nil otherwise.")
@@ -395,7 +481,7 @@ bring the repository into sync.")
     (unless (remote-connected-p remote)
       (error 'connection-error
              :message "Remote is not connected."))
-    (%git-remote-download remote (null-pointer) (null-pointer))))
+    (%git-remote-download remote (null-pointer) (make-instance 'fetch-options))))
 
 (defgeneric ls-remote (remote)
   (:documentation "Lists the current refs at the remote.  Return a

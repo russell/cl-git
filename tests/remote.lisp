@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2012-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -62,11 +62,13 @@
                  `((:local nil
                     :remote-oid ,(oid (repository-head *test-repository*))
                     :local-oid 0
-                    :name "HEAD")
+                    :name "HEAD"
+                    :symref-target "refs/heads/master")
                    (:local nil
                     :remote-oid ,(oid (repository-head *test-repository*))
                     :local-oid 0
-                    :name "refs/heads/master")))))))
+                    :name "refs/heads/master"
+                    :symref-target nil)))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))
 
@@ -93,15 +95,15 @@
       (progn
         (delete-directory-and-files remote-repo-path)))))
 
-
-(def-test clone-repository (:fixture repository-with-commits)
-  "Create a new repository and clone it."
-  (let ((remote-repo-path (gen-temp-path)))
-    (unwind-protect
-         (let ((cloned-repository
-                 (clone-repository (namestring *repository-path*) remote-repo-path)))
-           (is (eql
-                (oid (repository-head *test-repository*))
-                (oid (repository-head cloned-repository)))))
-      (progn
-        (delete-directory-and-files remote-repo-path)))))
+(def-test git-fetch-options-struct ()
+  "Verify initialising a GIT-FETCH-OPTIONS-STRUCT."
+  (cffi:with-foreign-object (ptr '(:struct cl-git::git-fetch-options))
+    (cffi:with-foreign-slots ((cl-git::version cl-git::custom-headers)
+                              ptr (:struct cl-git::git-fetch-options))
+      (setf cl-git::version 1234)
+      (setf cl-git::custom-headers (cffi:convert-to-foreign (funcall (random-list)) '(:struct cl-git::git-strings))))
+    (cl-git::%git-fetch-options-init ptr cl-git::+git-fetch-options-version+)
+    (cffi:with-foreign-slots ((cl-git::version cl-git::custom-headers)
+                               ptr (:struct cl-git::git-fetch-options))
+      (is (eql cl-git::+git-fetch-options-version+ cl-git::version))
+      (is (eql nil cl-git::custom-headers)))))

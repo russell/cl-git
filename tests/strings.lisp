@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -21,7 +21,7 @@
 
 (in-suite :cl-git)
 
-(test string-list
+(def-test individual-strings ()
   (for-all ((strings-fixture (random-list)))
     (let ((str-pointer
             (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))
@@ -30,3 +30,13 @@
         (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strings))
         strings-fixture))
       (cffi:free-converted-object str-pointer '(:struct cl-git::git-strings) t))))
+
+(def-test string-list ()
+  (let* ((strings-fixture (funcall (random-list)))
+         (str-pointer
+           (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))
+    (is
+     (equal
+      (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strings))
+      strings-fixture))
+    (cffi:free-converted-object str-pointer '(:struct cl-git::git-strings) t)))

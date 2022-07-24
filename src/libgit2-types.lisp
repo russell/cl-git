@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -20,8 +20,16 @@
 
 (in-package #:cl-git)
 
-(defcenum (git-file-mode)
-  (:new #o0000000)
+(defctype off-t :int64)
+(defctype object-size-t :uint64)
+
+(define-foreign-type time-t ()
+  nil
+  (:actual-type :int64)
+  (:simple-parser %time-t))
+
+(defcenum (git-filemode-t :uint16)
+  (:unreadable #o0000000)
   (:tree #o0040000)
   (:blob #o0100644)
   (:blob-executable #o0100755)

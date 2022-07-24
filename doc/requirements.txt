@@ -1,5 +1,4 @@
 sphinx
 sphinxcontrib-cldomain
-sphinxcontrib-googleanalytics
-sphinx-bootstrap-theme
+sphinx-book-theme
 pygments-cl-repl

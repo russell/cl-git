@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;; Copyright (C) 2012 Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;;
 ;; This program is free software: you can redistribute it and/or
@@ -30,22 +30,13 @@
   (:ssh 4))
 
 (define-foreign-library libgit2
-  (:linux "libgit2.so.21")
+  (:linux "libgit2.so.1.3.0")
   (:windows "libgit2.dll")
   (:darwin "libgit2.0.dylib")
   (:default "libgit2"))
 
 (unless (foreign-library-loaded-p 'libgit2)
   (use-foreign-library libgit2))
-
-(defctype off-t :uint64)
-
-
-(define-foreign-type time-type ()
-  nil
-  (:actual-type :int64)
-  (:simple-parser %time))
-
 
 (defcfun ("git_libgit2_features" libgit2-features)
   git-capabilities
@@ -58,17 +49,17 @@ list return values are :THREADS and :HTTPS.")
   (minor :pointer)
   (revision :pointer))
 
-(defcfun ("git_threads_init" git-threads-init)
+(defcfun ("git_libgit2_init" git-init)
     :void
-    "Init libgit2 threading.")
+    "Init libgit2.")
 
-(defcfun ("git_threads_shutdown" git-threads-shutdown)
+(defcfun ("git_libgit_shutdown" git-shutdown)
     :void
-    "Shutdown libgit2 threading.")
+    "Shutdown libgit2.")
 
 ;;; Init threading on load
 (eval-when (:load-toplevel :execute)
-  (git-threads-init))
+  (git-init))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

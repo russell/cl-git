@@ -1,3 +1,12 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '() :silent t))
+
 (in-package :common-lisp-user)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -45,22 +54,31 @@
           (eval `(trace ,(intern (symbol-name sym) package)))
         (skip-symbol () nil)))))
 
-(unix-options:with-cli-options (uiop:*command-line-arguments*)
-    (help trace)
-  (when help
-    (unix-options:print-usage-summary
-     "Usage:~%~@{~A~%~}"
-     '(((#\t "trace") nil "trace the functions during a test run.")))
-    (uiop::quit :unix-status 1))
-  (when trace
-    (do-symbols (sym 'cl-git)
-      (safe-trace sym "CL-GIT"))))
 
-(let ((result-list (fiveam:run :cl-git)))
-  (fiveam:explain! result-list)
-  (uiop:quit
-   (if (remove-if-not
-        (lambda (res)
-          (typep res 'fiveam::test-failure))
-        result-list)
-       1 0)))
+
+(defun main (&rest argv)
+  (unix-options:with-cli-options (argv)
+                                 (help trace)
+                                 (when help
+                                   (unix-options:print-usage-summary
+                                    "Usage:~%~@{~A~%~}"
+                                    '(((#\t "trace") nil "trace the functions during a test run.")))
+                                   (uiop::quit :unix-status 1))
+                                 (when trace
+                                   (do-symbols (sym 'cl-git)
+                                               (safe-trace sym "CL-GIT"))))
+
+  (let ((result-list (fiveam:run :cl-git)))
+    (fiveam:explain! result-list)
+    #+sbcl
+    (sb-ext:gc :full t)
+    (uiop:quit
+     (if (remove-if-not
+          (lambda (res)
+            (typep res 'fiveam::test-failure))
+          result-list)
+         1 0))))
+
+
+
+;;; vim: set ft=lisp lisp:

@@ -3,7 +3,7 @@ almost complete exposure of the underlying library.
 
 License `LLGPL`_
 
-The source is available on `github`_.
+The source is available on `GitHub`_.
 
 .. _LLGPL: http://opensource.franz.com/preamble.html
 .. _libgit2: http://libgit2.github.com/
@@ -15,7 +15,7 @@ The source is available on `github`_.
 
    GIT> (resolve
          (get-object 'reference "HEAD"
-                     (open-repository 
+                     (open-repository
                       (merge-pathnames #p"projects/lisp/cl-git"
                                        (user-homedir-pathname)))))
    #<COMMIT 276EE31DD4F35E49AEB7C7FCFB8094D557A25AD1 {100817E383}>
@@ -32,31 +32,35 @@ Documentation
 
 .. toctree::
    :maxdepth: 2
-   :numbered:
+   :caption: Topic Areas
 
-   objects
-   repositories
-   references
-   commits
-   tag
-   tree
-   blob
-   indexes
-   remote
-   config
-
-Low Level
----------
+   usage/objects
+   usage/repositories
+   usage/references
+   usage/commits
+   usage/tag
+   usage/tree
+   usage/blob
+   usage/indexes
+   usage/remote
+   usage/config
 
 .. toctree::
    :maxdepth: 2
+   :caption: Low Level
 
-   odb
-   internals
+   low-level/odb
+   low-level/internals
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Developing
+
+   changelog
+   contributing
 
 Indices and tables
 ------------------
 
 * :ref:`genindex`
 * :ref:`search`
-

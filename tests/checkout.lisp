@@ -22,20 +22,11 @@
 
 (in-suite :cl-git)
 
-
-(def-test revision-walker-test ()
-  "create a repository and add several random commits to it. then
-check that the commit messages match the expected messages."
-  (with-test-repository ()
-    (make-test-revisions 10)
-    (let* ((commit-list *test-repository-state*)
-           (tcommit (pop commit-list))
-           (count 0))
-      (let ((walker (revision-walk (get-object 'commit (getf tcommit :sha) *test-repository*)
-                                   :ordering :topological)))
-        (do ((commit (next-revision walker) (next-revision walker)))
-            ((null commit))
-          (commit-equal tcommit commit)
-          (setf count (1+ count))
-          (setq tcommit (pop commit-list)))
-        (is (equal count 10))))))
+(def-test git-checkout-options-struct ()
+  "Verify initialising a GIT-CHECKOUT-OPTIONS-STRUCT."
+  (cffi:with-foreign-object (ptr '(:struct cl-git::git-checkout-options))
+    (cl-git::%git-checkout-init-options ptr cl-git::+git-checkout-options-version+)
+    (cffi:with-foreign-slots ((cl-git::version cl-git::perfdata-payload)
+                               ptr (:struct cl-git::git-checkout-options))
+      (is (eql cl-git::+git-checkout-options-version+ cl-git::version))
+      (is (cffi:null-pointer-p cl-git::perfdata-payload)))))

@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -31,6 +31,12 @@
         (write-string-to-file filename filetext)
         (&body)))))
 
+(defun approximately-now-p (a)
+  (timestamp-approximately-equal-p a (now)))
+
+(defun timestamp-approximately-equal-p (a b)
+  (< (timestamp-difference a b) 2))
+
 
 (defun plist-equal (a b)
   "Compare an plist, if the plist contains a function then use that as
@@ -40,11 +46,8 @@
               ((functionp value)
                (is (funcall value (getf a key))))
               ((eql (type-of value) 'local-time:timestamp)
-               (is (local-time:timestamp= (getf a key) value)))
+               (is (timestamp-approximately-equal-p (getf a key) value)))
               (t (is (equal (getf a key) value))))))
-
-(defun approximately-now-p (a)
-  (< (timestamp-difference a (now)) 5))
 
 (defun index-path-test (filename filetext)
   (index-add-file filename *test-repository-index*)
@@ -56,7 +59,6 @@
              :FILE-SIZE ,(length filetext)
              :OID 475587057170892494251873940086020553338329808131
              :FLAGS ,(length (namestring filename))
-             :FLAGS-EXTENDED 0
              :PATH ,(namestring filename)
              :STAGE 0))))
 
@@ -119,8 +121,4 @@
           ;; Add the entry from the other git index.
           (index-add-file entry index-in-memory)
           (let ((entry1 (entry-by-index index-in-memory 0)))
-            ;; NOTE Removed the check of the FLAGS-EXTENDED field
-            ;; since it stores internal details about the state of the
-            ;; index.
-            (setf (getf entry1 :flags-extended) 0)
             (plist-equal entry entry1)))))))

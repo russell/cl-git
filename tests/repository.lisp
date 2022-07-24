@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -22,7 +22,7 @@
 
 (in-suite :cl-git)
 
-(test repository-init
+(def-test repository-init ()
   "Create a repository and open it."
   (for-all ((path 'gen-temp-path))
     (finishes
@@ -80,18 +80,6 @@
     (bare-p *test-repository*)
     t)))
 
-(def-test repository-head-orphaned (:fixture (repository))
-  "Confirm that the current head is orphaned then check that not."
-  ;; confirm head is orphaned
-  (is (equal
-       (head-orphaned-p *test-repository*)
-       t))
-  (make-test-revision)
-  ;; confirm head no longer orphaned
-  (is (equal
-       (head-orphaned-p *test-repository*)
-       nil)))
-
 (def-test repository-head-unborn (:fixture (repository))
   "Confirm that the current head is orphaned then check that not."
   ;; confirm head is orphaned
@@ -109,9 +97,9 @@
   (for-all ((path 'gen-temp-path))
     (finishes
       (unwind-protect
-	   (progn
-	     (init-repository path :bare t)
-	     (with-repository (repository path)
-           (is (typep repository 'repository))))
-	(progn
-	  (delete-directory-and-files path))))))
+           (progn
+             (init-repository path :bare t)
+             (with-repository (repository path)
+               (is (typep repository 'repository))))
+        (progn
+          (delete-directory-and-files path))))))

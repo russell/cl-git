@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp; Syntax: COMMON-LISP; Base: 10 -*-
 ;;
 ;; cl-git is a Common Lisp interface to git repositories.
-;; Copyright (C) 2011-2014 Russell Sim <russell.sim@gmail.com>
+;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -35,106 +35,118 @@
 (def-test diff-revisions (:fixture repository-with-changes)
   (let ((diffs (diff commit1 commit2)))
     (is (eq (diff-deltas-count diffs) 1))
-    (is (equal (diff-deltas-summary diffs)
-               '((:status :modified
+    (is (equal '((:status :modified
                   :similarity 0
-                  :flags nil
-                  :file-a (:mode :blob
-                           :flags (:valid-oid)
-                           :size 0
+                  :flags (:not-binary)
+                  :file-a (:id-abbrev 40
+                           :mode :blob
+                           :flags (:not-binary :valid-oid :exists)
+                           :size 902
                            :path "test-file"
                            :oid 97787706012661474925191056142692387097255677107)
-                  :file-b (:mode :blob
-                           :flags (:valid-oid)
-                           :size 0
+                  :file-b (:id-abbrev 40
+                           :mode :blob
+                           :flags (:not-binary :valid-oid :exists)
+                           :size 919
                            :path "test-file"
-                           :oid 243568240973109882797341286687005129339258402139)))))
-    (is (equal (sort-diff-flags (make-patch diffs))
-               `((:patch ,repository-with-changes-diff
+                           :oid 243568240973109882797341286687005129339258402139)))
+               (diff-deltas-summary diffs)))
+    (is (equal `((:patch ,repository-with-changes-diff
                   :status :modified
                   :similarity 0
                   :flags (:not-binary)
-                  :file-a (:mode :blob
-                           :flags (:not-binary :valid-oid)
+                  :file-a (:id-abbrev 40
+                           :mode :blob
+                           :flags (:exists :not-binary :valid-oid)
                            :size 902
                            :path "test-file"
                            :oid
                            97787706012661474925191056142692387097255677107)
-                  :file-b (:mode :blob
-                           :flags (:not-binary :valid-oid)
+                  :file-b (:id-abbrev 40
+                           :mode :blob
+                           :flags (:exists :not-binary :valid-oid)
                            :size 919
                            :path "test-file"
                            :oid
-                           243568240973109882797341286687005129339258402139)))))))
+                           243568240973109882797341286687005129339258402139)))
+               (sort-diff-flags (make-patch diffs))))))
 
 
 (def-test diff-working (:fixture repository-with-unstaged)
   (let ((diffs (diff *test-repository* (open-index *test-repository*))))
     (is (eq (diff-deltas-count diffs) 1))
-    (is (equal (diff-deltas-summary diffs)
-               '((:status :modified
+    (is (equal '((:status :modified
                   :similarity 0
-                  :flags nil
-                  :file-a (:mode :blob
-                           :flags (:valid-oid)
+                  :flags (:not-binary)
+                  :file-a (:id-abbrev 40
+                           :mode :blob
+                           :flags (:not-binary :valid-oid :exists)
                            :size 902
                            :path "test-file"
                            :oid 97787706012661474925191056142692387097255677107)
-                  :file-b (:mode :blob
-                           :flags nil
+                  :file-b (:id-abbrev 40
+                           :mode :blob
+                           :flags (:not-binary :valid-oid :exists)
                            :size 919
                            :path "test-file"
-                           :oid 0)))))
-    (is (equal (sort-diff-flags (make-patch diffs))
-               `((:patch ,repository-with-changes-diff
+                           :oid 243568240973109882797341286687005129339258402139)))
+               (diff-deltas-summary diffs)))
+    (is (equal `((:patch ,repository-with-changes-diff
                   :status :modified
                   :similarity 0
                   :flags (:not-binary)
-                  :file-a (:mode :blob
-                           :flags (:not-binary :valid-oid)
+                  :file-a (:id-abbrev 40
+                           :mode :blob
+                           :flags (:exists :not-binary :valid-oid)
                            :size 902
                            :path "test-file"
                            :oid
                            97787706012661474925191056142692387097255677107)
-                  :file-b (:mode :blob
-                           :flags (:not-binary :valid-oid)
+                  :file-b (:id-abbrev 40
+                           :mode :blob
+                           :flags (:exists :not-binary :valid-oid)
                            :size 919
                            :path "test-file"
                            :oid
-                           243568240973109882797341286687005129339258402139)))))))
+                           243568240973109882797341286687005129339258402139)))
+               (sort-diff-flags (make-patch diffs))))))
 
 
 (def-test diff-staged (:fixture repository-with-staged)
   (let ((diffs (diff commit1 (open-index *test-repository*))))
     (is (eq (diff-deltas-count diffs) 1))
-    (is (equal (diff-deltas-summary diffs)
-               '((:status :modified
+    (is (equal '((:status :modified
                   :similarity 0
-                  :flags nil
-                  :file-a (:mode :blob
-                           :flags (:valid-oid)
-                           :size 0
+                  :flags (:not-binary)
+                  :file-a (:id-abbrev 40
+                           :mode :blob
+                           :flags (:not-binary :valid-oid :exists)
+                           :size 902
                            :path "test-file"
                            :oid 97787706012661474925191056142692387097255677107)
-                  :file-b (:mode :blob
-                           :flags (:valid-oid)
+                  :file-b (:id-abbrev 40
+                           :mode :blob
+                           :flags (:not-binary :valid-oid :exists)
                            :size 919
                            :path "test-file"
-                           :oid 243568240973109882797341286687005129339258402139)))))
-    (is (equal (sort-diff-flags (make-patch diffs))
-               `((:patch ,repository-with-changes-diff
+                           :oid 243568240973109882797341286687005129339258402139)))
+               (diff-deltas-summary diffs)))
+    (is (equal `((:patch ,repository-with-changes-diff
                   :status :modified
                   :similarity 0
                   :flags (:not-binary)
-                  :file-a (:mode :blob
-                           :flags (:not-binary :valid-oid)
+                  :file-a (:id-abbrev 40
+                           :mode :blob
+                           :flags (:exists :not-binary :valid-oid)
                            :size 902
                            :path "test-file"
                            :oid
                            97787706012661474925191056142692387097255677107)
-                  :file-b (:mode :blob
-                           :flags (:not-binary :valid-oid)
+                  :file-b (:id-abbrev 40
+                           :mode :blob
+                           :flags (:exists :not-binary :valid-oid)
                            :size 919
                            :path "test-file"
                            :oid
-                           243568240973109882797341286687005129339258402139)))))))
+                           243568240973109882797341286687005129339258402139)))
+               (sort-diff-flags (make-patch diffs))))))
