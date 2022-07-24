@@ -121,6 +121,10 @@ html_theme = 'sphinx_book_theme'
 
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
+html_theme_options = {
+    "extra_navbar": "<p>Your HTML</p>",
+}
+
 # html_theme_options = {
 #     # Navigation bar title. (Default: ``project`` value)
 #     # 'navbar_title': "Demo",

@@ -4,7 +4,7 @@ This is common lisp wrapper around the =libgit2= library. It's still
 early days and the abstraction is far from complete, but there is
 enough for this library to be useful.
 
-- [[http://cl-git.russellsim.org/][Documentation]]
+- [[https://russell.github.io/cl-git/][Documentation]]
 - [[https://github.com/russell/cl-git/issues][Bug Tracker]]
 
 ** What It Can Do
