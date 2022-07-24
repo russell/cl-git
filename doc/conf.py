@@ -51,12 +51,6 @@ master_doc = 'index'
 project = u'cl-git'
 copyright = u'2011-2022, Russell Sim'
 
-googleanalytics_id = "UA-28069739-2"
-if os.environ.get("GOOGLE_ANALYTICS"):
-    googleanalytics_enabled = True
-else:
-    googleanalytics_enabled = False
-
 cl_packages = {"cl-git": join(dirname(realpath(__file__)), "../")}
 
 cl_quicklisp = expandvars('$HOME/.quicklisp/')
