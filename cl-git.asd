@@ -1,11 +1,16 @@
 ;;;; cl-git.asd
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  #+quicklisp
+  (ql:quickload 'cffi-grovel :silent t)
   (asdf:oos 'asdf:load-op :cffi-grovel))
 
 (asdf:defsystem #:cl-git
   :description "A CFFI wrapper of libgit2."
   :version (:read-file-form "version.lisp-expr")
+  ;; https://github.com/quicklisp/quicklisp-client/issues/108 There
+  ;; will be errors if loading without first calling `(ql:quickload
+  ;; 'cffi :silent t)'
   :defsystem-depends-on (:asdf :cffi-grovel)
   :depends-on (#:cffi #:local-time #:cl-fad #:flexi-streams #:trivial-garbage
                       #:anaphora #:alexandria #:closer-mop #:uiop)

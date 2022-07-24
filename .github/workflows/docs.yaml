@@ -39,6 +39,7 @@ jobs:
         env:
           LD_LIBRARY_PATH: /usr/local/lib
         run: |
+          ./doc/install-dependencies.ros
           ./doc/build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
