@@ -5,15 +5,22 @@
   (ql:quickload 'cffi-grovel :silent t)
   (asdf:oos 'asdf:load-op :cffi-grovel))
 
-(asdf:defsystem #:cl-git
+(defsystem "cl-git"
   :description "A CFFI wrapper of libgit2."
   :version (:read-file-form "version.lisp-expr")
   ;; https://github.com/quicklisp/quicklisp-client/issues/108 There
   ;; will be errors if loading without first calling `(ql:quickload
   ;; 'cffi :silent t)'
   :defsystem-depends-on (:asdf :cffi-grovel)
-  :depends-on (#:cffi #:local-time #:cl-fad #:flexi-streams #:trivial-garbage
-                      #:anaphora #:alexandria #:closer-mop #:uiop)
+  :depends-on ("cffi"
+               "local-time"
+               "cl-fad"
+               "flexi-streams"
+               "trivial-garbage"
+               "anaphora"
+               "alexandria"
+               "closer-mop"
+               "uiop")
   :author "Russell Sim <russell.sim@gmail.com>"
   :licence "Lisp-LGPL"
   :pathname "src/"
@@ -47,13 +54,20 @@
                (:file "odb" :depends-on ("object"))
                (:file "checkout" :depends-on ("object"))
                (:file "clone" :depends-on ("checkout" "credentials" "remote"))
-               (:file "credentials" :depends-on ("object"))))
+               (:file "credentials" :depends-on ("object")))
+  :in-order-to ((test-op (test-op "cl-git/tests"))))
 
 
-(asdf:defsystem #:cl-git/tests
+(defsystem "cl-git/tests"
   :defsystem-depends-on (:asdf)
-  :depends-on (#:cl-git #:FiveAM #:cl-fad #:unix-options #:inferior-shell
-                        #:local-time #:alexandria #:flexi-streams)
+  :depends-on ("cl-git"
+               "fiveam"
+               "cl-fad"
+               "unix-options"
+               "inferior-shell"
+               "local-time"
+               "alexandria"
+               "flexi-streams")
   :version (:read-file-form "version.lisp-expr")
   :licence "Lisp-LGPL"
   :pathname "tests/"
@@ -76,10 +90,5 @@
                (:file "references" :depends-on ("common"))
                (:file "revwalker" :depends-on ("common"))
                (:file "libgit2" :depends-on ("common")))
-  :in-order-to ((compile-op (load-op :cl-git))))
-
-
-(defmethod perform ((op asdf:test-op) (system (eql (find-system :cl-git))))
-  (asdf:oos 'asdf:load-op :cl-git/tests)
-  (funcall (intern (string :run!) (string :it.bese.FiveAM))
-           :cl-git))
+  :in-order-to ((compile-op (load-op :cl-git)))
+  :perform (test-op (o c) (symbol-call :fiveam '#:run! :cl-git)))
