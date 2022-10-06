@@ -30,7 +30,7 @@
   (:ssh 4))
 
 (define-foreign-library libgit2
-  (:linux "libgit2.so.1.3.0")
+  (:linux "libgit2.so.1.3")
   (:windows "libgit2.dll")
   (:darwin "libgit2.0.dylib")
   (:default "libgit2"))
@@ -49,17 +49,17 @@ list return values are :THREADS and :HTTPS.")
   (minor :pointer)
   (revision :pointer))
 
-(defcfun ("git_libgit2_init" git-init)
+(defcfun ("git_libgit2_init" git-libgit2-init)
     :void
     "Init libgit2.")
 
-(defcfun ("git_libgit_shutdown" git-shutdown)
+(defcfun ("git_libgit2_shutdown" git-libgit2-shutdown)
     :void
     "Shutdown libgit2.")
 
 ;;; Init threading on load
 (eval-when (:load-toplevel :execute)
-  (git-init))
+  (git-libgit2-init))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
