@@ -40,13 +40,13 @@
                   :flags (:not-binary)
                   :file-a (:id-abbrev 40
                            :mode :blob
-                           :flags (:not-binary :valid-oid :exists)
+                           :flags (:not-binary :valid-id :exists)
                            :size 902
                            :path "test-file"
                            :oid 97787706012661474925191056142692387097255677107)
                   :file-b (:id-abbrev 40
                            :mode :blob
-                           :flags (:not-binary :valid-oid :exists)
+                           :flags (:not-binary :valid-id :exists)
                            :size 919
                            :path "test-file"
                            :oid 243568240973109882797341286687005129339258402139)))
@@ -57,14 +57,14 @@
                   :flags (:not-binary)
                   :file-a (:id-abbrev 40
                            :mode :blob
-                           :flags (:exists :not-binary :valid-oid)
+                           :flags (:exists :not-binary :valid-id)
                            :size 902
                            :path "test-file"
                            :oid
                            97787706012661474925191056142692387097255677107)
                   :file-b (:id-abbrev 40
                            :mode :blob
-                           :flags (:exists :not-binary :valid-oid)
+                           :flags (:exists :not-binary :valid-id)
                            :size 919
                            :path "test-file"
                            :oid
@@ -80,13 +80,13 @@
                   :flags (:not-binary)
                   :file-a (:id-abbrev 40
                            :mode :blob
-                           :flags (:not-binary :valid-oid :exists)
+                           :flags (:not-binary :valid-id :exists)
                            :size 902
                            :path "test-file"
                            :oid 97787706012661474925191056142692387097255677107)
                   :file-b (:id-abbrev 40
                            :mode :blob
-                           :flags (:not-binary :valid-oid :exists)
+                           :flags (:not-binary :valid-id :exists)
                            :size 919
                            :path "test-file"
                            :oid 243568240973109882797341286687005129339258402139)))
@@ -97,14 +97,14 @@
                   :flags (:not-binary)
                   :file-a (:id-abbrev 40
                            :mode :blob
-                           :flags (:exists :not-binary :valid-oid)
+                           :flags (:exists :not-binary :valid-id)
                            :size 902
                            :path "test-file"
                            :oid
                            97787706012661474925191056142692387097255677107)
                   :file-b (:id-abbrev 40
                            :mode :blob
-                           :flags (:exists :not-binary :valid-oid)
+                           :flags (:exists :not-binary :valid-id)
                            :size 919
                            :path "test-file"
                            :oid
@@ -120,13 +120,13 @@
                   :flags (:not-binary)
                   :file-a (:id-abbrev 40
                            :mode :blob
-                           :flags (:not-binary :valid-oid :exists)
+                           :flags (:not-binary :valid-id :exists)
                            :size 902
                            :path "test-file"
                            :oid 97787706012661474925191056142692387097255677107)
                   :file-b (:id-abbrev 40
                            :mode :blob
-                           :flags (:not-binary :valid-oid :exists)
+                           :flags (:not-binary :valid-id :exists)
                            :size 919
                            :path "test-file"
                            :oid 243568240973109882797341286687005129339258402139)))
@@ -137,14 +137,14 @@
                   :flags (:not-binary)
                   :file-a (:id-abbrev 40
                            :mode :blob
-                           :flags (:exists :not-binary :valid-oid)
+                           :flags (:exists :not-binary :valid-id)
                            :size 902
                            :path "test-file"
                            :oid
                            97787706012661474925191056142692387097255677107)
                   :file-b (:id-abbrev 40
                            :mode :blob
-                           :flags (:exists :not-binary :valid-oid)
+                           :flags (:exists :not-binary :valid-id)
                            :size 919
                            :path "test-file"
                            :oid

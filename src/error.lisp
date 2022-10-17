@@ -29,40 +29,9 @@
 (eval-when (:compile-toplevel :execute :load-toplevel)
   (defvar error-conditions (make-hash-table)))
 
-(defcenum %error-class-list
-  :none
-  :no-memory
-  :os
-  :invalid
-  :reference
-  :zlib
-  :repository
-  :config
-  :regex
-  :odb
-  :index
-  :object
-  :net
-  :tag
-  :tree
-  :indexer
-  :ssl
-  :submodule
-  :thread
-  :stash
-  :checkout
-  :fetchhead
-  :merge
-  :ssh
-  :filter
-  :revert
-  :callback
-  :cherrypick)
-
-
 (defcstruct git-error
   (message :string)
-  (klass %error-class-list))
+  (klass git-error-t))
 
 
 (define-foreign-type git-error-type ()
@@ -134,27 +103,47 @@
                        (error-message condition))))))
 
 (eval-when (:compile-toplevel :execute :load-toplevel)
- (defmacro define-git-condition (error-type error-number)
+ (defmacro define-git-condition (error-type error-key)
    `(progn
       (eval-when (:compile-toplevel :execute :load-toplevel)
         (define-condition ,error-type (basic-error) ()))
       (eval-when (:execute :load-toplevel)
-        (setf (gethash ,error-number error-conditions) (quote ,error-type))))))
+        (setf (gethash ,(foreign-enum-value 'git-error-code error-key) error-conditions) (quote ,error-type))))))
 
-(setf (gethash -1 error-conditions) 'basic-error)
-(define-git-condition not-found -3)
-(define-git-condition exists -4)
-(define-git-condition ambiguous-error -5)
-(define-git-condition buffer-error -6)  ;; buffer is too small
-(define-git-condition user-error -7)
-(define-git-condition barerepo-error -8)
-(define-git-condition orphanedhead-error -9)
-(define-git-condition unmerged-error -10)
-(define-git-condition non-fast-forward-error -11)
-(define-git-condition invalid-spec-error -12)
-(define-git-condition merge-conflict-error -13)
-(define-git-condition passthrough -30)
-(define-git-condition stop-iteration -31)
+(define-git-condition ok :ok)
+
+(define-git-condition general-error :error)
+(define-git-condition not-found-error :enotfound)
+(define-git-condition exists-error :eexists)
+(define-git-condition ambiguous-error :eambiguous)
+(define-git-condition buffer-error :ebufs)  ;; buffer is too small
+
+(define-git-condition user-error :euser)
+
+(define-git-condition barerepo-error :ebarerepo)
+(define-git-condition unborn-branch-error :eunbornbranch)
+(define-git-condition unmerged-error :eunmerged)
+(define-git-condition non-fast-forward-error :enonfastforward)
+(define-git-condition invalid-spec-error :einvalidspec)
+(define-git-condition conflict-error :econflict)
+(define-git-condition locked-error :elocked)
+(define-git-condition modified-error :emodified)
+(define-git-condition auth-error :eauth)
+(define-git-condition certificate-error :ecertificate)
+(define-git-condition applied-error :eapplied)
+(define-git-condition peel-error :epeel)
+(define-git-condition eof-error :eeof)
+(define-git-condition invalid-error :einvalid)
+(define-git-condition uncommitted-error :euncommitted)
+(define-git-condition directory-error :edirectory)
+(define-git-condition merge-conflict-error :emergeconflict)
+
+(define-git-condition passthrough :passthrough)
+(define-git-condition stop-iteration :iterover)
+(define-git-condition retry :retry)
+(define-git-condition mismatch-error :emismatch)
+(define-git-condition index-dirty-error :eindexdirty)
+(define-git-condition apply-fail-error :eapplyfail)
 
 (define-condition unknown-error (basic-error) ()
   (:documentation "This return value is not expected."))

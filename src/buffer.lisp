@@ -19,11 +19,6 @@
 
 (in-package #:cl-git)
 
-(defcstruct git-buf
-  (ptr :pointer)
-  (asize size-t)
-  (size size-t))
-
 (define-foreign-type buffer (git-pointer)
   nil
   (:actual-type :pointer)

@@ -23,32 +23,6 @@
 
 (defconstant +git-clone-options-version+ 1)
 
-(defcenum git-clone-local
-  ;; will bypass the git-aware transport for local paths, but use
-  ;; normal fetch for file:// URLs.
-  (:auto)
-
-  ;; Bypass git-aware transport for all URLs
-  (:local)
-
-  ;; Don't bypass git-aware transport
-  (:no-local)
-
-  ;; Bypass git-aware transport but don't use hardlinks
-  (:local-no-links))
-
-(defcstruct git-clone-options
-  (version :unsigned-int)
-  (checkout-options (:struct git-checkout-options))
-  (fetch-options (:struct git-fetch-options))
-  (bare :bool)
-  (local git-clone-local)
-  (checkout-branch :string)
-  (repository-cb :pointer)
-  (repository-cb-payload :pointer)
-  (remote-cb :pointer)
-  (remote-cb-payload :pointer))
-
 (define-foreign-type clone-options ()
   ((fetch-options
     :initform (make-instance 'fetch-options)

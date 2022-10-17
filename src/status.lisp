@@ -28,22 +28,9 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defbitfield git-status-flags
-  (:current 0)
-  (:index-new 1)
-  (:index-modified 2)
-  (:index-deleted 4)
-  (:index-renamed 8)
-  (:index-typechange 16)
-  (:worktree-new 128)
-  (:worktree-modified 256)
-  (:worktree-deleted 512)
-  (:worktree-typechange 1024)
-  (:ignored 16384))
-
 
 (defcfun ("git_status_file" %git-status-file)
-    git-status-flags
+    git-status-t*
   (repository %repository)
   (path :string))
 
@@ -55,7 +42,7 @@
   (payload :pointer))
 
 
-(defcallback collect-status-values :int ((path :string) (value git-status-flags) (payload :pointer))
+(defcallback collect-status-values :int ((path :string) (value git-status-t*) (payload :pointer))
   (declare (ignore payload))
   (push (cons path value) *status-values*)
   0)

@@ -18,8 +18,18 @@
 ;; <http://www.gnu.org/licenses/>.
 
 
-(in-package #:cl-git)
+(in-package #:cl-git-tests)
 
-(include "stddef.h")
+(in-suite :cl-git)
 
-(ctype size-t "size_t")
+(def-test error-conditions ()
+  "Verify all error conditions exist."
+  (is (equal
+       nil
+       (loop :for key :in (cffi:foreign-enum-keyword-list 'cl-git::git-error-code)
+             :unless (gethash (cffi:foreign-enum-value 'cl-git::git-error-code key)
+                              cl-git::error-conditions)
+               :collect (format nil "~A from ~S missing from ~S"
+                                key
+                                'cl-git::git-error-code
+                                'cl-git::error-conditions)))))

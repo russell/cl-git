@@ -19,33 +19,27 @@
 
 (in-package #:cl-git)
 
-
-(defcstruct (git-strings :class strings-struct-type)
-  (strings :pointer)
-  (count size-t))
-
-
-(defmethod translate-to-foreign ((value list) (type strings-struct-type))
-  (let ((ptr (foreign-alloc '(:struct git-strings))))
+(defmethod translate-to-foreign ((value list) (type git-strarray-tclass))
+  (let ((ptr (foreign-alloc '(:struct git-strarray))))
     (translate-into-foreign-memory value type ptr)
     ptr))
 
-(defmethod translate-into-foreign-memory ((object list) (type strings-struct-type) ptr)
-  (setf (cffi:foreign-slot-value ptr '(:struct git-strings) 'count) (length object))
+(defmethod translate-into-foreign-memory ((object list) (type git-strarray-tclass) ptr)
+  (setf (cffi:foreign-slot-value ptr '(:struct git-strarray) 'count) (length object))
   (let ((array (foreign-alloc :pointer :initial-element (null-pointer)
                                        :count (length object))))
     (loop :for string :in object
           :for i :from 0
           :for str = (foreign-string-alloc string)
           :do (setf (mem-aref array :pointer i) str))
-    (setf (cffi:foreign-slot-value ptr '(:struct git-strings) 'strings) array)))
+    (setf (cffi:foreign-slot-value ptr '(:struct git-strarray) 'strings) array)))
 
-(defmethod translate-from-foreign (value (type strings-struct-type))
-  (with-foreign-slots ((strings count) value (:struct git-strings))
+(defmethod translate-from-foreign (value (type git-strarray-tclass))
+  (with-foreign-slots ((strings count) value (:struct git-strarray))
     (loop :for i :below count
           :collect (foreign-string-to-lisp (mem-aref strings :pointer i)))))
 
-(defmethod free-translated-object (ptr (type strings-struct-type) do-not-free)
+(defmethod free-translated-object (ptr (type git-strarray-tclass) do-not-free)
   (%git-strarray-free ptr)
   (unless do-not-free (foreign-free ptr)))
 

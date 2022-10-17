@@ -24,11 +24,6 @@
 (defvar +success+ 0
   "Used to signal success for C return values in callbacks.")
 
-(defbitfield git-capabilities
-  (:threads 1)
-  (:https 2)
-  (:ssh 4))
-
 (define-foreign-library libgit2
   (:linux "libgit2.so.1.3")
   (:windows "libgit2.dll")
@@ -39,7 +34,7 @@
   (use-foreign-library libgit2))
 
 (defcfun ("git_libgit2_features" libgit2-features)
-  git-capabilities
+  git-feature-t*
   "Return a list of the libgit2 capabilities, possible values in the
 list return values are :THREADS and :HTTPS.")
 

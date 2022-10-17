@@ -24,19 +24,19 @@
 (def-test individual-strings ()
   (for-all ((strings-fixture (random-list)))
     (let ((str-pointer
-            (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))
+            (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strarray))))
       (is
        (equal
-        (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strings))
+        (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strarray))
         strings-fixture))
-      (cffi:free-converted-object str-pointer '(:struct cl-git::git-strings) t))))
+      (cffi:free-converted-object str-pointer '(:struct cl-git::git-strarray) t))))
 
 (def-test string-list ()
   (let* ((strings-fixture (funcall (random-list)))
          (str-pointer
-           (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strings))))
+           (cffi:convert-to-foreign strings-fixture '(:struct cl-git::git-strarray))))
     (is
      (equal
-      (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strings))
+      (cffi:convert-from-foreign str-pointer '(:struct cl-git::git-strarray))
       strings-fixture))
-    (cffi:free-converted-object str-pointer '(:struct cl-git::git-strings) t)))
+    (cffi:free-converted-object str-pointer '(:struct cl-git::git-strarray) t)))

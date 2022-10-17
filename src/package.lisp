@@ -48,6 +48,8 @@
                 #:define-foreign-type
                 #:use-foreign-library
                 #:foreign-library-loaded-p
+                #:foreign-enum-value
+                #:foreign-enum-keyword-list
                 #:define-foreign-library
                 #:translate-to-foreign
                 #:translate-into-foreign-memory
@@ -239,5 +241,4 @@
    #:diff-deltas-count
    #:diff-deltas-summary
    #:make-patch
-   #:patch-to-string
-   ))
+   #:patch-to-string))

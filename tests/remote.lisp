@@ -58,7 +58,6 @@
                (remote-connect remote)
                (is
                 (equal
-                 (ls-remote remote)
                  `((:local nil
                     :remote-oid ,(oid (repository-head *test-repository*))
                     :local-oid 0
@@ -68,7 +67,8 @@
                     :remote-oid ,(oid (repository-head *test-repository*))
                     :local-oid 0
                     :name "refs/heads/master"
-                    :symref-target nil)))))))
+                    :symref-target nil))
+                 (ls-remote remote))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))
 
@@ -101,7 +101,7 @@
     (cffi:with-foreign-slots ((cl-git::version cl-git::custom-headers)
                               ptr (:struct cl-git::git-fetch-options))
       (setf cl-git::version 1234)
-      (setf cl-git::custom-headers (cffi:convert-to-foreign (funcall (random-list)) '(:struct cl-git::git-strings))))
+      (setf cl-git::custom-headers (cffi:convert-to-foreign (funcall (random-list)) '(:struct cl-git::git-strarray))))
     (cl-git::%git-fetch-options-init ptr cl-git::+git-fetch-options-version+)
     (cffi:with-foreign-slots ((cl-git::version cl-git::custom-headers)
                                ptr (:struct cl-git::git-fetch-options))

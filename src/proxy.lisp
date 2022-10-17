@@ -22,30 +22,6 @@
 
 (defconstant +git-proxy-options-version+ 1)
 
-(defcenum git-proxy
-  :none
-  :auto
-  :specified)
-
-(defcstruct (git-proxy-options :class proxy-options-struct-type)
-  (version :unsigned-int)
-  (type git-proxy)
-  (url :string)
-
-  ;; this will be called if the remote host requires authentication in
-  ;; order to connect to it.
-  ;;
-  ;; returning git_passthrough will make libgit2 behave as though this
-  ;; field isn't set.
-  (credentials-cb :pointer)
-
-  ;; if cert verification fails, this will be called to let the user
-  ;; make the final decision of whether to allow the connection to
-  ;; proceed. returns 0 to allow the connection or a negative value to
-  ;; indicate an error.
-  (certificate-check-cb :pointer)
-  (payload :pointer))
-
 
 (define-foreign-type proxy-options ()
   ()

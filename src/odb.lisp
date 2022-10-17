@@ -53,7 +53,7 @@
   (obd-object :pointer))
 
 (defcfun ("git_odb_object_type" %git-odb-object-type)
-    git-object-type
+    git-object-t
   (object %odb-object))
 
 (defcfun ("git_odb_object_id" git-odb-object-id)

@@ -23,18 +23,18 @@
 
 (defparameter *branch-values* nil)
 
-(defbitfield git-branch-type-flags
-  (:local 1)
-  (:remote 2))
+
 
 (defcfun ("git_branch_lookup" %git-branch-lookup)
     %return-value
   (ref :pointer)
   (repository %repository)
   (name :string)
-  (type git-branch-type-flags))
+  (type git-branch-t))
 
-(defcallback collect-branch-values :int ((branch-name :string) (type git-branch-type-flags) (payload :pointer))
+(defcallback collect-branch-values :int ((branch-name :string)
+                                         (type git-branch-t)
+                                         (payload :pointer))
   (declare (ignore payload))
   (push (cons branch-name type) *branch-values*)
   0)

@@ -19,53 +19,43 @@
 
 (in-package #:cl-git)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defparameter *git-oid-size* 20))
-
-(defparameter *git-oid-hex-size* (+ 40 1)
-  "The size of a Git commit hash.")
-
-
-(defcstruct (git-oid :class oid-struct-type)
-  (id :unsigned-char :count #.*git-oid-size*))
-
 (defun oid-to-foreign (oid foreign)
   (loop
-    :for c-index :from 0 :below *git-oid-size*
-    :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+    :for c-index :from 0 :below +git-oid-rawsz+
+    :for byte-index :downfrom (* 8 (1- +git-oid-rawsz+)) :by 8
     :do
        (setf (mem-aref foreign :unsigned-char c-index)
              (ldb (byte 8 byte-index) oid))))
 
-(defmethod translate-into-foreign-memory (value (type oid-struct-type) ptr)
+(defmethod translate-into-foreign-memory (value (type git-oid-tclass) ptr)
   (declare (ignore ptr))
   (if (pointerp value)
       value
       (error "Don't know how to translate ~A." value)))
 
-(defmethod translate-into-foreign-memory ((value number) (type oid-struct-type) ptr)
+(defmethod translate-into-foreign-memory ((value number) (type git-oid-tclass) ptr)
   (oid-to-foreign value (foreign-slot-pointer ptr '(:struct git-oid) 'id)))
 
-(defmethod translate-to-foreign ((value number) (type oid-struct-type))
+(defmethod translate-to-foreign ((value number) (type git-oid-tclass))
   (let ((ptr (foreign-alloc '(:struct git-oid))))
     (translate-into-foreign-memory value type ptr)
     ptr))
 
-(defmethod translate-to-foreign ((value string) (type oid-struct-type))
+(defmethod translate-to-foreign ((value string) (type git-oid-tclass))
   (translate-to-foreign (parse-integer value :radix 16) type))
 
 (defun oid-from-foreign (value)
   (let ((lisp-oid 0))
         (loop
-          :for c-index :from 0 :below *git-oid-size*
-          :for byte-index :downfrom (* 8 (1- *git-oid-size*)) :by 8
+          :for c-index :from 0 :below +git-oid-rawsz+
+          :for byte-index :downfrom (* 8 (1- +git-oid-rawsz+)) :by 8
           :do
              (setf (ldb (byte 8 byte-index) lisp-oid)
                    (mem-aref value
                              :unsigned-char c-index)))
         lisp-oid))
 
-(defmethod translate-from-foreign (value (type oid-struct-type))
+(defmethod translate-from-foreign (value (type git-oid-tclass))
   "Translates a pointer to a libgit2 oid structure to an integer, the lisp
 version of the oid.  If the pointer is a C null pointer return nil.
 This can happen for example when the oid is asked for a reference and the
@@ -75,7 +65,7 @@ reference is symbolic."
       (let ((oid (oid-from-foreign (foreign-slot-pointer value '(:struct git-oid) 'id))))
         oid)))
 
-(defmethod free-translated-object (pointer (type oid-struct-type) do-not-free)
+(defmethod free-translated-object (pointer (type git-oid-tclass) do-not-free)
   (unless do-not-free (foreign-free pointer)))
 
 

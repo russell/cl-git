@@ -19,17 +19,6 @@
 
 (in-package #:cl-git)
 
-
-(defcstruct timeval
-  (time %time-t)
-  (offset :int))
-
-(defcstruct git-signature
-  (name :string)
-  (email :string)
-  (time (:struct timeval)))
-
-
 (define-foreign-type git-signature-type ()
   nil
   (:actual-type :pointer)
@@ -70,20 +59,22 @@
 
 ;; Signatures
 (defmethod translate-to-foreign (value (type git-signature-type))
+  (declare (optimize (debug 3)))
   (cond
     ((pointerp value)
      (values value t))
     ((listp value)
      (let ((signature (foreign-alloc '(:struct git-signature))))
-       (with-foreign-slots ((name email) signature (:struct git-signature))
+       (with-foreign-slots ((time offset sign)
+                            (foreign-slot-pointer signature '(:struct git-signature) 'when)
+                            (:struct git-time))
+         (let ((time-to-set (getf value :time (local-time:now))))
+           (setf time time-to-set)
+           (setf offset (timezone-offset time))
+           (setf sign (char-int (if (< offset 0) #\- #\+)))))
+       (with-foreign-slots ((name email when) signature (:struct git-signature))
          (setf name (getf value :name (getenv "USER")))
-         (setf email (getf value :email (default-email)))
-         (with-foreign-slots ((time offset)
-                              (foreign-slot-pointer signature '(:struct git-signature) 'time)
-                              (:struct timeval))
-           (let ((time-to-set (getf value :time (local-time:now))))
-             (setf time time-to-set)
-             (setf offset (timezone-offset time)))))
+         (setf email (getf value :email (default-email))))
        signature))
     (t
      (error "Cannot convert type: ~A to git-signature struct" (type-of value)))))
@@ -104,11 +95,11 @@ OFFSET."
      offset)))
 
 (defmethod translate-from-foreign (value (type git-signature-type))
-  (with-foreign-slots ((name email time) value (:struct git-signature))
+  (with-foreign-slots ((name email when) value (:struct git-signature))
     (list :name name
           :email email
-          :time (getf time 'time)
-          :timezone (make-timezone (getf time 'offset)))))
+          :time (getf when 'time)
+          :timezone (make-timezone (getf when 'offset)))))
 
 (defmethod free-translated-object (pointer (type git-signature-type) do-not-free)
   (unless do-not-free (foreign-free pointer)))

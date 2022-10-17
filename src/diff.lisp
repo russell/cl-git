@@ -21,127 +21,15 @@
 
 (defconstant +git-diff-options-version+ 1)
 
-(defbitfield (git-diff-option-flags :uint32)
-  (:normal 0)
-  (:reverse #.(ash 1 0))
-  :force_text
-  :ignore_whitespace
-  :ignore_whitespace_change
-  :ignore_whitespace_eol
-  :ignore_submodules
-  :patience
-  :include_ignored
-  :include_untracked
-  :include_unmodified
-  :recurse_untracked_dirs
-  :disable_pathspec_match
-  :deltas_are_icase
-  :include_untracked_content
-  :skip_binary_check
-  :include_typechange
-  :include_typechange_trees
-  :ignore_filemode
-  :recurse_ignored_dirs)
-
-(defbitfield git-diff-flags
-  (:binary #.(ash 1 0)) ;; file(s) treated as binary data
-  :not-binary           ;; file(s) treated as text data
-  :valid-oid            ;; `oid` value is known correct
-  :exists               ;; file exists at this side of the delta
-  :valid_size)          ;; file size value is known correct
-
-(defcenum git-delta-status
-  :unmodified  ;; no changes
-  :added       ;; entry does not exist in old version
-  :deleted     ;; entry does not exist in new version
-  :modified    ;; entry content changed between old and new
-  :renamed     ;; entry was renamed between old and new
-  :copied      ;; entry was copied from another old entry
-  :ignored     ;; entry is ignored item in workdir
-  :untracked   ;; entry is untracked item in workdir
-  :typechange) ;; type of entry changed between old and new
-
-(defcenum (git-diff-line :char)
-  (:context #.(char-int #\Space))
-  (:addition #.(char-int #\+))
-  (:deletion #.(char-int #\-))
-  (:add_eofnl #.(char-int #\Newline))
-  (:del_eofnl 0)
-  (:file_hdr #.(char-int #\F))
-  (:hunk_hdr #.(char-int #\H))
-  (:binary #.(char-int #\B)))
-
-
-
-(defcenum (git-diff-submodule-ignore)
-  "Submodule ignore values
-
-:UNSPECIFIED use the submodule's configuration
-
-:NONE don't ignore any change - i.e. even an untracked file, will mark
-the submodule as dirty.  Ignored files are still ignored, of course.
-
-:UNTRACKED ignore untracked files; only changes to tracked files, or
-the index or the HEAD commit will matter.
-
-:DIRTY ignore changes in the working directory, only considering
-changes if the HEAD of submodule has moved from the value in the
-superproject.
-
-:ALL never check if the submodule is dirty
-
-:DEFAULT not used except as static initializer when we don't want any
-particular ignore rule to be specified.
-
-"
-  (:unspecified -1)
-  (:none 1)
-  (:untracked 2)
-  (:dirty 3)
-  (:all 4))
-
 (define-foreign-type patch (git-pointer)
   nil
   (:actual-type :pointer)
   (:simple-parser %patch))
 
-(defcstruct git-diff-file
-  (:oid (:struct git-oid))
-  (:path :string)
-  (:size object-size-t)
-  (:flags git-diff-flags)
-  (:mode git-filemode-t)
-  (:id-abbrev :uint16))
-
-(defcstruct (git-diff-delta :class diff-delta-type)
-  (status git-delta-status)
-  (flags git-diff-flags)
-  (similarity :uint16) ;;< for RENAMED and COPIED, value 0-100
-  (number-files :uint16)
-  (old-file (:struct git-diff-file))
-  (new-file (:struct git-diff-file))
-  )
-
-(defcstruct git-diff-range
-  (:start-a :int)  ;; Starting line number in old_file
-  (:lines-a :int)  ;; Number of lines in old_file
-  (:start-b :int)  ;; Starting line number in new_file
-  (:lines-b :int)) ;; Number of lines in new_file
-
-(defcstruct git-diff-options
-  (version :unsigned-int)
-  (flags git-diff-option-flags)
-  (ignore-submodules git-diff-submodule-ignore)
-  (pathspec (:struct git-strings))
-  (notify-cb :pointer)  ;; this isn't really a pointer?
-  (progress-cb :pointer)  ;; this isn't really a pointer?
-  (payload :pointer)
-  (context-lines :uint32)
-  (interhunk-lines :uint32)
-  (oid-abbrev :uint16)
-  (max-size off-t)  ;; defaults to 512MB
-  (old-prefix :string)
-  (new-prefix :string))
+(define-foreign-type diff-delta-type ()
+  nil
+  (:actual-type :pointer)
+  (:simple-parser %diff-delta))
 
 (define-foreign-type diff-options ()
   ((version :reader diff-version
@@ -283,7 +171,7 @@ particular ignore rule to be specified.
     (setf new-prefix (diff-new-prefix value))
     (convert-into-foreign-memory
      (diff-pathspec value)
-     '(:struct git-strings)
+     '(:struct git-strarray)
      (foreign-slot-pointer ptr '(:struct git-diff-options) 'pathspec))
     (setf max-size (diff-max-size value))
     (setf diff-notify-cb (diff-notify-cb value))
@@ -296,7 +184,7 @@ particular ignore rule to be specified.
   (foreign-free pointer))
 
 
-(defmethod translate-from-foreign (value (type diff-delta-type))
+(defmethod translate-from-foreign (value (type git-diff-delta-tclass))
   (with-foreign-slots ((old-file new-file status similarity flags)
                        value (:struct git-diff-delta))
     (list :status status :similarity similarity :flags flags
@@ -345,8 +233,7 @@ particular ignore rule to be specified.
 
 (defmethod diff ((tree-old tree) (tree-new tree) &optional (options (make-instance 'diff-options)))
   (with-foreign-objects ((diff-list :pointer))
-    (let ((ptr (foreign-alloc '(:struct git-diff-options))))
-      (%git-diff-tree-to-tree diff-list (facilitator tree-old) tree-old tree-new options))
+    (%git-diff-tree-to-tree diff-list (facilitator tree-old) tree-old tree-new options)
     (let ((diff-list (convert-from-foreign (mem-ref diff-list :pointer) '%diff-list)))
       ;; TODO (RS) this is a crap way to enable garbage collection
       (setf (facilitator diff-list) (facilitator tree-old))

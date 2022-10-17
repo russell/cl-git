@@ -20,89 +20,6 @@
 (in-package #:cl-git)
 
 
-#+nil (defbitfield (index-entry-flag :unsigned-short)
-  (:update #.(ash 1 0))
-  :remove
-  :uptodate
-  :added
-  :hashed
-  :unhashed
-  :worktree-remove
-  :conflicted
-  :unpacked
-  :new-skip-worktree
-  (:intent-to-add #.(ash 1 13))
-  :skip-worktree
-  :extended-2)
-
-
-(defvar git-index-entry-namemask #x0fff)
-(defvar git-index-entry-stagemask #x3000)
-(defvar git-index-entry-extended #x4000)
-(defvar git-index-entry-valid #x8000)
-(defvar git-index-entry-stageshift 12)
-
-
-(defcstruct (git-index-time :class index-time-struct-type)
-  (seconds :int32)
-  (nanoseconds :uint32))
-
-;; 32-bit mode, split into (high to low bits)
-;;
-;; 4-bit object type
-;; valid values in binary are 1000 (regular file), 1010 (symbolic link)
-;; and 1110 (gitlink)
-;;
-;; 3-bit unused
-;;
-;; 9-bit unix permission. Only 0755 and 0644 are valid for regular files.
-;; Symbolic links and gitlinks have value 0 in this field.
-
-(defcenum (git-index-file-mode)
-  (:new #o0000000)
-  (:tree #o0040000)
-  (:blob #o0100644)
-  (:blob-executable #o0100755)
-  (:link #o0120000)
-  (:gitlink #o0160000))
-
-(defcstruct git-index-entry
-  (ctime (:struct git-index-time))
-  (mtime (:struct git-index-time))
-  (dev :uint32)
-  (ino :uint32)
-  (mode git-index-file-mode)
-  (uid :uint32)
-  (gid :uint32)
-  (file-size :uint32)
-  (oid (:struct git-oid))
-  (flags :uint16)
-  ;; Flags Extended is for internal use only, so should be hidden
-  (flags-extended :uint16)
-  (path :string))
-
-
-(defcenum git-index-capabilities
-  (:normal 0)
-  (:ignore-case 1)
-  (:no-filemode 2)
-  (:no-symlinks 4)
-  ;; (:from-owner ~0u)
-  )
-
-
-(define-foreign-type index (git-pointer)
-  ()
-  (:documentation "A git index")
-  (:simple-parser %index))
-
-
-(define-foreign-type index-entry-type ()
-  nil
-  (:actual-type :pointer)
-  (:simple-parser %index-entry))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcfun ("git_index_new" %git-index-new)
@@ -141,7 +58,7 @@
   (index %index))
 
 (defcfun ("git_index_caps" %git-index-caps)
-    git-index-capabilities
+    git-index-capabilities-t
   (index %index))
 
 (defcfun ("git_index_has_conflicts" %git-index-has-conflicts)
@@ -188,8 +105,8 @@ and 3 (theirs) are in conflict."
           :oid oid
           :flags flags
           :path path
-          :stage (ash (logand flags git-index-entry-stagemask)
-                      (- 0 git-index-entry-stageshift)))))
+          :stage (ash (logand flags +git-index-entry-stagemask+)
+                      (- 0 +git-index-entry-stageshift+)))))
 
 (defmethod translate-to-foreign (value (type index-entry-type))
   (let ((index-entry (foreign-alloc '(:struct git-index-entry)))
@@ -218,7 +135,7 @@ and 3 (theirs) are in conflict."
       (setf path (foreign-string-alloc (getf value :path "")))
       index-entry)))
 
-(defmethod translate-from-foreign (value (type index-time-struct-type))
+(defmethod translate-from-foreign (value (type git-index-time-tclass))
   (with-foreign-slots ((seconds nanoseconds) value (:struct git-index-time))
     (local-time:unix-to-timestamp seconds :nsec nanoseconds)))
 

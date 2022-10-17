@@ -20,11 +20,6 @@
 (in-package #:cl-git)
 
 
-(define-foreign-type tree (git-object)
-  nil
-  (:simple-parser %tree))
-
-
 (define-foreign-type tree-entry ()
   nil
   (:actual-type :pointer)
@@ -64,7 +59,7 @@ This does count the number of direct children, not recursively."
   (tree %tree))
 
 (defcfun ("git_tree_entry_type" git-tree-entry-type)
-    git-object-type
+    git-object-t
   "Returns the tree entry type."
   (tree %tree))
 

@@ -59,8 +59,10 @@
 (def-test references-list-symbolic (:fixture reference)
   (is
    (equal ;; test the list-objects default args.
-    (sort-strings (mapcar #'full-name (list-objects 'reference *test-repository*)))
-    (sort-strings (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master")))))
+    (sort-strings
+     (mapcar #'full-name (list-objects 'reference *test-repository*)))
+    (sort-strings
+     (list "refs/heads/oid" "refs/heads/symbolic" "refs/heads/master")))))
 
 (def-test reference-lookup-oid (:fixture reference)
   (let ((ref (get-object 'reference "refs/heads/oid" *test-repository*)))

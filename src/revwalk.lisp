@@ -20,13 +20,6 @@
 (in-package #:cl-git)
 
 
-(defbitfield git-revwalk-flags
-  (:none        #b000)
-  (:topological #b001)
-  (:time        #b010)
-  (:reverse     #b100))
-
-
 (define-foreign-type revision-walker (git-pointer)
   ()
   (:simple-parser %revwalker))
@@ -53,7 +46,7 @@
 (defcfun ("git_revwalk_sorting" %git-revwalk-sorting)
     :void
   (walk %revwalker)
-  (sort-mode git-revwalk-flags))
+  (sort-mode git-sort-t*))
 
 (defcfun ("git_revwalk_push" %git-revwalk-push)
     %return-value

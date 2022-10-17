@@ -27,27 +27,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defcenum git-object-type
-  (:any -2)       ; Object can be any of the following
-  (:bad -1)       ; Object is invalid.
-  (:commit 1)     ; A commit object.
-  (:tree 2)       ; A tree (directory listing) object.
-  (:blob 3)       ; A file revision object.
-  (:tag 4)        ; An annotated tag object.
-  (:ofs-delta 6)  ; A delta, base is given by an offset.
-  (:ref-delta 7)) ; A delta, base is given by object id.
-
-(define-foreign-type git-object (git-pointer)
-  ((libgit2-oid :initarg :oid
-                :initform nil)
-   (libgit2-name :initarg :name
-                 :initform nil)
-   (libgit2-disposed :initform nil))
-  (:actual-type :pointer)
-  (:simple-parser %object)
-  (:documentation "Class wrapping a pointer, handles finalization and
-  freeing of the underlying object"))
-
 (defvar object-type-mapping
   (list 'commit :commit
         'tree :tree
@@ -108,7 +87,7 @@
   (object %object))
 
 (defcfun ("git_object_type" git-object-type)
-    git-object-type
+    git-object-t
   "Returns the type of the git object."
   (object %object))
 
@@ -117,7 +96,7 @@
   (object %object)
   (repo %repository)
   (oid %oid)
-  (type git-object-type))
+  (type git-object-t))
 
 (defcfun ("git_object_free" git-object-free)
     :void

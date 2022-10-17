@@ -21,13 +21,6 @@
 
 (in-package #:cl-git)
 
-(defbitfield git-credtype
-  (:userpass-plaintext)
-  (:ssh-key)
-  (:ssh-custom)
-  (:default)
-  (:ssh-interactive))
-
 (defcfun %git-cred-ssh-key-from-agent
     :int
   (git-cred :pointer)
@@ -128,4 +121,3 @@ can use as credentials."))
                                     (or (username credentials)
                                         username-from-url)
                                     (password credentials)))
-

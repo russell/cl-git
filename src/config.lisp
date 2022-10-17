@@ -20,47 +20,6 @@
 (in-package #:cl-git)
 
 
-
-(defcenum git-config-level
-  "The priority level of a config file.
-
-:PROGRAMDATA System-wide on Windows, for compatibility with portable
-git
-
-:SYSTEM System-wide configuration file; /etc/gitconfig on Linux
-systems
-
-:XDG XDG compatible configuration file; typically ~/.config/git/config
-
-:GLOBAL User-specific configuration file (also called Global
-configuration file); typically ~/.gitconfig
-
-:LOCAL Repository specific configuration file; $WORK_DIR/.git/config
-on non-bare repos
-
-:APP Application specific configuration file; freely defined by
-applications
-
-:HIGHEST-LEVEL Represents the highest level available config
-file (i.e. the most specific config file available that actually is
-loaded)
-"
-  (:programdata 1)
-  (:system 2)
-  (:xdg 3)
-  (:global 4)
-  (:local 5)
-  (:app 6)
-  (:highest-level -1))
-
-
-(defcstruct git-config-entry
-  (:name :string)
-  (:value :string)
-  (:include-depth :int)
-  (:level git-config-level))
-
-
 (define-foreign-type config (git-pointer)
   nil
   (:simple-parser %config))
@@ -83,7 +42,7 @@ REPOSITORY-CONFIG."
   "Limit return a new git config object that is limited to the level specified."
   (config :pointer)
   (parent %config)
-  (level git-config-level))
+  (level git-config-level-t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

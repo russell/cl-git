@@ -122,7 +122,7 @@ is the case."
   "Returns a list of tag for the repository.  If the tag is an
 annotated tag then a TAG object will be returned, otherwise it will be
 a ref with the in the tag namespace."
-  (with-foreign-object (string-array '(:struct git-strings))
+  (with-foreign-object (string-array '(:struct git-strarray))
     (%git-tag-list string-array repository)
     (let ((refs
             (mapcar (lambda (ref-name)
@@ -130,8 +130,8 @@ a ref with the in the tag namespace."
                                   (concatenate 'string reference-tags-dir ref-name)
                                   repository))
                     (prog1
-                        (convert-from-foreign string-array '(:struct git-strings))
-                      (free-converted-object string-array '(:struct git-strings) t)))))
+                        (convert-from-foreign string-array '(:struct git-strarray))
+                      (free-converted-object string-array '(:struct git-strarray) t)))))
       (cond (test
                 (remove-if-not test refs))
             (test-not

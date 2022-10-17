@@ -20,13 +20,6 @@
 (in-package #:cl-git)
 
 
-(defbitfield git-reference-flags
-  (:oid 1)
-  (:symbolic 2)
-  (:packed 4)
-  (:has-peel 8))
-
-
 (define-foreign-type reference (git-object)
   nil
   (:simple-parser %reference))
@@ -35,8 +28,7 @@
 (defcfun ("git_reference_list" %git-reference-list)
     %return-value
   (strings :pointer)
-  (repository %repository)
-  (flags git-reference-flags))
+  (repository %repository))
 
 (defcfun ("git_reference_target" %git-reference-target)
     %oid
@@ -94,7 +86,7 @@
   (reference :pointer))
 
 (defcfun ("git_reference_type" git-reference-type)
-    git-reference-flags
+    git-reference-t
   (reference %reference))
 
 (defcfun ("git_reference_is_branch" %git-is-branch)
@@ -135,10 +127,7 @@
    "Return T if the reference is symbolic.")
   (:method ((reference reference))
     (let ((type (git-reference-type reference)))
-      (assert (eql 1 (length type)))
-      (ecase (car type)
-        (:symbolic t)
-        (:oid nil)))))
+      (eq type :symbolic))))
 
 (defgeneric remote-p (reference)
   (:documentation
@@ -196,14 +185,14 @@ symbolic reference."
 (defmethod list-objects ((class (eql 'reference)) repository &key test test-not)
   "List all the refs the returned list can be filtered using a PREDICATE."
   (assert (not (null-or-nullpointer repository)))
-  (with-foreign-object (string-array '(:pointer (:struct git-strings)))
-    (%git-reference-list string-array repository '(:oid :symbolic :packed))
+  (with-foreign-object (string-array '(:pointer (:struct git-strarray)))
+    (%git-reference-list string-array repository)
     (let ((refs
             (mapcar (lambda (ref-name)
                       (make-reference-from-name ref-name repository))
              (prog1
-                 (convert-from-foreign string-array '(:struct git-strings))
-               (free-converted-object string-array '(:struct git-strings) t)))))
+                 (convert-from-foreign string-array '(:struct git-strarray))
+               (free-converted-object string-array '(:struct git-strarray) t)))))
       (cond (test
              (remove-if-not test refs))
             (test-not

@@ -71,23 +71,6 @@ the callback.")
 			 (setf (remote-callback-db-last-used-id db) id)
 			 (return id)))))
 
-(defcstruct git-remote-callbacks
-  (version :uint)
-  (sideband-progress-cb :pointer)
-  (completion-cb :pointer)
-  (credentials-cb :pointer)
-  (certificate-check-cb :pointer)
-  (transfer-progress-cb :pointer)
-  (update-tips-cb :pointer)
-  (pack-progress-cb :pointer)
-  (push-transfer-progress-cb :pointer)
-  (push-update-reference-cb :pointer)
-  (push-negotiation-cb :pointer)
-  (transport-cb :pointer)
-  (remote-ready-cb :pointer)
-  (payload :pointer)
-  (resolve-url-cb :pointer))
-
 (define-foreign-type remote-callbacks ()
   ((id
     :reader id)
@@ -103,7 +86,7 @@ the callback.")
     ((git-cred :pointer)
      (url :string)
      (username-from-url :string)
-     (allowed-types git-credtype)
+     (allowed-types git-credential-t*)
      (payload :pointer))
   "This is the callback we give to libgit. It finds the
 REMOTE-CALLBACKS structure referenced by the PAYLOAD and dispatches on
@@ -138,21 +121,24 @@ foreign memory."
 
 (defparameter *remote-ls-values* nil)
 
+(define-foreign-type remote (git-object)
+  nil
+  (:simple-parser %remote))
+
 (defbitfield (refspec-flags :unsigned-int)
   :force
   :pattern
   :matching)
+
+
+;; TODO This was removed, but has no tests so it only came up when i
+;; manually checked. This needs tests as well as having.
 
 (defcstruct (git-refspec :class refspec-struct-type)
   (next :pointer)
   (src :string)
   (dst :string)
   (flags refspec-flags))
-
-
-(define-foreign-type remote (git-object)
-  nil
-  (:simple-parser %remote))
 
 
 (define-foreign-type refspec-type ()
@@ -174,10 +160,16 @@ foreign memory."
                      :flags flags)
               (translate-from-foreign next type))))))
 
+(defcfun %git-remote-refspec-count
+    size-t
+  (remote %remote))
 
-(defcstruct (git-indexer-stats :class indexer-stats-struct-type)
-  (total :unsigned-int)
-  (processed :unsigned-int))
+(defcfun %git-remote-get-refspec
+    %refspec
+  (remote %remote)
+  (index size-t))
+
+
 
 #+nil (defmethod translate-from-foreign (value (type indexer-stats-struct-type))
   (translate-from-foreign value (make-instance 'indexer-stats-type)))
@@ -187,14 +179,11 @@ foreign memory."
 		      (list :processed processed
 			    :total total)))
 
-(defcstruct (git-remote-head :class remote-head-struct-type)
-  (local :boolean)
-  (oid (:struct git-oid))
-  (loid (:struct git-oid))
-  (name :string)
-  (symref-target :string))
+(define-foreign-type remote-head-type ()
+  nil
+  (:actual-type :pointer))
 
-(defmethod translate-from-foreign (value (type remote-head-struct-type))
+(defmethod translate-from-foreign (value (type remote-head-type))
   (with-foreign-slots ((local oid loid name symref-target) value (:struct git-remote-head))
     (list :local local
           :remote-oid oid
@@ -203,41 +192,6 @@ foreign memory."
           :symref-target symref-target)))
 
 (defconstant +git-fetch-options-version+ 1)
-
-(defcenum git-fetch-prune
-  ;; Use the setting in the configuration
-  :unspecified
-  ;; Prune during fetch
-  :prune
-  ;; Don't prune during fetch
-  :no-prune)
-
-(defcenum git-remote-autotag-options
-  ;; Use the setting from the configuration
-  :unspecified
-  ;; Ask the server for tags pointing to objects we are downloading
-  :auto
-  ;; Don't ask for any tags beyond the refspecs
-  :none
-  ;; Ask for all the tags
-  :all)
-
-(defbitfield git-remote-redirect
-  ;; Do not follow any redirects
-  :none
-  ;; Only follow redirects for the initial request
-  :initial
-  ;; Follow redirects in any stage of the fetch or push
-  :all)
-
-(defcstruct git-fetch-options
-  (version :int)
-  (callbacks (:struct git-remote-callbacks))
-  (prune git-fetch-prune)
-  (update-fetchhead :boolean)
-  (download-tags git-remote-autotag-options)
-  (proxy-options (:struct git-proxy-options))
-  (custom-headers (:struct git-strings)))
 
 (define-foreign-type fetch-options ()
   ((remote-callbacks
@@ -384,14 +338,14 @@ foreign memory."
                          :free-function #'%git-remote-free))
 
 (defmethod list-objects ((class (eql 'remote)) repository &key test test-not)
-  (with-foreign-object (string-array '(:struct git-strings))
+  (with-foreign-object (string-array '(:struct git-strarray))
     (%git-remote-list string-array repository)
     (let ((remotes
            (mapcar (lambda (remote-name)
                      (make-remote-from-name remote-name repository))
                    (prog1
-                       (convert-from-foreign string-array '(:struct git-strings))
-                     (free-converted-object string-array '(:struct git-strings) t)))))
+                       (convert-from-foreign string-array '(:struct git-strarray))
+                     (free-converted-object string-array '(:struct git-strarray) t)))))
       (cond (test
              (remove-if-not test remotes))
             (test-not
@@ -441,7 +395,7 @@ for sending data.")
   (:method ((remote remote) &key (direction :fetch) credentials)
     (let ((callbacks (make-instance 'remote-callbacks :credentials credentials)))
       (with-foreign-objects ((proxy-options '(:struct git-proxy-options))
-                             (headers '(:struct git-strings)))
+                             (headers '(:struct git-strarray)))
         (%git-remote-connect remote direction callbacks proxy-options headers)))))
 
 (defgeneric remote-connected-p (remote)
@@ -458,21 +412,21 @@ for sending data.")
   (:documentation
    "Returns a list of push specifications of the remote. ")
   (:method ((remote remote))
-    (with-foreign-object (string-array '(:struct git-strings))
+    (with-foreign-object (string-array '(:struct git-strarray))
       (%git-remote-get-push-refspecs string-array remote)
       (prog1
-          (convert-from-foreign string-array '(:struct git-strings))
-        (free-converted-object string-array '(:struct git-strings) t)))))
+          (convert-from-foreign string-array '(:struct git-strarray))
+        (free-converted-object string-array '(:struct git-strarray) t)))))
 
 (defgeneric remote-fetch-refspecs (remote)
   (:documentation
    "Returns a list of fetch specifications for the remote.")
   (:method ((remote remote))
-    (with-foreign-object (string-array '(:struct git-strings))
+    (with-foreign-object (string-array '(:struct git-strarray))
       (%git-remote-get-fetch-refspecs string-array remote)
       (prog1
-          (convert-from-foreign string-array '(:struct git-strings))
-        (free-converted-object string-array '(:struct git-strings) t)))))
+          (convert-from-foreign string-array '(:struct git-strarray))
+        (free-converted-object string-array '(:struct git-strarray) t)))))
 
 (defgeneric remote-download (remote)
   (:documentation "Download the required packfile from the remote to
@@ -495,8 +449,9 @@ LOCAL bool that is true if the ref has a local copy.")
                            (remotes :pointer))
       (%git-remote-ls remotes count remote)
       (loop :for i :below (mem-ref count :int)
-            :collect (mem-ref (mem-aref (mem-ref remotes :pointer) :pointer i)
-                              '(:struct git-remote-head))))))
+            :collect (translate-from-foreign
+                      (mem-aref (mem-ref remotes :pointer) :pointer i)
+                      (make-instance 'remote-head-type))))))
 
 (defgeneric remote-push-url (remote)
   (:method ((remote remote))
