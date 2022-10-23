@@ -27,9 +27,30 @@
   (let ((remote-repo-path (gen-temp-path)))
     (unwind-protect
          (let ((cloned-repository
-                 (clone-repository (namestring *repository-path*) remote-repo-path)))
+                 (clone-repository (namestring *repository-path*)
+                                   remote-repo-path)))
            (is (eql
                 (oid (repository-head *test-repository*))
+                (oid (repository-head cloned-repository)))))
+      (progn
+        (delete-directory-and-files remote-repo-path)))))
+
+(def-test clone-repository-https (:fixture repository-with-commits)
+  "Create a new repository and clone it."
+  (let ((remote-repo-path (gen-temp-path)))
+    (unwind-protect
+         (let ((cloned-repository
+                 (clone-repository
+                  "https://github.com/libgit2/TestGitRepository.git"
+                  remote-repo-path
+                  ;; TODO This is only really needed for my local
+                  ;; machine that rewrites all github url's to be ssh.
+                  ;; But it shuoldn't cause an issue here and still
+                  ;; generally tests things.  Though not ideal
+                  :credentials 'ssh-key-from-agent)))
+           (is (eql
+                ;; Hard coded oid
+                417875169754799628935327977610761210040455787456
                 (oid (repository-head cloned-repository)))))
       (progn
         (delete-directory-and-files remote-repo-path)))))
