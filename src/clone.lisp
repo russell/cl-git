@@ -63,11 +63,14 @@
     (%git-clone-init-options ptr +git-clone-options-version+)
     (translate-into-foreign-memory value type ptr)))
 
-(defmethod translate-into-foreign-memory ((value clone-options) (type clone-options) ptr)
+(defmethod translate-into-foreign-memory ((value clone-options)
+                                          (type clone-options)
+                                          ptr)
   (with-foreign-slots (((:pointer fetch-options))
                        ptr (:struct git-clone-options))
-    (translate-into-foreign-memory (fetch-options value) (fetch-options value) fetch-options)
-    )
+    (translate-into-foreign-memory (fetch-options value)
+                                   (fetch-options value)
+                                   fetch-options))
   ptr)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -82,7 +85,8 @@
     (clone-repository url (namestring path) :credentials credentials))
   (:method ((url string) (path string) &key credentials)
     (with-foreign-object (repository-ref :pointer)
-      (%git-clone repository-ref url path (make-instance 'clone-options :credentials credentials))
+      (%git-clone repository-ref url path
+                  (make-instance 'clone-options :credentials credentials))
       (make-instance 'repository
                      :pointer (mem-ref repository-ref :pointer)
                      :free-function #'git-repository-free))))

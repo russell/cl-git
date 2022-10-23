@@ -42,18 +42,23 @@
   (username :string)
   (password :string))
 
-(defgeneric acquire-credentials (credential-type git-cred url username-from-url allowed-types payload)
+(defgeneric acquire-credentials (credential-type git-cred url
+                                 username-from-url allowed-types payload)
   (:documentation "Specializes on CREDENTIAL-TYPE to fill GIT-CRED
 with a pointer to an object allocated in foreign memory that libgit
 can use as credentials."))
 
-;; Default implementation that does nothing.
-(defmethod acquire-credentials (credential-type git-cred url username-from-url allowed-types payload)
-  (declare (ignore payload url allowed-types credential-type username-from-url git-cred))
+(defmethod acquire-credentials (credential-type git-cred url username-from-url
+                                allowed-types payload)
+  "Default implementation that does nothing."
+  (declare (ignore payload url allowed-types credential-type
+                   username-from-url git-cred))
   2)
 
-;;;; SSH Key from SSH Agent.
-(defmethod acquire-credentials ((credential-type (eql 'ssh-key-from-agent)) git-cred url username-from-url allowed-types payload)
+(defmethod acquire-credentials ((credential-type (eql 'ssh-key-from-agent))
+                                git-cred url username-from-url
+                                allowed-types payload)
+  "Acquire credentials from the SSH Agent"
   (declare (ignore payload url allowed-types))
   (%git-cred-ssh-key-from-agent git-cred username-from-url))
 
@@ -62,14 +67,19 @@ can use as credentials."))
 (defclass credentials ()
   ())
 
-(defmethod acquire-credentials ((credential-type (eql 'ssh-key)) git-cred url username-from-url allowed-types payload)
+(defmethod acquire-credentials ((credential-type (eql 'ssh-key))
+                                git-cred url username-from-url
+                                allowed-types payload)
   (declare (ignore payload url allowed-types))
   ;; Tries the default values for an ssh key: private key at
   ;; ~/.ssh/id_rsa, public key at ~/.ssh/id_rsa.pub, no passphrase.
-  (%git-cred-ssh-key-new git-cred username-from-url
-						 (null-pointer)
-						 (namestring (merge-pathnames ".ssh/id_rsa" (user-homedir-pathname)))
-						 (null-pointer)))
+  (%git-cred-ssh-key-new git-cred
+                         username-from-url
+			 (null-pointer)
+			 (namestring
+                          (merge-pathnames ".ssh/id_rsa"
+                                           (user-homedir-pathname)))
+			 (null-pointer)))
 
 (defclass ssh-key (credentials)
   ((public-key
@@ -87,20 +97,22 @@ can use as credentials."))
   (:documentation "An SSH-key credential, possibly with a nonstandard
   path."))
 
-(defmethod acquire-credentials ((credentials ssh-key) git-cred url username-from-url allowed-types payload)
+(defmethod acquire-credentials ((credentials ssh-key)
+                                git-cred url username-from-url
+                                allowed-types payload)
   (declare (ignore payload url allowed-types))
   ;; Tries the default values for an ssh key: private key at
   ;; ~/.ssh/id_rsa, public key at ~/.ssh/id_rsa.pub, no passphrase.
   (with-foreign-string (pubkey (or (public-key credentials) ""))
 	(with-foreign-string (pass (or (passphrase credentials) ""))
 	  (%git-cred-ssh-key-new git-cred username-from-url
-							 (if (public-key credentials)
-								 pubkey
-								 (null-pointer))
-							 (private-key credentials)
-							 (if (passphrase credentials)
-								 pass
-								 (null-pointer))))))
+				 (if (public-key credentials)
+				     pubkey
+				     (null-pointer))
+				 (private-key credentials)
+				 (if (passphrase credentials)
+				     pass
+				     (null-pointer))))))
 
 ;;; Username/password
 
@@ -115,7 +127,9 @@ can use as credentials."))
     :accessor password)))
 
 
-(defmethod acquire-credentials ((credentials username-password) git-cred url username-from-url allowed-types payload)
+(defmethod acquire-credentials ((credentials username-password)
+                                git-cred url username-from-url
+                                allowed-types payload)
   (declare (ignore payload url allowed-types))
   (%git-cred-userpass-plaintext-new git-cred
                                     (or (username credentials)

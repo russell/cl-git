@@ -40,36 +40,37 @@ the callback.")
 
 (defun remote-callback-db-id-in-use-p (id &optional (db *git-remote-callbacks*))
   (multiple-value-bind (value present-p)
-	  (gethash id (remote-callback-db-id->instance-map db))
-	(declare (ignore value))
-	present-p))
+      (gethash id (remote-callback-db-id->instance-map db))
+    (declare (ignore value))
+    present-p))
 
 (defun remote-callbacks-by-id (id &optional (db *git-remote-callbacks*))
   (gethash id (remote-callback-db-id->instance-map db)))
 
-(defun register-remote-callback (remote-callback &optional (db *git-remote-callbacks*))
+(defun register-remote-callback (remote-callback
+                                 &optional (db *git-remote-callbacks*))
   "Returns the ID of the remote callback in the database."
   ;; Note: this is NOT thread safe.
   (loop
-	 with max-id = (1- (expt 2 32))
-	 with id = (min max-id (remote-callback-db-last-used-id db))
-	 ;; Repeat "only" 2^32 times
-	 repeat (1+ max-id)
-	 until (not (remote-callback-db-id-in-use-p id db))
-	 do (if (= id max-id)
-			(setf id 0)
-			(incf id))
-	 finally
-	   (if (remote-callback-db-id-in-use-p id db)
-		   ;; This means we were unable to find an unused 32bit
-		   ;; ID. Signal an error.
-		   (error "Unable to find an ID for remote callbcak.")
-		   ;; We were able to find an unused ID.
-		   (progn
-			 (setf (gethash id (remote-callback-db-id->instance-map db))
-				   remote-callback)
-			 (setf (remote-callback-db-last-used-id db) id)
-			 (return id)))))
+    with max-id = (1- (expt 2 32))
+    with id = (min max-id (remote-callback-db-last-used-id db))
+    ;; Repeat "only" 2^32 times
+    repeat (1+ max-id)
+    until (not (remote-callback-db-id-in-use-p id db))
+    do (if (= id max-id)
+           (setf id 0)
+           (incf id))
+    finally
+       (if (remote-callback-db-id-in-use-p id db)
+           ;; This means we were unable to find an unused 32bit
+           ;; ID. Signal an error.
+           (error "Unable to find an ID for remote callback.")
+           ;; We were able to find an unused ID.
+           (progn
+             (setf (gethash id (remote-callback-db-id->instance-map db))
+                   remote-callback)
+             (setf (remote-callback-db-last-used-id db) id)
+             (return id)))))
 
 (define-foreign-type remote-callbacks ()
   ((id
@@ -94,11 +95,13 @@ its credentials slot to provide a pointer to credentials allocated in
 foreign memory."
   ;; Convert the payload to an ID.
   (let* ((id (cffi:pointer-address payload))
-		 (remote-callbacks (remote-callbacks-by-id id)))
-	;; If no credentials have been provided, return a positive integer.
-	(if remote-callbacks
-		(acquire-credentials (credentials remote-callbacks) git-cred url username-from-url allowed-types payload)
-		1)))
+         (remote-callbacks (remote-callbacks-by-id id)))
+    ;; If no credentials have been provided, return a positive integer.
+    (if remote-callbacks
+        (acquire-credentials (credentials remote-callbacks)
+                             git-cred url username-from-url
+                             allowed-types payload)
+        1)))
 
 (defmethod initialize-instance :after ((inst remote-callbacks) &rest args)
   (declare (ignore args))
@@ -110,9 +113,12 @@ foreign memory."
     (%git-remote-init-callbacks ptr +git-remote-callbacks-version+)
     (translate-into-foreign-memory value type ptr)))
 
-(defmethod translate-into-foreign-memory ((value remote-callbacks) (type remote-callbacks) ptr)
+(defmethod translate-into-foreign-memory ((value remote-callbacks)
+                                          (type remote-callbacks)
+                                          ptr)
   "Translate a remote-callbacks class into a foreign structure."
-  (with-foreign-slots ((credentials-cb payload) ptr (:struct git-remote-callbacks))
+  (with-foreign-slots ((credentials-cb payload)
+                       ptr (:struct git-remote-callbacks))
     ;; Use our callback to process credential requests.
     (setf credentials-cb (callback %git-remote-callback-acquire-credentials))
     (setf payload (cffi:make-pointer (id value))))
@@ -172,12 +178,12 @@ foreign memory."
 
 
 #+nil (defmethod translate-from-foreign (value (type indexer-stats-struct-type))
-  (translate-from-foreign value (make-instance 'indexer-stats-type)))
+        (translate-from-foreign value (make-instance 'indexer-stats-type)))
 
 #+nil (defmethod translate-from-foreign (value (type indexer-stats-type))
-  (with-foreign-slots ((total processed) value (:struct git-indexer-stats))
-		      (list :processed processed
-			    :total total)))
+        (with-foreign-slots ((total processed) value (:struct git-indexer-stats))
+          (list :processed processed
+                :total total)))
 
 (define-foreign-type remote-head-type ()
   nil
@@ -315,7 +321,7 @@ foreign memory."
   ())
 
 (defmethod make-object ((class (eql 'remote)) name repository
-                       &key url)
+                        &key url)
   "Create a new remote."
   (let ((url (namestring url)))
     (with-foreign-object (remote :pointer)
@@ -341,13 +347,13 @@ foreign memory."
   (with-foreign-object (string-array '(:struct git-strarray))
     (%git-remote-list string-array repository)
     (let ((remotes
-           (mapcar (lambda (remote-name)
-                     (make-remote-from-name remote-name repository))
-                   (prog1
-                       (convert-from-foreign string-array '(:struct git-strarray))
-                     (free-converted-object string-array '(:struct git-strarray) t)))))
+            (mapcar (lambda (remote-name)
+                      (make-remote-from-name remote-name repository))
+                    (prog1
+                        (convert-from-foreign string-array '(:struct git-strarray))
+                      (free-converted-object string-array '(:struct git-strarray) t)))))
       (cond (test
-             (remove-if-not test remotes))
+                (remove-if-not test remotes))
             (test-not
              (remove-if test-not remotes))
             (t
@@ -357,9 +363,9 @@ foreign memory."
   (with-foreign-object (remote-out :pointer)
     (%git-remote-lookup remote-out repository name)
     (make-instance 'remote
-           :pointer (mem-ref remote-out :pointer)
-           :facilitator repository
-           :free-function #'%git-remote-free)))
+                   :pointer (mem-ref remote-out :pointer)
+                   :facilitator repository
+                   :free-function #'%git-remote-free)))
 
 (defmethod full-name ((remote remote))
   "The name of the remote."
