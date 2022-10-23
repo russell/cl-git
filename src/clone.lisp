@@ -42,10 +42,13 @@
   (local-path :string)
   (options %clone-options))
 
-(defmethod initialize-instance :after ((opts clone-options) &rest initargs &key credentials)
+(defmethod initialize-instance :after ((opts clone-options)
+                                       &rest initargs
+                                       &key credentials)
   (declare (ignore initargs))
   (when credentials
-    (setf (remote-callbacks opts) (make-instance 'remote-callbacks :credentials credentials))))
+    (setf (remote-callbacks (fetch-options opts))
+          (make-instance 'remote-callbacks :credentials credentials))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
