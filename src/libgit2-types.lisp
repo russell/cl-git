@@ -20,6 +20,9 @@
 
 (in-package #:cl-git)
 
+(defvar +success+ 0
+  "Used to signal success for C return values in callbacks.")
+
 (define-foreign-type time-t ()
   nil
   (:actual-type git-time-t)

@@ -2,7 +2,6 @@
 
 ;; cl-git is a Common Lisp interface to git repositories.
 ;; Copyright (C) 2011-2022 Russell Sim <russell.sim@gmail.com>
-;; Copyright (C) 2012 Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;;
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU Lesser General Public License
@@ -21,14 +20,7 @@
 
 (in-package #:cl-git)
 
-(defcfun ("git_libgit2_init" git-libgit2-init)
-    :void
-  "Init libgit2.")
-
-(defcfun ("git_libgit2_shutdown" git-libgit2-shutdown)
-    :void
-  "Shutdown libgit2.")
-
-;;; Init threading on load
-(eval-when (:load-toplevel :execute)
-  (git-libgit2-init))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (pushnew (intern (apply 'format nil "LIBGIT2-~a.~a" (libgit2-version))
+                   (find-package 'keyword))
+           *features*))

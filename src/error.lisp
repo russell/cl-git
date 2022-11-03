@@ -142,7 +142,9 @@
 (define-git-condition stop-iteration :iterover)
 (define-git-condition retry :retry)
 (define-git-condition mismatch-error :emismatch)
+#-libgit2-0.27
 (define-git-condition index-dirty-error :eindexdirty)
+#-libgit2-0.27
 (define-git-condition apply-fail-error :eapplyfail)
 
 (define-condition unknown-error (basic-error) ()

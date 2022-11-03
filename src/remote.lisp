@@ -208,7 +208,14 @@ foreign memory."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+#-(or libgit2-0.28 libgit2-0.27)
 (defcfun %git-fetch-options-init
+    %return-value
+  (options :pointer)
+  (version :uint))
+
+#+(or libgit2-0.28 libgit2-0.27)
+(defcfun ("git_fetch_init_options" %git-fetch-options-init)
     %return-value
   (options :pointer)
   (version :uint))
