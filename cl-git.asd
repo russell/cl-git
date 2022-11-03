@@ -28,18 +28,27 @@
   ((:file "package")
    (:file "git-pointer"
     :depends-on ("package"))
-   (cffi-grovel:grovel-file "libgit2-types-grovel0"
-                            :depends-on ("package"))
-   (cffi-grovel:grovel-file "libgit2-types-grovel1"
-                            :depends-on ("libgit2-types"
-                                         "libgit2-types-grovel0"
-                                         "package"))
+   (:file "libgit2" :depends-on ("package"
+                                 "libgit2-lib"
+                                 "libgit2-types"
+                                 "libgit2-types-grovel1"))
+   (:file "libgit2-lib" :depends-on ("package"))
    (:file "libgit2-types" :depends-on ("package"
                                        "git-pointer"
+                                       "libgit2-features"
                                        "libgit2-types-grovel0"))
+   (:file "libgit2-features" :depends-on ("package"
+                                          "libgit2-lib"))
+   (cffi-grovel:grovel-file "libgit2-types-grovel0"
+                            :depends-on ("package"
+                                         "libgit2-features"
+                                         "libgit2-lib"))
+   (cffi-grovel:grovel-file "libgit2-types-grovel1"
+                            :depends-on ("package"
+                                         "libgit2-features"
+                                         "libgit2-types"
+                                         "libgit2-types-grovel0"))
    (:file "api" :depends-on ("package"))
-   (:file "libgit2" :depends-on ("package" "libgit2-types"
-                                           "libgit2-types-grovel1"))
    (:file "buffer" :depends-on ("libgit2"))
    (:file "error" :depends-on ("libgit2"))
    (:file "strarray" :depends-on ("libgit2"))

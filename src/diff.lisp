@@ -79,7 +79,14 @@
   (:actual-type :pointer)
   (:simple-parser %diff-list))
 
+#-(or libgit2-0.28 libgit2-0.27)
 (defcfun %git-diff-options-init
+    %return-value
+  (options :pointer)
+  (version :unsigned-int))
+
+#+(or libgit2-0.28 libgit2-0.27)
+(defcfun ("git_diff_init_options" %git-diff-options-init)
     %return-value
   (options :pointer)
   (version :unsigned-int))

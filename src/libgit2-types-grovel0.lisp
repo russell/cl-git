@@ -66,6 +66,7 @@
        ((:conflict-style-diff3 "GIT_CHECKOUT_CONFLICT_STYLE_DIFF3"))
        ((:dont-remove-existing "GIT_CHECKOUT_DONT_REMOVE_EXISTING"))
        ((:dont-write-index "GIT_CHECKOUT_DONT_WRITE_INDEX"))
+       #-(or libgit2-1.1 libgit2-1.0 libgit2-0.28 libgit2-0.27)
        ((:dry-run "GIT_CHECKOUT_DRY_RUN"))
 
        ;; Not implemented yet in libgit2
@@ -158,6 +159,7 @@ without this flag, diff will always leave the index untouched.")
         :documentation "Use a heuristic that takes indentation and whitespace into account
 which generally can produce better diffs when dealing with ambiguous
 diff hunks.")
+       #-(or libgit2-1.1 libgit2-1.0 libgit2-0.28 libgit2-0.27)
        ((:ignore-blank-lines "GIT_DIFF_IGNORE_BLANK_LINES")
         :documentation "Ignore blank lines")
        ((:force-text "GIT_DIFF_FORCE_TEXT")
@@ -204,6 +206,17 @@ can apply given diff information to binary files."))
 ;; Credential
 ;;
 
+#+(or libgit2-0.28 libgit2-0.27)
+(cenum git-credential-t
+       ((:userpass-plaintext "GIT_CREDTYPE_USERPASS_PLAINTEXT"))
+       ((:ssh-key "GIT_CREDTYPE_SSH_KEY"))
+       ((:ssh-custom "GIT_CREDTYPE_SSH_CUSTOM"))
+       ((:default "GIT_CREDTYPE_DEFAULT"))
+       ((:ssh-interactive "GIT_CREDTYPE_SSH_INTERACTIVE"))
+       ((:username "GIT_CREDTYPE_USERNAME"))
+       ((:ssh-memory "GIT_CREDTYPE_SSH_MEMORY")))
+
+#-(or libgit2-0.28 libgit2-0.27)
 (cenum git-credential-t
        ((:userpass-plaintext "GIT_CREDENTIAL_USERPASS_PLAINTEXT")
         :documentation

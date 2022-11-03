@@ -45,9 +45,13 @@
 (ctype git-time-t "git_time_t")
 
 ;; The maximum size of an object
+#+(or libgit2-0.28 libgit2-0.27)
+(ctype object-size-t "git_off_t")
+#-(or libgit2-0.28 libgit2-0.27)
 (ctype object-size-t "git_object_size_t")
 
 
+#-libgit2-0.27
 (cenum git-object-t
        ((:any "GIT_OBJECT_ANY")
         :documentation "Object can be any of the following")
@@ -66,6 +70,25 @@
        ((:ref-delta "GIT_OBJECT_REF_DELTA")
         :documentation "A delta, base is given by object id."))
 
+#+libgit2-0.27
+(cenum git-object-t
+       ((:any "GIT_OBJ_ANY")
+        :documentation "Object can be any of the following")
+       ((:invalid "GIT_OBJ_BAD")
+        :documentation "Object is invalid.")
+       ((:commit "GIT_OBJ_COMMIT")
+        :documentation "A commit object.")
+       ((:tree "GIT_OBJ_TREE")
+        :documentation "A tree (directory listing) object.")
+       ((:blob "GIT_OBJ_BLOB")
+        :documentation "A file revision object.")
+       ((:tag "GIT_OBJ_TAG")
+        :documentation "An annotated tag object.")
+       ((:ofs-delta "GIT_OBJ_OFS_DELTA")
+        :documentation "A delta, base is given by an offset.")
+       ((:ref-delta "GIT_OBJ_REF_DELTA")
+        :documentation "A delta, base is given by object id."))
+
 (cstruct git-time "git_time"
          (time "time" :type %time-t)
          (offset "offset" :type :int)
@@ -76,6 +99,7 @@
          (email "email" :type :string)
          (when "when" :type (:struct git-time)))
 
+#-libgit2-0.27
 (cenum git-reference-t
        ((:invalid "GIT_REFERENCE_INVALID")
         :documentation "Invalid reference")
@@ -84,6 +108,17 @@
        ((:symbolic "GIT_REFERENCE_SYMBOLIC")
         :documentation "A reference that points at another reference")
        ((:all "GIT_REFERENCE_ALL")
+        :documentation "Either direct or symbolic"))
+
+#+libgit2-0.27
+(cenum git-reference-t
+       ((:invalid "GIT_REF_INVALID")
+        :documentation "Invalid reference")
+       ((:direct "GIT_REF_OID")
+        :documentation "A reference that points at an object id")
+       ((:symbolic "GIT_REF_SYMBOLIC")
+        :documentation "A reference that points at another reference")
+       ((:all "GIT_REF_LISTALL")
         :documentation "Either direct or symbolic"))
 
 (cenum git-branch-t
@@ -159,16 +194,33 @@
          (path "path" :type :string))
 
 ;; Bitmasks for on-disk fields of `git_index_entry`'s `flags`
+#-libgit2-0.27
 (constant (+git-index-entry-namemask+ "GIT_INDEX_ENTRY_NAMEMASK") :type integer)
+#-libgit2-0.27
 (constant (+git-index-entry-stagemask+ "GIT_INDEX_ENTRY_STAGEMASK") :type integer)
+#-libgit2-0.27
 (constant (+git-index-entry-stageshift+ "GIT_INDEX_ENTRY_STAGESHIFT") :type integer)
 
+#+libgit2-0.27
+(constant (+git-index-entry-namemask+ "GIT_IDXENTRY_NAMEMASK") :type integer)
+#+libgit2-0.27
+(constant (+git-index-entry-stagemask+ "GIT_IDXENTRY_STAGEMASK") :type integer)
+#+libgit2-0.27
+(constant (+git-index-entry-stageshift+ "GIT_IDXENTRY_STAGESHIFT") :type integer)
+
+#-libgit2-0.27
 (cenum git-index-capabilities-t
        ((:ignore-case "GIT_INDEX_CAPABILITY_IGNORE_CASE"))
        ((:no-filemode "GIT_INDEX_CAPABILITY_NO_FILEMODE"))
        ((:no-symlinks "GIT_INDEX_CAPABILITY_NO_SYMLINKS"))
        ((:from-owner "GIT_INDEX_CAPABILITY_FROM_OWNER")))
 
+#+libgit2-0.27
+(cenum git-index-capabilities-t
+       ((:ignore-case "GIT_INDEXCAP_IGNORE_CASE"))
+       ((:no-filemode "GIT_INDEXCAP_NO_FILEMODE"))
+       ((:no-symlinks "GIT_INDEXCAP_NO_SYMLINKS"))
+       ((:from-owner "GIT_INDEXCAP_FROM_OWNER")))
 
 
 ;;
@@ -216,8 +268,10 @@
          (push-update-reference-cb "push_update_reference" :type :pointer)
          (push-negotiation-cb "push_negotiation" :type :pointer)
          (transport-cb "transport" :type :pointer)
+         #-(or libgit2-1.1 libgit2-1.0 libgit2-0.28 libgit2-0.27)
          (remote-ready-cb "remote_ready" :type :pointer)
          (payload "payload" :type :pointer)
+         #-(or libgit2-0.28 libgit2-0.27)
          (resolve-url-cb "resolve_url" :type :pointer))
 
 (cenum (git-fetch-prune)
@@ -388,6 +442,8 @@ fetch for file:// URLs.")
 ;;
 ;; Indexer
 ;;
+
+#-(or libgit2-0.28 libgit2-0.27)
 (cstruct git-indexer-progress "git_indexer_progress"
          (total-objects "total_objects" :type :uint)
          (indexed-objects "indexed_objects" :type :uint)
@@ -410,7 +466,10 @@ fetch for file:// URLs.")
 ;;
 (cstruct git-buf "git_buf"
          (ptr "ptr" :type :pointer)
+         #-(or libgit2-1.4 libgit2-1.5)
          (asize "asize" :type size-t)
+         #+(or libgit2-1.4 libgit2-1.5)
+         (asize "reserved" :type size-t)
          (size "size" :type size-t))
 
 
@@ -449,6 +508,7 @@ specific config file available that actually is loaded)"))
 (cstruct git-config-entry "git_config_entry"
          (:name "name" :type :string)
          (:value "value" :type :string)
+         #-(or libgit2-0.28 libgit2-0.27)
          (:include-depth "include_depth" :type :uint)
          (:level "level" :type git-config-level-t)
          ;; XXX This will leak, it needs to free the method using a
@@ -461,6 +521,7 @@ specific config file available that actually is loaded)"))
 ;; Error
 ;;
 
+#-libgit2-0.27
 (cenum git-error-t
        ((:none "GIT_ERROR_NONE"))
        ((:nomemory "GIT_ERROR_NOMEMORY"))
@@ -496,8 +557,47 @@ specific config file available that actually is loaded)"))
        ((:patch "GIT_ERROR_PATCH"))
        ((:worktree "GIT_ERROR_WORKTREE"))
        ((:sha1 "GIT_ERROR_SHA1"))
+       #-libgit2-0.28
        ((:http "GIT_ERROR_HTTP"))
+       #-(or libgit2-1.0 libgit2-0.28)
        ((:internal "GIT_ERROR_INTERNAL")))
+
+#+libgit2-0.27
+(cenum git-error-t
+       ((:none "GITERR_NONE"))
+       ((:nomemory "GITERR_NOMEMORY"))
+       ((:os "GITERR_OS"))
+       ((:invalid "GITERR_INVALID"))
+       ((:reference "GITERR_REFERENCE"))
+       ((:zlib "GITERR_ZLIB"))
+       ((:repository "GITERR_REPOSITORY"))
+       ((:config "GITERR_CONFIG"))
+       ((:regex "GITERR_REGEX"))
+       ((:odb "GITERR_ODB"))
+       ((:index "GITERR_INDEX"))
+       ((:object "GITERR_OBJECT"))
+       ((:net "GITERR_NET"))
+       ((:tag "GITERR_TAG"))
+       ((:tree "GITERR_TREE"))
+       ((:indexer "GITERR_INDEXER"))
+       ((:ssl "GITERR_SSL"))
+       ((:submodule "GITERR_SUBMODULE"))
+       ((:thread "GITERR_THREAD"))
+       ((:stash "GITERR_STASH"))
+       ((:checkout "GITERR_CHECKOUT"))
+       ((:fetchhead "GITERR_FETCHHEAD"))
+       ((:merge "GITERR_MERGE"))
+       ((:ssh "GITERR_SSH"))
+       ((:filter "GITERR_FILTER"))
+       ((:revert "GITERR_REVERT"))
+       ((:callback "GITERR_CALLBACK"))
+       ((:cherrypick "GITERR_CHERRYPICK"))
+       ((:describe "GITERR_DESCRIBE"))
+       ((:rebase "GITERR_REBASE"))
+       ((:filesystem "GITERR_FILESYSTEM"))
+       ((:patch "GITERR_PATCH"))
+       ((:worktree "GITERR_WORKTREE"))
+       ((:sha1 "GITERR_SHA1")))
 
 (cenum git-error-code
        ((:ok "GIT_OK")
@@ -564,10 +664,12 @@ know that it was generated by the callback and not by libgit2.")
         :documentation "Internal only")
        ((:emismatch "GIT_EMISMATCH")
         :documentation "Hashsum mismatch in object")
+       #-libgit2-0.27
        ((:eindexdirty "GIT_EINDEXDIRTY")
         :documentation "Unsaved changes in the index would be overwritten")
+       #-libgit2-0.27
        ((:eapplyfail "GIT_EAPPLYFAIL")
-        :documentation "Patch application failed")
+        :documentation "Patch application failedq")
        ;; ((:eowner "GIT_EOWNER")
        ;;  :documentation "The object is not owned by the current user")
        )

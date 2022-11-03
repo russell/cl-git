@@ -29,7 +29,14 @@
   (:actual-type :pointer))
 
 
+#-(or libgit2-0.28 libgit2-0.27)
 (defcfun %git-proxy-options-init
+    %return-value
+  (options :pointer)
+  (version :uint))
+
+#+(or libgit2-0.28 libgit2-0.27)
+(defcfun ("git_proxy_init_options" %git-proxy-options-init)
     %return-value
   (options :pointer)
   (version :uint))
