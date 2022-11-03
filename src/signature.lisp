@@ -73,7 +73,7 @@
            (setf offset (timezone-offset time))
            (setf sign (char-int (if (< offset 0) #\- #\+)))))
        (with-foreign-slots ((name email when) signature (:struct git-signature))
-         (setf name (getf value :name (getenv "USER")))
+         (setf name (getf value :name (default-name)))
          (setf email (getf value :email (default-email))))
        signature))
     (t
@@ -111,6 +111,10 @@ OFFSET."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun default-name ()
+  (or (getenv "USER") "cl-git"))
+
 (defun default-email ()
   (or (getenv "MAIL")
-      (concatenate 'string (getenv "USERNAME") "@" (machine-instance))))
+      (concatenate 'string (or (getenv "USERNAME") (default-name))
+                   "@" (machine-instance))))
