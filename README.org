@@ -1,3 +1,7 @@
+#+OPTIONS: html-preamble:nil
+#+OPTIONS: html-postamble:nil
+#+OPTIONS: html-style:nil
+
 * cl-git
 
 This is common lisp wrapper around the =libgit2= library. It's still
