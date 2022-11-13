@@ -20,7 +20,7 @@ qualified name of the reference must be specified.
 
    .. code-block:: common-lisp-repl
 
-      GIT> (get-object 'reference "ref/heads/master"
+      GIT> (get-object 'reference "refs/heads/master"
                (open-repository (merge-pathnames #p"projects/lisp/cl-git"
                                                  (user-homedir-pathname))))
       #<REFERENCE refs/heads/master {100BA0E543}>

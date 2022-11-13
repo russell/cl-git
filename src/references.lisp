@@ -154,7 +154,7 @@
     (mem-ref reference :pointer)))
 
 (defmethod get-object ((class (eql 'reference)) name repository)
-  "Find a reference by its full name e.g.: ref/heads/master
+  "Find a reference by its full name e.g.: refs/heads/master
 Note that this function name clashes with the generic lookup function.
 We need to figure this out by using the type argument to do dispatch."
   (make-instance 'reference
