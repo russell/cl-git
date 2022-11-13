@@ -1,6 +1,7 @@
 #+OPTIONS: html-preamble:nil
 #+OPTIONS: html-postamble:nil
 #+OPTIONS: html-style:nil
+#+OPTIONS: html-scripts:nil
 
 * cl-git
 
