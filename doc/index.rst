@@ -3,11 +3,15 @@ almost complete exposure of the underlying library.
 
 License `LLGPL`_
 
-The source is available on `GitHub`_.
+This is the HTML documentation, but there is also, :download:`latex
+<build/latex/cl-git.pdf>` and :download:`info
+<build/texinfo/cl-git.info>`
+
+The source is available on `SourceHut`_.
 
 .. _LLGPL: http://opensource.franz.com/preamble.html
 .. _libgit2: http://libgit2.github.com/
-.. _github: https://github.com/russell/cl-git/
+.. _SourceHut: https://git.sr.ht/~rsl/cl-git
 
 
 
