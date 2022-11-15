@@ -69,11 +69,11 @@ To walk commits, :cl:symbol:`REVISION-WALK` and
 
 .. code-block:: common-lisp-repl
 
-   GIT> (let ((repository (open-repository (merge-pathnames #p"projects/ecl" 
+   GIT> (let ((repository (open-repository (merge-pathnames #p"projects/ecl"
                                               (user-homedir-pathname)))))
-          (loop 
-            :with walker = (revision-walk 
-                            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a" 
+          (loop
+            :with walker = (revision-walk
+                            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
                                         repository))
             :for revision = (next-revision walker)
             :until (null revision)
@@ -152,3 +152,18 @@ Inspecting
                                                 (user-homedir-pathname))))))
       #<TREE 96F8A446E020204589710FE1BF0CE1DD5B5B5AD0 {10079C9C03}>
 
+Graph
+-----
+
+.. cl:generic:: reachable-from
+
+   .. code-block:: common-lisp-repl
+
+      GIT> (with-repository (repository (merge-pathnames
+                                         #p"projects/cl-git"
+                                         (user-homedir-pathname)))
+            (reachable-from
+             repository
+             (resolve (car (list-objects 'tag repository)) '(commit))
+             (list (get-object 'reference "refs/heads/master" repository))))
+      T

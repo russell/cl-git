@@ -195,6 +195,9 @@
    #:filemode
    #:filename
 
+   ;; Graph
+   #:reachable-from
+
    ;; Odb
    #:odb
    #:odb-data
