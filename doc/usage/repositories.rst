@@ -22,7 +22,7 @@ Creating
 
       GIT> (empty-p (open-repository #p"/tmp/test-repo/"))
       T
-       
+
 Bare
 ~~~~
 
@@ -38,7 +38,7 @@ Whether an existing repository is bare can be determined using the
 bare-p method.
 
 .. cl:method:: bare-p repository
-                                  
+
    .. code-block:: common-lisp-repl
 
       GIT> (bare-p (open-repository #p"/tmp/test-bare/"))
@@ -67,7 +67,7 @@ Accessing
    .. code-block:: common-lisp-repl
 
       CL-GIT> (with-repository (repository #p"/home/russell/projects/ecl/")
-                (prin1 repository) 
+                (prin1 repository)
                 nil)
       #<REPOSITORY 7FFFE8003E00 {1003880DA3}>
       NIL

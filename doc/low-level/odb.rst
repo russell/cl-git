@@ -27,7 +27,3 @@ ODB
 .. cl:generic:: odb-data cl-git:odb-object
 
 .. cl:generic:: odb-size cl-git:odb-object
-
-
-
-
