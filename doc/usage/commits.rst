@@ -104,6 +104,16 @@ Inspecting
       in the Lisp runtime.
       "
 
+.. cl:generic:: message-trailers
+
+   .. code-block:: common-lisp-repl
+
+      GIT> (message-trailers
+            (get-object 'commit "ea010dee347e50666331b77edcf0588735c3205a"
+                        (open-repository #p"/home/russell/projects/ecl/")))
+      '((:key "Fixes" :value "https://example.com/foobar")
+        (:key "Signed-off-by" :value "John Doe <john@doe.example.com>"))
+
 .. cl:generic:: author
 
    .. code-block:: common-lisp-repl

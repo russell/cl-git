@@ -75,6 +75,7 @@
                 #:pointerp
                 #:mem-ref
                 #:mem-aref
+                #:mem-aptr
                 #:defcfun
                 #:defctype
                 #:defcstruct
@@ -148,6 +149,7 @@
    #:commit-tree
    #:message
    #:message-encoding
+   #:message-trailers
    #:parents
 
    ;; Revision walker

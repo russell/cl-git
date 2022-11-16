@@ -472,6 +472,18 @@ fetch for file:// URLs.")
          (asize "reserved" :type size-t)
          (size "size" :type size-t))
 
+
+;;
+;; Message
+;;
+(cstruct git-message-trailer "git_message_trailer"
+         (key "key" :type :string)
+         (value "value" :type :string))
+
+(cstruct git-message-trailer-array "git_message_trailer_array"
+         (trailers "trailers" :type (:pointer git-message-trailer))
+         (count "count" :type size-t))
+
 
 
 ;;

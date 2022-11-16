@@ -47,7 +47,7 @@ descendant commits."))
                        :count (length commits))))
     (loop :for c :in commits
           :for i :from 0
-          :for ptr = (cffi:mem-aptr commit-array '(:struct git-oid) i)
+          :for ptr = (mem-aptr commit-array '(:struct git-oid) i)
           :do (oid-to-foreign
                (oid c)
                (foreign-slot-pointer ptr '(:struct git-oid) 'id)))
