@@ -152,8 +152,11 @@ Inspecting
                                                 (user-homedir-pathname))))))
       #<TREE 96F8A446E020204589710FE1BF0CE1DD5B5B5AD0 {10079C9C03}>
 
-Graph
------
+Graph Traversal
+---------------
+
+.. note::
+   This API is only implemented in libgit2 version 1.2 and greater
 
 .. cl:generic:: reachable-from
 

@@ -21,6 +21,7 @@
 
 (in-suite :cl-git)
 
+#-(or libgit2-0.27 libgit2-0.28 libgit2-1.0 libgit2-1.1)
 (def-test graph-parents (:fixture repository-with-commits)
   (let* ((test-commit (next-test-commit))
          (test-commit-parents (parents (get-object 'commit

@@ -40,6 +40,7 @@ following parent edges."
    "Return T if given commit is an ancestor of any of the given potential
 descendant commits."))
 
+#-(or libgit2-0.27 libgit2-0.28 libgit2-1.0 libgit2-1.1)
 (defmethod reachable-from ((repository repository) (commit commit) commits)
   (let ((commit-array (foreign-alloc
                        '(:struct git-oid)
@@ -55,3 +56,8 @@ descendant commits."))
      (%git-graph-reachable-from-any repository (oid commit) commit-array
                                     (length commits))
      1)))
+
+#+(or libgit2-0.27 libgit2-0.28 libgit2-1.0 libgit2-1.1)
+(defmethod reachable-from ((repository repository) (commit commit) commits)
+  (error
+   "REACHABLE-FROM is implmented in libgit2 version 1.2 and greater"))
