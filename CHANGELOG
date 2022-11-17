@@ -2,6 +2,13 @@
 Changelog
 ---------
 
+1.4.0 - UNRELEASED
+~~~~~~~~~~~~~~~~~~
+
+* add REACHABLE-FROM API for inspecting the graph.
+* add MESSAGE-TRAILERS API for parsing commit message trailers.
+* add support for libgit2 0.27, 0.28, 1.0, 1.1, 1.2, 1.4, 1.5
+
 1.3.0 - 2022-07-03
 ~~~~~~~~~~~~~~~~~~
 
