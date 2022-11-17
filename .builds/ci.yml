@@ -16,32 +16,32 @@ tasks:
 
   - sbcl-with-libgit2-0-27: |
       cd cl-git
-      earthly +test-libgit2-0.27
+      earthly +test-libgit2-0.27-sbcl
 
   - sbcl-with-libgit2-0-28: |
       cd cl-git
-      earthly +test-libgit2-0.28
+      earthly +test-libgit2-0.28-sbcl
 
   - sbcl-with-libgit2-1-0: |
       cd cl-git
-      earthly +test-libgit2-1.0
+      earthly +test-libgit2-1.0-sbcl
 
   - sbcl-with-libgit2-1-1: |
       cd cl-git
-      earthly +test-libgit2-1.1
+      earthly +test-libgit2-1.1-sbcl
 
   - sbcl-with-libgit2-1-2: |
       cd cl-git
-      earthly +test-libgit2-1.2
+      earthly +test-libgit2-1.2-sbcl
 
   - sbcl-with-libgit2-1-3: |
       cd cl-git
-      earthly +test-libgit2-1.3
+      earthly +test-libgit2-1.3-sbcl
 
   - sbcl-with-libgit2-1-4: |
       cd cl-git
-      earthly +test-libgit2-1.4
+      earthly +test-libgit2-1.4-sbcl
 
   - sbcl-with-libgit2-1-5: |
       cd cl-git
-      earthly +test-libgit2-1.5
+      earthly +test-libgit2-1.5-sbcl
