@@ -244,6 +244,8 @@ example be the text \"master\" or \"HEAD\"."
        (subseq name (length reference-remotes-dir)))
       ((branch-p name)
        (subseq name (length reference-heads-dir)))
+      ((tag-p name)
+       (subseq name (length reference-tags-dir)))
       (t name))))
 
 (defmethod print-object ((object reference) stream)
