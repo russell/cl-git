@@ -4,13 +4,25 @@ Contributing
 Testing
 -------
 
-CL-GIT uses FiveAM as the testing harness and inferior shell to help
-check for leaks.
+CL-Git uses `FiveAM`_ as the testing harness and `inferior shell`_ to
+call `lsof`_ to check for file descriptor leaks.
+
+follow the `Roswell install documentation`_.
+
+install lsof::
+
+  apt install lsof
+
+install SBCL and run tests.::
+
+   ros install sbcl
+
+   ./run-tests.lisp
 
 .. _fiveam: http://common-lisp.net/project/fiveam/
 .. _inferior shell: http://www.cliki.net/inferior-shell/
-
-Download these with `Quicklisp`_
+.. _lsof: https://github.com/lsof-org/lsof
+.. _Roswell install documentation: https://roswell.github.io/Installation.html
 
 
 Documentation
@@ -22,29 +34,19 @@ depends on:
 * Sphinx
 * `sphinxcontrib.cldomain`_ latest `pypi <https://pypi.python.org/pypi/sphinxcontrib-cldomain>`_
 * `pygments-cl-repl`_ latest `pypi <https://pypi.python.org/pypi/pygments-cl-repl>`_
+* `roswell`_ 3.21.7 `git <https://github.com/roswell/roswell>`_
+* `Quicklisp`_
 
-  * `cl-launch`_ 3.21.7 `git <http://common-lisp.net/project/xcvb/git/cl-launch.git>`_
-  * `asdf`_ 3.1 `git <http://common-lisp.net/projects/asdf/asdf.git>`_
-  * `Quicklisp`_
-
-.. _cl-launch: http://cliki.net/cl-launch
+.. _roswell: https://roswell.github.io/
 .. _asdf: http://common-lisp.net/project/asdf/
 .. _pygments: https://bitbucket.org/russell/pygments-main
 .. _sphinxcontrib.cldomain: http://cldomain.russellsim.org/
 
-Using `virtualenv`_ run::
+build documentation::
 
-   pip install -r doc/requirements.txt
-   
-If you do not have fabric::
+  ./doc/build.sh
 
-   pip install fabric
-
-To build run::
-
-   fab build
-
-The compiled documentation is output into ``doc/html``.
+The compiled documentation is output into ``doc/build/html``.
 
 .. _virtualenv: http://www.virtualenv.org/
 .. _quicklisp: http://www.quicklisp.org/beta/
