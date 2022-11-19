@@ -25,20 +25,75 @@
 (def-test list-tags (:fixture repository)
   (is (equal (list-objects 'tag *test-repository*)
              nil))
-  (let ((tag-name (random-string 50))
+  (let ((tag-name1 (random-string 50))
+        (tag-name2 (random-string 50))
         (tag-message (random-string 500))
         (test-commit (make-test-revision :author (list :name (random-string 50)))))
     (bind-git-commits (((commit :sha (getf test-commit :sha))) *test-repository*)
-      (let ((tag
-              (make-tag tag-name tag-message
-                        :repository *test-repository*
-                        :target commit
-                        :tagger (list :name (random-string 50)
-                                      :email (random-string 50)
-                                      :time (random-time)))))
-        (is (equal (full-name tag)
-                   (concatenate 'string "refs/tags/" tag-name)))
-        (is (equal (short-name tag)
-                   tag-name))))
-    (is (equal (mapcar #'short-name (list-objects 'tag *test-repository*))
-               (list tag-name)))))
+      (let ((annotated-tag
+              (make-object 'tag tag-name1
+                            *test-repository*
+                            :message tag-message
+                            :target commit
+                            :tagger `(:name ,(random-string 50)
+                                      :email ,(random-string 50)
+                                      :time ,(random-time))))
+            (lightweight-tag
+              (make-object 'tag tag-name2
+                            *test-repository*
+                            :type :lightweight
+                            :target commit)))))
+    (is (equal
+         (sort
+          (mapcar #'short-name (list-objects 'tag *test-repository*))
+          #'string-greaterp)
+         (sort
+          (list tag-name1 tag-name2)
+          #'string-greaterp)))))
+
+(def-fixture annotated-tag-with-context ()
+  (with-test-repository ()
+    (let* ((test-commit (make-test-revision))
+           (tag (make-object 'tag
+                             "test-tag"
+                             *test-repository*
+                             :type :annotated
+                             :target (get-object 'commit
+                                                 (getf test-commit :sha)
+                                                 *test-repository*)
+                             :message "this is an annotated tag"
+                             :tagger `(:name ,(random-string 50)
+                                       :email ,(random-string 50)
+                                       :time ,(random-time)))))
+      (&body))))
+
+(def-test tag-accessors-annotated (:fixture annotated-tag-with-context)
+  "Create an annotated tag and check accessors."
+  (is (equal
+       (full-name tag)
+       "refs/tags/test-tag"))
+  (is (equal
+       (short-name tag)
+       "test-tag")))
+
+
+(def-fixture lightweight-tag-with-context ()
+  (with-test-repository ()
+    (let* ((test-commit (make-test-revision))
+           (tag (make-object 'tag
+                             "test-tag"
+                             *test-repository*
+                             :type :lightweight
+                             :target (get-object 'commit
+                                                 (getf test-commit :sha)
+                                                 *test-repository*))))
+      (&body))))
+
+(def-test tag-accessors-lightweight (:fixture lightweight-tag-with-context)
+  "Create lightweight tag and check accessors."
+  (is (equal
+       (full-name tag)
+       "refs/tags/test-tag"))
+  (is (equal
+       (short-name tag)
+       "test-tag")))

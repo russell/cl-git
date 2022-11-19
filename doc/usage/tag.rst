@@ -38,7 +38,7 @@ Target
 Creating
 --------
 
-.. cl:function:: make-tag
+.. cl:method:: make-object tag common-lisp:t common-lisp:t
 
 Accessing
 ---------

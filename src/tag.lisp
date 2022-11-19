@@ -50,6 +50,14 @@ repositories history.")
   (message :string)
   (force :boolean))
 
+(defcfun %git-tag-create-lightweight
+    %return-value
+  (oid :pointer)
+  (repo %repository)
+  (tag-name :string)
+  (target %object)
+  (force :boolean))
+
 (defcfun ("git_tag_target" %git-tag-target)
     %return-value
   (target-out :pointer)
@@ -116,6 +124,59 @@ is the case."
                            (%message message))
       (%git-tag-create newoid repository %name target tagger %message force))
     (get-object 'tag (convert-from-foreign newoid '%oid) repository)))
+
+
+(defun make-lightweight-tag (name &key
+                                repository
+                                target
+                                force)
+  "Create a tag that points to target.
+
+NAME is the name of the tag.
+
+REPOSITORY is the repository that the tag will be added to.  TARGET is
+the object that the tag will point to.  TAGGER should be a signature
+plist.
+
+If FORCE is t the tag will be created, even if a tag with the same
+name already exists.  If FORCE is nil, it will return an error if that
+is the case."
+  ;; TODO (RS) should catch exists error and offer a continue.
+  (with-foreign-object (newoid '(:struct git-oid))
+    (with-foreign-strings ((%name name))
+      (%git-tag-create-lightweight newoid repository %name target force))
+    (get-object 'reference (concatenate 'string reference-tags-dir name)
+                repository)))
+
+
+(defmethod make-object ((class (eql 'tag)) name repository
+                       &key
+                         (type :annotated)
+                         force
+                         target
+                         signature
+                         message)
+  "Create a tag to TARGET.
+The type of tag depends on TYPE.  If TYPE is :ANNOTATED the value of
+TARGET should be an OID and a direct tag is created.  If TYPE is
+:LIGHTWEIGHT, a reference is created and TARGET should be a
+OID. SIGNATURE should be a signature plist.
+
+If FORCE is t the tag will be created, even if a tag with
+the same name already exists.  If FORCE is nil, it will return an
+error if that is the case."
+  (ecase type
+    (:annotated
+     (make-tag name message
+               :repository repository
+               :target target
+               :tagger signature
+               :force force))
+    (:lightweight
+     (make-lightweight-tag name
+               :repository repository
+               :target target
+               :force force))))
 
 
 (defmethod list-objects ((class (eql 'tag)) repository &key test test-not)
