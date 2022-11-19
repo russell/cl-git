@@ -24,6 +24,45 @@ install SBCL and run tests.::
 .. _lsof: https://github.com/lsof-org/lsof
 .. _Roswell install documentation: https://roswell.github.io/Installation.html
 
+CI Builds
+~~~~~~~~~
+
+CI builds are done with `Earthly`_ it bulids and tests using buildkit
+(either docker or podman containers), once it is installed, you can
+list the build targets like this::
+
+   % earthly ls
+   +base
+   +build
+   +deps
+   +libgit2
+   +test-libgit2-0.27-sbcl
+   +test-libgit2-0.28-sbcl
+   +test-libgit2-1.0-sbcl
+   +test-libgit2-1.1-sbcl
+   +test-libgit2-1.2-sbcl
+   +test-libgit2-1.3-sbcl
+   +test-libgit2-1.4-sbcl
+   +test-libgit2-1.5-ccl
+   +test-libgit2-1.5-clasp
+   +test-libgit2-1.5-ecl
+   +test-libgit2-1.5-sbcl
+   +test-libgit2-ccl
+   +test-libgit2-clasp
+   +test-libgit2-ecl
+   +test-libgit2-sbcl
+
+All the targets with the format `test-libgit2-<version>-<lisp>` can be
+executed to test that version combination.
+
+To run a build you would use a command like::
+
+   earthly +test-libgit2-1.5-sbcl
+
+Currently SBCL is the only working Lisp, but others are there in case
+we want to extend our support to them.
+
+.. _Earthly: https://earthly.dev/get-earthly
 
 Documentation
 -------------
