@@ -154,6 +154,9 @@ optional instance of a GIT-SIGNATURE the details the committer.
 (defmethod get-object ((class (eql 'commit)) oid repository)
   (git-object-lookup oid class repository))
 
+(defmethod get-object ((class (eql 'commit)) (commit commit) repository)
+  commit)
+
 (defmethod message ((commit commit))
   "Return a string containing the commit message."
   (foreign-string-to-lisp (git-commit-message commit)
