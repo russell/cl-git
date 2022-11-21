@@ -118,21 +118,36 @@
    #:entry-by-index
 
    ;; Errors
-   #:basic-error
-   #:not-found
-   #:exists
+   #:connection-error  ; from remotes
+   #:general-error
+   #:not-found-error
+   #:exists-error
    #:ambiguous-error
    #:buffer-error
-   #:connection-error
    #:user-error
    #:barerepo-error
-   #:orphanedhead-error
+   #:unborn-branch-error
    #:unmerged-error
    #:non-fast-forward-error
    #:invalid-spec-error
+   #:conflict-error
+   #:locked-error
+   #:modified-error
+   #:auth-error
+   #:certificate-error
+   #:applied-error
+   #:peel-error
+   #:eof-error
+   #:invalid-error
+   #:uncommitted-error
+   #:directory-error
    #:merge-conflict-error
    #:passthrough
    #:stop-iteration
+   #:retry
+   #:mismatch-error
+   #:index-dirty-error
+   #:apply-fail-error
    #:unknown-error
 
    ;; Tags
@@ -178,12 +193,11 @@
    #:index
    #:index-add-file
    #:index-write
-   #:index-entries
    #:index-to-tree
    #:open-index
    #:index-clear
    #:index-conflicts-p
-   #:index-refresh
+   #:index-reload
    #:with-index
 
    ;; Tree
