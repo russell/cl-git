@@ -60,9 +60,11 @@
   "Return the current status values for each of the object in the
 repository.  For each element of the list the FIRST is the name of the
 file and the CDR is a list of keywords that containing the current
-state of the file.  Possible states are: :CURRENT :INDEX-NEW :INDEX-MODIFIED
-:INDEX-DELETED :INDEX-RENAMED :INDEX-TYPECHANGE :WORKTREE-NEW :WORKTREE-MODIFIED
-:WORKTREE-DELETED :WORKTREE-TYPECHANGE or :IGNORED"
+state of the file.  Possible states are: :CURRENT :INDEX-NEW
+:INDEX-MODIFIED :INDEX-DELETED :INDEX-RENAMED :INDEX-TYPECHANGE
+:WORKTREE-NEW :WORKTREE-MODIFIED :WORKTREE-DELETED
+:WORKTREE-TYPECHANGE :WORKTREE-RENAMED :WORKTREE-UNREADABLE :IGNORED
+or :CONFLICTED"
   (assert (not (null-or-nullpointer repository)))
   (let ((*status-values* (list)))
     (%git-status-for-each repository
