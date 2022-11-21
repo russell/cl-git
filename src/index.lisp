@@ -159,7 +159,9 @@ and 3 (theirs) are in conflict."
 (defmethod index-add-file ((path pathname) (index index))
   (let ((path (if (pathname-relative-p path)
                    path
-                   (enough-namestring path (repository-workdir (slot-value index 'facilitator))))))
+                   (enough-namestring path
+                                      (repository-workdir
+                                       (slot-value index 'facilitator))))))
     (index-add-file (namestring path) index)))
 
 (defmethod index-add-file ((entry list) (index index))
