@@ -142,7 +142,8 @@ Nam euismod tellus id erat.
                :files `((:filename "test-file"
                          :text ,test-file1))))))
       (bind-git-commits (((commit1 :sha (getf commit1-content :sha))
-                          (commit2 :sha (getf commit2-content :sha))) *test-repository* )
+                          (commit2 :sha (getf commit2-content :sha)))
+                         *test-repository* )
         (&body)))))
 
 (def-fixture repository-with-unstaged ()
