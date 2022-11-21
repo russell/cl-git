@@ -36,6 +36,7 @@ of the index.
 
 .. cl:generic:: index-write
 
+.. cl:method:: entries cl-git:index
 
 Clearing
 ~~~~~~~~
