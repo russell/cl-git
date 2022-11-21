@@ -41,6 +41,7 @@ Documentation
    usage/objects
    usage/repositories
    usage/references
+   usage/reflog
    usage/commits
    usage/tag
    usage/tree
