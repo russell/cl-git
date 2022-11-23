@@ -34,7 +34,7 @@
 (define-foreign-type diff-options ()
   ((version :reader diff-version
             :initarg :version
-            :initform *diff-options-version*)
+            :initform +git-diff-options-version+)
    (flags :accessor diff-flags
           :initarg :flags
           :initform '(:normal))

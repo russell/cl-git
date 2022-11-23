@@ -28,7 +28,6 @@
 
 (defvar *oid-abbrev* 7)
 
-(defvar *diff-options-version* 1)
 (defvar *diff-context-lines* 3)
 (defvar *diff-interhunk-lines* 0)
 (defvar *diff-old-prefix* "a")
