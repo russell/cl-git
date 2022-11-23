@@ -235,9 +235,72 @@ foreign memory."
     )
   ptr)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Push Options
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defconstant +git-push-options-version+ 1)
+
+#-(or libgit2-0.28 libgit2-0.27)
+(defcfun %git-push-options-init
+    %return-value
+  (options :pointer)
+  (version :uint))
+
+#+(or libgit2-0.28 libgit2-0.27)
+(defcfun ("git_push_init_options" %git-push-options-init)
+    %return-value
+  (options :pointer)
+  (version :uint))
+
+(define-foreign-type push-options ()
+  ((version :reader push-version
+            :initarg :version
+            :initform +git-push-options-version+)
+   (packbuilder-parallelism :reader push-packbuilder-parallelism
+                            :initarg :packbuilder-parallelism
+                            :initform 0)
+   (callbacks :reader remote-callbacks
+              :initarg :callbacks
+              :initform (make-instance 'remote-callbacks))
+   (proxy-options  :reader push-proxy-options
+                   :initarg :proxy-options
+                   :initform nil)
+   (follow-redirects  :reader push-follow-redirects
+                      :initarg :follow-redirects
+                      :initform nil)
+   (custom-headers  :reader push-custom-headers
+                    :initarg :custom-headers
+                    :initform nil))
+  (:simple-parser %push-options)
+  (:actual-type :pointer))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defmethod translate-to-foreign (value (type push-options))
+  (let ((ptr (foreign-alloc '(:struct git-push-options))))
+    ;; Init the structure with default values.
+    (%git-push-options-init ptr +git-push-options-version+)
+    (translate-into-foreign-memory value type ptr)))
+
+(defmethod translate-into-foreign-memory ((value push-options)
+                                          (type push-options)
+                                          ptr)
+  (with-foreign-slots (((:pointer callbacks))
+                       ptr (:struct git-push-options))
+    ;; Fill in the remote-callbacks structure.
+    (translate-into-foreign-memory
+     (remote-callbacks value)
+     (remote-callbacks value)
+     callbacks))
+  ptr)
+
+(defmethod free-translated-object (ptr (type push-options) freep)
+  (foreign-free ptr))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcfun ("git_remote_create" %git-remote-create)
     %return-value
@@ -310,6 +373,12 @@ foreign memory."
   (remote %remote)
   (refspecs :pointer)  ;; pointer to git_strarray
   (options %fetch-options))
+
+(defcfun %git-remote-push
+    %return-value
+  (remote %remote)
+  (refspecs :pointer)  ;; pointer to git_strarray
+  (options %push-options))
 
 (defcfun %git-remote-init-callbacks
     %return-value
@@ -445,10 +514,16 @@ for sending data.")
   (:documentation "Download the required packfile from the remote to
 bring the repository into sync.")
   (:method ((remote remote))
-    (unless (remote-connected-p remote)
-      (error 'connection-error
-             :message "Remote is not connected."))
     (%git-remote-download remote (null-pointer) (make-instance 'fetch-options))))
+
+(defgeneric remote-push (remote &key refspecs)
+  (:documentation "Perform a push.")
+  (:method ((remote remote) &key refspecs)
+    (let ((str-pointer (convert-to-foreign refspecs
+                                           '(:struct git-strarray))))
+      (prog1
+          (%git-remote-push remote str-pointer (make-instance 'push-options))
+        (free-converted-object str-pointer '(:struct git-strarray) t)))))
 
 (defgeneric ls-remote (remote)
   (:documentation "Lists the current refs at the remote.  Return a

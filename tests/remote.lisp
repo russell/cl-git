@@ -84,9 +84,6 @@
                           remote-repo
                           :url (namestring *repository-path*))
              (let ((remote (get-object 'remote "origin" remote-repo)))
-               (signals connection-error
-                 (remote-download remote))
-               (remote-connect remote)
                (remote-download remote)
                (is
                 (equal
@@ -94,6 +91,40 @@
                  '("+refs/heads/*:refs/remotes/origin/*"))))))
       (progn
         (delete-directory-and-files remote-repo-path)))))
+
+
+(def-test push-remote (:fixture repository-with-commits)
+  "Create a new bare repo and push to it."
+  (let ((push-repo-path (gen-temp-path)))
+    (unwind-protect
+         (progn
+           (init-repository push-repo-path :bare t)
+           (let ((remote
+                   (make-object 'remote "origin"
+                                *test-repository*
+                                :url (namestring push-repo-path))))
+             (is
+              (equal
+               (remote-fetch-refspecs remote)
+               '("+refs/heads/*:refs/remotes/origin/*")))
+             (remote-push remote :refspecs '("refs/heads/master")))
+           (let ((push-repo (open-repository push-repo-path)))
+             (is (eql
+                  (oid (repository-head *test-repository*))
+                  (oid (repository-head push-repo))))
+             ;; Test repo shauld now show the remote branch
+             (is (equal
+                  '("refs/heads/master" "refs/remotes/origin/master")
+                  (mapcar #'full-name
+                          (list-objects 'reference *test-repository*))))
+             ;; The bare repo should have a master branch
+             (is (equal
+                  '("refs/heads/master")
+                  (mapcar #'full-name
+                          (list-objects 'reference push-repo))))))
+      (progn
+        (delete-directory-and-files push-repo-path)))))
+
 
 (def-test git-fetch-options-struct ()
   "Verify initialising a GIT-FETCH-OPTIONS-STRUCT."

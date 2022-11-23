@@ -28,6 +28,8 @@ Remote
 
 .. cl:generic:: remote-push-refspecs
 
+.. cl:generic:: remote-push
+
 .. cl:generic:: remote-connect
 
 .. cl:generic:: remote-connected-p

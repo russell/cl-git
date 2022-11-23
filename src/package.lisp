@@ -228,6 +228,7 @@
    #:remote-connected-p
    #:remote-disconnect
    #:remote-download
+   #:remote-push
    #:ls-remote
    #:remote-push-refspecs
    #:remote-fetch-refspecs

@@ -254,6 +254,15 @@
 ;;
 ;; Remote
 ;;
+(cenum (git-remote-redirect-t)
+       ((:none "GIT_REMOTE_REDIRECT_NONE")
+        :documentation "Do not follow any off-site redirects at any stage of
+the fetch or push.")
+       ((:initial "GIT_REMOTE_REDIRECT_INITIAL")
+        :documentation "Allow off-site redirects only upon the initial
+request. This is the default.")
+       ((:all "GIT_REMOTE_REDIRECT_ALL")
+        :documentation "Allow redirects at any stage in the fetch or push."))
 
 (cstruct git-remote-callbacks "git_remote_callbacks"
          (version "version" :type :uint)
@@ -313,11 +322,19 @@ to a proxy if the environment variables specify it.")
 
 (cstruct git-fetch-options "git_fetch_options"
          (version "version" :type :int)
-         (callbacks "callbacks" :type  (:struct git-remote-callbacks))
+         (callbacks "callbacks" :type (:struct git-remote-callbacks))
          (prune "prune" :type git-fetch-prune)
          (update-fetchhead "update_fetchhead" :type :boolean)
          (download-tags "download_tags" :type git-remote-autotag-option)
          (proxy-options "proxy_opts" :type (:struct git-proxy-options))
+         (custom-headers "custom_headers" :type (:struct git-strarray)))
+
+(cstruct git-push-options "git_push_options"
+         (version "version" :type :int)
+         (packbuilder-parallelism "pb_parallelism" :type :unsigned-int)
+         (callbacks "callbacks" :type (:struct git-remote-callbacks))
+         (proxy-options "proxy_opts" :type (:struct git-proxy-options))
+         (follow-redirects "follow_redirects" :type git-remote-redirect-t)
          (custom-headers "custom_headers" :type (:struct git-strarray)))
 
 
