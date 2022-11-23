@@ -223,7 +223,6 @@ foreign memory."
 (defmethod translate-to-foreign (value (type fetch-options))
   (let ((ptr (foreign-alloc '(:struct git-fetch-options))))
     ;; Init the structure with default values.
-    ;; TODO(RS) this struct is leaked here, there is no freeing of it
     (%git-fetch-options-init ptr +git-fetch-options-version+)
     (translate-into-foreign-memory value type ptr)))
 
@@ -234,6 +233,10 @@ foreign memory."
     (translate-into-foreign-memory (remote-callbacks value) (remote-callbacks value) callbacks)
     )
   ptr)
+
+(defmethod free-translated-object (ptr (type fetch-options) freep)
+  (foreign-free ptr))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
