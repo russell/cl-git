@@ -21,14 +21,14 @@
 
 (in-package #:cl-git)
 
-(defcfun ("git_libgit2_init" git-libgit2-init)
+(defcfun ("git_libgit2_init" libgit2-init)
     :void
-  "Init libgit2.")
+  "Init libgit2 library.")
 
-(defcfun ("git_libgit2_shutdown" git-libgit2-shutdown)
+(defcfun ("git_libgit2_shutdown" libgit2-shutdown)
     :void
-  "Shutdown libgit2.")
+  "Shutdown libgit2 library.")
 
 ;;; Init threading on load
 (eval-when (:load-toplevel :execute)
-  (git-libgit2-init))
+  (libgit2-init))

@@ -91,6 +91,8 @@
                 #:timestamp-to-universal)
   (:export
    ;; LibGit2 Library
+   #:libgit2-init
+   #:libgit2-shutdown
    #:libgit2-features
    #:libgit2-version
 
