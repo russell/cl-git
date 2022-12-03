@@ -1,0 +1,28 @@
+FROM ubuntu:focal
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install git openssh-client openssh-server
+RUN useradd -rm -d /home/git -s /bin/bash -u 1000 git
+RUN echo 'git:test1234' | chpasswd
+RUN mkdir /home/git/.ssh
+COPY id_gituser_rsa id_gituser_rsa.pub /home/git/.ssh/
+COPY id_gituser_rsa.pub /home/git/.ssh/authorized_keys
+COPY environment /home/git/.ssh/
+RUN chmod 600 -R /home/git/.ssh && \
+    chmod 700 /home/git/.ssh && \
+    chown git:git -R /home/git/.ssh
+
+# Add git repositories
+RUN git init --bare /home/git/test.git && \
+    chown git:git -R /home/git/test.git
+RUN git init --bare /home/git/test-push-options.git && \
+    git config -f /home/git/test-push-options.git/config receive.advertisePushOptions true && \
+    chown git:git -R /home/git/test-push-options.git
+
+# Setup SSH
+RUN echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config
+RUN mkdir /var/run/sshd
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D", "-e"]
+# CMD ["/usr/bin/git", "daemon", "--verbose", "--listen=0.0.0.0", "--port=9419", "--export-all", "--enable=receive-pack", "--base-path=/home/git/", "/home/git/"]

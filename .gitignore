@@ -34,3 +34,5 @@
 /include/
 /doc/build/
 /README.html
+/scripts/id_gituser_rsa
+/scripts/id_gituser_rsa.pub

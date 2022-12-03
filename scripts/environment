@@ -1,0 +1,9 @@
+GIT_TRACE=/home/git/git.log
+GIT_CURL_VERBOSE=/home/git/git.log
+GIT_TRACE_PERFORMANCE=/home/git/git.log
+GIT_TRACE_PACK_ACCESS=/home/git/git.log
+GIT_TRACE_PACKET=/home/git/git.log
+GIT_TRACE_PACKFILE=/home/git/git.log
+GIT_TRACE_SETUP=/home/git/git.log
+GIT_TRACE_SHALLOW=/home/git/git.log
+
