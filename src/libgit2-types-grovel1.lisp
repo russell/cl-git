@@ -254,6 +254,8 @@
 ;;
 ;; Remote
 ;;
+#-(or libgit2-1.3 libgit2-1.2 libgit2-1.1
+      libgit2-1.0 libgit2-0.28 libgit2-0.27)
 (cenum (git-remote-redirect-t)
        ((:none "GIT_REMOTE_REDIRECT_NONE")
         :documentation "Do not follow any off-site redirects at any stage of
@@ -334,6 +336,8 @@ to a proxy if the environment variables specify it.")
          (packbuilder-parallelism "pb_parallelism" :type :unsigned-int)
          (callbacks "callbacks" :type (:struct git-remote-callbacks))
          (proxy-options "proxy_opts" :type (:struct git-proxy-options))
+         #-(or libgit2-1.3 libgit2-1.2 libgit2-1.1
+               libgit2-1.0 libgit2-0.28 libgit2-0.27)
          (follow-redirects "follow_redirects" :type git-remote-redirect-t)
          (custom-headers "custom_headers" :type (:struct git-strarray)))
 

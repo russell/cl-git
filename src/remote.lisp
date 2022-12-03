@@ -271,6 +271,8 @@ foreign memory."
    (proxy-options  :reader push-proxy-options
                    :initarg :proxy-options
                    :initform nil)
+   #-(or libgit2-1.3 libgit2-1.2 libgit2-1.1
+         libgit2-1.0 libgit2-0.28 libgit2-0.27)
    (follow-redirects  :reader push-follow-redirects
                       :initarg :follow-redirects
                       :initform nil)
