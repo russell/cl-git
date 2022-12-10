@@ -112,7 +112,7 @@
              (is (eql
                   (oid (repository-head *test-repository*))
                   (oid (repository-head push-repo))))
-             ;; Test repo shauld now show the remote branch
+             ;; Test repo should now show the remote branch
              (is (equal
                   '("refs/heads/master" "refs/remotes/origin/master")
                   (mapcar #'full-name
