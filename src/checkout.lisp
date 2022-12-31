@@ -33,6 +33,12 @@
   (options :pointer)
   (version :uint))
 
+(defcfun %git-checkout-tree
+    %return-value
+  (repository %repository)
+  (object %object)
+  (checkout-options %checkout-options))
+
 ;;; Translation methods
 
 (defmethod translate-to-foreign (value (type checkout-options))
@@ -43,3 +49,29 @@
   ;; First, initialize the structure with default values.
   (%git-checkout-init-options ptr +git-checkout-options-version+)
   ptr)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Highlevel Interface
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric checkout (object repository)
+  :documentation "Checkout an object and replace the working tree and index with it's
+content.  If passed a reference update the head ot point at the
+reference.")
+
+(defmethod checkout ((object reference) repository)
+  "Checkout the git REFERENCE over the top of the contents of the
+working directory. Then update the heod to point at the REFERENCE."
+  (checkout (resolve object) repository)
+  (%git-repository-set-head repository (%git-reference-name object))
+  object)
+
+(defmethod checkout (object repository)
+  "Checkout the git COMMIT or TREE over the top of the contents of the
+working directory."
+  (%git-checkout-tree
+   repository object
+   (make-instance 'checkout-options))
+  object)

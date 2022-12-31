@@ -252,13 +252,14 @@
    #:repository-path
    #:repository-status
    #:repository-workdir
+   #:checkout
 
    ;; Credentials
    #:ssh-key-from-agent
    #:ssh-key
    #:username-password
 
-   ;; diff
+   ;; Diff
    #:diff
    #:diff-deltas-count
    #:diff-deltas-summary

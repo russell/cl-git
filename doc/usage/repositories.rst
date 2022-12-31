@@ -72,6 +72,11 @@ Accessing
       #<REPOSITORY 7FFFE8003E00 {1003880DA3}>
       NIL
 
+Checkout
+--------
+
+.. cl:generic:: checkout
+
 
 Head
 ----

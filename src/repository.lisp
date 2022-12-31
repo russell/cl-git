@@ -74,6 +74,11 @@ contains the object database.")
     :boolean
   (repository %repository))
 
+(defcfun %git-repository-set-head
+    %return-value
+  (repository %repository)
+  (reference :string))
+
 (defcfun %git-repository-head-unborn
     :boolean
   (repository %repository))
@@ -85,6 +90,7 @@ contains the object database.")
 (defcfun ("git_repository_workdir" %git-repository-workdir)
     :string
   (repository %repository))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
