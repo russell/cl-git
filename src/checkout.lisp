@@ -57,9 +57,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgeneric checkout (object repository)
-  :documentation "Checkout an object and replace the working tree and index with it's
+  (:documentation "Checkout an object and replace the working tree and index with it's
 content.  If passed a reference update the head ot point at the
-reference.")
+reference."))
 
 (defmethod checkout ((object reference) repository)
   "Checkout the git REFERENCE over the top of the contents of the
