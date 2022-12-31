@@ -180,6 +180,7 @@
    #:blob-size
 
    ;; References
+   #:branch
    #:branch-p
    #:resolve
    #:head-p

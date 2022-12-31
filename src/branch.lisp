@@ -65,19 +65,44 @@ This means that this is the branch that is checked out."
   (repository %repository)
   (branch-name :string))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defcfun %git-branch-create
+    %return-value
+  (out :pointer)
+  (repository %repository)
+  (branch-name :string)
+  (commit %commit)
+  (force :boolean))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Highlevel interface.
 ;;;
 ;;; Branches are just a sort of reference and are returned as
 ;;; instances of references.
 ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+(defmethod make-object ((class (eql 'branch)) name repository
+                        &key
+                          commit
+                          force)
+  "Create a new branch pointing at COMMIT."
+  (with-foreign-object (reference :pointer)
+    (%git-branch-create reference repository name
+                        (if (eql (type-of commit) 'reference)
+                            (resolve commit)
+                            commit)
+                        force)
+    (make-instance 'reference
+                   :pointer (mem-ref reference :pointer)
+                   :facilitator repository
+                   :free-function #'%git-reference-free)))
 
 (defgeneric head-p (branch)
   (:documentation
-   "Returns t is the current HEAD points to this branch.
+   "Returns T if the current HEAD points to this branch.
 This means that this is the branch that is checked out.")
   (:method ((branch reference))
     (%git-branch-is-head branch)))
