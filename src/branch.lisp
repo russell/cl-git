@@ -86,14 +86,14 @@ This means that this is the branch that is checked out."
 
 (defmethod make-object ((class (eql 'branch)) name repository
                         &key
-                          commit
+                          target
                           force)
-  "Create a new branch pointing at COMMIT."
+  "Create a new branch pointing at the commit TARGET resolves to."
   (with-foreign-object (reference :pointer)
     (%git-branch-create reference repository name
-                        (if (eql (type-of commit) 'reference)
-                            (resolve commit)
-                            commit)
+                        (if (eql (type-of target) 'reference)
+                            (resolve target)
+                            target)
                         force)
     (make-instance 'reference
                    :pointer (mem-ref reference :pointer)
