@@ -521,13 +521,17 @@ bring the repository into sync.")
   (:method ((remote remote))
     (%git-remote-download remote (null-pointer) (make-instance 'fetch-options))))
 
-(defgeneric remote-push (remote &key refspecs)
+(defgeneric remote-push (remote &key refspecs credentials)
   (:documentation "Perform a push.")
-  (:method ((remote remote) &key refspecs)
+  (:method ((remote remote) &key refspecs credentials)
     (let ((str-pointer (convert-to-foreign refspecs
                                            '(:struct git-strarray))))
       (prog1
-          (%git-remote-push remote str-pointer (make-instance 'push-options))
+          (%git-remote-push remote str-pointer
+                            (make-instance 'push-options
+                                           :callbacks
+                                           (make-instance 'remote-callbacks
+                                                          :credentials credentials)))
         (free-converted-object str-pointer '(:struct git-strarray) t)))))
 
 (defgeneric ls-remote (remote)
