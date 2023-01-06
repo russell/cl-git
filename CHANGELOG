@@ -2,13 +2,51 @@
 Changelog
 ---------
 
-1.4.0 - UNRELEASED
+2.0.0 - 2023-01-05
 ~~~~~~~~~~~~~~~~~~
 
+Features
+^^^^^^^^
+
+* add support for libgit2 0.27, 0.28, 1.0, 1.1, 1.2, 1.4, 1.5
 * add REACHABLE-FROM API for inspecting the graph.
 * add MESSAGE-TRAILERS API for parsing commit message trailers.
-* add support for libgit2 0.27, 0.28, 1.0, 1.1, 1.2, 1.4, 1.5
-* replaced cl-launch with Roswell
+* unify the git tag creation API
+* pass credentials through to remote-push
+* expose libgit2 init functions
+* add git checkout method
+* add branch make-object method
+
+Minor Fixes
+^^^^^^^^^^^
+
+* force a GC after tests
+* convert some types to size-t
+* translate to foreign type
+* proxy options translation
+* update more structs to support libgit 1.3.0
+* move remote callbacks to fetch remotes
+* load cffi before building docs
+* update remote callbacks location
+* bug where missing USER or USERNAME would error
+* backwards compatible support for libgit2
+* only implemented in some versions of libgit2
+* expose missing error symbols
+* make the get-object return a commit if looking for a commit
+* remove duplicate git-dif-options-version constant
+* rename COMMIT to TARGET
+* FETCH-OPTIONS struct is now freed
+* disable follow redirects for old versions
+* bug in definition of checkout generic
+
+Documentation
+^^^^^^^^^^^^^
+
+* produce all formats and update urls
+* make documentation building more portable
+* add documentation for reference logs
+* exposed documentation or the git index entries method
+
 
 1.3.0 - 2022-07-03
 ~~~~~~~~~~~~~~~~~~
